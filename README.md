@@ -3,7 +3,7 @@
 ![](https://github.com/FAIRmat-NFDI/pynxtools_xps/actions/workflows/pylint.yml/badge.svg)
 ![](https://coveralls.io/repos/github/FAIRmat-NFDI/pynxtools_xps/badge.svg?branch=master)
 
-# A reader for -ray photoelectron spectroscopy (XPS) data
+# A reader XPS data
 
 # Installation
 

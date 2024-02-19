@@ -144,7 +144,7 @@ def fill_data_group(key, key_part, entries_values, config_dict, template):
         data_group_key = data_field_key.rsplit("/data", 1)[0]
 
         if key_part == "energy":
-            # Here, we need to take here if the data/entry is
+            # Here, we need to use the energy value if the data/energy is
             # written directly in the future.
             energy_field_key = data_group_key
             energy = np.array(xr_data.coords["energy"].values)

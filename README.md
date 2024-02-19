@@ -3,7 +3,7 @@
 ![](https://github.com/FAIRmat-NFDI/pynxtools_xps/actions/workflows/pylint.yml/badge.svg)
 ![](https://coveralls.io/repos/github/FAIRmat-NFDI/pynxtools_xps/badge.svg?branch=master)
 
-# A reader XPS data
+# A reader for XPS data
 
 # Installation
 

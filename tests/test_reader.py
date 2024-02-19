@@ -1,5 +1,5 @@
 """
-Basic example based test for the stm reader
+Basic example based test for the XPS reader
 """
 import os
 import xml.etree.ElementTree as ET
@@ -16,7 +16,7 @@ from pynxtools_xps.reader import XPSReader
 
 def test_example_data():
     """
-    Test the example data for the stm reader
+    Test the example data for the XPS reader
     """
     reader = XPSReader
     assert callable(reader.read)

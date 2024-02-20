@@ -49,7 +49,7 @@ class VamasHeader:
 
 
 @dataclass
-class Block:
+class VamasBlock:
     """An object to store a block of spectrum data and meta-data."""
 
     block_id: str = ""

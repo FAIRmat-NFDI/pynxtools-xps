@@ -45,9 +45,9 @@ An example script to run the XPS reader in pynxtools:
 --nxdl NXmpes \
 --input-file $<xps-file path> \
 --input-file $<eln-file path> \
---output <output-file path>.test.nxs
+--output <output-file path>.nxs
 ```
-Note that none of the supported file format have data/values for all required and recommended fields and attributes in NXmpes. In order for the validation step of the XPS reader to pass, you need to provide an ELN file that contains the missing values. An example can be found in  [*pynxtools_xps/examples*](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples).
+Note that none of the supported file format have data/values for all required and recommended fields and attributes in NXmpes. In order for the validation step of the XPS reader to pass, you need to provide an ELN file that contains the missing values. Example raw and converted data can be found in  [*pynxtools_xps/examples*](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples).
 
 
 # Contributing
@@ -76,9 +76,9 @@ from the root of this repository.
 
 ## Development Notes
 The development process is modular so that new parsers can be added. The design logic is the following:
-1. First, [`XpsDataFileParser`]([https://github.com/FAIRmat-NFDI/pynxtools_xps/blob/main/pynxtools_xps/dataconverter/readers/xps/file_parser.py#L39]) selects the proper parser based on the file extensions of the provided files. It then calls a sub-parser that can read files with such extensions and calls the `parse_file` function of that reader. In addition, it selects a proper config file from
+1. First, [`XpsDataFileParser`](https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/pynxtools_xps/file_parser.py#L36) selects the proper parser based on the file extensions of the provided files. It then calls a sub-parser that can read files with such extensions and calls the `parse_file` function of that reader. In addition, it selects a proper config file from
 the `config` subfolder.
-2. Afterwards, the NXmpes nxdl template is filled with the data in `XpsDataFileParser` using the *`config`file. Data that is not in the given main files can be added through the ELN file (and must be added for required fields in NXmpes).
+2. Afterwards, the NXmpes nxdl template is filled with the data in `XpsDataFileParser` using the [`config`](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/pynxtools_xps/config) file. Data that is not in the given main files can be added through the ELN file (and must be added for required fields in NXmpes).
 
 ## Test this software
 

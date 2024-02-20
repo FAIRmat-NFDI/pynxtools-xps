@@ -25,8 +25,7 @@ from typing import List, Dict
 
 from pynxtools_xps.sle.sle_specs import SleMapperSpecs
 from pynxtools_xps.txt.txt_scienta import TxtMapperScienta
-
-# from pynxtools_xps.txt.txt_specs import TxtMapperSpecs
+from pynxtools_xps.txt.txt_specs import TxtMapperSpecs
 from pynxtools_xps.txt.txt_vamas_export import TxtMapperVamasExport
 from pynxtools_xps.vms.vamas import VamasMapper
 from pynxtools_xps.xy.xy_specs import XyMapperSpecs
@@ -43,7 +42,7 @@ class XpsDataFileParser:
         "sle": {"specs": SleMapperSpecs},
         "txt": {
             "scienta": TxtMapperScienta,
-            # 'specs': TxtMapperSpecs,
+            "specs": TxtMapperSpecs,
             "unknown": TxtMapperVamasExport,
         },
         "vms": {"unkwown": VamasMapper},

@@ -27,8 +27,8 @@ within the field of X-ray photoelectron spectroscopy into a standardized represe
 
 ## Supported file formats
 The reader decides which parser to use based on the file extension of the files provided. For the main XPS files, the following file extensions are supported:
-- .sle: [SpecsLabProdigy](https://www.specs-group.com/nc/specs/products/detail/prodigy/) files, propietary format of SPECS GmbH (v1.6)
-- .xml: SpecsLab 2files, XML format from SPECS GmbH (v1 and v4)
+- .sle: [SpecsLabProdigy](https://www.specs-group.com/nc/specs/products/detail/prodigy/) files, propietary format of SPECS GmbH (1 and v4)
+- .xml: SpecsLab 2files, XML format from SPECS GmbH (v1.6)
 - .vms: VAMAS files, ISO standard data transfer format ([ISO 14976](https://www.iso.org/standard/24269.html)), both in regular and irregular format
 - .xy: SpecsLabProdigy export format in XY format (including all export settings)
 - .txt:

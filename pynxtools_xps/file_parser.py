@@ -24,8 +24,8 @@ Generic Classes for reading XPS files into python dictionary.
 from typing import List, Dict
 
 from pynxtools.dataconverter.readers.xps.sle.sle_specs import SleMapperSpecs
-
-# from pynxtools.dataconverter.readers.xps.slh.slh_specs import SlhMapperSpecs
+from pynxtools_xps.slh.metadata_specs import CsvMapperSpecs
+from pynxtools_xps.slh.metadata_specs import SlhMapperSpecs
 from pynxtools.dataconverter.readers.xps.txt.txt_scienta import TxtMapperScienta
 
 # from pynxtools.dataconverter.readers.xps.txt.txt_specs import TxtMapperSpecs
@@ -41,11 +41,12 @@ class XpsDataFileParser:
     """Class intended for receiving any type of XPS data file."""
 
     __prmt_file_ext__ = ["sle", "txt", "vms", "xml", "xy"]
-    __prmt_metadata_file_ext__ = ["slh"]
+    __prmt_metadata_file_ext__ = ["slh", "csv"]
     __vendors__ = ["kratos", "scienta", "specs", "unkwown"]
     __prmt_vndr_cls: Dict[str, Dict] = {
+        "csv": {"specs": CsvMapperSpecs},
         "sle": {"specs": SleMapperSpecs},
-        # "slh": {"specs": SlhMapperSpecs},
+        "slh": {"specs": SlhMapperSpecs},
         "txt": {
             "scienta": TxtMapperScienta,
             # 'specs': TxtMapperSpecs,

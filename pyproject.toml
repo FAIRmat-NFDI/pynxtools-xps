@@ -3,12 +3,12 @@ requires = ["setuptools>=64.0.1", "setuptools-scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pynxtools_xps"
+name = "pynxtools-xps"
 dynamic = ["version"]
 authors = [
     { name = "The NOMAD Authors" },
 ]
-description = "A reader for XPS data"
+description = "A reader for transferring XPS data from vendor formats to NeXus and NOMAD."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.8,<3.12"
@@ -48,7 +48,7 @@ dev = [
 ]
 
 [tool.ruff]
-include = ["pynxtools/*.py", "tests/*.py"]
+include = ["pynxtools_xps*.py", "tests/*.py"]
 select = [
     "E", # pycodestyle
     "W", # pycodestyle
@@ -70,7 +70,6 @@ ignore = [
     "PLR5501", # else-if-used
 ]
 fixable = ["ALL"]
-exclude = ["pynxtools/definitions/*"]
 
 [tool.mypy]
 strict = false
@@ -78,4 +77,3 @@ ignore_missing_imports = true
 follow_imports = "silent"
 no_strict_optional = true
 disable_error_code = "import, annotation-unchecked"
-exclude = ["pynxtools/definitions/*"]

@@ -48,7 +48,7 @@ dev = [
 ]
 
 [tool.setuptools.package-data]
-"pynxtools_xps.config" = ["*.json"]
+pynxtools_xps = ["*.json"]
 
 [tool.setuptools_scm]
 version_scheme = "no-guess-dev"

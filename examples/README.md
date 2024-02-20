@@ -1,8 +1,8 @@
-# XPS Reader
+# Examples for the XPS
 
-## What is this reader?
+Here, you can find working examples of XPS-to-NeXus conversion using the latest [NXmpes](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXmpes.html#nxmpes) application definition and the latest development version of pynxtools-xps.
 
-This reader supports converting X-ray photoelectron spectroscopy into a NeXus formatted file. The application definiton it follows is [NXmpes](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXmpes.html#nxmpes).
+This reader supports converting X-ray photoelectron spectroscopy into a NeXus formatted file. The  it follows is .
 
 ## Supported file formats
 The reader decides which parser to use based on the file extension of the files provided. For the main XPS files, the following file extensions are supported:

@@ -50,6 +50,10 @@ dev = [
 [tool.setuptools.package-data]
 "pynxtools_xps.config" = ["*.json"]
 
+[tool.setuptools_scm]
+version_scheme = "no-guess-dev"
+local_scheme = "node-and-date"
+
 [tool.ruff]
 include = ["pynxtools_xps*.py", "tests/*.py"]
 select = [

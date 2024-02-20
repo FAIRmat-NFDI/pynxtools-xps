@@ -27,9 +27,9 @@ from itertools import groupby
 import xarray as xr
 import numpy as np
 
-from pynxtools.dataconverter.readers.xps.vms.vamas_data_model import VamasHeader, Block
+from pynxtools_xps.vms.vamas_data_model import VamasHeader, VamasBlock
 
-from pynxtools.dataconverter.readers.xps.reader_utils import (
+from pynxtools_xps.reader_utils import (
     XPSMapper,
     construct_entry_name,
     construct_data_key,
@@ -475,7 +475,7 @@ class VamasParser(ABC):
         This method has to be implemented in the inherited parsers.
 
         """
-        return Block()
+        return VamasBlock()
 
     @abstractmethod
     def _parse_map_block(self):
@@ -485,7 +485,7 @@ class VamasParser(ABC):
         This method has to be implemented in the inherited parsers.
 
         """
-        return Block()
+        return VamasBlock()
 
     def _get_scan_numbers_for_spectra(self, spectra):
         """
@@ -638,7 +638,7 @@ class VamasParserRegular(VamasParser):
 
         """
         # pylint: disable=too-many-statements
-        block = Block()
+        block = VamasBlock()
         block.block_id = self.data.pop(0).strip()
         block.sample_id = self.data.pop(0).strip()
         block.year = int(self.data.pop(0).strip())
@@ -719,7 +719,7 @@ class VamasParserRegular(VamasParser):
 
         """
         # pylint: disable=too-many-statements
-        block = Block()
+        block = VamasBlock()
         block.block_id = self.data.pop(0).strip()
         block.sample_id = self.data.pop(0).strip()
         block.year = int(self.data.pop(0).strip())
@@ -844,7 +844,7 @@ class VamasParserIrregular(VamasParser):
 
         """
         # pylint: disable=too-many-statements
-        block = Block()
+        block = VamasBlock()
         block.block_id = self.data.pop(0).strip()
         block.sample_id = self.data.pop(0).strip()
         block.year = int(self.data.pop(0).strip())
@@ -925,7 +925,7 @@ class VamasParserIrregular(VamasParser):
 
         """
         # pylint: disable=too-many-statements
-        block = Block()
+        block = VamasBlock()
         block.block_id = self.data.pop(0).strip()
         block.sample_id = self.data.pop(0).strip()
         block.year = int(self.data.pop(0).strip())

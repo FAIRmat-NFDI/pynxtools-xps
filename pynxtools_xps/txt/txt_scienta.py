@@ -27,7 +27,7 @@ import pytz
 import xarray as xr
 import numpy as np
 
-from pynxtools.dataconverter.readers.xps.reader_utils import (
+from pynxtools_xps.reader_utils import (
     XPSMapper,
     construct_entry_name,
     construct_data_key,

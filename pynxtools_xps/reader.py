@@ -34,9 +34,9 @@ from pynxtools.dataconverter.readers.utils import (
     flatten_and_replace,
     parse_flatten_json,
 )
-from pynxtools.dataconverter.readers.xps.file_parser import XpsDataFileParser
-from pynxtools.dataconverter.readers.xps.reader_utils import construct_entry_name
 from pynxtools.dataconverter.template import Template
+from pynxtools_xps.file_parser import XpsDataFileParser
+from pynxtools_xps.reader_utils import construct_entry_name
 
 np.set_printoptions(threshold=sys.maxsize)
 

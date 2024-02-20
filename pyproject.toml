@@ -25,6 +25,9 @@ dependencies = [
     "pynxtools>=0.0.10"
 ]
 
+[tool.setuptools.package-data]
+pynxtools-xps = ["*.json"]
+
 [project.entry-points."pynxtools.reader"]
 xps = "pynxtools_xps.reader:XPSReader"
 

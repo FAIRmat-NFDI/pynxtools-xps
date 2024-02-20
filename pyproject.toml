@@ -11,7 +11,7 @@ authors = [
 description = "A reader for transferring XPS data from vendor formats to NeXus and NOMAD."
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.8,<3.12"
+requires-python = ">=3.8,<=3.12"
 classifiers = [
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",

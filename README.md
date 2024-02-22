@@ -2,8 +2,9 @@
 ![](https://github.com/FAIRmat-NFDI/pynxtools-xps/actions/workflows/pytest.yml/badge.svg)
 ![](https://github.com/FAIRmat-NFDI/pynxtools-xps/actions/workflows/pylint.yml/badge.svg)
 ![](https://github.com/FAIRmat-NFDI/pynxtools-xps/actions/workflows/publish.yml/badge.svg)
-![](https://github.com/FAIRmat-NFDI/pynxtools_xps/actions/workflows/pytest.yml/badge.svg)
-![](https://github.com/FAIRmat-NFDI/pynxtools_xps/actions/workflows/pylint.yml/badge.svg)
+![](https://img.shields.io/pypi/pyversions/pynxtools-xps)
+![](https://img.shields.io/pypi/l/pynxtools-xps)
+![](https://img.shields.io/pypi/v/pynxtools-xps)
 ![](https://coveralls.io/repos/github/FAIRmat-NFDI/pynxtools_xps/badge.svg?branch=master)
 
 # A reader for XPS data

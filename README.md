@@ -1,4 +1,7 @@
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+![](https://github.com/FAIRmat-NFDI/pynxtools-xps/actions/workflows/pytest.yml/badge.svg)
+![](https://github.com/FAIRmat-NFDI/pynxtools-xps/actions/workflows/pylint.yml/badge.svg)
+![](https://github.com/FAIRmat-NFDI/pynxtools-xps/actions/workflows/publish.yml/badge.svg)
 ![](https://github.com/FAIRmat-NFDI/pynxtools_xps/actions/workflows/pytest.yml/badge.svg)
 ![](https://github.com/FAIRmat-NFDI/pynxtools_xps/actions/workflows/pylint.yml/badge.svg)
 ![](https://coveralls.io/repos/github/FAIRmat-NFDI/pynxtools_xps/badge.svg?branch=master)

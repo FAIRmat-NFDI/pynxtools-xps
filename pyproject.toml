@@ -22,6 +22,8 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
+    "h5py>=3.6.0",
+    "xarray>=0.20.2",
     "pynxtools>=0.0.10"
 ]
 
@@ -37,14 +39,14 @@ dev = [
     "mypy",
     "ruff",
     "pytest",
-    "pytest-timeout",
     "pytest-cov",
+    "pytest-timeout",
     "structlog",
     "types-pyyaml",
     "types-pytz",
     "types-requests",
     "pip-tools",
-    "pre-commit",
+    "pre-commit"
 ]
 
 [tool.setuptools.package-data]
@@ -55,13 +57,13 @@ version_scheme = "no-guess-dev"
 local_scheme = "node-and-date"
 
 [tool.ruff]
-include = ["pynxtools_xps*.py", "tests/*.py"]
+include = ["pynxtools_xps/*.py", "tests/*.py"]
 select = [
     "E", # pycodestyle
     "W", # pycodestyle
     "PL", # pylint
 ]
-ignore = [
+lint.ignore = [
     "E501", # Line too long ({width} > {limit} characters)
     "E701", # Multiple statements on one line (colon)
     "E731", # Do not assign a lambda expression, use a def

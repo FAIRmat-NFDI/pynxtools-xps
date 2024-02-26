@@ -35,8 +35,8 @@ class VamasHeader:
     experiment_id: str = "Not Specified"
     no_comment_lines: str = "2"
     comment_lines: list = field(
-        default_factory=["Casa Info Follows CasaXPS Version 2.3.22PR1.0\n0"]
-    )
+        default_factory=list
+    )  # ["Casa Info Follows CasaXPS Version 2.3.22PR1.0\n0"]
     exp_mode: str = "NORM"
     scan_mode: str = "REGULAR"
     nr_regions: str = "0"

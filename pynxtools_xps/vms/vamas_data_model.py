@@ -19,7 +19,7 @@ Data model for Vamas ISO standard.
 #
 # pylint: disable=too-many-instance-attributes
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -34,7 +34,9 @@ class VamasHeader:
     operator_id: str = "Not Specified"
     experiment_id: str = "Not Specified"
     no_comment_lines: str = "2"
-    comment_lines: str = "Casa Info Follows CasaXPS Version 2.3.22PR1.0\n0"
+    comment_lines: list = field(
+        default_factory=["Casa Info Follows CasaXPS Version 2.3.22PR1.0\n0"]
+    )
     exp_mode: str = "NORM"
     scan_mode: str = "REGULAR"
     nr_regions: str = "0"
@@ -64,7 +66,7 @@ class VamasBlock:
     no_comment_lines: str = ""
     # This list should contain one element per for each
     # line in the comment block
-    comment_lines: str = ""
+    comment_lines: list = field(default_factory=list)
     technique: str = ""
     exp_var_value: str = ""
     source_label: str = ""

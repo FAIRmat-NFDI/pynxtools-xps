@@ -435,9 +435,9 @@ class VamasParser(ABC):
         for attr in self.attrs["common_header"]:
             setattr(self.header, attr, self.data.pop(0).strip())
         no_comment_lines = int(self.header.no_comment_lines)
-        comments = ""
+        comments = []
         for _ in range(no_comment_lines):
-            comments += self.data.pop(0)
+            comments += [self.data.pop(0)]
         self.header.comment_lines = comments
         self.header.exp_mode = self.data.pop(0).strip()
         if self.header.exp_mode == "NORM":
@@ -657,7 +657,7 @@ class VamasParserRegular(VamasParser):
         block.no_hrs_in_advance_of_gmt = int(self.data.pop(0).strip())
         block.no_comment_lines = int(self.data.pop(0).strip())
         for _ in range(block.no_comment_lines):
-            block.comment_lines += self.data.pop(0)
+            block.comment_lines += [self.data.pop(0)]
         block.technique = self.data.pop(0).strip()
         for _ in range(int(self.header.nr_exp_var)):
             block.exp_var_value = self.data.pop(0).strip()
@@ -739,7 +739,7 @@ class VamasParserRegular(VamasParser):
         block.no_comment_lines = int(self.data.pop(0).strip())
         for _ in range(block.no_comment_lines):
             self.data.pop(0)
-            block.comment_lines += self.data.pop(0)
+            block.comment_lines += [self.data.pop(0)]
         block.technique = self.data.pop(0).strip()
         block.x_coord = self.data.pop(0).strip()
         block.y_coord = self.data.pop(0).strip()
@@ -863,7 +863,7 @@ class VamasParserIrregular(VamasParser):
         block.no_hrs_in_advance_of_gmt = int(self.data.pop(0).strip())
         block.no_comment_lines = int(self.data.pop(0).strip())
         for _ in range(block.no_comment_lines):
-            block.comment_lines += self.data.pop(0)
+            block.comment_lines += [self.data.pop(0)]
         block.technique = self.data.pop(0).strip()
         for _ in range(int(self.header.nr_exp_var)):
             block.exp_var_value = self.data.pop(0).strip()
@@ -945,7 +945,7 @@ class VamasParserIrregular(VamasParser):
         block.no_comment_lines = int(self.data.pop(0).strip())
         for _ in range(block.no_comment_lines):
             self.data.pop(0)
-            block.comment_lines += self.data.pop(0)
+            block.comment_lines += [self.data.pop(0)]
         block.technique = self.data.pop(0).strip()
         block.x_coord = self.data.pop(0).strip()
         block.y_coord = self.data.pop(0).strip()

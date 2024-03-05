@@ -43,6 +43,7 @@ np.set_printoptions(threshold=sys.maxsize)
 XPS_TOKEN = "@xps_token:"
 XPS_DATA_TOKEN = "@data:"
 XPS_DETECTOR_TOKEN = "@detector_data:"
+XPS_METADATA_TOKEN = "@metadata:"
 ELN_TOKEN = "@eln"
 LINK_TOKEN = "link"
 TOKEN_SET = {XPS_TOKEN, XPS_DATA_TOKEN, XPS_DETECTOR_TOKEN, ELN_TOKEN}
@@ -291,38 +292,52 @@ def fill_template_with_xps_data(config_dict, xps_data_dict, template):
     and store them into template. We use searching_keys
     for separating the data from xps_data_dict.
     """
-    for key, config_value in config_dict.items():
-        if isinstance(config_value, str) and any(
-            token in config_value for token in TOKEN_SET
-        ):
-            if XPS_DATA_TOKEN in str(config_value):
-                key_part = config_value.split(XPS_DATA_TOKEN)[-1]
-                entries_values = find_entry_and_value(
-                    xps_data_dict, key_part, dt_typ=XPS_DATA_TOKEN
-                )
-                fill_data_group(key, key_part, entries_values, config_dict, template)
+    for key, config_values in config_dict.items():
+        config_value_list = values_to_list(config_values)
 
-            elif XPS_DETECTOR_TOKEN in str(config_value):
-                key_part = config_value.split(XPS_DATA_TOKEN)[-1]
-                entries_values = find_entry_and_value(
-                    xps_data_dict, key_part, dt_typ=XPS_DETECTOR_TOKEN
-                )
+        for config_value in config_value_list:
+            if isinstance(config_value, str) and any(
+                token in config_value for token in TOKEN_SET
+            ):
+                if XPS_DATA_TOKEN in str(config_value):
+                    key_part = config_value.split(XPS_DATA_TOKEN)[-1]
+                    entries_values = find_entry_and_value(
+                        xps_data_dict, key_part, dt_typ=XPS_DATA_TOKEN
+                    )
+                    fill_data_group(
+                        key, key_part, entries_values, config_dict, template
+                    )
 
-                fill_detector_group(
-                    key, entries_values, config_dict, xps_data_dict, template
-                )
+                elif XPS_DETECTOR_TOKEN in str(config_value):
+                    key_part = config_value.split(XPS_DATA_TOKEN)[-1]
+                    entries_values = find_entry_and_value(
+                        xps_data_dict, key_part, dt_typ=XPS_DETECTOR_TOKEN
+                    )
 
-            elif XPS_TOKEN in str(config_value):
-                key_part = config_value.split(XPS_TOKEN)[-1]
-                entries_values = find_entry_and_value(
-                    xps_data_dict, key_part, dt_typ=XPS_TOKEN
-                )
-                for entry, ent_value in entries_values.items():
-                    modified_key = key.replace("[entry]", f"[{entry}]")
-                    fill_template_with_value(modified_key, ent_value, template)
+                    fill_detector_group(
+                        key, entries_values, config_dict, xps_data_dict, template
+                    )
 
-        else:
-            fill_template_with_value(key, config_value, template)
+                elif XPS_TOKEN in str(config_value):
+                    key_part = config_value.split(XPS_TOKEN)[-1]
+                    entries_values = find_entry_and_value(
+                        xps_data_dict, key_part, dt_typ=XPS_TOKEN
+                    )
+                    for entry, ent_value in entries_values.items():
+                        modified_key = key.replace("[entry]", f"[{entry}]")
+                        fill_template_with_value(modified_key, ent_value, template)
+
+                elif XPS_METADATA_TOKEN in str(config_value):
+                    token = config_value.split(XPS_METADATA_TOKEN)[-1]
+                    entries_values = find_entry_and_value(
+                        xps_data_dict, token, dt_typ=XPS_METADATA_TOKEN
+                    )
+                    for entry, ent_value in entries_values.items():
+                        modified_key = key.replace("[entry]", f"[{entry}]")
+                        fill_template_with_value(modified_key, ent_value, template)
+
+            else:
+                fill_template_with_value(key, config_value, template)
 
 
 def fill_template_with_eln_data(eln_data_dict, config_dict, template):
@@ -337,6 +352,22 @@ def fill_template_with_eln_data(eln_data_dict, config_dict, template):
         elif key in eln_data_dict:
             field_value = eln_data_dict[key]
             fill_template_with_value(key, field_value, template)
+
+
+def values_to_list(values):
+    """
+    Return a list of the values object, independent of its intial type
+    Parameters
+    ----------
+    values :
+        Dictionary values.
+    Returns
+    -------
+    list.
+    """
+    if isinstance(values, bool):
+        return [values]
+    return list(values)
 
 
 def concatenate_values(value1, value2):
@@ -356,6 +387,51 @@ def concatenate_values(value1, value2):
         concatenated = value1 + value2
 
     return concatenated
+
+
+def _concatenate_values(value1, value2):
+    """
+    Concatenate two values of same type to be stored
+    in xps_data_dict. Dicts are merged and every other object is
+        appended to a list.
+    """
+    if isinstance(value1, dict) and isinstance(value2, dict):
+        concatenated = {**value1, **value2}
+    else:
+        if not isinstance(value1, list):
+            value1 = [value1]
+        if not isinstance(value2, list):
+            value2 = [value2]
+        concatenated = value1 + value2
+    return concatenated
+
+
+def update_dict_without_replacing(existing_dict, new_dict):
+    """
+    Update an existing dictionary with a new dict,
+    without overwriting existing keys.
+    Parameters
+    ----------
+    existing_dict : dict
+        Dictionary contain XPS data.
+    new_dict : dict
+        Dictionary containining similar XPS data, used to update the
+        first dict.
+    Returns
+    -------
+    updated_dict : dict
+        Existing dictionary, updated with new dict.
+    """
+    existing = [
+        (key, existing_dict[key], new_dict[key])
+        for key in set(existing_dict).intersection(new_dict)
+    ]
+
+    updated_dict = {**existing_dict, **new_dict}
+    for key, value1, value2 in existing:
+        updated_dict[key] = _concatenate_values(value1, value2)
+
+    return updated_dict
 
 
 # pylint: disable=too-few-public-methods
@@ -399,14 +475,7 @@ class XPSReader(BaseReader):
 
                 # If there are multiple input data files of the same type,
                 # make sure that existing keys are not overwritten.
-                existing = [
-                    (key, xps_data_dict[key], data_dict[key])
-                    for key in set(xps_data_dict).intersection(data_dict)
-                ]
-
-                xps_data_dict = {**xps_data_dict, **data_dict}
-                for key, value1, value2 in existing:
-                    xps_data_dict[key] = concatenate_values(value1, value2)
+                xps_data_dict = update_dict_without_replacing(xps_data_dict, data_dict)
 
                 config_file = reader_dir.joinpath(f"config/{config_file}")
             elif file_ext in XpsDataFileParser.__prmt_metadata_file_ext__:

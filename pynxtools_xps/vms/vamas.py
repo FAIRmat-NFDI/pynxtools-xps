@@ -624,6 +624,10 @@ class VamasParser(ABC):
         temp_group_name = ""
         spectra = []
 
+        header_dict = {to_snake_case(k): v for (k, v) in self.header.dict().items()}
+        del header_dict["comment_lines"]
+        header_dict.update(self.handle_header_comments(self.header.comment_lines))
+
         for spectrum_id, block in enumerate(self.blocks):
             group_name = block.sample_id
             # This set of conditions detects if the group name has changed.
@@ -669,9 +673,7 @@ class VamasParser(ABC):
                 "sample_rotation_angle": block.sample_rotation,
                 "n_values": int(block.num_ord_values / block.no_variables),
             }
-
-            comment_dict = self.handle_block_comments(block.comment_lines)
-            settings.update(comment_dict)
+            settings.update(header_dict)
 
             # Convert the native time format to the datetime string
             # in the ISO 8601 format
@@ -719,8 +721,31 @@ class VamasParser(ABC):
 
         return spectra
 
+    def handle_header_comments(self, comment_list):
+        """Handle comments (incl. Casa info) for the header."""
+        comments = {}
+
+        if "Casa Info Follows" in comment_list[0]:
+            comments["casa_version"] = (
+                comment_list[0].split("Casa Info Follows CasaXPS Version")[1].strip()
+            )
+            non_casa_comments = comment_list[1:]
+        else:
+            non_casa_comments = comment_list
+
+        for line in non_casa_comments:
+            for sep in ("=", ":"):
+                try:
+                    key, value = [part.strip(" ") for part in line.split(sep, 1)]
+                    comments[to_snake_case(key)] = value
+                except ValueError:
+                    if "SpecsLab Prodigy" in line:
+                        comments["prodigy_version"] = line.split("Version")[1].strip()
+
+        return comments
+
     def handle_block_comments(self, comment_list):
-        """Handle comments (incl. Casa fitting for each block."""
+        """Handle comments (incl. Casa fitting) for each block."""
         comments = {}
 
         if "Casa Info Follows" in comment_list[0]:

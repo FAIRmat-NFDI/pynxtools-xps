@@ -28,12 +28,14 @@ import xarray as xr
 import numpy as np
 
 from pynxtools_xps.vms.vamas_data_model import VamasHeader, VamasBlock
+from pynxtools_xps.vms.casa_data_model import CasaProcess
 
 from pynxtools_xps.reader_utils import (
     XPSMapper,
     construct_entry_name,
     construct_data_key,
     construct_detector_data_key,
+    to_snake_case,
 )
 
 
@@ -54,6 +56,26 @@ class VamasMapper(XPSMapper):
         self.parser_map = {
             "regular": VamasParserRegular,
             "irregular": VamasParserIrregular,
+        }
+
+        self.units = {
+            "instrument/sample_normal_polarangle_tilt": "degree ",
+            "instrument/sample_tilt_azimuth": "degree",
+            "instrument/sample_rotation_angle": "degree",
+            "source/source_analyzer_angle": "degree",
+            "source/excitation_energy": "eV",
+            "source/particle_charge": "C",
+            "analyser/analyzer_take_off_azimuth": "degree",
+            "analyser/analyzer_take_off_polar": "degree",
+            "analyser/analysis_width_x": "m",
+            "analyser/analysis_width_y": "m",
+            "analyser/target_bias": "V",
+            "analyser/time_correction": "s",
+            "analyser/work_function": "eV",
+            "energydispersion/pass_energy": "eV",
+            "detector/dwell_time": "s",
+            "data/start_energy": "eV",
+            "data/step_size": "eV",
         }
 
         super().__init__()
@@ -94,21 +116,28 @@ class VamasMapper(XPSMapper):
 
         key_map = {
             "user": [],
-            "instrument": [],
+            "instrument": [
+                "sample_normal_polarangle_tilt",
+                "sample_tilt_azimuth",
+                "sample_rotation_angle",
+            ],
             "source": [
                 "source_label",
                 "source_analyzer_angle",
             ],
-            "beam": ["excitation_energy"],
+            "beam": ["excitation_energy", "particle_charge"],
             "analyser": [
                 "analyzer_take_off_azimuth",
                 "analyzer_take_off_polar",
                 "analysis_width_x",
                 "analysis_width_y",
                 "target_bias",
+                "time_correction",
                 "work_function",
             ],
-            "collectioncolumn": [],
+            "collectioncolumn": [
+                "magnification",
+            ],
             "energydispersion": [
                 "scan_mode",
                 "pass_energy",
@@ -118,8 +147,7 @@ class VamasMapper(XPSMapper):
                 "dwell_time",
             ],
             "manipulator": [],
-            "sample": [],
-            "calibration": [],
+            "sample": ["sample_name"],
             "data": [
                 "x_label",
                 "x_units",
@@ -133,11 +161,16 @@ class VamasMapper(XPSMapper):
             ],
             "region": [
                 "analysis_method",
-                "spectrum_type",
-                "comments",
-                "spectrum_id",
-                "time_stamp",
+                "element",
+                "group_id",
+                "group_name",
+                "region",
+                "scan_no",
                 "scans",
+                "spectrum_id",
+                "spectrum_type",
+                "transition",
+                "time_stamp",
             ],
         }
 
@@ -147,8 +180,8 @@ class VamasMapper(XPSMapper):
     def _update_xps_dict_with_spectrum(self, spectrum, key_map):
         """Map one spectrum from raw data to NXmpes-ready dict."""
         # pylint: disable=too-many-locals,duplicate-code
-        group_parent = f'{self._root_path}/RegionGroup_{spectrum["group_name"]}'
-        region_parent = f'{group_parent}/regions/RegionData_{spectrum["spectrum_type"]}'
+        group_parent = f'{self._root_path}/Group_{spectrum["group_name"]}'
+        region_parent = f'{group_parent}/regions/Region_{spectrum["spectrum_type"]}'
         instrument_parent = f"{region_parent}/instrument"
         analyser_parent = f"{instrument_parent}/analyser"
 
@@ -162,23 +195,47 @@ class VamasMapper(XPSMapper):
             "energydispersion": f"{analyser_parent}/energydispersion",
             "detector": f"{analyser_parent}/detector",
             "manipulator": f"{instrument_parent}/manipulator",
-            "calibration": f"{instrument_parent}/calibration",
             "sample": f"{region_parent}/sample",
             "data": f"{region_parent}/data",
+            "energy_referencing": f"{region_parent}/calibrations/energy_referencing",
+            "peak_fitting": f"{region_parent}/peak_fitting",
             "region": f"{region_parent}",
         }
+
+        used_keys = []
 
         for grouping, spectrum_keys in key_map.items():
             root = path_map[str(grouping)]
             for spectrum_key in spectrum_keys:
-                try:
-                    units = re.search(r"\[([A-Za-z0-9_]+)\]", spectrum_key).group(1)
-                    mpes_key = spectrum_key.rsplit(" ", 1)[0]
+                mpes_key = spectrum_key.rsplit(" ", 1)[0]
+                self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
+
+                unit_key = f"{grouping}/{spectrum_key}"
+                units = self._get_units_for_key(unit_key)
+                if units:
                     self._xps_dict[f"{root}/{mpes_key}/@units"] = units
-                    self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
-                except AttributeError:
-                    mpes_key = spectrum_key
-                    self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
+
+        # Write process data
+        process_key_map = {
+            "energy_referencing": ["alignments"],
+            "peak_fitting": ["regions", "components"],
+        }
+
+        for grouping, spectrum_keys in process_key_map.items():
+            root = path_map[str(grouping)]
+            for spectrum_key in spectrum_keys:
+                try:
+                    processes = spectrum[spectrum_key]
+                    for i, process in enumerate(processes):
+                        process_key = (
+                            f"{root}/{spectrum_key}/{spectrum_key.rstrip('s')}{i}"
+                        )
+                        for key, value in process.dict().items():
+                            key = key.replace("_units", "/@units")
+                            self._xps_dict[f"{process_key}/{key}"] = value
+                    used_keys += [spectrum_key]
+                except KeyError:
+                    pass
 
         # Create keys for writing to data and detector
         entry = construct_entry_name(region_parent)
@@ -217,9 +274,39 @@ class VamasMapper(XPSMapper):
         self._xps_dict["data"][entry][scan_key] = xr.DataArray(
             data=intensity_cps, coords={"energy": energy}
         )
+        used_keys += ["data"]
 
         # Write raw intensities to 'detector'.
         self._xps_dict[detector_data_key] = intensity_raw
+
+        # Write additional keys to region parent.
+        for spectrum_key, value in spectrum.items():
+            if spectrum_key not in used_keys:
+                self._xps_dict[f"{region_parent}/{spectrum_key}"] = value
+
+    def _get_units_for_key(self, unit_key):
+        """
+        Get correct units for a given key.
+
+        Parameters
+        ----------
+        unit_key : str
+           Key of type <mapping>:<spectrum_key>, e.g.
+           detector/detector_voltage
+
+        Returns
+        -------
+        str
+            Unit for that unit_key.
+
+        """
+        try:
+            return re.search(r"\[([A-Za-z0-9_]+)\]", unit_key).group(1)
+        except AttributeError:
+            try:
+                return self.units[unit_key]
+            except KeyError:
+                return ""
 
 
 class VamasParser(ABC):
@@ -550,7 +637,6 @@ class VamasParser(ABC):
             settings = {
                 "region": block.block_id,
                 "sample_name": block.sample_id,
-                "comments": block.comment_lines,
                 "analysis_method": block.technique,
                 "source_label": block.source_label,
                 "excitation_energy": block.source_energy,
@@ -584,6 +670,9 @@ class VamasParser(ABC):
                 "n_values": int(block.num_ord_values / block.no_variables),
             }
 
+            comment_dict = self.handle_block_comments(block.comment_lines)
+            settings.update(comment_dict)
+
             # Convert the native time format to the datetime string
             # in the ISO 8601 format
             tzinfo = datetime.timezone(
@@ -606,7 +695,7 @@ class VamasParser(ABC):
 
                     data["y"] = getattr(block, "y")
 
-                    if block.variable_label_1 == "Intensity":
+                    if block.variable_label_1 in ["Intensity", "counts"]:
                         y_cps = [np.round(y / block.dwell_time, 2) for y in block.y]
                         data["y_cps"] = y_cps
 
@@ -629,6 +718,44 @@ class VamasParser(ABC):
         spectra = self._get_scan_numbers_for_spectra(spectra)
 
         return spectra
+
+    def handle_block_comments(self, comment_list):
+        """Handle comments (incl. Casa fitting for each block."""
+        comments = {}
+
+        if "Casa Info Follows" in comment_list[0]:
+            # Get all processing and fitting data from Casa comments.
+            casa = CasaProcess()
+            casa_data = casa.process_comments(comment_list)
+
+            comments.update(casa_data)
+
+            no_of_casa_lines = 1
+
+            for number in (
+                "n_alignments",
+                "n_unknown_processes",
+                "n_regions",
+                "n_components",
+            ):
+                occurence = getattr(casa, number)
+                no_of_casa_lines += 1
+                if occurence >= 1:
+                    no_of_casa_lines += occurence
+
+            non_casa_comments = comment_list[no_of_casa_lines:]
+
+        else:
+            non_casa_comments = comment_list
+
+        for line in non_casa_comments:
+            for sep in ("=", ":"):
+                try:
+                    key, value = [part.strip(" ") for part in line.split("=", 1)]
+                    comments[to_snake_case(key)] = value
+                except ValueError:
+                    continue
+        return comments
 
 
 class VamasParserRegular(VamasParser):
@@ -1040,3 +1167,10 @@ class VamasParserIrregular(VamasParser):
             data_array_slice = data_array[var::max_var]
             data_dict[name] = data_array_slice
             setattr(block, name, data_dict[name])
+
+
+if __name__ == "__main__":
+    file = r"C:\Users\pielsticker\Lukas\FAIRMat\user_cases\Schumann_XPS_Catalysis\C2 Activated Vamas Files\CleanData-alphaII VOPO4 C2 BC4316.vms"
+    parser = VamasParserRegular()
+    d = parser.parse_file(file)
+    d0 = d[0]

@@ -21,9 +21,11 @@ Data model for Vamas ISO standard.
 
 from dataclasses import dataclass, field
 
+from pynxtools_xps.reader_utils import XpsDataclass
+
 
 @dataclass
-class VamasHeader:
+class VamasHeader(XpsDataclass):
     """An object to store the Vamas header information."""
 
     format_id: str = (
@@ -51,7 +53,7 @@ class VamasHeader:
 
 
 @dataclass
-class VamasBlock:
+class VamasBlock(XpsDataclass):
     """An object to store a block of spectrum data and meta-data."""
 
     block_id: str = ""

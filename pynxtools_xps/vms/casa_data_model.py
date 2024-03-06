@@ -232,7 +232,7 @@ class CasaAlignment(XpsDataclass):
     measured_energy: float = 0.0
     measured_energy_units: str = "eV"
     aligned_energy: float = 0.0
-    measured_energy_units: str = "eV"
+    aligned_energy_units: str = "eV"
     operation: str = "eV"
 
 
@@ -277,9 +277,9 @@ class CasaComponent(XpsDataclass):
     width: float = 0.0
     width_units: str = "eV"
     width_min: float = 0.0
-    width_units: str = "eV"
+    width_min_units: str = "eV"
     width_max: float = 0.0
-    width_units: str = "eV"
+    width_max_units: str = "eV"
     width_ref_comp_id: int = -1
     width_ref_comp_factor: float = 0.0
 

@@ -20,7 +20,6 @@ Data model for Vamas ISO standard.
 # pylint: disable=too-many-instance-attributes
 
 from dataclasses import dataclass, field
-
 from pynxtools_xps.reader_utils import XpsDataclass
 
 

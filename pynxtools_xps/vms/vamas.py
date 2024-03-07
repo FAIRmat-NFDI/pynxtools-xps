@@ -29,6 +29,7 @@ import numpy as np
 
 from pynxtools_xps.vms.vamas_data_model import VamasHeader, VamasBlock
 from pynxtools_xps.vms.casa_data_model import CasaProcess
+# from pynxtools_xps.phi.spe_pro_phi import PhiParser
 
 from pynxtools_xps.reader_utils import (
     XPSMapper,
@@ -725,24 +726,75 @@ class VamasParser(ABC):
         """Handle comments (incl. Casa info) for the header."""
         comments = {}
 
-        if "Casa Info Follows" in comment_list[0]:
-            comments["casa_version"] = (
-                comment_list[0].split("Casa Info Follows CasaXPS Version")[1].strip()
-            )
-            non_casa_comments = comment_list[1:]
-        else:
-            non_casa_comments = comment_list
+        special_keys = {
+            "Casa Info Follows": self._handle_casa_header,
+            "SpecsLab Prodigy": self._handle_prodigy_header,
+            # "SOFH": self._handle_phi_header,
+        }
 
-        for line in non_casa_comments:
+        for keyword, handle_func in special_keys.items():
+            if any(keyword in line for line in comment_list):
+                index = [i for i, line in enumerate(comment_list) if keyword in line][0]
+
+                if keyword == "Casa Info Follows":
+                    special_comments = comment_list[index]
+                    comment_list = comment_list[index + 1 :]
+
+                if keyword == "SpecsLab Prodigy":
+                    special_comments = comment_list[index]
+                    comment_list = comment_list[index + 1 :]
+
+                if keyword == "SOFH":
+                    end_index = [
+                        i for i, line in enumerate(comment_list) if "EOFH" in line
+                    ][0]
+                    special_comments = comment_list[index : end_index + 1]
+                    del comment_list[index : end_index + 1]
+
+                comments.update(handle_func(special_comments))
+
+        # Handle non-special comments.
+        for line in comment_list:
             for sep in ("=", ":"):
                 try:
                     key, value = [part.strip(" ") for part in line.split(sep, 1)]
                     comments[to_snake_case(key)] = value
                 except ValueError:
-                    if "SpecsLab Prodigy" in line:
-                        comments["prodigy_version"] = line.split("Version")[1].strip()
+                    continue
 
         return comments
+
+    def _handle_casa_header(self, comment_line: str):
+        """Get information about CasaXPS version."""
+        return {
+            "casa_version": comment_line.split("Casa Info Follows CasaXPS Version")[
+                1
+            ].strip()
+        }
+
+    def _handle_prodigy_header(self, comment_line: str):
+        """Get information about SpecsLab Prodigy version."""
+        return {"prodigy_version": comment_line.split("Version")[1].strip()}
+
+    # =============================================================================
+    #     def _handle_phi_header(self, comment_list):
+    #         """Get metadta from Phi system."""
+    #         phi_parser = PhiParser()
+    #         phi_parser.parse_header_into_metadata(comment_list)
+    #
+    #         phi_comments = phi_parser.metadata.dict()
+    #
+    #         regions = phi_parser.parse_spectral_regions(comment_list)
+    #         areas = phi_parser.parse_spatial_areas(comment_list)
+    #
+    #         for region in regions:
+    #             for area in areas:
+    #                 concatenated = {**region.dict(), **area.dict()}
+    #
+    #             phi_comments.update(concatenated)
+    #
+    #         return phi_comments
+    # =============================================================================
 
     def handle_block_comments(self, comment_list):
         """Handle comments (incl. Casa fitting) for each block."""

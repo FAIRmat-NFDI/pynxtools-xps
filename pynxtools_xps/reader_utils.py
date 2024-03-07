@@ -17,6 +17,7 @@ Helper functions for populating NXmpes template
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import re
 from abc import ABC, abstractmethod
 from scipy.interpolate import interp1d
 import numpy as np
@@ -100,9 +101,22 @@ class XPSMapper(ABC):
         """
 
 
-def to_snake_case(string_with_whitespace):
+def to_snake_case(str_value):
     """Convert a string to snake_case."""
-    return "_".join(word.lower() for word in string_with_whitespace.split())
+    if " " in str_value:
+        return "_".join(word.lower() for word in str_value.split())
+    return convert_pascal_to_snake(str_value)
+
+
+def convert_pascal_to_snake(str_value):
+    """Convert pascal case text to snake case."""
+    pattern = re.compile(r"(?<!^)(?=[A-Z])")
+    return pattern.sub("_", str_value).lower()
+
+
+def convert_snake_to_pascal(str_value):
+    """Convert snakecase text to pascal case."""
+    return str_value.replace("_", " ").title().replace(" ", "")
 
 
 def safe_arange_with_edges(start, stop, step):

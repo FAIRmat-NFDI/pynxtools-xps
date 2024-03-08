@@ -818,7 +818,7 @@ class VamasParser:
             data_dict[name] = data_array_slice
             setattr(block, name, data_dict[name])
 
-        self.data = self.data[block.num_ord_values + block.no_variables :]
+        self.data = self.data[block.num_ord_values :]  # + block.no_variables :]
 
     def _get_scan_numbers_for_spectra(self, spectra: List[Dict]):
         """

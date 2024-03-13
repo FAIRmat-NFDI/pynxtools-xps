@@ -1,5 +1,5 @@
 {
-    "/@default":"entry",
+    "/@default":"None",
     "/ENTRY[entry]":{
       "@default":"data",
       "definition":"@eln",
@@ -22,6 +22,7 @@
       "email":"@eln"
     },
     "/ENTRY[entry]/INSTRUMENT[instrument]":{
+      "@default": "electronanalyser",
       "device_information":{
         "vendor":"@eln",
         "identifier":"@eln",
@@ -57,7 +58,7 @@
         "associated_source":"@link:/entry/instrument/source_probe"
       },
       "ELECTRONANALYSER[electronanalyser]":{
-        "@default": "None",
+        "@default": "detector0",
         "name":"@xps_token:analyzer_info/name",
         "description":"@eln",
         "work_function":"@eln",
@@ -116,7 +117,6 @@
           },
           "raw_data":{
             "@signal":"raw",
-            "@default":"raw",
             "raw":"@detector_data:cycles/Cycle_",
             "raw/@units":"counts"
           }
@@ -236,7 +236,6 @@
     },
     "/ENTRY[entry]/data":{
       "@signal":"data",
-      "@default":"data",
       "@axes":["energy"],
       "data":"@data:cycle",
       "data/@units":"counts",

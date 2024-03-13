@@ -1,5 +1,5 @@
 {
-    "/@default":"entry",
+    "/@default":"None",
     "/ENTRY[entry]":{
       "@default":"data",
       "definition":"@eln",
@@ -24,6 +24,7 @@
       "email":"@eln"
     },
     "/ENTRY[entry]/INSTRUMENT[instrument]":{
+      "@default": "electronanalyser",
       "device_information":{
         "vendor":"@eln",
         "identifier":"@eln",
@@ -90,7 +91,6 @@
           "resolution/@units":"eV"
         },
         "transmission_function":{
-          "@default":"relative_intensity",
           "@signal":"relative_intensity",
           "@axes":["kinetic_energy"],
           "kinetic_energy":"@xps_token:transmission_function/kinetic_energy",
@@ -140,7 +140,6 @@
           },
           "raw_data":{
             "@signal":"raw",
-            "@default":"raw",
             "raw":"@detector_data:cycles/Cycle_",
             "raw/@units":"counts"
           }
@@ -276,7 +275,6 @@
     },
     "/ENTRY[entry]/data":{
       "@signal":"data",
-      "@default":"data",
       "@axes":["energy"],
       "data":"@data:cycle",
       "data/@units":"@xps_token:data/y_units_1",

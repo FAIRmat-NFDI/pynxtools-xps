@@ -19,6 +19,8 @@ Helper functions for populating NXmpes template
 #
 import re
 from abc import ABC, abstractmethod
+from typing import Any, Dict, List, Union
+from pathlib import Path
 from scipy.interpolate import interp1d
 import numpy as np
 
@@ -50,9 +52,9 @@ class XPSMapper(ABC):
     """Abstract base class from mapping from a parser to NXmpes template"""
 
     def __init__(self):
-        self.file = None
-        self.raw_data: list = []
-        self._xps_dict: dict = {}
+        self.file: Union[str, Path] = ""
+        self.raw_data: List[str] = []
+        self._xps_dict: Dict[str, Any] = {}
         self._root_path = "/ENTRY[entry]"
 
         self.parser = None

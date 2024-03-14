@@ -13,6 +13,20 @@ from pynxtools.dataconverter.template import Template
 from pynxtools.nexus.nxdl_utils import get_nexus_definitions_path
 from pynxtools_xps.reader import XPSReader
 
+# from pynxtools_xps.phi.spe_pro_phi import MapperPhi
+from pynxtools_xps.sle.sle_specs import SleMapperSpecs
+
+# from pynxtools_xps.slh.slh_specs import SlhMapperSpecs
+from pynxtools_xps.txt.txt_scienta import TxtMapperScienta
+
+# from pynxtools_xps.txt.txt_specs import TxtMapperSpecs
+from pynxtools_xps.txt.txt_vamas_export import (
+    TxtMapperVamasExport,
+)
+from pynxtools_xps.vms.vamas import VamasMapper
+from pynxtools_xps.xy.xy_specs import XyMapperSpecs
+from pynxtools_xps.xml.xml_specs import XmlMapperSpecs
+
 
 def test_example_data():
     """
@@ -45,3 +59,38 @@ def test_example_data():
 
             assert isinstance(read_data, Template)
             assert validate_data_dict(template, read_data, root)
+
+
+def test_vms_mapper():
+    mapper = VamasMapper
+    data_dir = os.path.join(os.path.dirname(__file__), "data", "vms")
+
+    files_and_keys = {
+        "EX889_S1110_MgFe2O4_spent_irregular": {
+            "/ENTRY[entry]/Group_1 as-loaded/regions/Region_Survey/scan_mode": "REGULAR",
+            "data['2 S1110, UHV, RT, Epass = 20 eV__MgKLL_1']['cycle0']": 1351,
+        },
+        "EX889_S1110_MgFe2O4_spent_irregular": {
+            "/ENTRY[entry]/Group_1 as-loaded/regions/Region_Survey/scan_mode": "IRREGULAR",
+            "/ENTRY[entry]/Group_1 as-loaded/regions/Region_Fe2p/instrument/analyser/energydispersion/scan_mode": "FixedAnalyserTransmission",
+            "data['2 S1110, UHV, RT, Epass = 20 eV__Fe3s-Si2p-Mg2s']['cycle0']": 761,
+        },
+    }
+
+    # (C["benz"], "20240122_SBenz_102_20240122_SBenz_SnO2_10nm.vms"),
+    # (r"C:\Users\pielsticker\Lukas\MPI-CEC\Projects\deepxps\RUB MDI\example_spectra_Florian\Co", "Co 2p 0008751 M1.vms"),
+    # (C["pielst"], C["EX889"], "vms", f"{C['EX889']}_regular.vms"),
+    ((C["pielst"], C["EX889"], "vms", f"{C['EX889']}_irregular.vms"),)
+    # (C["schu"], "CleanData-alphaII VOPO4 C2 BC4316.vms"),
+    # (C["pielst"], C["EX889"], "vms", "d_reg.vms"),
+    ((C["pielst"], C["EX889"], "vms", "d_irreg.vms"),)
+
+    for vms_file in os.listdir(data_dir):
+        data = mapper.parse_file(file=file)
+
+
+for k, v in d.items():
+    if isinstance(v, str):
+        # print(k)
+        if "REG" in v:
+            print(k)

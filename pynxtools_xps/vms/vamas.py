@@ -52,7 +52,6 @@ class VamasMapper(XPSMapper):
     config_file = "config_vms.json"
 
     def __init__(self):
-        self.file: Union[str, Path] = ""
         self.parsers: List[Any] = []
 
         self.units: dict = {
@@ -190,7 +189,7 @@ class VamasMapper(XPSMapper):
         used_keys = []
 
         for grouping, spectrum_keys in key_map.items():
-            root = path_map[str(grouping)]
+            root = path_map[grouping]
             for spectrum_key in spectrum_keys:
                 mpes_key = spectrum_key.rsplit(" ", 1)[0]
                 self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
@@ -207,7 +206,7 @@ class VamasMapper(XPSMapper):
         }
 
         for grouping, process_key_list in process_key_map.items():
-            root = path_map[str(grouping)]
+            root = path_map[grouping]
             for spectrum_key in process_key_list:
                 try:
                     processes = spectrum[spectrum_key]

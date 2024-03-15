@@ -749,15 +749,15 @@ class VamasParser:
 
     def _add_regular_data(self, block: VamasBlock):
         """Parse data with regularly spaced energy axis."""
-        data_dict: Dict[str, List] = {}
+        data_dict: Dict[str, np.ndarray] = {}
 
         start = float(block.abscissa_start)
         step = float(block.abscissa_step)
         num = int(block.num_ord_values / block.no_variables)
-        energy = [round(start + i * step, 2) for i in range(num)]
+        energy = np.array([round(start + i * step, 2) for i in range(num)])
 
         if block.abscissa_label == "binding energy":
-            energy.reverse()
+            energy = np.flip(energy)
 
         setattr(block, "x", energy)
 
@@ -766,7 +766,6 @@ class VamasParser:
                 name = "y"
             else:
                 name = "y" + str(var)
-            data_dict[name] = []
 
         data_array = np.array(self.data[: block.num_ord_values], dtype=float)
 
@@ -784,13 +783,13 @@ class VamasParser:
 
     def _add_irregular_data(self, block: VamasBlock):
         """Parse data with regularly spaced energy axis."""
-        data_dict: Dict[str, List] = {}
+        data_dict: Dict[str, np.ndarray] = {}
 
         block_data = np.array(self.data[: block.num_ord_values], dtype=float)
 
         energy = block_data[:: block.no_variables + 1]
         if block.abscissa_label == "binding energy":
-            energy.reverse()
+            energy = np.flip(energy)
 
         setattr(block, "x", energy)
         block.abscissa_start = float(min(energy))
@@ -801,7 +800,6 @@ class VamasParser:
                 name = "y"
             else:
                 name = "y" + str(var)
-            data_dict[name] = []
 
         for var in range(block.no_variables):
             if var == 0:
@@ -1060,7 +1058,7 @@ class VamasParser:
 
                     if block.variable_label_1 in ["Intensity", "counts"]:
                         y_cps = [np.round(y / block.dwell_time, 2) for y in block.y]
-                        data["y_cps"] = y_cps
+                        data["y_cps"] = np.array(y_cps)
 
                 else:
                     key = "y" + str(var)

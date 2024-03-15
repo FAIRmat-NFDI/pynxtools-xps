@@ -29,18 +29,18 @@ import struct
 import xarray as xr
 import numpy as np
 
-from pynxtools.dataconverter.readers.xps.phi.phi_data_model import (
-    PhiMetadata,
-    PhiSpectralRegion,
-    PhiSpatialArea,
-)
-
-from pynxtools.dataconverter.readers.xps.reader_utils import (
+from pynxtools_xps.reader_utils import (
     XPSMapper,
     construct_entry_name,
     construct_data_key,
     construct_detector_data_key,
     safe_arange_with_edges,
+)
+
+from pynxtools_xps.phi.phi_data_model import (
+    PhiMetadata,
+    PhiSpectralRegion,
+    PhiSpatialArea,
 )
 
 
@@ -1087,16 +1087,19 @@ class PhiParser:  # pylint: disable=too-few-public-methods
             Binary XPS data, format is 64 bit float.
 
         """
-        offset = self.spectra_header_length + self.binary_header_length + 8000
+        offset = self.spectra_header_length + self.binary_header_length
+        print(offset)
 
-        for i, spectrum in enumerate(self.spectra[:1]):
+        for i, spectrum in enumerate(self.spectra):
             n_values = spectrum["n_values"]
+            print(f"n_values: {n_values}")
             start = (i + 1) * offset * self.float_buffer
             stop = (i + 1) * (n_values + offset) * self.float_buffer
-            print(start, stop)
+            print(f"start: {start}", f"stop: {stop}")
 
             binary_spectrum_data = binary_data[start:stop]
-            print(len(binary_spectrum_data))
+            print(f"bin data len: {len(binary_spectrum_data)}")
+            print(f"data len: {len(binary_spectrum_data)/self.float_buffer}\n")
             spectrum["data"] = self._parse_binary_data(binary_spectrum_data)
 
     def _parse_binary_data(self, binary_spectrum_data):
@@ -1493,8 +1496,8 @@ def _convert_stage_positions(value):
 
 # %%
 file = r"C:\Users\pielsticker\Lukas\FAIRMat\user_cases\Benz_PHI_Versaprobe\20240122_SBenz_102_20240122_SBenz_SnO2_10nm.spe"
-# file = r"C:\Users\pielsticker\Lukas\FAIRMat\user_cases\Benz_PHI_Versaprobe\20240122_SBenz_107_20240122_SBenz_SnO2_10nm_1.pro"
-file = r"C:\Users\pielsticker\Lukas\FAIRMat\user_cases\Benz_PHI_Versaprobe\C0ELR081_033.spe"
+file = r"C:\Users\pielsticker\Lukas\FAIRMat\user_cases\Benz_PHI_Versaprobe\20240122_SBenz_107_20240122_SBenz_SnO2_10nm_1.pro"
+# file = r"C:\Users\pielsticker\Lukas\FAIRMat\user_cases\Benz_PHI_Versaprobe\C0ELR081_033.spe"
 if __name__ == "__main__":
     parser = PhiParser()
     d = parser.parse_file(file)

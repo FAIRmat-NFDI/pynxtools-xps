@@ -13,20 +13,6 @@ from pynxtools.dataconverter.template import Template
 from pynxtools.nexus.nxdl_utils import get_nexus_definitions_path
 from pynxtools_xps.reader import XPSReader
 
-# from pynxtools_xps.phi.spe_pro_phi import MapperPhi
-from pynxtools_xps.sle.sle_specs import SleMapperSpecs
-
-# from pynxtools_xps.slh.slh_specs import SlhMapperSpecs
-from pynxtools_xps.txt.txt_scienta import TxtMapperScienta
-
-# from pynxtools_xps.txt.txt_specs import TxtMapperSpecs
-from pynxtools_xps.txt.txt_vamas_export import (
-    TxtMapperVamasExport,
-)
-from pynxtools_xps.vms.vamas import VamasMapper
-from pynxtools_xps.xy.xy_specs import XyMapperSpecs
-from pynxtools_xps.xml.xml_specs import XmlMapperSpecs
-
 
 def test_example_data():
     """
@@ -41,7 +27,7 @@ def test_example_data():
 
     reader_dirs = sorted(glob(os.path.join(data_dir, "*")))
 
-    for reader_dir in reader_dirs[:1]:
+    for reader_dir in reader_dirs:
         input_files = sorted(glob(os.path.join(reader_dir, "*")))
 
         for supported_nxdl in reader.supported_nxdls:
@@ -58,14 +44,10 @@ def test_example_data():
             )
 
             assert isinstance(read_data, Template)
-            # validate_data_dict(template, read_data, root)
-            # assert validate_data_dict(template, read_data, root)
-
-    return read_data.get_accumulated_dict()
+            assert validate_data_dict(template, read_data, root)
 
 
-data = test_example_data()
-
+## This will be implemented in the future.
 # =============================================================================
 # def test_vms_mapper():
 #     mapper = VamasMapper

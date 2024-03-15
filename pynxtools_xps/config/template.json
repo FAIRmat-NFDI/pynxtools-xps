@@ -14,6 +14,7 @@
       "affiliation":"None"
     },
     "/ENTRY[entry]/INSTRUMENT[instrument]":{
+      "@default": "electronanalyser",
       "device_information":{
         "vendor":"None",
         "identifier":"None",
@@ -50,7 +51,7 @@
         "associated_source":"None"
       },
       "ELECTRONANALYSER[electronanalyser]":{
-        "@default": "None",
+        "@default": "detector0",
         "description":"None",
         "work_function":"None",
         "work_function/@units":"None",
@@ -106,7 +107,6 @@
           },
           "raw_data":{
             "@signal":"None",
-            "@default":"raw",
             "raw":"None"
           }
         }
@@ -238,7 +238,6 @@
     },
     "/ENTRY[entry]/data":{
       "@signal":"data",
-      "@default":"data",
       "@axes":["energy"],
       "data":"None",
       "data/@units":"None",

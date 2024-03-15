@@ -23,6 +23,7 @@
       "email":"@eln"
     },
     "/ENTRY[entry]/INSTRUMENT[instrument]":{
+      "@default": "electronanalyser",
       "device_information":{
         "vendor":"None",
         "identifier":"None",
@@ -58,7 +59,7 @@
         "associated_source":"@link:/entry/instrument/source_probe"
       },
       "ELECTRONANALYSER[electronanalyser]":{
-        "@default": "None",
+        "@default": "detector0",
         "description":"@eln",
         "name": "@eln",
         "work_function":"@eln",
@@ -122,7 +123,6 @@
           },
           "raw_data":{
             "@signal":"None",
-            "@default":"raw",
             "raw":"@detector_data:cycles/Cycle_",
             "raw/@units":"counts"
           }
@@ -273,7 +273,6 @@
     },
     "/ENTRY[entry]/data":{
       "@signal":"data",
-      "@default":"data",
       "@axes":["energy"],
       "data":"@data:cycle",
       "data/@units":"@xps_token:data/y_units",

@@ -122,7 +122,7 @@
             "vendor":"@eln",
             "model":"@eln",
             "identifier":"@eln"
-          },
+          }
         },
         "DETECTOR[detector]":{
           "@default":"raw_data",

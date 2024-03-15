@@ -768,7 +768,7 @@ class VamasParser:
                 name = "y" + str(var)
             data_dict[name] = []
 
-        data_array = list(np.array(self.data[: block.num_ord_values], dtype=float))
+        data_array = np.array(self.data[: block.num_ord_values], dtype=float)
 
         self.data = self.data[block.num_ord_values :]
 
@@ -786,7 +786,7 @@ class VamasParser:
         """Parse data with regularly spaced energy axis."""
         data_dict: Dict[str, List] = {}
 
-        block_data = list(np.array(self.data[: block.num_ord_values], dtype=float))
+        block_data = np.array(self.data[: block.num_ord_values], dtype=float)
 
         energy = block_data[:: block.no_variables + 1]
         if block.abscissa_label == "binding energy":
@@ -861,9 +861,11 @@ class VamasParser:
         }
 
         for keyword, handle_func in special_keys.items():
-            if any(keyword in line for line in comment_list):
-                index = [i for i, line in enumerate(comment_list) if keyword in line][0]
+            # if any(keyword in line for line in comment_list):
+            indices = [i for i, line in enumerate(comment_list) if keyword in line]
 
+            if indices:
+                index = indices[0]
                 if keyword == "Casa Info Follows":
                     special_comments = comment_list[index]
                     comment_list = comment_list[index + 1 :]

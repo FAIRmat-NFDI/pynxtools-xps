@@ -42,6 +42,26 @@ from pynxtools_xps.reader_utils import (
     get_minimal_step,
 )
 
+UNITS: dict = {
+    "instrument/sample_normal_polarangle_tilt": "degree ",
+    "instrument/sample_tilt_azimuth": "degree",
+    "instrument/sample_rotation_angle": "degree",
+    "source/source_analyzer_angle": "degree",
+    "source/excitation_energy": "eV",
+    "source/particle_charge": "C",
+    "analyser/analyzer_take_off_azimuth": "degree",
+    "analyser/analyzer_take_off_polar": "degree",
+    "analyser/analysis_width_x": "m",
+    "analyser/analysis_width_y": "m",
+    "analyser/target_bias": "V",
+    "analyser/time_correction": "s",
+    "analyser/work_function": "eV",
+    "energydispersion/pass_energy": "eV",
+    "detector/dwell_time": "s",
+    "data/start_energy": "eV",
+    "data/step_size": "eV",
+}
+
 
 class VamasMapper(XPSMapper):
     """
@@ -50,31 +70,6 @@ class VamasMapper(XPSMapper):
     """
 
     config_file = "config_vms.json"
-
-    def __init__(self):
-        self.parsers: List[Any] = []
-
-        self.units: dict = {
-            "instrument/sample_normal_polarangle_tilt": "degree ",
-            "instrument/sample_tilt_azimuth": "degree",
-            "instrument/sample_rotation_angle": "degree",
-            "source/source_analyzer_angle": "degree",
-            "source/excitation_energy": "eV",
-            "source/particle_charge": "C",
-            "analyser/analyzer_take_off_azimuth": "degree",
-            "analyser/analyzer_take_off_polar": "degree",
-            "analyser/analysis_width_x": "m",
-            "analyser/analysis_width_y": "m",
-            "analyser/target_bias": "V",
-            "analyser/time_correction": "s",
-            "analyser/work_function": "eV",
-            "energydispersion/pass_energy": "eV",
-            "detector/dwell_time": "s",
-            "data/start_energy": "eV",
-            "data/step_size": "eV",
-        }
-
-        super().__init__()
 
     def _select_parser(self):
         """
@@ -288,7 +283,7 @@ class VamasMapper(XPSMapper):
             return re.search(r"\[([A-Za-z0-9_]+)\]", unit_key).group(1)
         except AttributeError:
             try:
-                return self.units[unit_key]
+                return UNITS[unit_key]
             except KeyError:
                 return ""
 

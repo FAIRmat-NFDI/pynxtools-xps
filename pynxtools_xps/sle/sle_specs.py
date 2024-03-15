@@ -334,6 +334,7 @@ class SleProdigyParser(ABC):
         self.spectra = []
         self.xml = None
         self.sum_channels = False
+        self.remove_align = True
 
         keys_map = {
             "Udet": "detector_voltage",
@@ -448,6 +449,9 @@ class SleProdigyParser(ABC):
             Flat list of dictionaries containing one spectrum each.
 
         """
+        if "remove_align" in kwargs:
+            self.remove_align = kwargs["remove_align"]
+
         try:
             self.sum_channels = kwargs["sum_channels"]
         except KeyError:
@@ -470,9 +474,8 @@ class SleProdigyParser(ABC):
         self._convert_to_common_format()
         self._close_con()
 
-        if "remove_align" in kwargs:
-            if kwargs["remove_align"]:
-                self._remove_fixed_energies()
+        if self.remove_align:
+            self._remove_fixed_energies()
 
         self._remove_syntax()
         self._remove_snapshot()

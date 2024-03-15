@@ -17,18 +17,44 @@ Helper functions for populating NXmpes template
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import re
 from abc import ABC, abstractmethod
+from typing import Any, Dict, List, Union
+from pathlib import Path
 from scipy.interpolate import interp1d
 import numpy as np
+
+from dataclasses import dataclass
+
+
+@dataclass
+class XpsDataclass:
+    """Generic class to hold a data model and a type validation method."""
+
+    def validate_types(self):
+        ret = True
+        for field_name, field_def in self.__dataclass_fields__.items():
+            actual_type = type(getattr(self, field_name))
+            if actual_type != field_def.type:
+                print(f"\t{field_name}: '{actual_type}' instead of '{field_def.type}'")
+                ret = False
+        return ret
+
+    def __post_init__(self):
+        if not self.validate_types():
+            raise ValueError("Wrong types")
+
+    def dict(self):
+        return self.__dict__.copy()
 
 
 class XPSMapper(ABC):
     """Abstract base class from mapping from a parser to NXmpes template"""
 
     def __init__(self):
-        self.file = None
-        self.raw_data: list = []
-        self._xps_dict: dict = {}
+        self.file: Union[str, Path] = ""
+        self.raw_data: List[str] = []
+        self._xps_dict: Dict[str, Any] = {}
         self._root_path = "/ENTRY[entry]"
 
         self.parser = None
@@ -77,6 +103,24 @@ class XPSMapper(ABC):
         """
 
 
+def to_snake_case(str_value):
+    """Convert a string to snake_case."""
+    if " " in str_value:
+        return "_".join(word.lower() for word in str_value.split())
+    return convert_pascal_to_snake(str_value)
+
+
+def convert_pascal_to_snake(str_value):
+    """Convert pascal case text to snake case."""
+    pattern = re.compile(r"(?<!^)(?=[A-Z])")
+    return pattern.sub("_", str_value).lower()
+
+
+def convert_snake_to_pascal(str_value):
+    """Convert snakecase text to pascal case."""
+    return str_value.replace("_", " ").title().replace(" ", "")
+
+
 def safe_arange_with_edges(start, stop, step):
     """
     In order to avoid float point errors in the division by step.
@@ -102,7 +146,7 @@ def safe_arange_with_edges(start, stop, step):
 
 def check_uniform_step_width(lst):
     """
-    Check to see if a non-uniform step width is used in an lst
+    Check to see if a non-uniform step width is used in an list.
 
     Parameters
     ----------

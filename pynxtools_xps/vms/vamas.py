@@ -22,19 +22,45 @@ Class for reading XPS files from raw VMS data.
 import re
 from copy import deepcopy
 import datetime
-from abc import ABC, abstractmethod
+from pathlib import Path
+from typing import Any, Dict, List, Union
+
 from itertools import groupby
 import xarray as xr
 import numpy as np
 
 from pynxtools_xps.vms.vamas_data_model import VamasHeader, VamasBlock
+from pynxtools_xps.vms.casa_data_model import CasaProcess
+# from pynxtools_xps.phi.spe_pro_phi import PhiParser
 
 from pynxtools_xps.reader_utils import (
     XPSMapper,
     construct_entry_name,
     construct_data_key,
     construct_detector_data_key,
+    to_snake_case,
+    get_minimal_step,
 )
+
+UNITS: dict = {
+    "instrument/sample_normal_polarangle_tilt": "degree ",
+    "instrument/sample_tilt_azimuth": "degree",
+    "instrument/sample_rotation_angle": "degree",
+    "source/source_analyzer_angle": "degree",
+    "source/excitation_energy": "eV",
+    "source/particle_charge": "C",
+    "analyser/analyzer_take_off_azimuth": "degree",
+    "analyser/analyzer_take_off_polar": "degree",
+    "analyser/analysis_width_x": "m",
+    "analyser/analysis_width_y": "m",
+    "analyser/target_bias": "V",
+    "analyser/time_correction": "s",
+    "analyser/work_function": "eV",
+    "energydispersion/pass_energy": "eV",
+    "detector/dwell_time": "s",
+    "data/start_energy": "eV",
+    "data/step_size": "eV",
+}
 
 
 class VamasMapper(XPSMapper):
@@ -44,19 +70,6 @@ class VamasMapper(XPSMapper):
     """
 
     config_file = "config_vms.json"
-
-    def __init__(self):
-        self.file = None
-        self.parsers = [
-            VamasParserRegular,
-            VamasParserIrregular,
-        ]
-        self.parser_map = {
-            "regular": VamasParserRegular,
-            "irregular": VamasParserIrregular,
-        }
-
-        super().__init__()
 
     def _select_parser(self):
         """
@@ -69,46 +82,39 @@ class VamasMapper(XPSMapper):
             Vamas parser for reading this file structure.
 
         """
-        vms_type = self._get_vms_type()
-        return self.parser_map[vms_type]()
-
-    def _get_vms_type(self):
-        """Check if the vamas file is regular or irregular"""
-        contents = []
-        with open(self.file, "rb") as vms_file:
-            for line in vms_file:
-                if line.endswith(b"\r\n"):
-                    contents += [line.decode("utf-8", errors="ignore").strip()]
-
-        for vms_type in self.parser_map:
-            if vms_type.upper() in contents:
-                return vms_type
-        return ""
+        return VamasParser()
 
     def construct_data(self):
         """Map VMS format to NXmpes-ready dict."""
         # pylint: disable=duplicate-code
         spectra = deepcopy(self.raw_data)
 
-        self._xps_dict["data"]: dict = {}
+        self._xps_dict["data"]: Dict[str, Any] = {}
 
         key_map = {
             "user": [],
-            "instrument": [],
+            "instrument": [
+                "sample_normal_polarangle_tilt",
+                "sample_tilt_azimuth",
+                "sample_rotation_angle",
+            ],
             "source": [
                 "source_label",
                 "source_analyzer_angle",
             ],
-            "beam": ["excitation_energy"],
+            "beam": ["excitation_energy", "particle_charge"],
             "analyser": [
                 "analyzer_take_off_azimuth",
                 "analyzer_take_off_polar",
                 "analysis_width_x",
                 "analysis_width_y",
                 "target_bias",
+                "time_correction",
                 "work_function",
             ],
-            "collectioncolumn": [],
+            "collectioncolumn": [
+                "magnification",
+            ],
             "energydispersion": [
                 "scan_mode",
                 "pass_energy",
@@ -118,8 +124,7 @@ class VamasMapper(XPSMapper):
                 "dwell_time",
             ],
             "manipulator": [],
-            "sample": [],
-            "calibration": [],
+            "sample": ["sample_name"],
             "data": [
                 "x_label",
                 "x_units",
@@ -133,26 +138,33 @@ class VamasMapper(XPSMapper):
             ],
             "region": [
                 "analysis_method",
-                "spectrum_type",
-                "comments",
-                "spectrum_id",
-                "time_stamp",
+                "element",
+                "group_id",
+                "group_name",
+                "region",
+                "scan_no",
                 "scans",
+                "spectrum_id",
+                "spectrum_type",
+                "transition",
+                "time_stamp",
             ],
         }
 
         for spectrum in spectra:
             self._update_xps_dict_with_spectrum(spectrum, key_map)
 
-    def _update_xps_dict_with_spectrum(self, spectrum, key_map):
+    def _update_xps_dict_with_spectrum(
+        self, spectrum: Dict[str, Any], key_map: Dict[str, str]
+    ):
         """Map one spectrum from raw data to NXmpes-ready dict."""
         # pylint: disable=too-many-locals,duplicate-code
-        group_parent = f'{self._root_path}/RegionGroup_{spectrum["group_name"]}'
-        region_parent = f'{group_parent}/regions/RegionData_{spectrum["spectrum_type"]}'
+        group_parent = f'{self._root_path}/Group_{spectrum["group_name"]}'
+        region_parent = f'{group_parent}/regions/Region_{spectrum["spectrum_type"]}'
         instrument_parent = f"{region_parent}/instrument"
         analyser_parent = f"{instrument_parent}/analyser"
 
-        path_map = {
+        path_map: Dict[str, str] = {
             "user": f"{region_parent}/user",
             "instrument": f"{instrument_parent}",
             "source": f"{instrument_parent}/source",
@@ -162,23 +174,47 @@ class VamasMapper(XPSMapper):
             "energydispersion": f"{analyser_parent}/energydispersion",
             "detector": f"{analyser_parent}/detector",
             "manipulator": f"{instrument_parent}/manipulator",
-            "calibration": f"{instrument_parent}/calibration",
             "sample": f"{region_parent}/sample",
             "data": f"{region_parent}/data",
+            "energy_referencing": f"{region_parent}/calibrations/energy_referencing",
+            "peak_fitting": f"{region_parent}/peak_fitting",
             "region": f"{region_parent}",
         }
 
+        used_keys = []
+
         for grouping, spectrum_keys in key_map.items():
-            root = path_map[str(grouping)]
+            root = path_map[grouping]
             for spectrum_key in spectrum_keys:
-                try:
-                    units = re.search(r"\[([A-Za-z0-9_]+)\]", spectrum_key).group(1)
-                    mpes_key = spectrum_key.rsplit(" ", 1)[0]
+                mpes_key = spectrum_key.rsplit(" ", 1)[0]
+                self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
+
+                unit_key = f"{grouping}/{spectrum_key}"
+                units = self._get_units_for_key(unit_key)
+                if units:
                     self._xps_dict[f"{root}/{mpes_key}/@units"] = units
-                    self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
-                except AttributeError:
-                    mpes_key = spectrum_key
-                    self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
+
+        # Write process data
+        process_key_map: Dict[str, List[str]] = {
+            "energy_referencing": ["alignments"],
+            "peak_fitting": ["regions", "components"],
+        }
+
+        for grouping, process_key_list in process_key_map.items():
+            root = path_map[grouping]
+            for spectrum_key in process_key_list:
+                try:
+                    processes = spectrum[spectrum_key]
+                    for i, process in enumerate(processes):
+                        process_key = (
+                            f"{root}/{spectrum_key}/{spectrum_key.rstrip('s')}{i}"
+                        )
+                        for key, value in process.dict().items():
+                            key = key.replace("_units", "/@units")
+                            self._xps_dict[f"{process_key}/{key}"] = value
+                    used_keys += [spectrum_key]
+                except KeyError:
+                    pass
 
         # Create keys for writing to data and detector
         entry = construct_entry_name(region_parent)
@@ -187,7 +223,8 @@ class VamasMapper(XPSMapper):
         detector_data_key = f'{path_map["detector"]}/{detector_data_key_child}/counts'
 
         energy = np.array(spectrum["data"]["x"])
-        intensity = np.array(spectrum["data"]["y"])
+        intensity_raw = np.array(spectrum["data"]["y"])
+        intensity_cps = np.array(spectrum["data"]["y_cps"])
 
         if entry not in self._xps_dict["data"]:
             self._xps_dict["data"][entry] = xr.Dataset()
@@ -203,7 +240,7 @@ class VamasMapper(XPSMapper):
         averaged_scans = np.mean(all_scan_data, axis=0)
         if averaged_scans.size == 1:
             # on first scan in cycle
-            averaged_scans = intensity
+            averaged_scans = intensity_cps
 
         try:
             self._xps_dict["data"][entry][scan_key.split("_")[0]] = xr.DataArray(
@@ -213,16 +250,45 @@ class VamasMapper(XPSMapper):
         except ValueError:
             pass
 
-        # Write scan data to 'data'.
         self._xps_dict["data"][entry][scan_key] = xr.DataArray(
-            data=intensity, coords={"energy": energy}
+            data=intensity_cps, coords={"energy": energy}
         )
+        used_keys += ["data"]
 
         # Write raw intensities to 'detector'.
-        self._xps_dict[detector_data_key] = intensity
+        self._xps_dict[detector_data_key] = intensity_raw
+
+        # Write additional keys to region parent.
+        for spectrum_key, value in spectrum.items():
+            if spectrum_key not in used_keys:
+                self._xps_dict[f"{region_parent}/{spectrum_key}"] = value
+
+    def _get_units_for_key(self, unit_key: str):
+        """
+        Get correct units for a given key.
+
+        Parameters
+        ----------
+        unit_key : str
+           Key of type <mapping>:<spectrum_key>, e.g.
+           detector/detector_voltage
+
+        Returns
+        -------
+        str
+            Unit for that unit_key.
+
+        """
+        try:
+            return re.search(r"\[([A-Za-z0-9_]+)\]", unit_key).group(1)
+        except AttributeError:
+            try:
+                return UNITS[unit_key]
+            except KeyError:
+                return ""
 
 
-class VamasParser(ABC):
+class VamasParser:
     """A parser for reading vamas files."""
 
     def __init__(self):
@@ -234,10 +300,10 @@ class VamasParser(ABC):
         vamas attribute keys, which are used, depending on how the
         vamas file is formatted.
         """
-        self.data = []
+        self.data: List[str] = []
 
         self.header = VamasHeader()
-        self.blocks = []
+        self.blocks: List[VamasBlock] = []
 
         self.attrs = {
             "common_header": [
@@ -404,7 +470,7 @@ class VamasParser(ABC):
             ],
         }
 
-    def parse_file(self, file):
+    def parse_file(self, file: Union[str, Path]):
         """Parse the vamas file into a list of dictionaries.
 
         Parameters
@@ -417,7 +483,8 @@ class VamasParser(ABC):
         self._parse_blocks()
         return self.build_list()
 
-    def _read_lines(self, file):
+    def _read_lines(self, file: Union[str, Path]):
+        """Read in vamas text file."""
         with open(file, "rb") as vms_file:
             for line in vms_file:
                 if line.endswith(b"\r\n"):
@@ -435,9 +502,9 @@ class VamasParser(ABC):
         for attr in self.attrs["common_header"]:
             setattr(self.header, attr, self.data.pop(0).strip())
         no_comment_lines = int(self.header.no_comment_lines)
-        comments = ""
+        comments = []
         for _ in range(no_comment_lines):
-            comments += self.data.pop(0)
+            comments += [self.data.pop(0)]
         self.header.comment_lines = comments
         self.header.exp_mode = self.data.pop(0).strip()
         if self.header.exp_mode == "NORM":
@@ -452,45 +519,304 @@ class VamasParser(ABC):
                 if attr == "nr_exp_var":
                     self._add_exp_var()
 
+        self.header.validate_types()
+
     def _add_exp_var(self):
+        """Add experimental variable to header."""
         for _ in range(int(self.header.nr_exp_var)):
             for attr in self.attrs["exp_var"]:
                 setattr(self.header, attr, self.data.pop(0).strip())
 
     def _parse_blocks(self):
+        """Parse all (metadata) of Vamas blocks."""
         for _ in range(int(self.header.no_blocks)):
             self._parse_one_block()
 
     def _parse_one_block(self):
+        """Parse one Vamas Block."""
         if self.header.exp_mode == "NORM":
             self.blocks += [self._parse_norm_block()]
         elif self.header.exp_mode == "MAP":
             self.blocks += [self._parse_map_block()]
 
-    @abstractmethod
     def _parse_norm_block(self):
         """
         Use this method when the NORM keyword is present.
 
-        This method has to be implemented in the inherited parsers.
+        Returns
+        -------
+        block : vamas.Block object.
+            A block represents one spectrum with its metadata.
 
         """
-        return VamasBlock()
+        # pylint: disable=too-many-statements
+        block = VamasBlock()
+        block.block_id = self.data.pop(0).strip()
+        block.sample_id = self.data.pop(0).strip()
+        block.year = int(self.data.pop(0).strip())
+        block.month = int(self.data.pop(0).strip())
+        block.day = int(self.data.pop(0).strip())
+        block.hour = int(self.data.pop(0).strip())
+        block.minute = int(self.data.pop(0).strip())
+        block.second = int(self.data.pop(0).strip().split(".")[0])
+        block.no_hrs_in_advance_of_gmt = int(self.data.pop(0).strip())
+        block.no_comment_lines = int(self.data.pop(0).strip())
+        for _ in range(block.no_comment_lines):
+            block.comment_lines += [self.data.pop(0)]
+        block.technique = self.data.pop(0).strip()
+        for _ in range(int(self.header.nr_exp_var)):
+            block.exp_var_value = self.data.pop(0).strip()
+        block.source_label = self.data.pop(0).strip()
+        block.source_energy = float(self.data.pop(0).strip())
+        block.unknown_1 = self.data.pop(0).strip()
+        block.unknown_2 = self.data.pop(0).strip()
+        block.unknown_3 = self.data.pop(0).strip()
+        block.source_analyzer_angle = float(self.data.pop(0).strip())
+        block.unknown_4 = self.data.pop(0).strip()
+        block.analyzer_mode = self.data.pop(0).strip()
+        block.resolution = float(self.data.pop(0).strip())
+        block.magnification = self.data.pop(0).strip()
+        block.work_function = float(self.data.pop(0).strip())
+        block.target_bias = float(self.data.pop(0).strip())
+        block.analyzer_width_x = float(self.data.pop(0).strip())
+        block.analyzer_width_y = float(self.data.pop(0).strip())
+        block.analyzer_take_off_polar_angle = float(self.data.pop(0).strip())
+        block.analyzer_azimuth = float(self.data.pop(0).strip())
+        block.species_label = self.data.pop(0).strip()
+        block.transition_label = self.data.pop(0).strip()
+        block.particle_charge = int(self.data.pop(0).strip())
 
-    @abstractmethod
+        if self.header.scan_mode == "REGULAR":
+            block.abscissa_label = self.data.pop(0).strip()
+            block.abscissa_units = self.data.pop(0).strip()
+            block.abscissa_start = float(self.data.pop(0).strip())
+            block.abscissa_step = float(self.data.pop(0).strip())
+
+            block.no_variables = int(self.data.pop(0).strip())
+            for var in range(block.no_variables):
+                name = "variable_label_" + str(var + 1)
+                setattr(block, name, self.data.pop(0).strip())
+                name = "variable_units_" + str(var + 1)
+                setattr(block, name, self.data.pop(0).strip())
+
+        else:
+            block.no_variables = int(self.data.pop(0).strip()) - 1
+            block.abscissa_label = self.data.pop(0).strip()
+            block.abscissa_units = self.data.pop(0).strip()
+            for var in range(block.no_variables):
+                name = "variable_label_" + str(var + 1)
+                setattr(block, name, self.data.pop(0).strip())
+                name = "variable_units_" + str(var + 1)
+                setattr(block, name, self.data.pop(0).strip())
+
+        block.signal_mode = self.data.pop(0).strip()
+        block.dwell_time = float(self.data.pop(0).strip())
+        block.no_scans = int(self.data.pop(0).strip())
+        block.time_correction = self.data.pop(0).strip()
+        block.sample_angle_tilt = float(self.data.pop(0).strip())
+        block.sample_tilt_azimuth = float(self.data.pop(0).strip())
+        block.sample_rotation = float(self.data.pop(0).strip())
+        block.no_additional_params = int(self.data.pop(0).strip())
+        for param in range(block.no_additional_params):
+            name = "param_label_" + str(param + 1)
+            setattr(block, name, self.data.pop(0))
+            name = "param_unit_" + str(param + 1)
+            setattr(block, name, self.data.pop(0))
+            name = "param_value_" + str(param + 1)
+            setattr(block, name, self.data.pop(0))
+        block.num_ord_values = int(self.data.pop(0).strip())
+        if self.header.scan_mode == "IRREGULAR":
+            del self.data[:2]
+        for var in range(block.no_variables):
+            name = "min_ord_value_" + str(var + 1)
+            setattr(block, name, float(self.data.pop(0).strip()))
+            name = "max_ord_value_" + str(var + 1)
+            setattr(block, name, float(self.data.pop(0).strip()))
+
+        self._add_data_values(block)
+
+        block.validate_types()
+        return block
+
     def _parse_map_block(self):
         """
         Use this method when the MAP keyword is present.
 
-        This method has to be implemented in the inherited parsers.
+        Returns
+        -------
+        block : vamas.Block object.
+            A block represents one spectrum with its metadata.
 
         """
-        return VamasBlock()
+        # pylint: disable=too-many-statements
+        block = VamasBlock()
+        block.block_id = self.data.pop(0).strip()
+        block.sample_id = self.data.pop(0).strip()
+        block.year = int(self.data.pop(0).strip())
+        block.month = int(self.data.pop(0).strip())
+        block.day = int(self.data.pop(0).strip())
+        block.hour = int(self.data.pop(0).strip())
+        block.minute = int(self.data.pop(0).strip())
+        block.second = int(self.data.pop(0).strip())
+        block.no_hrs_in_advance_of_gmt = int(self.data.pop(0).strip())
+        block.no_comment_lines = int(self.data.pop(0).strip())
+        for _ in range(block.no_comment_lines):
+            self.data.pop(0)
+            block.comment_lines += [self.data.pop(0)]
+        block.technique = self.data.pop(0).strip()
+        block.x_coord = self.data.pop(0).strip()
+        block.y_coord = self.data.pop(0).strip()
+        block.exp_var_value = self.data.pop(0).strip()
+        block.source_label = self.data.pop(0).strip()
+        block.source_energy = float(self.data.pop(0).strip())
+        block.unknown_1 = self.data.pop(0).strip()
+        block.unknown_2 = self.data.pop(0).strip()
+        block.unknown_3 = self.data.pop(0).strip()
+        block.fov_x = self.data.pop(0).strip()
+        block.fov_y = self.data.pop(0).strip()
+        block.source_analyzer_angle = float(self.data.pop(0).strip())
+        block.unknown_4 = self.data.pop(0).strip()
+        block.analyzer_mode = self.data.pop(0).strip()
+        block.resolution = float(self.data.pop(0).strip())
+        block.magnification = self.data.pop(0).strip()
+        block.work_function = float(self.data.pop(0).strip())
+        block.target_bias = float(self.data.pop(0).strip())
+        block.analyzer_width_x = float(self.data.pop(0).strip())
+        block.analyzer_width_y = float(self.data.pop(0).strip())
+        block.analyzer_take_off_polar_angle = float(self.data.pop(0).strip())
+        block.analyzer_azimuth = float(self.data.pop(0).strip())
+        block.species_label = self.data.pop(0).strip()
+        block.transition_label = self.data.pop(0).strip()
+        block.particle_charge = int(self.data.pop(0).strip())
 
-    def _get_scan_numbers_for_spectra(self, spectra):
+        if self.header.scan_mode == "REGULAR":
+            block.abscissa_label = self.data.pop(0).strip()
+            block.abscissa_units = self.data.pop(0).strip()
+            block.abscissa_start = float(self.data.pop(0).strip())
+            block.abscissa_step = float(self.data.pop(0).strip())
+
+            block.no_variables = int(self.data.pop(0).strip())
+            for var in range(block.no_variables):
+                name = "variable_label_" + str(var + 1)
+                setattr(block, name, self.data.pop(0).strip())
+                name = "variable_units_" + str(var + 1)
+                setattr(block, name, self.data.pop(0).strip())
+
+        else:
+            block.no_variables = int(self.data.pop(0).strip()) - 1
+            block.abscissa_label = self.data.pop(0).strip()
+            block.abscissa_units = self.data.pop(0).strip()
+            for var in range(block.no_variables):
+                name = "variable_label_" + str(var + 1)
+                setattr(block, name, self.data.pop(0).strip())
+                name = "variable_units_" + str(var + 1)
+                setattr(block, name, self.data.pop(0).strip())
+
+        block.signal_mode = self.data.pop(0).strip()
+        block.dwell_time = float(self.data.pop(0).strip())
+        block.no_scans = int(self.data.pop(0).strip())
+        block.time_correction = self.data.pop(0).strip()
+        block.sample_angle_tilt = float(self.data.pop(0).strip())
+        block.sample_tilt_azimuth = float(self.data.pop(0).strip())
+        block.sample_rotation = float(self.data.pop(0).strip())
+        block.no_additional_params = int(self.data.pop(0).strip())
+        for param in range(block.no_additional_params):
+            name = "param_label_" + str(param + 1)
+            setattr(block, name, self.data.pop(0))
+            name = "param_unit_" + str(param + 1)
+            setattr(block, name, self.data.pop(0))
+            name = "param_value_" + str(param + 1)
+            setattr(block, name, self.data.pop(0))
+        block.num_ord_values = int(self.data.pop(0).strip())
+        if self.header.scan_mode == "IRREGULAR":
+            del self.data[:2]
+        for var in range(block.no_variables):
+            name = "min_ord_value_" + str(var + 1)
+            setattr(block, name, float(self.data.pop(0).strip()))
+            name = "max_ord_value_" + str(var + 1)
+            setattr(block, name, float(self.data.pop(0).strip()))
+
+        self._add_data_values(block)
+
+        return block
+
+    def _add_data_values(self, block: VamasBlock):
+        """Add data values to a Vamas data block."""
+        if self.header.scan_mode == "REGULAR":
+            self._add_regular_data(block)
+        elif self.header.scan_mode == "IRREGULAR":
+            self._add_irregular_data(block)
+
+    def _add_regular_data(self, block: VamasBlock):
+        """Parse data with regularly spaced energy axis."""
+        data_dict: Dict[str, np.ndarray] = {}
+
+        start = float(block.abscissa_start)
+        step = float(block.abscissa_step)
+        num = int(block.num_ord_values / block.no_variables)
+        energy = np.array([round(start + i * step, 2) for i in range(num)])
+
+        if block.abscissa_label == "binding energy":
+            energy = np.flip(energy)
+
+        setattr(block, "x", energy)
+
+        for var in range(block.no_variables):
+            if var == 0:
+                name = "y"
+            else:
+                name = "y" + str(var)
+
+        data_array = np.array(self.data[: block.num_ord_values], dtype=float)
+
+        self.data = self.data[block.num_ord_values :]
+
+        for var in range(block.no_variables):
+            max_var = block.no_variables
+            if var == 0:
+                name = "y"
+            else:
+                name = "y" + str(var)
+            data_array_slice = data_array[var::max_var]
+            data_dict[name] = data_array_slice
+            setattr(block, name, data_dict[name])
+
+    def _add_irregular_data(self, block: VamasBlock):
+        """Parse data with regularly spaced energy axis."""
+        data_dict: Dict[str, np.ndarray] = {}
+
+        block_data = np.array(self.data[: block.num_ord_values], dtype=float)
+
+        energy = block_data[:: block.no_variables + 1]
+        if block.abscissa_label == "binding energy":
+            energy = np.flip(energy)
+
+        setattr(block, "x", energy)
+        block.abscissa_start = float(min(energy))
+        block.abscissa_step = float(get_minimal_step(energy))
+
+        for var in range(block.no_variables):
+            if var == 0:
+                name = "y"
+            else:
+                name = "y" + str(var)
+
+        for var in range(block.no_variables):
+            if var == 0:
+                name = "y"
+            else:
+                name = "y" + str(var)
+            data_array_slice = block_data[var + 1 :: block.no_variables + 1]
+            data_dict[name] = data_array_slice
+            setattr(block, name, data_dict[name])
+
+        self.data = self.data[block.num_ord_values :]
+
+    def _get_scan_numbers_for_spectra(self, spectra: List[Dict]):
         """
-        For a flat list of spectra, groupby group name and spectrum
-        type and iteratively give them scan numbers.
+        For a flat list of spectra dictionaries, group the spectra
+        by group name and spectrum type and iteratively give them
+        scan numbers.
 
         Parameters
         ----------
@@ -522,6 +848,120 @@ class VamasParser(ABC):
 
         return flattened_spectra
 
+    def handle_header_comments(self, comment_list: List[str]):
+        """Handle comments (incl. Casa info) for the header."""
+        comments = {}
+
+        special_keys = {
+            "Casa Info Follows": self._handle_casa_header,
+            "SpecsLab Prodigy": self._handle_prodigy_header,
+            # "SOFH": self._handle_phi_header,
+        }
+
+        for keyword, handle_func in special_keys.items():
+            # if any(keyword in line for line in comment_list):
+            indices = [i for i, line in enumerate(comment_list) if keyword in line]
+
+            if indices:
+                index = indices[0]
+                if keyword == "Casa Info Follows":
+                    special_comments = comment_list[index]
+                    comment_list = comment_list[index + 1 :]
+
+                if keyword == "SpecsLab Prodigy":
+                    special_comments = comment_list[index]
+                    comment_list = comment_list[index + 1 :]
+
+                if keyword == "SOFH":
+                    end_index = [
+                        i for i, line in enumerate(comment_list) if "EOFH" in line
+                    ][0]
+                    special_comments = comment_list[index : end_index + 1]  # type: ignore[assignment]
+                    del comment_list[index : end_index + 1]
+
+                comments.update(handle_func(special_comments))
+
+        # Handle non-special comments.
+        for line in comment_list:
+            for sep in ("=", ":"):
+                try:
+                    key, value = [part.strip(" ") for part in line.split(sep, 1)]
+                    comments[to_snake_case(key)] = value
+                except ValueError:
+                    continue
+
+        return comments
+
+    def _handle_casa_header(self, comment_line: str):
+        """Get information about CasaXPS version."""
+        return {
+            "casa_version": comment_line.split("Casa Info Follows CasaXPS Version")[
+                1
+            ].strip()
+        }
+
+    def _handle_prodigy_header(self, comment_line: str):
+        """Get information about SpecsLab Prodigy version."""
+        return {"prodigy_version": comment_line.split("Version")[1].strip()}
+
+    # =============================================================================
+    #     def _handle_phi_header(self, comment_list: List[str]):
+    #         """Get metadta from Phi system."""
+    #         phi_parser = PhiParser()
+    #         phi_parser.parse_header_into_metadata(comment_list)
+    #
+    #         phi_comments = phi_parser.metadata.dict()
+    #
+    #         regions = phi_parser.parse_spectral_regions(comment_list)
+    #         areas = phi_parser.parse_spatial_areas(comment_list)
+    #
+    #         for region in regions:
+    #             for area in areas:
+    #                 concatenated = {**region.dict(), **area.dict()}
+    #
+    #             phi_comments.update(concatenated)
+    #
+    #         return phi_comments
+    # =============================================================================
+
+    def handle_block_comments(self, comment_list: List[str]):
+        """Handle comments (incl. Casa fitting) for each block."""
+        comments = {}
+
+        if "Casa Info Follows" in comment_list[0]:
+            # Get all processing and fitting data from Casa comments.
+            casa = CasaProcess()
+            casa_data = casa.process_comments(comment_list)
+
+            comments.update(casa_data)
+
+            no_of_casa_lines = 1
+
+            for number in (
+                "n_alignments",
+                "n_unknown_processes",
+                "n_regions",
+                "n_components",
+            ):
+                occurence = getattr(casa, number)
+                no_of_casa_lines += 1
+                if occurence >= 1:
+                    no_of_casa_lines += occurence
+
+            non_casa_comments = comment_list[no_of_casa_lines:]
+
+        else:
+            non_casa_comments = comment_list
+
+        for line in non_casa_comments:
+            for sep in ("=", ":"):
+                try:
+                    key, value = [part.strip(" ") for part in line.split("=", 1)]
+                    comments[to_snake_case(key)] = value
+                except ValueError:
+                    continue
+        return comments
+
     def build_list(self):
         """
         Construct a list of dictionaries from the Vamas objects
@@ -537,6 +977,10 @@ class VamasParser(ABC):
         temp_group_name = ""
         spectra = []
 
+        header_dict = {to_snake_case(k): v for (k, v) in self.header.dict().items()}
+        del header_dict["comment_lines"]
+        header_dict.update(self.handle_header_comments(self.header.comment_lines))
+
         for spectrum_id, block in enumerate(self.blocks):
             group_name = block.sample_id
             # This set of conditions detects if the group name has changed.
@@ -550,7 +994,6 @@ class VamasParser(ABC):
             settings = {
                 "region": block.block_id,
                 "sample_name": block.sample_id,
-                "comments": block.comment_lines,
                 "analysis_method": block.technique,
                 "source_label": block.source_label,
                 "excitation_energy": block.source_energy,
@@ -583,29 +1026,43 @@ class VamasParser(ABC):
                 "sample_rotation_angle": block.sample_rotation,
                 "n_values": int(block.num_ord_values / block.no_variables),
             }
+            settings.update(header_dict)
+
+            comment_dict = self.handle_block_comments(block.comment_lines)
+            settings.update(comment_dict)
 
             # Convert the native time format to the datetime string
             # in the ISO 8601 format
             tzinfo = datetime.timezone(
                 datetime.timedelta(hours=block.no_hrs_in_advance_of_gmt)
             )
-            date_time = datetime.datetime(
-                block.year,
-                block.month,
-                block.day,
-                block.hour,
-                block.minute,
-                block.second,
-                tzinfo=tzinfo,
-            )
+            try:
+                date_time = datetime.datetime(
+                    block.year,
+                    block.month,
+                    block.day,
+                    block.hour,
+                    block.minute,
+                    block.second,
+                    tzinfo=tzinfo,
+                )
+            except ValueError:
+                date_time = datetime.datetime.min
 
             data = {"x": block.x}
             for var in range(int(block.no_variables)):
                 if var == 0:
                     key = "y"
+
+                    data["y"] = getattr(block, "y")
+
+                    if block.variable_label_1 in ["Intensity", "counts"]:
+                        y_cps = [np.round(y / block.dwell_time, 2) for y in block.y]
+                        data["y_cps"] = np.array(y_cps)
+
                 else:
                     key = "y" + str(var)
-                data[key] = getattr(block, key)
+                    data[key] = getattr(block, key)
 
             spec_dict = {
                 "time_stamp": date_time,
@@ -622,414 +1079,3 @@ class VamasParser(ABC):
         spectra = self._get_scan_numbers_for_spectra(spectra)
 
         return spectra
-
-
-class VamasParserRegular(VamasParser):
-    """Parser for .vms files of type REGULAR"""
-
-    def _parse_norm_block(self):
-        """
-        Use this method when the NORM keyword is present.
-
-        Returns
-        -------
-        block : vamas.Block object.
-            A block represents one spectrum with its metadata.
-
-        """
-        # pylint: disable=too-many-statements
-        block = VamasBlock()
-        block.block_id = self.data.pop(0).strip()
-        block.sample_id = self.data.pop(0).strip()
-        block.year = int(self.data.pop(0).strip())
-        block.month = int(self.data.pop(0).strip())
-        block.day = int(self.data.pop(0).strip())
-        block.hour = int(self.data.pop(0).strip())
-        block.minute = int(self.data.pop(0).strip())
-        block.second = int(self.data.pop(0).strip().split(".")[0])
-        block.no_hrs_in_advance_of_gmt = int(self.data.pop(0).strip())
-        block.no_comment_lines = int(self.data.pop(0).strip())
-        for _ in range(block.no_comment_lines):
-            block.comment_lines += self.data.pop(0)
-        block.technique = self.data.pop(0).strip()
-        for _ in range(int(self.header.nr_exp_var)):
-            block.exp_var_value = self.data.pop(0).strip()
-        block.source_label = self.data.pop(0).strip()
-        block.source_energy = float(self.data.pop(0).strip())
-        block.unknown_1 = self.data.pop(0).strip()
-        block.unknown_2 = self.data.pop(0).strip()
-        block.unknown_3 = self.data.pop(0).strip()
-        block.source_analyzer_angle = self.data.pop(0).strip()
-        block.unknown_4 = self.data.pop(0).strip()
-        block.analyzer_mode = self.data.pop(0).strip()
-        block.resolution = float(self.data.pop(0).strip())
-        block.magnification = self.data.pop(0).strip()
-        block.work_function = float(self.data.pop(0).strip())
-        block.target_bias = float(self.data.pop(0).strip())
-        block.analyzer_width_x = self.data.pop(0).strip()
-        block.analyzer_width_y = self.data.pop(0).strip()
-        block.analyzer_take_off_polar_angle = self.data.pop(0).strip()
-        block.analyzer_azimuth = self.data.pop(0).strip()
-        block.species_label = self.data.pop(0).strip()
-        block.transition_label = self.data.pop(0).strip()
-        block.particle_charge = self.data.pop(0).strip()
-        block.abscissa_label = self.data.pop(0).strip()
-        block.abscissa_units = self.data.pop(0).strip()
-        block.abscissa_start = float(self.data.pop(0).strip())
-        block.abscissa_step = float(self.data.pop(0).strip())
-        block.no_variables = int(self.data.pop(0).strip())
-        for var in range(block.no_variables):
-            name = "variable_label_" + str(var + 1)
-            setattr(block, name, self.data.pop(0).strip())
-            name = "variable_units_" + str(var + 1)
-            setattr(block, name, self.data.pop(0).strip())
-        block.signal_mode = self.data.pop(0).strip()
-        block.dwell_time = float(self.data.pop(0).strip())
-        block.no_scans = int(self.data.pop(0).strip())
-        block.time_correction = self.data.pop(0).strip()
-        block.sample_angle_tilt = float(self.data.pop(0).strip())
-        block.sample_tilt_azimuth = float(self.data.pop(0).strip())
-        block.sample_rotation = float(self.data.pop(0).strip())
-        block.no_additional_params = int(self.data.pop(0).strip())
-        for param in range(block.no_additional_params):
-            name = "param_label_" + str(param + 1)
-            setattr(block, name, self.data.pop(0))
-            name = "param_unit_" + str(param + 1)
-            setattr(block, name, self.data.pop(0))
-            name = "param_value_" + str(param + 1)
-            setattr(block, name, self.data.pop(0))
-        block.num_ord_values = int(self.data.pop(0).strip())
-        for var in range(block.no_variables):
-            name = "min_ord_value_" + str(var + 1)
-            setattr(block, name, float(self.data.pop(0).strip()))
-            name = "max_ord_value_" + str(var + 1)
-            setattr(block, name, float(self.data.pop(0).strip()))
-
-        self._add_data_values(block)
-        return block
-
-    def _parse_map_block(self):
-        """
-        Use this method when the MAP keyword is present.
-
-        Returns
-        -------
-        block : vamas.Block object.
-            A block represents one spectrum with its metadata.
-
-        """
-        # pylint: disable=too-many-statements
-        block = VamasBlock()
-        block.block_id = self.data.pop(0).strip()
-        block.sample_id = self.data.pop(0).strip()
-        block.year = int(self.data.pop(0).strip())
-        block.month = int(self.data.pop(0).strip())
-        block.day = int(self.data.pop(0).strip())
-        block.hour = int(self.data.pop(0).strip())
-        block.minute = int(self.data.pop(0).strip())
-        block.second = int(self.data.pop(0).strip())
-        block.no_hrs_in_advance_of_gmt = int(self.data.pop(0).strip())
-        block.no_comment_lines = int(self.data.pop(0).strip())
-        for _ in range(block.no_comment_lines):
-            self.data.pop(0)
-            block.comment_lines += self.data.pop(0)
-        block.technique = self.data.pop(0).strip()
-        block.x_coord = self.data.pop(0).strip()
-        block.y_coord = self.data.pop(0).strip()
-        block.exp_var_value = self.data.pop(0).strip()
-        block.source_label = self.data.pop(0).strip()
-        block.source_energy = float(self.data.pop(0).strip())
-        block.unknown_1 = self.data.pop(0).strip()
-        block.unknown_2 = self.data.pop(0).strip()
-        block.unknown_3 = self.data.pop(0).strip()
-        block.fov_x = self.data.pop(0).strip()
-        block.fov_y = self.data.pop(0).strip()
-        block.source_analyzer_angle = self.data.pop(0).strip()
-        block.unknown_4 = self.data.pop(0).strip()
-        block.analyzer_mode = self.data.pop(0).strip()
-        block.resolution = float(self.data.pop(0).strip())
-        block.magnification = self.data.pop(0).strip()
-        block.work_function = float(self.data.pop(0).strip())
-        block.target_bias = float(self.data.pop(0).strip())
-        block.analyzer_width_x = self.data.pop(0).strip()
-        block.analyzer_width_y = self.data.pop(0).strip()
-        block.analyzer_take_off_polar_angle = self.data.pop(0).strip()
-        block.analyzer_azimuth = self.data.pop(0).strip()
-        block.species_label = self.data.pop(0).strip()
-        block.transition_label = self.data.pop(0).strip()
-        block.particle_charge = self.data.pop(0).strip()
-        block.abscissa_label = self.data.pop(0).strip()
-        block.abscissa_units = self.data.pop(0).strip()
-        block.abscissa_start = float(self.data.pop(0).strip())
-        block.abscissa_step = float(self.data.pop(0).strip())
-        block.no_variables = int(self.data.pop(0).strip())
-        for var in range(block.no_variables):
-            name = "variable_label_" + str(var + 1)
-            setattr(block, name, self.data.pop(0).strip())
-            name = "variable_units_" + str(var + 1)
-            setattr(block, name, self.data.pop(0).strip())
-        block.signal_mode = self.data.pop(0).strip()
-        block.dwell_time = float(self.data.pop(0).strip())
-        block.no_scans = int(self.data.pop(0).strip())
-        block.time_correction = self.data.pop(0).strip()
-        block.sample_angle_tilt = float(self.data.pop(0).strip())
-        block.sample_tilt_azimuth = float(self.data.pop(0).strip())
-        block.sample_rotation = float(self.data.pop(0).strip())
-        block.no_additional_params = int(self.data.pop(0).strip())
-        for param in range(block.no_additional_params):
-            name = "param_label_" + str(param + 1)
-            setattr(block, name, self.data.pop(0))
-            name = "param_unit_" + str(param + 1)
-            setattr(block, name, self.data.pop(0))
-            name = "param_value_" + str(param + 1)
-            setattr(block, name, self.data.pop(0))
-        block.num_ord_values = int(self.data.pop(0).strip())
-        for var in range(block.no_variables):
-            name = "min_ord_value_" + str(var + 1)
-            setattr(block, name, float(self.data.pop(0).strip()))
-            name = "max_ord_value_" + str(var + 1)
-            setattr(block, name, float(self.data.pop(0).strip()))
-
-        self._add_data_values(block)
-
-        return block
-
-    def _add_data_values(self, block):
-        """Add data values to a Vamas data block."""
-        data_dict = {}
-        start = float(block.abscissa_start)
-        step = float(block.abscissa_step)
-        num = int(block.num_ord_values / block.no_variables)
-        energy = [round(start + i * step, 2) for i in range(num)]
-
-        if block.abscissa_label == "binding energy":
-            energy.reverse()
-
-        setattr(block, "x", energy)
-
-        for var in range(block.no_variables):
-            if var == 0:
-                name = "y"
-            else:
-                name = "y" + str(var)
-            data_dict[name] = []
-
-        data_array = list(np.array(self.data[: block.num_ord_values], dtype=float))
-
-        self.data = self.data[block.num_ord_values :]
-
-        for var in range(block.no_variables):
-            max_var = block.no_variables
-            if var == 0:
-                name = "y"
-            else:
-                name = "y" + str(var)
-            data_array_slice = data_array[var::max_var]
-            data_dict[name] = data_array_slice
-            setattr(block, name, data_dict[name])
-
-
-# THIS DOESN'T WORK SO FAR!!
-class VamasParserIrregular(VamasParser):
-    """Parser for .vms files of type IRREGULAR"""
-
-    def _parse_norm_block(self):
-        """
-        Use this method when the NORM keyword is present.
-
-        Returns
-        -------
-        block : vamas.Block object.
-            A block represents one spectrum with its metadata.
-
-        """
-        # pylint: disable=too-many-statements
-        block = VamasBlock()
-        block.block_id = self.data.pop(0).strip()
-        block.sample_id = self.data.pop(0).strip()
-        block.year = int(self.data.pop(0).strip())
-        block.month = int(self.data.pop(0).strip())
-        block.day = int(self.data.pop(0).strip())
-        block.hour = int(self.data.pop(0).strip())
-        block.minute = int(self.data.pop(0).strip())
-        block.second = int(self.data.pop(0).strip().split(".")[0])
-        block.no_hrs_in_advance_of_gmt = int(self.data.pop(0).strip())
-        block.no_comment_lines = int(self.data.pop(0).strip())
-        for _ in range(block.no_comment_lines):
-            block.comment_lines += self.data.pop(0)
-        block.technique = self.data.pop(0).strip()
-        for _ in range(int(self.header.nr_exp_var)):
-            block.exp_var_value = self.data.pop(0).strip()
-        block.source_label = self.data.pop(0).strip()
-        block.source_energy = float(self.data.pop(0).strip())
-        block.unknown_1 = self.data.pop(0).strip()
-        block.unknown_2 = self.data.pop(0).strip()
-        block.unknown_3 = self.data.pop(0).strip()
-        block.source_analyzer_angle = self.data.pop(0).strip()
-        block.unknown_4 = self.data.pop(0).strip()
-        block.analyzer_mode = self.data.pop(0).strip()
-        block.resolution = float(self.data.pop(0).strip())
-        block.magnification = self.data.pop(0).strip()
-        block.work_function = float(self.data.pop(0).strip())
-        block.target_bias = float(self.data.pop(0).strip())
-        block.analyzer_width_x = self.data.pop(0).strip()
-        block.analyzer_width_y = self.data.pop(0).strip()
-        block.analyzer_take_off_polar_angle = self.data.pop(0).strip()
-        block.analyzer_azimuth = self.data.pop(0).strip()
-        block.species_label = self.data.pop(0).strip()
-        block.transition_label = self.data.pop(0).strip()
-        block.particle_charge = self.data.pop(0).strip()
-        block.abscissa_label = self.data.pop(0).strip()
-        block.abscissa_units = self.data.pop(0).strip()
-        block.abscissa_start = float(self.data.pop(0).strip())
-        block.abscissa_step = float(self.data.pop(0).strip())
-        block.no_variables = int(self.data.pop(0).strip())
-        for var in range(block.no_variables):
-            name = "variable_label_" + str(var + 1)
-            setattr(block, name, self.data.pop(0).strip())
-            name = "variable_units_" + str(var + 1)
-            setattr(block, name, self.data.pop(0).strip())
-        block.signal_mode = self.data.pop(0).strip()
-        block.dwell_time = float(self.data.pop(0).strip())
-        block.no_scans = int(self.data.pop(0).strip())
-        block.time_correction = self.data.pop(0).strip()
-        block.sample_angle_tilt = float(self.data.pop(0).strip())
-        block.sample_tilt_azimuth = float(self.data.pop(0).strip())
-        block.sample_rotation = float(self.data.pop(0).strip())
-        block.no_additional_params = int(self.data.pop(0).strip())
-        for param in range(block.no_additional_params):
-            name = "param_label_" + str(param + 1)
-            setattr(block, name, self.data.pop(0))
-            name = "param_unit_" + str(param + 1)
-            setattr(block, name, self.data.pop(0))
-            name = "param_value_" + str(param + 1)
-            setattr(block, name, self.data.pop(0))
-        block.num_ord_values = int(self.data.pop(0).strip())
-        for var in range(block.no_variables):
-            name = "min_ord_value_" + str(var + 1)
-            setattr(block, name, float(self.data.pop(0).strip()))
-            name = "max_ord_value_" + str(var + 1)
-            setattr(block, name, float(self.data.pop(0).strip()))
-
-        self._add_data_values(block)
-        return block
-
-    def _parse_map_block(self):
-        """
-        Use this method when the MAP keyword is present.
-
-        Returns
-        -------
-        block : vamas.Block object.
-            A block represents one spectrum with its metadata.
-
-        """
-        # pylint: disable=too-many-statements
-        block = VamasBlock()
-        block.block_id = self.data.pop(0).strip()
-        block.sample_id = self.data.pop(0).strip()
-        block.year = int(self.data.pop(0).strip())
-        block.month = int(self.data.pop(0).strip())
-        block.day = int(self.data.pop(0).strip())
-        block.hour = int(self.data.pop(0).strip())
-        block.minute = int(self.data.pop(0).strip())
-        block.second = int(self.data.pop(0).strip())
-        block.no_hrs_in_advance_of_gmt = int(self.data.pop(0).strip())
-        block.no_comment_lines = int(self.data.pop(0).strip())
-        for _ in range(block.no_comment_lines):
-            self.data.pop(0)
-            block.comment_lines += self.data.pop(0)
-        block.technique = self.data.pop(0).strip()
-        block.x_coord = self.data.pop(0).strip()
-        block.y_coord = self.data.pop(0).strip()
-        block.exp_var_value = self.data.pop(0).strip()
-        block.source_label = self.data.pop(0).strip()
-        block.source_energy = float(self.data.pop(0).strip())
-        block.unknown_1 = self.data.pop(0).strip()
-        block.unknown_2 = self.data.pop(0).strip()
-        block.unknown_3 = self.data.pop(0).strip()
-        block.fov_x = self.data.pop(0).strip()
-        block.fov_y = self.data.pop(0).strip()
-        block.source_analyzer_angle = self.data.pop(0).strip()
-        block.unknown_4 = self.data.pop(0).strip()
-        block.analyzer_mode = self.data.pop(0).strip()
-        block.resolution = float(self.data.pop(0).strip())
-        block.magnification = self.data.pop(0).strip()
-        block.work_function = float(self.data.pop(0).strip())
-        block.target_bias = float(self.data.pop(0).strip())
-        block.analyzer_width_x = self.data.pop(0).strip()
-        block.analyzer_width_y = self.data.pop(0).strip()
-        block.analyzer_take_off_polar_angle = self.data.pop(0).strip()
-        block.analyzer_azimuth = self.data.pop(0).strip()
-        block.species_label = self.data.pop(0).strip()
-        block.transition_label = self.data.pop(0).strip()
-        block.particle_charge = self.data.pop(0).strip()
-        block.abscissa_label = self.data.pop(0).strip()
-        block.abscissa_units = self.data.pop(0).strip()
-        block.abscissa_start = float(self.data.pop(0).strip())
-        block.abscissa_step = float(self.data.pop(0).strip())
-        block.no_variables = int(self.data.pop(0).strip())
-        for var in range(block.no_variables):
-            name = "variable_label_" + str(var + 1)
-            setattr(block, name, self.data.pop(0).strip())
-            name = "variable_units_" + str(var + 1)
-            setattr(block, name, self.data.pop(0).strip())
-        block.signal_mode = self.data.pop(0).strip()
-        block.dwell_time = float(self.data.pop(0).strip())
-        block.no_scans = int(self.data.pop(0).strip())
-        block.time_correction = self.data.pop(0).strip()
-        block.sample_angle_tilt = float(self.data.pop(0).strip())
-        block.sample_tilt_azimuth = float(self.data.pop(0).strip())
-        block.sample_rotation = float(self.data.pop(0).strip())
-        block.no_additional_params = int(self.data.pop(0).strip())
-        for param in range(block.no_additional_params):
-            name = "param_label_" + str(param + 1)
-            setattr(block, name, self.data.pop(0))
-            name = "param_unit_" + str(param + 1)
-            setattr(block, name, self.data.pop(0))
-            name = "param_value_" + str(param + 1)
-            setattr(block, name, self.data.pop(0))
-        block.num_ord_values = int(self.data.pop(0).strip())
-        for var in range(block.no_variables):
-            name = "min_ord_value_" + str(var + 1)
-            setattr(block, name, float(self.data.pop(0).strip()))
-            name = "max_ord_value_" + str(var + 1)
-            setattr(block, name, float(self.data.pop(0).strip()))
-
-        self._add_data_values(block)
-
-        return block
-
-    def _add_data_values(self, block):
-        """Add data values to a Vamas data block."""
-        data_dict = {}
-        start = float(block.abscissa_start)
-        step = float(block.abscissa_step)
-        num = int(block.num_ord_values / block.no_variables)
-        energy = [round(start + i * step, 2) for i in range(num)]
-
-        if block.abscissa_label == "binding energy":
-            energy.reverse()
-
-        setattr(block, "x", energy)
-
-        for var in range(block.no_variables):
-            if var == 0:
-                name = "y"
-            else:
-                name = "y" + str(var)
-            data_dict[name] = []
-
-        data_array = list(np.array(self.data[: block.num_ord_values], dtype=float))
-
-        self.data = self.data[block.num_ord_values :]
-
-        for var in range(block.no_variables):
-            max_var = block.no_variables
-            if var == 0:
-                name = "y"
-            else:
-                name = "y" + str(var)
-            data_array_slice = data_array[var::max_var]
-            data_dict[name] = data_array_slice
-            setattr(block, name, data_dict[name])

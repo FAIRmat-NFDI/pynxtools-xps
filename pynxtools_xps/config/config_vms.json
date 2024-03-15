@@ -71,7 +71,7 @@
         "slow_axes":"energy",
         "analyzer_take_off_azimuth": "@xps_token:analyser/analyzer_take_off_azimuth",
         "analyzer_take_off_azimuth/@units": "degree",
-        "analyzer_take_off_polar/": "@xps_token:analyser/analyzer_take_off_polar",
+        "analyzer_take_off_polar": "@xps_token:analyser/analyzer_take_off_polar",
         "analyzer_take_off_polar/@units": "degree",
         "analysis_width_x": "@xps_token:analyser/analysis_width_x",
         "analysis_width_x/@units": "mm",

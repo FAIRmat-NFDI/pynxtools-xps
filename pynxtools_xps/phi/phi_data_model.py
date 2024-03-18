@@ -24,30 +24,11 @@ from dataclasses import field
 
 import numpy as np
 
-
-@dataclass
-class PhiDataclass:
-    """Generic class to hold validation method."""
-
-    def validate_types(self):
-        ret = True
-        for field_name, field_def in self.__dataclass_fields__.items():
-            actual_type = type(getattr(self, field_name))
-            if actual_type != field_def.type:
-                print(f"\t{field_name}: '{actual_type}' instead of '{field_def.type}'")
-                ret = False
-        return ret
-
-    def __post_init__(self):
-        if not self.validate_types():
-            raise ValueError("Wrong types")
-
-    def dict(self):
-        return self.__dict__.copy()
+from pynxtools_xps.reader_utils import XpsDataclass
 
 
 @dataclass
-class PhiMetadata(PhiDataclass):
+class PhiMetadata(XpsDataclass):
     """An object to store the PHI Versaprobe metadata."""
 
     platform: str = ""
@@ -354,7 +335,7 @@ class PhiMetadata(PhiDataclass):
 
 
 @dataclass
-class PhiSpectralRegion(PhiDataclass):
+class PhiSpectralRegion(XpsDataclass):
     """An object to store the PHI Versaprobe metadata."""
 
     full_region: bool = False
@@ -374,7 +355,7 @@ class PhiSpectralRegion(PhiDataclass):
 
 
 @dataclass
-class PhiSpatialArea(PhiDataclass):
+class PhiSpatialArea(XpsDataclass):
     """An object to store the PHI Versaprobe metadata."""
 
     area_id: int = 0

@@ -584,6 +584,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
         """
         self.raw_data: str = ""
         self.spectra = []
+
         self.metadata = PhiMetadata()
 
         self.binary_header_length = 4
@@ -980,8 +981,9 @@ class PhiParser:  # pylint: disable=too-few-public-methods
             stop = float(def_split[7])
             region.dwell_time = float(def_split[9])
             region.pass_energy = float(def_split[-2])
+            region.energy_type = "kinetic"
 
-            region.energy = np.flip(safe_arange_with_edges(stop, start, step))
+            region.energy = safe_arange_with_edges(stop, start, step)
 
             region.validate_types()
 
@@ -1042,8 +1044,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
         for region in regions:
             for area in areas:
                 concatenated = {**region.dict(), **area.dict()}
-
-            self.spectra += [concatenated]
+                self.spectra += [concatenated]
 
     def parse_binary_header(self, binary_data):
         """
@@ -1068,12 +1069,15 @@ class PhiParser:  # pylint: disable=too-few-public-methods
             spectrum_header = struct.unpack(
                 "I" * self.spectra_header_length, binary_data[start:stop]
             )
-            n_values = spectrum_header[8]
+
             spectrum.update(
                 {
                     "binary_header": binary_header,
                     "spectrum_header": np.array(spectrum_header),
-                    "n_values": n_values,
+                    "n_values": spectrum_header[8],
+                    "n_scans": spectrum_header[9],
+                    "binary_start": spectrum_header[23],
+                    "binary_len": spectrum_header[22],
                 }
             )
 
@@ -1087,20 +1091,35 @@ class PhiParser:  # pylint: disable=too-few-public-methods
             Binary XPS data, format is 64 bit float.
 
         """
-        offset = self.spectra_header_length + self.binary_header_length
-        print(offset)
-
         for i, spectrum in enumerate(self.spectra):
-            n_values = spectrum["n_values"]
-            print(f"n_values: {n_values}")
-            start = (i + 1) * offset * self.float_buffer
-            stop = (i + 1) * (n_values + offset) * self.float_buffer
-            print(f"start: {start}", f"stop: {stop}")
+            spectrum["data"] = {}
+            start = spectrum["binary_start"]
+            stop = start + spectrum["binary_len"]
 
             binary_spectrum_data = binary_data[start:stop]
-            print(f"bin data len: {len(binary_spectrum_data)}")
-            print(f"data len: {len(binary_spectrum_data)/self.float_buffer}\n")
-            spectrum["data"] = self._parse_binary_data(binary_spectrum_data)
+            binary_spectrum_length = spectrum["n_values"] * self.float_buffer
+
+            for scan_no in range(spectrum["n_scans"]):
+                spec_start = i * binary_spectrum_length
+                spec_stop = (i + 1) * binary_spectrum_length
+                scan_data = binary_spectrum_data[spec_start:spec_stop]
+
+                spectrum["data"][f"scan_{scan_no}"] = self._parse_binary_data(scan_data)
+
+    # =============================================================================
+    #             import matplotlib.pyplot as plt
+    #             all_scan_data = [
+    #                 np.array(value)
+    #                 for key, value in spectrum["data"].items()
+    #                 #if scan_key.split("_")[0] in key
+    #             ]
+    #
+    #             averaged_spectra = np.mean(all_scan_data, axis=0)
+    #
+    #             plt.plot(spectrum["energy"], averaged_spectra)
+    #             plt.title(spectrum["spectrum_type"])
+    #             plt.show()
+    # =============================================================================
 
     def _parse_binary_data(self, binary_spectrum_data):
         """
@@ -1129,10 +1148,6 @@ class PhiParser:  # pylint: disable=too-few-public-methods
             parsed_data.append(
                 struct.unpack_from("<f", binary_spectrum_data[start:stop])[0]
             )
-        import matplotlib.pyplot as plt
-
-        plt.plot(parsed_data)
-        plt.show()
 
         return parsed_data
 
@@ -1495,13 +1510,24 @@ def _convert_stage_positions(value):
 
 
 # %%
-file = r"C:\Users\pielsticker\Lukas\FAIRMat\user_cases\Benz_PHI_Versaprobe\20240122_SBenz_102_20240122_SBenz_SnO2_10nm.spe"
-file = r"C:\Users\pielsticker\Lukas\FAIRMat\user_cases\Benz_PHI_Versaprobe\20240122_SBenz_107_20240122_SBenz_SnO2_10nm_1.pro"
-# file = r"C:\Users\pielsticker\Lukas\FAIRMat\user_cases\Benz_PHI_Versaprobe\C0ELR081_033.spe"
-if __name__ == "__main__":
-    parser = PhiParser()
-    d = parser.parse_file(file)
-    d0 = d[0]
+files = [
+    r"C:\Users\pielsticker\Lukas\FAIRMat\user_cases\Benz_PHI_Versaprobe\20240122_SBenz_102_20240122_SBenz_SnO2_10nm.spe",
+    # r"C:\Users\pielsticker\Lukas\FAIRMat\user_cases\Benz_PHI_Versaprobe\20240122_SBenz_107_20240122_SBenz_SnO2_10nm_1.pro",
+    # r"C:\Users\pielsticker\Lukas\FAIRMat\user_cases\Benz_PHI_Versaprobe\C0ELR081_033.spe"
+]
 
-    spectra_header = np.array([s["spectrum_header"] for s in parser.spectra])
-    n_values = np.array([s["n_values"] for s in parser.spectra])
+if __name__ == "__main__":
+    raw_data = []
+    spectra_header = np.zeros((1, 24))
+
+    for file in files:
+        parser = PhiParser()
+        d = parser.parse_file(file)
+        raw_data.append(d)
+        header = np.array([s["spectrum_header"] for s in parser.spectra])
+        spectra_header = np.vstack([spectra_header, header])
+
+    spectra_header = np.delete(spectra_header, (0), axis=0)
+
+
+#    n_values = np.array([s["n_values"] for s in parser.spectra])

@@ -352,6 +352,7 @@ class PhiSpectralRegion(XpsDataclass):
     dwell_time_units: str = "s"
     pass_energy: float = 0.0
     pass_energy_units: str = "eV"
+    energy_type: str = "kinetic"
 
 
 @dataclass

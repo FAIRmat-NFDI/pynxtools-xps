@@ -879,7 +879,7 @@ class VamasParser:
                     special_comments = comment_list[index : end_index + 1]  # type: ignore[assignment]
                     del comment_list[index : end_index + 1]
 
-                comments.update(handle_func(special_comments))
+                comments.update(handle_func(special_comments))  # type: ignore[operator]
 
         # Handle non-special comments.
         for line in comment_list:

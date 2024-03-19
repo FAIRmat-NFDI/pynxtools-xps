@@ -480,7 +480,6 @@ class MapperPhi(XPSMapper):
         }
 
         for spectrum in spectra:
-            spectrum["group_name"] = "entry0"
             self._update_xps_dict_with_spectrum(spectrum, key_map)
 
     def _update_xps_dict_with_spectrum(self, spectrum, key_map):
@@ -489,8 +488,13 @@ class MapperPhi(XPSMapper):
 
         """
         # pylint: disable=too-many-locals,duplicate-code
-        group_parent = f'{self._root_path}/RegionGroup_{spectrum["group_name"]}'
-        region_parent = f'{group_parent}/regions/RegionData_{spectrum["spectrum_type"]}'
+        try:
+            group_parent = f'{self._root_path}/Group_{spectrum["group_name"]}'
+            region_parent = f'{group_parent}/regions/Region_{spectrum["spectrum_type"]}'
+        except KeyError:
+            region_parent = (
+                f'{self._root_path}/regions/Region_{spectrum["spectrum_type"]}'
+            )
         file_parent = f"{region_parent}/file_info"
         instrument_parent = f"{region_parent}/instrument"
         analyser_parent = f"{instrument_parent}/analyser"
@@ -530,44 +534,36 @@ class MapperPhi(XPSMapper):
 
         # Create keys for writing to data and detector
         entry = construct_entry_name(region_parent)
-        scan_key = construct_data_key(spectrum)
-        detector_data_key_child = construct_detector_data_key(spectrum)
-        detector_data_key = f'{path_map["detector"]}/{detector_data_key_child}/counts'
+        cycle_key = "cycle0"
 
         energy = np.array(spectrum["energy"])
-        intensity = np.array(spectrum["data"])
 
         if entry not in self._xps_dict["data"]:
             self._xps_dict["data"][entry] = xr.Dataset()
 
-        # Write averaged cycle data to 'data'.
-        all_scan_data = [
-            np.array(value)
-            for key, value in self._xps_dict["data"][entry].items()
-            if scan_key.split("_")[0] in key
-        ]
-
-        # Write averaged cycle data to 'data'.
+        # Write averaged data to 'data'.
+        all_scan_data = [np.array(value) for key, value in spectrum["data"].items()]
         averaged_scans = np.mean(all_scan_data, axis=0)
-        if averaged_scans.size == 1:
-            # on first scan in cycle
-            averaged_scans = intensity
 
-        try:
-            self._xps_dict["data"][entry][scan_key.split("_")[0]] = xr.DataArray(
-                data=averaged_scans,
-                coords={"energy": energy},
-            )
-        except ValueError:
-            pass
-
-        # Write scan data to 'data'.
-        self._xps_dict["data"][entry][scan_key] = xr.DataArray(
-            data=intensity, coords={"energy": energy}
+        self._xps_dict["data"][entry][cycle_key] = xr.DataArray(
+            data=averaged_scans,
+            coords={"energy": energy},
         )
 
-        # Write raw intensities to 'detector'.
-        self._xps_dict[detector_data_key] = intensity
+        # Write scan data to 'data'.
+        for scan_no, intensity in spectrum["data"].items():
+            xarr_key = f"{cycle_key}_{scan_no}"
+            self._xps_dict["data"][entry][xarr_key] = xr.DataArray(
+                data=intensity,
+                coords={"energy": energy},
+            )
+
+            # Write raw intensities to 'detector'.
+            detector_data_key_child = f"cycles/Cycle_0/scans/Scan_{scan_no}"
+            detector_data_key = (
+                f'{path_map["detector"]}/{detector_data_key_child}/counts'
+            )
+            self._xps_dict[detector_data_key] = intensity
 
 
 class PhiParser:  # pylint: disable=too-few-public-methods
@@ -981,9 +977,9 @@ class PhiParser:  # pylint: disable=too-few-public-methods
             stop = float(def_split[7])
             region.dwell_time = float(def_split[9])
             region.pass_energy = float(def_split[-2])
-            region.energy_type = "kinetic"
+            region.energy_type = "binding"
 
-            region.energy = safe_arange_with_edges(stop, start, step)
+            region.energy = np.flip(safe_arange_with_edges(stop, start, step))
 
             region.validate_types()
 
@@ -1092,38 +1088,42 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         """
         for i, spectrum in enumerate(self.spectra):
+            # spectrum["n_scans"] = 2
             spectrum["data"] = {}
             start = spectrum["binary_start"]
             stop = start + spectrum["binary_len"]
 
             binary_spectrum_data = binary_data[start:stop]
-            binary_spectrum_length = spectrum["n_values"] * self.float_buffer
+            n_values_binary = spectrum["n_values"] * self.float_buffer
 
             for scan_no in range(spectrum["n_scans"]):
-                spec_start = i * binary_spectrum_length
-                spec_stop = (i + 1) * binary_spectrum_length
+                spec_start = scan_no * n_values_binary
+                spec_stop = spec_start + n_values_binary
                 scan_data = binary_spectrum_data[spec_start:spec_stop]
 
-                spectrum["data"][f"scan_{scan_no}"] = self._parse_binary_data(scan_data)
+                spectrum["data"][f"scan_{scan_no}"] = self._parse_binary_scan(scan_data)
 
     # =============================================================================
-    #             import matplotlib.pyplot as plt
     #             all_scan_data = [
     #                 np.array(value)
     #                 for key, value in spectrum["data"].items()
     #                 #if scan_key.split("_")[0] in key
     #             ]
     #
-    #             averaged_spectra = np.mean(all_scan_data, axis=0)
-    #
-    #             plt.plot(spectrum["energy"], averaged_spectra)
-    #             plt.title(spectrum["spectrum_type"])
-    #             plt.show()
+    #             try:
+    #                 import matplotlib.pyplot as plt
+    #                 for key, value in spectrum["data"].items():
+    #                     plt.plot(spectrum["energy"], value)
+    #                 plt.title(spectrum["spectrum_type"])
+    #                 plt.gca().invert_xaxis()
+    #                 plt.show()
+    #             except:
+    #                 pass
     # =============================================================================
 
-    def _parse_binary_data(self, binary_spectrum_data):
+    def _parse_binary_scan(self, binary_scan_data):
         """
-        For each spectrum, parse the XPS data by unpacking the
+        For each spectrum scan, parse the XPS data by unpacking the
         64 bit floats.
 
         Parameters
@@ -1140,13 +1140,13 @@ class PhiParser:  # pylint: disable=too-few-public-methods
         """
         parsed_data = []
 
-        n_values = int(len(binary_spectrum_data) / self.float_buffer)
+        n_values = int(len(binary_scan_data) / self.float_buffer)
 
         for i in range(n_values):
             start = i * self.float_buffer
             stop = (i + 1) * self.float_buffer
             parsed_data.append(
-                struct.unpack_from("<f", binary_spectrum_data[start:stop])[0]
+                struct.unpack_from("<f", binary_scan_data[start:stop])[0]
             )
 
         return parsed_data
@@ -1511,9 +1511,9 @@ def _convert_stage_positions(value):
 
 # %%
 files = [
-    r"C:\Users\pielsticker\Lukas\FAIRMat\user_cases\Benz_PHI_Versaprobe\20240122_SBenz_102_20240122_SBenz_SnO2_10nm.spe",
-    # r"C:\Users\pielsticker\Lukas\FAIRMat\user_cases\Benz_PHI_Versaprobe\20240122_SBenz_107_20240122_SBenz_SnO2_10nm_1.pro",
-    # r"C:\Users\pielsticker\Lukas\FAIRMat\user_cases\Benz_PHI_Versaprobe\C0ELR081_033.spe"
+    # r"C:\Users\pielsticker\Lukas\FAIRMat\user_cases\Benz_PHI_Versaprobe\20240122_SBenz_102_20240122_SBenz_SnO2_10nm.spe",
+    r"C:\Users\pielsticker\Lukas\FAIRMat\user_cases\Benz_PHI_Versaprobe\20240122_SBenz_107_20240122_SBenz_SnO2_10nm_1.pro",
+    r"C:\Users\pielsticker\Lukas\FAIRMat\user_cases\Benz_PHI_Versaprobe\C0ELR081_033.spe",
 ]
 
 if __name__ == "__main__":
@@ -1528,6 +1528,3 @@ if __name__ == "__main__":
         spectra_header = np.vstack([spectra_header, header])
 
     spectra_header = np.delete(spectra_header, (0), axis=0)
-
-
-#    n_values = np.array([s["n_values"] for s in parser.spectra])

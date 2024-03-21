@@ -13,7 +13,7 @@
     "entry_identifier":"@eln",
     "duration":"None",
     "duration/@units":"s",
-    "method":"@xps_token:region/analysis_method",
+    "method":"@xps_token:region/technique",
     "program_name":"@eln"
   },
   "/ENTRY[entry]/USER[user]":{
@@ -26,17 +26,19 @@
   "/ENTRY[entry]/INSTRUMENT[instrument]":{
     "@default": "electronanalyser",
     "device_information":{
-      "vendor":"@xps_token:user/vendor",
+      "vendor":"@xps_token:instrument/vendor",
       "identifier":"@eln",
-      "model":"@xps_token:user/instrument_model"
+      "model":"@xps_token:instrument/instrument_model"
     },
+    "source_analyser_angle":"@xps_token/source_analyser_angle/",
+    "source_analyser_angle/@units":"@xps_token/source_analyser_angle/@units",
     "energy_resolution":{
       "physical_quantity":"energy",
       "type":"@eln",
       "resolution":"@eln",
       "resolution/@units":"@eln"
     },
-    "source_TYPE[source_probe]":{
+    "source_TYPE[xray_source]":{
       "type":"@eln",
       "name":"@xps_token:source/name",
       "probe":"@eln",
@@ -45,7 +47,35 @@
         "identifier":"@eln",
         "model":"@eln"
       },
-      "associated_beam":"@link:/entry/instrument/beam_probe"
+      "anode_material":"@xps_token:source/xray_anode_material",
+      "anode_position":"@xps_token:source/xray_anode_position",
+      "blanking_voltage":"@xps_token:source/xray_blanking_voltage",
+      "blanking_voltage/@units":"@xps_token:source/xray_blanking_voltage/@units",
+      "emission_control":"@xps_token:source/xray_emission_control",
+      "emission_current":"@xps_token:source/xray_emission_current",
+      "emission_current/@units":"@xps_token:source/xray_emission_current/@units",
+      "power":"@xps_token:source/xray_power",
+      "power/@units":"@xps_token:source/xray_power/@units",
+      "voltage":"@xps_token:source/xray_high_voltage",
+      "voltage/@units":"@xps_token:source/xray_high_voltage/@units",
+      "associated_beam":"@link:/entry/instrument/beam_probe",
+      "LENS_EM[condenser_lens]":{
+        "name":"condenser lens",
+        "voltage":"@xps_token:source/xray_condenser_lens_voltage",
+        "voltage/@units":"@xps_token:source/xray_condenser_lens_voltage/@units"
+      },
+      "DEFLECTOR[deflector]":{
+        "name":"deflector",
+        "span_x":"@xps_token:source/scan_deflection_span_x",
+        "span_x/@units":"@xps_token:source/scan_deflection_span_x/@units",
+        "span_y":"@xps_token:source/scan_deflection_span_y",
+        "span_y/@units":"@xps_token:source/scan_deflection_span_y/@units",
+        "offset_x":"@xps_token:source/scan_deflection_offset_x",
+        "offset_x/@units":"@xps_token:source/scan_deflection_offset_x/@units",
+        "offset_y":"@xps_token:source/scan_deflection_offset_y",
+        "offset_y/@units":"@xps_token:source/scan_deflection_offset_y/@units",
+        
+      },
     },
     "beam_TYPE[beam_probe]":{
       "distance":"@eln",
@@ -56,7 +86,8 @@
       "incident_energy_spread/@units":"None",
       "incident_polarization":"None",
       "incident_polarization/@units":"None",
-      "extent":"None",
+      "extent":"@xps_token:beam/xray_beam_diameter",
+      "extent/@units":"@xps_token:beam/xray_beam_diameter/@units",
       "associated_source":"@link:/entry/instrument/source_probe"
     },
     "ELECTRONANALYSER[electronanalyser]":{

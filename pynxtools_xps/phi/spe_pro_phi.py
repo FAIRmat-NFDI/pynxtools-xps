@@ -26,14 +26,13 @@ import re
 import copy
 import datetime
 import struct
+from typing import Any, Dict, List, Union
 import xarray as xr
 import numpy as np
 
 from pynxtools_xps.reader_utils import (
     XPSMapper,
     construct_entry_name,
-    construct_data_key,
-    construct_detector_data_key,
     safe_arange_with_edges,
 )
 
@@ -42,6 +41,201 @@ from pynxtools_xps.phi.phi_data_model import (
     PhiSpectralRegion,
     PhiSpatialArea,
 )
+
+SETTINGS_MAP: Dict[str, str] = {
+    "FileDesc": "file_description",
+    "acq_filename": "acquisition_filename",
+    "acq_file_date": "acquisition_file_date",
+    "institution": "vendor",
+    "operator": "user_name",
+    "experiment_i_d": "experiment_id",
+    "analyser_work_fcn": "analyser_work_function",
+    "analyser_retard_gain": "analyser_retardation_gain",
+    "reg_image_interval": "register_image_interval",
+    "reg_image_mode": "register_image_mode",
+    "reg_image_last": "register_image_last",
+    "platen_i_d": "platen_id",
+    "s_x_i_filename": "sxi_filename",
+    "intensity_recal": "intensity_recalibration",
+    "intensity_cal_coeff": "intensity_calibration_coefficients",
+    "energy_recal": "energy_recalibration",
+    "s_c_a_multiplier_voltage": "sca_multiplier_voltage",
+    "C60IonGun": "c60_ion_gun",
+    "t_f_c_parameters": "tfc_parameters",
+    "image_size_x_y": "image_size",
+    "float_volt": "float_voltage",
+    "float_enable": "float_enabled",
+    "grid_volt": "grid_voltage",
+    "condensor_volt": "condenser_lens_voltage",
+    "objective_volt": "objective_lens_voltage",
+    "bend_volt": "bend_voltage",
+    "neutral_float_volt": "neutral_float_voltage",
+    "neutral_float_enable": "neutral_float_enabled",
+    "neutral_grid_volt": "neutral_grid_voltage",
+    "neutral_condensor_volt": "neutral_condenser_lens_voltage",
+    "neutral_objective_volt": "neutral_objective_lens_voltage",
+    "neutral_bend_volt": "neutral_bend_voltage",
+    "no_d_p_data_cyc": "no_depth_profile_data_cycles",
+    "no_pre_sputter_cyc": "no_pre_sputter_cycles",
+    "sample_rotation": "profiling_sample_rotation",
+    "depth_recal": "profiling_depth_recalibration",
+    "sputter_mode": "profiling_sputter_mode",
+    "no_depth_reg": "profiling_no_depth_regions",
+    "depth_cal_def": "depth_calibration_definition",
+    "analyser_mode": "energy_scan_mode",
+    "surv_num_cycles": "survey_num_of_cycles",
+    "surv_time_per_step": "survey_dwell_time",
+    "no_spectral_reg_full": "no_spectral_regions_full",
+    "no_spectral_region": "no_spectral_regions",
+    "spectral_reg_def_full": "spectral_region_definition_full",
+    "spectral_reg_def2_full": "spectral_region_definition2_full",
+    "spectral_reg_background_full": "spectral_region_background_full",
+    "spectral_reg_hero_full": "spectral_region_hero_full",
+    "spectral_reg_i_r_full": "spectral_region_ir_full",
+    "no_spectral_reg": "no_spectral_regions",
+    "spectral_reg_def": "spectral_region_definition",
+    "spectral_reg_def2": "spectral_region_definition2",
+    "spectral_reg_background": "spectral_region_background",
+    "spectral_reg_hero": "spectral_region_hero",
+    "spectral_reg_i_r": "spectral_region_ir",
+    "no_spatial_area": "no_spatial_areas",
+    "spatial_area_def": "spatial_area_definition",
+    "spatial_h_r_photo_cor": "spatial_hr_photo_correction",
+    "xray_offset_in_um": "xray_offset",
+    "xray_mag_factor": "xray_magnification_factor",
+    "xray_rotation_in_deg": "xray_rotation",
+    "xray_setting": "xray_settings",
+    "neutralizer_current": "flood_gun_current",
+    "neutralizer_energy": "flood_gun_energy",
+    "flood_gun_filament": "flood_gun_filament_current",
+    "detector _acq _time": "detector_acquisition_time",
+    "number _of _channels": "number_of_channels",
+    "stage_position": "stage_positions",
+    "defect_positioner_i_d": "defect_positioner_id",
+    "defect_positioner_aligment": "defect_positioner_alignment",
+    "gcib_beam": "gcib_high_voltage",
+    "gcib_wien": "gcib_wien_filter_voltage",
+    "gcib_bend": "gcib_bend_voltage",
+    "gcib_magnet": "gcib_magnet_current",
+    "auto_e_gun_neut": "auto_flood_gun",
+    "auto_ion_neut": "auto_neutral_ion_source",
+}
+
+KEYS_WITH_UNITS: List[str] = [
+    "analyser_work_function",
+    "source_analyser_angle",
+    "analyser_solid_angle",
+    "scan_deflection_span_x",
+    "scan_deflection_span_y",
+    "scan_deflection_offset_x",
+    "scan_deflection_offset_y",
+    "sca_multiplier_voltage",
+    "delay_before_acquire",
+    "sputter_current",
+    "sputter_rate",
+    "sputter_energy",
+    "float_voltage",
+    "target_sputter_time",
+    "sputter_emission",
+    "grid_voltage",
+    "condenser_lens_voltage",
+    "objective_lens_voltage",
+    "bend_voltage",
+    "deflection_bias",
+    "ion_gun_gas_pressure",
+    "sputter_emission",
+    "deflection_bias",
+    "neutral_current",
+    "neutral_rate",
+    "neutral_energy",
+    "neutral_float_voltage",
+    "neutral_grid_voltage",
+    "neutral_condenser_lens_voltage",
+    "neutral_objective_lens_voltage",
+    "neutral_bend_voltage",
+    "neutral_target_timed_on_time",
+    "neutral_emission",
+    "neutral_deflection_bias",
+    "neutral_ion_gun_gas_pressure",
+    "profiling_sputter_delay",
+    "survey_dwell_time",
+    "xray_anode_power",
+    "xray_power",
+    "xray_beam_voltage",
+    "xray_beam_diameter",
+    "xray_condenser_lens_voltage",
+    "xray_objective_coil_current",
+    "xray_blanking_voltage",
+    "xray_filament_current",
+    "xray_offset",
+    "xray_rotation",
+    "xray_emission_current",
+    "xray_max_filament_current",
+    "flood_gun_current",
+    "flood_gun_energy",
+    "flood_gun_extractor",
+    "flood_gun_filament_current",
+    "flood_gun_pulse_length",
+    "flood_gun_time_per_step",
+    "flood_gun_ramp_rate",
+    "sxi_binding_energy",
+    "sxi_pass_energy",
+    "sxi_lens2_voltage",
+    "sxi_lens3_voltage",
+    "sxi_lens4_voltage",
+    "sxi_lens5_voltage",
+    "sxi_rotator",
+    "sxi_lens_bias_voltage",
+    "sxi_shutter_bias_voltage",
+    "detector_acquisition_time",
+    "stage_current_rotation_speed",
+    "defect_positioner_u",
+    "defect_positioner_v",
+    "defect_positioner_x",
+    "defect_positioner_y",
+    "defect_positioner_z",
+    "defect_positioner_tilt",
+    "defect_positioner_rotation",
+    "gcib_sputter_rate",
+    "gcib_high_voltage",
+    "gcib_ionization",
+    "gcib_extractor",
+    "gcib_wien_filter_voltage",
+    "gcib_bend_voltage",
+    "gcib_emission",
+    "gcib_magnet_current",
+    "gcib_focus",
+    "gcib_objective",
+    "gcib_focus",
+    "gcib_gas_pressure",
+    "gcib_cluster_size",
+    "gcib_energy_per_atom",
+    "deconvolution_pass_energy",
+]
+
+UNIT_MISSING: Dict[str, str] = {
+    "grid_voltage": "V",
+    "condenser_lens_voltage": "V",
+    "objective_lens_voltage": "V",
+    "bend_voltage": "V",
+    "neutral_grid_voltage": "V",
+    "neutral_condenser_lens_voltage": "V",
+    "neutral_objective_lens_voltage": "V",
+    "stage_current_rotation_speed": "degree/s",
+    "neutral_bend_voltage": "V",
+    "defect_positioner_u": "mm",
+    "defect_positioner_v": "mm",
+    "defect_positioner_x": "mm",
+    "defect_positioner_y": "mm",
+    "defect_positioner_z": "mm",
+    "defect_positioner_tilt": "degree",
+    "defect_positioner_rotation": "degree",
+    "profiling_sputter_delay": "s",
+    "scan_deflection_span_x": "mm",
+    "scan_deflection_span_y": "mm",
+    "scan_deflection_offset_x": "mm",
+    "scan_deflection_offset_y": "mm",
+}
 
 
 class MapperPhi(XPSMapper):
@@ -90,42 +284,44 @@ class MapperPhi(XPSMapper):
 
         key_map = {
             "user": [
-                "user_name",
+                "user_name",  #
             ],
             "instrument": [
-                "bias_box_mode",
-                "instrument_model",
-                "vendor",
+                "bias_box_mode",  #
+                "instrument_model",  #
+                "vendor",  #
                 "sca_multiplier_voltage",
                 "sca_multiplier_voltage/@units",
-                "source_analyser_angle",
-                "source_analyser_angle/@units",
+                "source_analyser_angle",  #
+                "source_analyser_angle/@units",  #
             ],
             "source": [
                 "scan_deflection_offset_x",
-                "scan_deflection_offset_y",
+                "scan_deflection_offset_x/@units",
+                "scan_deflection_offset_y/@units",
+                "scan_deflection_offset_x/@units",
                 "scan_deflection_span_x",
+                "scan_deflection_span_x/@units",
                 "scan_deflection_span_y",
-                "xray_anode_material",
+                "scan_deflection_span_y/@units",
+                "xray_anode_material",  #
                 "xray_anode_position",
-                "xray_beam_diameter",
-                "xray_beam_diameter/@units",
-                "xray_beam_voltage",
-                "xray_beam_voltage/@units",
-                "xray_blanking_voltage",
-                "xray_blanking_voltage/@units",
-                "xray_condenser_lens_voltage",
-                "xray_condenser_lens_voltage/@units",
+                "xray_beam_voltage",  #
+                "xray_beam_voltage/@units",  #
+                "xray_blanking_voltage",  #
+                "xray_blanking_voltage/@units",  #
+                "xray_condenser_lens_voltage",  #
+                "xray_condenser_lens_voltage/@units",  #
                 "xray_delay_factor_x",
                 "xray_delay_factor_y",
-                "xray_emission_control",
-                "xray_emission_current",
-                "xray_emission_current/@units",
+                "xray_emission_control",  #
+                "xray_emission_current",  #
+                "xray_emission_current/@units",  #
                 "xray_filament_current",
                 "xray_filament_current/@units",
-                "xray_high_power",
-                "xray_high_voltage",
-                "xray_high_voltage/@units",
+                "xray_high_power",  #
+                "xray_high_voltage",  #
+                "xray_high_voltage/@units",  #
                 "xray_interlace_interval",
                 "xray_magnification_factor_x",
                 "xray_magnification_factor_y",
@@ -136,22 +332,22 @@ class MapperPhi(XPSMapper):
                 "xray_objective_coil_current/@units",
                 "xray_offset",
                 "xray_offset/@units",
-                "xray_power",
-                "xray_power/@units",
+                "xray_power",  #
+                "xray_power/@units",  #
                 "xray_rotation",
                 "xray_rotation/@units",
-                "xray_spot_size",
-                "xray_spot_size/@units",
                 "xray_step_delay_read_beam",
                 "xray_steps_per_diameter",
                 "xray_stigmator_x",
                 "xray_stigmator_y",
             ],
             "beam": [
-                "xray_beam_diameter",
-                "xray_beam_diameter/@units",
-                "xray_energy",
-                "xray_energy/@units",
+                "xray_beam_diameter",  #
+                "xray_beam_diameter/@units",  #
+                "xray_energy",  #
+                "xray_energy/@units",  #
+                "xray_spot_size",  #
+                "xray_spot_size/@units",  #
             ],
             "analyser": [
                 "analyser_retardation_gain",
@@ -448,7 +644,7 @@ class MapperPhi(XPSMapper):
                 "region_id",
                 "region_ir",
                 "survey_num_of_cycles",
-                "technique",
+                "technique",  #
                 "technique_ex",
                 "tfc_parameters",
                 "xps_scan_mode",
@@ -590,173 +786,6 @@ class PhiParser:  # pylint: disable=too-few-public-methods
         self.binary_header = None
         self.spectra_header = None
 
-        self.settings_map = {
-            "FileDesc": "file_description",
-            "acq_filename": "acquisition_filename",
-            "acq_file_date": "acquisition_file_date",
-            "institution": "vendor",
-            "operator": "user_name",
-            "experiment_i_d": "experiment_id",
-            "analyser_work_fcn": "analyser_work_function",
-            "analyser_retard_gain": "analyser_retardation_gain",
-            "reg_image_interval": "register_image_interval",
-            "reg_image_mode": "register_image_mode",
-            "reg_image_last": "register_image_last",
-            "platen_i_d": "platen_id",
-            "s_x_i_filename": "sxi_filename",
-            "intensity_recal": "intensity_recalibration",
-            "intensity_cal_coeff": "intensity_calibration_coefficients",
-            "energy_recal": "energy_recalibration",
-            "s_c_a_multiplier_voltage": "sca_multiplier_voltage",
-            "C60IonGun": "c60_ion_gun",
-            "t_f_c_parameters": "tfc_parameters",
-            "image_size_x_y": "image_size",
-            "float_volt": "float_voltage",
-            "float_enable": "float_enabled",
-            "grid_volt": "grid_voltage",
-            "condensor_volt": "condenser_lens_voltage",
-            "objective_volt": "objective_lens_voltage",
-            "bend_volt": "bend_voltage",
-            "neutral_float_volt": "neutral_float_voltage",
-            "neutral_float_enable": "neutral_float_enabled",
-            "neutral_grid_volt": "neutral_grid_voltage",
-            "neutral_condensor_volt": "neutral_condenser_lens_voltage",
-            "neutral_objective_volt": "neutral_objective_lens_voltage",
-            "neutral_bend_volt": "neutral_bend_voltage",
-            "no_d_p_data_cyc": "no_depth_profile_data_cycles",
-            "no_pre_sputter_cyc": "no_pre_sputter_cycles",
-            "sample_rotation": "profiling_sample_rotation",
-            "depth_recal": "profiling_depth_recalibration",
-            "sputter_mode": "profiling_sputter_mode",
-            "no_depth_reg": "profiling_no_depth_regions",
-            "depth_cal_def": "depth_calibration_definition",
-            "analyser_mode": "energy_scan_mode",
-            "surv_num_cycles": "survey_num_of_cycles",
-            "surv_time_per_step": "survey_dwell_time",
-            "no_spectral_reg_full": "no_spectral_regions_full",
-            "no_spectral_region": "no_spectral_regions",
-            "spectral_reg_def_full": "spectral_region_definition_full",
-            "spectral_reg_def2_full": "spectral_region_definition2_full",
-            "spectral_reg_background_full": "spectral_region_background_full",
-            "spectral_reg_hero_full": "spectral_region_hero_full",
-            "spectral_reg_i_r_full": "spectral_region_ir_full",
-            "no_spectral_reg": "no_spectral_regions",
-            "spectral_reg_def": "spectral_region_definition",
-            "spectral_reg_def2": "spectral_region_definition2",
-            "spectral_reg_background": "spectral_region_background",
-            "spectral_reg_hero": "spectral_region_hero",
-            "spectral_reg_i_r": "spectral_region_ir",
-            "no_spatial_area": "no_spatial_areas",
-            "spatial_area_def": "spatial_area_definition",
-            "spatial_h_r_photo_cor": "spatial_hr_photo_correction",
-            "xray_offset_in_um": "xray_offset",
-            "xray_mag_factor": "xray_magnification_factor",
-            "xray_rotation_in_deg": "xray_rotation",
-            "xray_setting": "xray_settings",
-            "neutralizer_current": "flood_gun_current",
-            "neutralizer_energy": "flood_gun_energy",
-            "flood_gun_filament": "flood_gun_filament_current",
-            "detector _acq _time": "detector_acquisition_time",
-            "number _of _channels": "number_of_channels",
-            "stage_position": "stage_positions",
-            "defect_positioner_i_d": "defect_positioner_id",
-            "defect_positioner_aligment": "defect_positioner_alignment",
-            "gcib_beam": "gcib_high_voltage",
-            "gcib_wien": "gcib_wien_filter_voltage",
-            "gcib_bend": "gcib_bend_voltage",
-            "gcib_magnet": "gcib_magnet_current",
-            "auto_e_gun_neut": "auto_flood_gun",
-            "auto_ion_neut": "auto_neutral_ion_source",
-        }
-
-        self.keys_with_units = [
-            "analyser_work_function",
-            "source_analyser_angle",
-            "analyser_solid_angle",
-            "sca_multiplier_voltage",
-            "delay_before_acquire",
-            "sputter_current",
-            "sputter_rate",
-            "sputter_energy",
-            "float_voltage",
-            "target_sputter_time",
-            "sputter_emission",
-            "grid_voltage",
-            "condenser_lens_voltage",
-            "objective_lens_voltage",
-            "bend_voltage",
-            "deflection_bias",
-            "ion_gun_gas_pressure",
-            "sputter_emission",
-            "deflection_bias",
-            "neutral_current",
-            "neutral_rate",
-            "neutral_energy",
-            "neutral_float_voltage",
-            "neutral_grid_voltage",
-            "neutral_condenser_lens_voltage",
-            "neutral_objective_lens_voltage",
-            "neutral_bend_voltage",
-            "neutral_target_timed_on_time",
-            "neutral_emission",
-            "neutral_deflection_bias",
-            "neutral_ion_gun_gas_pressure",
-            "profiling_sputter_delay",
-            "survey_dwell_time",
-            "xray_anode_power",
-            "xray_power",
-            "xray_beam_voltage",
-            "xray_beam_diameter",
-            "xray_condenser_lens_voltage",
-            "xray_objective_coil_current",
-            "xray_blanking_voltage",
-            "xray_filament_current",
-            "xray_offset",
-            "xray_rotation",
-            "xray_emission_current",
-            "xray_max_filament_current",
-            "flood_gun_current",
-            "flood_gun_energy",
-            "flood_gun_extractor",
-            "flood_gun_filament_current",
-            "flood_gun_pulse_length",
-            "flood_gun_time_per_step",
-            "flood_gun_ramp_rate",
-            "sxi_binding_energy",
-            "sxi_pass_energy",
-            "sxi_lens2_voltage",
-            "sxi_lens3_voltage",
-            "sxi_lens4_voltage",
-            "sxi_lens5_voltage",
-            "sxi_rotator",
-            "sxi_lens_bias_voltage",
-            "sxi_shutter_bias_voltage",
-            "detector_acquisition_time",
-            "stage_current_rotation_speed",
-            "defect_positioner_u",
-            "defect_positioner_v",
-            "defect_positioner_x",
-            "defect_positioner_y",
-            "defect_positioner_z",
-            "defect_positioner_tilt",
-            "defect_positioner_rotation",
-            "gcib_sputter_rate",
-            "gcib_high_voltage",
-            "gcib_ionization",
-            "gcib_extractor",
-            "gcib_wien_filter_voltage",
-            "gcib_bend_voltage",
-            "gcib_emission",
-            "gcib_magnet_current",
-            "gcib_focus",
-            "gcib_objective",
-            "gcib_focus",
-            "gcib_gas_pressure",
-            "gcib_cluster_size",
-            "gcib_energy_per_atom",
-            "deconvolution_pass_energy",
-        ]
-
     def parse_file(self, file, **kwargs):
         """
         Parse the .xy file into a list of dictionaries.
@@ -883,7 +912,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
                     key = key.replace(old_key, new_key)
 
             try:
-                key = self.settings_map[key]
+                key = SETTINGS_MAP[key]
             except KeyError:
                 pass
 
@@ -906,12 +935,13 @@ class PhiParser:  # pylint: disable=too-few-public-methods
             if key in datacls_fields:
                 field_type = type(getattr(self.metadata, key))
 
-                if key in self.keys_with_units:
+                if key in KEYS_WITH_UNITS:
                     value, unit = self.extract_unit(key, value)
                     setattr(self.metadata, f"{key}_units", unit)
 
                 if not key.startswith("channel_"):
                     value = self.map_values(key, value, field_type)
+
                 else:
                     value = _convert_channel_info(value)
 
@@ -1183,36 +1213,18 @@ class PhiParser:  # pylint: disable=too-few-public-methods
             "Percent": "%",
             "eV/atom": "eV",
         }
-        unit_missing = {
-            "grid_voltage": "V",
-            "condenser_lens_voltage": "V",
-            "objective_lens_voltage": "V",
-            "bend_voltage": "V",
-            "neutral_grid_voltage": "V",
-            "neutral_condenser_lens_voltage": "V",
-            "neutral_objective_lens_voltage": "V",
-            "stage_current_rotation_speed": "degree/s",
-            "neutral_bend_voltage": "V",
-            "defect_positioner_u": "mm",
-            "defect_positioner_v": "mm",
-            "defect_positioner_x": "mm",
-            "defect_positioner_y": "mm",
-            "defect_positioner_z": "mm",
-            "defect_positioner_tilt": "degree",
-            "defect_positioner_rotation": "degree",
-            "profiling_sputter_delay": "s",
-        }
 
         try:
             value, unit = value.split(" ")
         except ValueError:
             unit = ""
+
         if unit in unit_map:
             unit = unit_map[unit]
         if key in special_cases:
             unit = special_cases[key]
-        if key in unit_missing:
-            unit = unit_missing[key]
+        if key in UNIT_MISSING:
+            unit = UNIT_MISSING[key]
 
         return value, unit
 
@@ -1331,6 +1343,10 @@ class PhiParser:  # pylint: disable=too-few-public-methods
             if "_units" in key:
                 new_key = key.replace("_units", "/@units")
                 flattened_dict[new_key] = flattened_dict.pop(key)
+
+        for key in flattened_dict.copy().keys():
+            if key in KEYS_WITH_UNITS and f"{key}/@units" not in flattened_dict:
+                flattened_dict[f"{key}/@units"] = UNIT_MISSING[key]
 
         return flattened_dict
 

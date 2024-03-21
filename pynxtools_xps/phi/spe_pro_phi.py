@@ -296,16 +296,16 @@ class MapperPhi(XPSMapper):
                 "source_analyser_angle/@units",  #
             ],
             "source": [
-                "scan_deflection_offset_x",
-                "scan_deflection_offset_x/@units",
-                "scan_deflection_offset_y/@units",
-                "scan_deflection_offset_x/@units",
-                "scan_deflection_span_x",
-                "scan_deflection_span_x/@units",
-                "scan_deflection_span_y",
-                "scan_deflection_span_y/@units",
+                "scan_deflection_span_x",  #
+                "scan_deflection_span_x/@units",  #
+                "scan_deflection_span_y",  #
+                "scan_deflection_span_y/@units",  #
+                "scan_deflection_offset_x",  #
+                "scan_deflection_offset_x/@units",  #
+                "scan_deflection_offset_y/@units",  #
+                "scan_deflection_offset_x/@units",  #
                 "xray_anode_material",  #
-                "xray_anode_position",
+                "xray_anode_position",  #
                 "xray_beam_voltage",  #
                 "xray_beam_voltage/@units",  #
                 "xray_blanking_voltage",  #
@@ -781,7 +781,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         self.binary_header_length = 4
         self.spectra_header_length = 24
-        self.float_buffer = 4
+        self.encoding = ["<f", 4]
 
         self.binary_header = None
         self.spectra_header = None
@@ -1107,6 +1107,8 @@ class PhiParser:  # pylint: disable=too-few-public-methods
                 }
             )
 
+        self._check_encoding()
+
     def parse_data_into_spectra(self, binary_data):
         """
         Parse the data of all spectra.
@@ -1118,13 +1120,15 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         """
         for i, spectrum in enumerate(self.spectra):
+            float_buffer = self.encoding[1]
+
             # spectrum["n_scans"] = 2
             spectrum["data"] = {}
             start = spectrum["binary_start"]
             stop = start + spectrum["binary_len"]
 
             binary_spectrum_data = binary_data[start:stop]
-            n_values_binary = spectrum["n_values"] * self.float_buffer
+            n_values_binary = spectrum["n_values"] * float_buffer
 
             for scan_no in range(spectrum["n_scans"]):
                 spec_start = scan_no * n_values_binary
@@ -1168,18 +1172,37 @@ class PhiParser:  # pylint: disable=too-few-public-methods
             One-dimensional array with spectrum intensities.
 
         """
+        float_buffer = self.encoding[1]
+        encoding = self.encoding[0]
         parsed_data = []
 
-        n_values = int(len(binary_scan_data) / self.float_buffer)
+        n_values = int(len(binary_scan_data) / float_buffer)
 
         for i in range(n_values):
-            start = i * self.float_buffer
-            stop = (i + 1) * self.float_buffer
+            start = i * float_buffer
+            stop = start + float_buffer
             parsed_data.append(
-                struct.unpack_from("<f", binary_scan_data[start:stop])[0]
+                struct.unpack_from(encoding, binary_scan_data[start:stop])[0]
             )
 
         return parsed_data
+
+    def _check_encoding(self):
+        datasize = sum(
+            [s["spectrum_header"][8] * s["spectrum_header"][9] for s in self.spectra]
+        )
+        binary_size = sum([s["spectrum_header"][-2] for s in self.spectra])
+
+        encodings_map = {
+            "double": ["<d", 8],
+            "float": ["<f", 4],
+        }
+        if binary_size / datasize == 4:
+            self.encoding = encodings_map["float"]
+        elif binary_size / datasize == 8:
+            self.encoding = encodings_map["double"]
+        else:
+            print("This binary encoding is not supported.")
 
     def extract_unit(self, key, value):
         """

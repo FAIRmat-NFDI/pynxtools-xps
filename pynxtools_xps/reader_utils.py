@@ -300,12 +300,16 @@ def construct_entry_name(key):
     """Construction entry name."""
     key_parts = key.split("/")
 
-    if len(key_parts) == 5:
-        # entry example : sample__name_of_scan_region
-        return (
-            f'{key_parts[2].split("_", 1)[1]}' f"__" f'{key_parts[4].split("_", 1)[1]}'
-        )
-    elif len(key_parts) == 4:
-        # entry example : name_of_scan_region
-        return key_parts[3].split("_", 1)[1]
+    if key_parts and len(key_parts) > 1:
+        if len(key_parts) == 4:
+            # entry example : name_of_scan_region
+            return key_parts[3].split("_", 1)[1]
+
+        else:
+            # entry example : sample__name_of_scan_region
+            return (
+                f'{key_parts[2].split("_", 1)[1]}'
+                f"__"
+                f'{key_parts[4].split("_", 1)[1]}'
+            )
     return ""

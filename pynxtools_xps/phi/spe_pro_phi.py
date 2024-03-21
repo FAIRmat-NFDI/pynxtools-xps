@@ -1546,24 +1546,3 @@ def _convert_stage_positions(value):
         "polar": polar,
         "polar_units": "degree",
     }
-
-
-# %%
-files = [
-    # r"C:\Users\pielsticker\Lukas\FAIRMat\user_cases\Benz_PHI_Versaprobe\20240122_SBenz_102_20240122_SBenz_SnO2_10nm.spe",
-    r"C:\Users\pielsticker\Lukas\FAIRMat\user_cases\Benz_PHI_Versaprobe\20240122_SBenz_107_20240122_SBenz_SnO2_10nm_1.pro",
-    r"C:\Users\pielsticker\Lukas\FAIRMat\user_cases\Benz_PHI_Versaprobe\C0ELR081_033.spe",
-]
-
-if __name__ == "__main__":
-    raw_data = []
-    spectra_header = np.zeros((1, 24))
-
-    for file in files:
-        parser = PhiParser()
-        d = parser.parse_file(file)
-        raw_data.append(d)
-        header = np.array([s["spectrum_header"] for s in parser.spectra])
-        spectra_header = np.vstack([spectra_header, header])
-
-    spectra_header = np.delete(spectra_header, (0), axis=0)

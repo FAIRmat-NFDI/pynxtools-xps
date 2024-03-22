@@ -202,12 +202,15 @@ class PhiMetadata(XpsDataclass):
     flood_gun_extractor: float = 0.0
     flood_gun_extractor_units: str = "V"
     flood_gun_x_steering: float = 0.0
+    flood_gun_x_steering_units: str = "mm"
     flood_gun_y_steering: float = 0.0
+    flood_gun_y_steering_units: str = "mm"
     flood_gun_filament_current: float = 0.0
     flood_gun_filament_current_units: str = "A"
     flood_gun_pulse_length: float = 0.0
     flood_gun_pulse_length_units: str = "s"
     flood_gun_pulse_frequency: int = 0
+    flood_gun_pulse_frequency_units: str = "1/s"
     flood_gun_gain: int = 0
     flood_gun_time_per_step: float = 0.0
     flood_gun_time_per_step_units: str = "s"

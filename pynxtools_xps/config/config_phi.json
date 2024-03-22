@@ -32,14 +32,21 @@
       "identifier":"@eln",
       "model":"@xps_token:instrument/instrument_model"
     },
-    "source_analyser_angle":"@xps_token/source_analyser_angle/",
-    "source_analyser_angle/@units":"@xps_token/source_analyser_angle/@units",
     "energy_resolution":{
       "physical_quantity":"energy",
       "type":"@eln",
       "resolution":"@eln",
       "resolution/@units":"@eln"
     },
+    "TRANSFORMATIONS[transformations]": {
+      "AXISNAME[source_analyser_angle]":"@xps_token/source_analyser_angle",
+      "AXISNAME[source_analyser_angle]/@transformation_type": "rotation",
+      "AXISNAME[source_analyser_angle]/@units":"@xps_token/source_analyser_angle/@units",
+      "AXISNAME[source_analyser_angle]/@vector": [
+        0,
+        0,
+        1
+      ],
     "source_TYPE[source_xray]":{
       "type":"@eln",
       "name":"@xps_token:xray_source/name",
@@ -101,7 +108,17 @@
         "offset_x/@units":"@xps_token:xray_source/xray_stigmator_x/@units",
         "offset_y":"@xps_token:xray_source/xray_stigmator_y",
         "offset_y/@units":"@xps_token:xray_source/xray_stigmator_y/@units"
-      }
+      },
+      "depends_on": "/entry/instrument/source_xray/transformations/trans_z",
+      "TRANSFORMATIONS[transformations]": {
+        "AXISNAME[xray_rotation]":"@xps_token:xray_source/xray_rotation",
+        "AXISNAME[xray_rotation]/@transformation_type": "rotation",
+        "AXISNAME[xray_rotation]/@units":"@xps_token:xray_source/xray_rotation/@units",
+        "AXISNAME[xray_rotation]/@vector": [
+          0,
+          0,
+          1
+        ],
     },
     "beam_TYPE[beam_probe]":{
       "distance":"@eln",

@@ -1,6 +1,5 @@
 {
   "/@default":"None",
-  
   "/ENTRY[entry]":{
     "@default":"data",
     "definition":"@eln",
@@ -8,7 +7,7 @@
     "title":"@eln",
     "start_time":"@xps_token:file_info/acquisition_file_date",
     "end_time":"@eln",
-    "experiment_identifier":"@xps_token:file_info/acquisition_file_date",
+    "experiment_identifier":"@xps_token:file_info/experiment_id",
     "experiment_institution":"@eln",
     "experiment_facility":"@eln",
     "experiment_laboratory":"@eln",
@@ -16,7 +15,7 @@
     "duration/@units":"s",
     "method":"@xps_token:region/technique",
     "program_name":"@xps_token:file_info/software_version",
-    "acquisition_filename":"@xps_token:file_info/acquisition_filename",
+    "acquisition_filename":"@xps_token:file_info/acquisition_filename"
   },
   "/ENTRY[entry]/USER[user]":{
     "name":"@xps_token:user/user_name",
@@ -29,8 +28,8 @@
     "@default": "electronanalyser",
     "device_information":{
       "vendor":"@xps_token:instrument/vendor",
-      "identifier":"@eln",
-      "model":"@xps_token:instrument/instrument_model"
+      "model":"@xps_token:instrument/instrument_model",
+      "identifier":"@eln"
     },
     "energy_resolution":{
       "physical_quantity":"energy",
@@ -46,7 +45,8 @@
         0,
         0,
         1
-      ],
+      ]
+    },
     "source_TYPE[source_xray]":{
       "type":"@eln",
       "name":"@xps_token:xray_source/name",
@@ -75,7 +75,7 @@
       "offset/@units":"@xps_token:xray_source/xray_offset/@units",
       "voltage":"@xps_token:xray_source/xray_high_voltage",
       "voltage/@units":"@xps_token:xray_source/xray_high_voltage/@units",
-      "associated_beam":"@link:/entry/instrument/beam_probe",
+      "associated_beam":"@link:/entry/instrument/beam_xray",
       "LENS_EM[blanking_lens]":{
         "name":"blanking lens",
         "voltage":"@xps_token:xray_source/xray_blanking_voltage",
@@ -118,9 +118,10 @@
           0,
           0,
           1
-        ],
+        ]
+      }
     },
-    "beam_TYPE[beam_probe]":{
+    "beam_TYPE[beam_xray]":{
       "distance":"@eln",
       "distance/@units":"@eln",
       "incident_energy":"@xps_token:beam/xray_energy",
@@ -131,7 +132,7 @@
       "incident_polarization/@units":"None",
       "extent":"@xps_token:beam/xray_beam_diameter",
       "extent/@units":"@xps_token:beam/xray_beam_diameter/@units",
-      "associated_source":"@link:/entry/instrument/source_probe"
+      "associated_source":"@link:/entry/instrument/source_xray"
     },
     "source_TYPE[source_flood_gun]":{
       "current":"@xps_token:flood_gun/flood_gun_current",
@@ -141,7 +142,7 @@
       "filament_current":"@xps_token:flood_gun/flood_gun_filament_current",
       "filament_currentrrent/@units":"@xps_token:flood_gun/flood_gun_filament_current/@units",
       "gain":"@xps_token:flood_gun/flood_gun_gain",
-      "mode":"@xps_token:flood_gun/flood_gun_mode",
+      "flood_gun_mode":"@xps_token:flood_gun/flood_gun_mode",
       "frequency":"@xps_token:flood_gun/pulse_frequency",
       "frequency/@units":"@xps_token:flood_gun/pulse_frequency/@units",
       "pulse_width":"@xps_token:flood_gun/flood_gun_pulse_length",
@@ -162,8 +163,8 @@
     },
     "source_TYPE[source_gas_cluster_ion_beam]":{
       "description":"@eln",
-      "cluster_size/":"@xps_token:gcib/gcib_cluster_size",
-      "cluster_size//@units":"@xps_token:gcib/gcib_cluster_size/@units",
+      "cluster_size":"@xps_token:gcib/gcib_cluster_size",
+      "cluster_size/@units":"@xps_token:gcib/gcib_cluster_size/@units",
       "emission_current":"@xps_token:gcib/gcib_bend_voltage",
       "emission_current/@units":"@xps_token:gcib/gcib_bend_voltage/@units",
       "energy":"@xps_token:gcib/energy_per_atom",
@@ -270,7 +271,7 @@
       "grid_voltage":"@xps_token:sputter_gun/grid_voltage",
       "grid_voltage/@units":"@xps_token:sputter_gun/grid_voltage/@units",
       "ion":"@xps_token:sputter_gun/sputter_ion",
-      "mode":"@xps_token:sputter_gun/ion_gun_mode",
+      "ion_gun_mode":"@xps_token:sputter_gun/ion_gun_mode",
       "raster_offset_x":"@xps_token:sputter_gun/sputter_raster_offset_x",
       "raster_offset_x/@units":"@xps_token:sputter_gun/sputter_raster_offset_x/@units",
       "raster_offset_y":"@xps_token:sputter_gun/sputter_raster_offset_y",
@@ -374,8 +375,8 @@
       },
       "ENERGYDISPERSION[energydispersion]":{
         "scheme":"@eln",
-        "pass_energy":"@xps_token:energydispersion/sxi_pass_energy",
-        "pass_energy/@units":"@xps_token:energydispersion/sxi_pass_energy/@units",
+        "pass_energy":"@xps_token:energydispersion/pass_energy",
+        "pass_energy/@units":"@xps_token:energydispersion/pass_energy/@units",
         "energy_scan_mode":"@xps_token:energydispersion/scan_mode",
         "xps_scan_mode":"@xps_token:energydispersion/xps_scan_mode",
         "device_information":{
@@ -404,7 +405,6 @@
         "count_time":"@xps_token:detector/survey_dwell_time",
         "count_time/@units":"@xps_token:detector/survey_dwell_time/@units",
         "number_of_channels":"@xps_token:detector/number_of_channels",
-
         "raw_data":{
           "@signal":"raw",
           "raw":"@detector_data:cycles/Cycle_",
@@ -505,7 +505,7 @@
       "value": "@xps_token:defect_positioner/defect_positioner_rotation",
       "value/@units": "@xps_token:defect_positioner/defect_positioner_rotation/@units"
     },
-    "defect_positioner_reference_image":  "@xps_token:defect_positioner/defect_positioner_reference_image",
+    "defect_positioner_reference_image":"@xps_token:defect_positioner/defect_positioner_reference_image",
     "pressure_gauge":{
       "name":"@eln",
       "measurement":"@eln",
@@ -513,7 +513,12 @@
       "value":"@eln",
       "value_log/value":"@eln"
     },
-    "flood_gun":  "@link:/entry/instrument/source_flood_gun"
+    "flood_gun":{
+      "name":"@eln",
+      "physical_quantity":"@eln",
+      "type":"@eln",
+      "value":"@link:/entry/instrument/source_flood_gun/current"   
+    }
   },
   "/ENTRY[entry]/PROCESS[process]":{
     "energy_calibration":"None",
@@ -523,10 +528,11 @@
       "binding_energy":"@xps_token:process/energy_reference_energy",
       "binding_energy/@units":"@xps_token:process/energy_reference_energy/@units",
       "offset":"None",
-      "calibrated_axis":"@xps_token:data/energy_reference_energy"
+      "calibrated_axis":"@data:energy"
     },
     "transmission_correction":{
       "intensity_calibration_coefficients":"@xps_token:data/intensity_calibration_coefficients"
+    }
   },
   "/ENTRY[entry]/SAMPLE[sample]":{
     "name":"@eln",
@@ -572,7 +578,7 @@
     "@axes":["energy"],
     "data":"@data:cycle",
     "data/@units":"@xps_token:data/intensity/@units",
-    "energy":"@link:/entry/process/energy_reference/calibrated_axis",
+    "energy":"@link:/entry/process/energy_referencing/calibrated_axis",
     "energy/@type":"@xps_token:data/energy/@type",
     "energy/@units":"@xps_token:data/energy/@units",
     "@energy_indices":"None",

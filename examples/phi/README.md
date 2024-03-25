@@ -1,4 +1,4 @@
-# Example for .sle data
+# Example for data from Phi VersaProbe 4 instruments
 
 This is an example for [Phi MultiPak](https://www.phi.com/surface-analysis-equipment/genesis.html#software:multi-pak-data-reduction-software/) .spe (single spectra) and .pro (single spectra) files, which is the propietary format of PHI Electronics used for their VersaProbe 4 instrumens. The Phi MultiPak software version that was used to measure this data is SS 3.3.3.2.1. The example conversion can be run with the following commands.
 

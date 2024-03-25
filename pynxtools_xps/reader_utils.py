@@ -112,8 +112,13 @@ def to_snake_case(str_value):
 
 def convert_pascal_to_snake(str_value):
     """Convert pascal case text to snake case."""
-    pattern = re.compile(r"(?<!^)(?=[A-Z])")
-    return pattern.sub("_", str_value).lower()
+    # Convert CamelCase to snake_case
+    snake_case = re.sub(r"(?<!^)(?=[A-Z])", "_", str_value)
+
+    # Convert whitespace to underscores and remove extra underscores
+    snake_case_cleaned = re.sub(r"\s+", "_", snake_case).replace("__", "_")
+
+    return snake_case_cleaned.lower()
 
 
 def convert_snake_to_pascal(str_value):

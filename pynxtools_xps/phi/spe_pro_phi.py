@@ -266,7 +266,7 @@ class MapperPhi(XPSMapper):
         return PhiParser()
 
     def construct_data(self):
-        """Map TXT format to NXmpes-ready dict."""
+        """Map Phi format to NXmpes-ready dict."""
         # pylint: disable=duplicate-code
         spectra = copy.deepcopy(self.raw_data)
 
@@ -1185,6 +1185,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
         return parsed_data
 
     def _check_encoding(self):
+        """Check if the binary data is single or double encoded."""
         datasize = sum(
             [s["spectrum_header"][8] * s["spectrum_header"][9] for s in self.spectra]
         )

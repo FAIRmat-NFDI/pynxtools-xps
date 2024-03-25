@@ -59,7 +59,7 @@ class XpsDataFileParser:
     )
 
     __vndr_err_msg__ = (
-        "Need an XPSdata file from the following vendors: " f"{__vendors__}"
+        "Need an XPS data file from the following vendors: " f"{__vendors__}"
     )
 
     def __init__(self, file_paths: List) -> None:

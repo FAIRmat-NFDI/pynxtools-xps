@@ -199,7 +199,7 @@ class SleMapperSpecs(XPSMapper):
         """
         # pylint: disable=too-many-locals,duplicate-code
         group_parent = f'{self._root_path}/Group_{spectrum["group_name"]}'
-        region_parent = f'{group_parent}/regions/Region_{spectrum["spectrum_type"]}'
+        region_parent = f'{group_parent}/Region_{spectrum["spectrum_type"]}'
         instrument_parent = f"{region_parent}/instrument"
         analyser_parent = f"{instrument_parent}/analyser"
 

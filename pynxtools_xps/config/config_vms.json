@@ -134,7 +134,7 @@
          "detector_voltage/@units":"V",
          "count_time":"@xps_token:detector/dwell_time",
          "count_time/@units":"s",
-         "acquisition_mode":"@xps_token:detector/signal_mode",
+         "signal_mode":"@xps_token:detector/signal_mode",
          "device_information":{
            "vendor":"@eln",
            "model":"@eln",
@@ -283,7 +283,7 @@
      "data":"@data:cycle",
      "data/@units":"@xps_token:data/y_units_1",
      "energy":"@data:energy",
-     "energy/@type":"@xps_token:data/x_units_1",
+     "energy/@type":"@xps_token:data/x_units",
      "energy/@units":"eV",
      "@energy_indices":"None",
      "@energy_depends":"None"

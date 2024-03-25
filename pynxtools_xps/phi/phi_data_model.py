@@ -1,5 +1,5 @@
 """
-Data model for Phi Versaprobe software (version SS 3.3.3.2).
+Data model for Phi VersaProbe 4 software (version SS 3.3.3.2).
 """
 # Copyright The NOMAD Authors.
 #
@@ -29,7 +29,7 @@ from pynxtools_xps.reader_utils import XpsDataclass
 
 @dataclass
 class PhiMetadata(XpsDataclass):
-    """An object to store the PHI Versaprobe metadata."""
+    """An object to store the PHI VersaProbe 4 metadata."""
 
     platform: str = ""
     technique: str = ""
@@ -339,7 +339,7 @@ class PhiMetadata(XpsDataclass):
 
 @dataclass
 class PhiSpectralRegion(XpsDataclass):
-    """An object to store the PHI Versaprobe metadata."""
+    """An object to store the PHI VersaProbe 4 spectral regions."""
 
     full_region: bool = False
     region_id: int = 0
@@ -360,7 +360,7 @@ class PhiSpectralRegion(XpsDataclass):
 
 @dataclass
 class PhiSpatialArea(XpsDataclass):
-    """An object to store the PHI Versaprobe metadata."""
+    """An object to store the PHI VersaProbe 4 spatial areas."""
 
     area_id: int = 0
     area_definition: str = ""

@@ -1,6 +1,6 @@
 """
 Parser for reading XPS (X-ray Photoelectron Spectroscopy) data from
-Phi PHI Versaprobe instruments (.spe or .pro format), to be passed to
+Phi PHI VersaProbe 4 instruments (.spe or .pro format), to be passed to
 mpes nxdl (NeXus Definition Language) template.
 """
 # Copyright The NOMAD Authors.
@@ -27,6 +27,7 @@ import copy
 import datetime
 import struct
 from typing import Any, Dict, List
+import pytz
 import xarray as xr
 import numpy as np
 
@@ -682,11 +683,9 @@ class MapperPhi(XPSMapper):
         # pylint: disable=too-many-locals,duplicate-code
         try:
             group_parent = f'{self._root_path}/Group_{spectrum["group_name"]}'
-            region_parent = f'{group_parent}/regions/Region_{spectrum["spectrum_type"]}'
+            region_parent = f'{group_parent}/Region_{spectrum["spectrum_type"]}'
         except KeyError:
-            region_parent = (
-                f'{self._root_path}/regions/Region_{spectrum["spectrum_type"]}'
-            )
+            region_parent = f'{self._root_path}/Region_{spectrum["spectrum_type"]}'
         file_parent = f"{region_parent}/file_info"
         instrument_parent = f"{region_parent}/instrument"
         analyser_parent = f"{instrument_parent}/analyser"
@@ -734,7 +733,9 @@ class MapperPhi(XPSMapper):
             self._xps_dict["data"][entry] = xr.Dataset()
 
         # Write averaged data to 'data'.
-        all_scan_data = [np.array(value) for key, value in spectrum["data"].items()]
+        all_scan_data = np.array(
+            [np.array(value) for key, value in spectrum["data"].items()]
+        )
         averaged_scans = np.mean(all_scan_data, axis=0)
 
         self._xps_dict["data"][entry][cycle_key] = xr.DataArray(
@@ -760,7 +761,7 @@ class MapperPhi(XPSMapper):
 
 class PhiParser:  # pylint: disable=too-few-public-methods
     """
-    A parser for reading in PHI Versaprobe data in the .spe or
+    A parser for reading in PHI VersaProbe 4 data in the .spe or
     .pro format.
     Tested with Software version SS 3.3.3.2.
     """
@@ -1411,7 +1412,9 @@ def _parse_datetime(value):
 
     """
     year, month, day = value.strip().split(" ")
-    date_object = datetime.datetime(year=int(year), month=int(month), day=int(day))
+    date_object = datetime.datetime(
+        year=int(year), month=int(month), day=int(day), tzinfo=pytz.timezone("UTC")
+    )
 
     return date_object.isoformat()
 
@@ -1531,14 +1534,14 @@ def _convert_stage_positions(value):
     x, y, z, azimuth, polar = value.split(" ")
 
     return {
-        "x": x,
+        "x": float(x),
         "x_units": "mm",
-        "y": y,
+        "y": float(y),
         "y_units": "mm",
-        "z": z,
+        "z": float(z),
         "z_units": "mm",
-        "azimuth": azimuth,
+        "azimuth": float(azimuth),
         "azimuth_units": "degree",
-        "polar": polar,
+        "polar": float(polar),
         "polar_units": "degree",
     }

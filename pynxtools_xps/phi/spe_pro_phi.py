@@ -26,7 +26,8 @@ import re
 import copy
 import datetime
 import struct
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
+from pathlib import Path
 import pytz
 import xarray as xr
 import numpy as np
@@ -272,7 +273,7 @@ class MapperPhi(XPSMapper):
 
         self._xps_dict["data"]: dict = {}
 
-        key_map = {
+        key_map: Dict[str, List[str]] = {
             "user": [
                 "user_name",
             ],
@@ -675,7 +676,9 @@ class MapperPhi(XPSMapper):
         for spectrum in spectra:
             self._update_xps_dict_with_spectrum(spectrum, key_map)
 
-    def _update_xps_dict_with_spectrum(self, spectrum, key_map):
+    def _update_xps_dict_with_spectrum(
+        self, spectrum: Dict[str, Any], key_map: Dict[str, List[str]]
+    ):
         """
         Map one spectrum from raw data to NXmpes-ready dict.
 
@@ -690,7 +693,7 @@ class MapperPhi(XPSMapper):
         instrument_parent = f"{region_parent}/instrument"
         analyser_parent = f"{instrument_parent}/analyser"
 
-        path_map = {
+        path_map: Dict[str, str] = {
             "file_info": f"{file_parent}",
             "user": f"{region_parent}/user",
             "instrument": f"{instrument_parent}",
@@ -772,16 +775,16 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         """
         self.raw_data: str = ""
-        self.spectra = []
+        self.spectra: List[Dict[str, Any]] = []
 
         self.metadata = PhiMetadata()
 
         self.binary_header_length = 4
         self.spectra_header_length = 24
-        self.encoding = ["<f", 4]
+        self.encoding: List[str, int] = ["<f", 4]
 
-        self.binary_header = None
-        self.spectra_header = None
+        self.binary_header: np.ndarray = None
+        self.spectra_header: np.ndarray = None
 
     def parse_file(self, file, **kwargs):
         """
@@ -826,7 +829,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         return self.spectra
 
-    def _read_lines(self, file):
+    def _read_lines(self, file: Union[str, Path]):
         """
         Read in all lines from the file as a list of strings.
 
@@ -866,7 +869,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         return header, data
 
-    def parse_header_into_metadata(self, header):
+    def parse_header_into_metadata(self, header: List[str]):
         """
         Parse header into PHiMetadata dataclass.
 
@@ -877,7 +880,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         """
 
-        def map_keys(key, channel_count):
+        def map_keys(key: str, channel_count: int):
             """Maps key names for better identification of fields."""
             if key.startswith("neut"):
                 key = key.replace("neut_", "neutral_")
@@ -898,7 +901,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
                 key = f"channel_{channel_count}_info"
                 channel_count += 1
 
-            key_map = {
+            key_map: Dict[str, str] = {
                 "desc": "description",
                 "defect_pos": "defect_positioner",
                 "g_c_i_b": "gcib",
@@ -946,7 +949,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         self.metadata.validate_types()
 
-    def parse_spectral_regions(self, header):
+    def parse_spectral_regions(self, header: List[str]):
         """
         Parse spectral regions definitions.
 
@@ -1014,7 +1017,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         return regions
 
-    def parse_spatial_areas(self, header):
+    def parse_spatial_areas(self, header: List[str]):
         """
         Parse spatial areas definitions.
 
@@ -1049,7 +1052,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         return areas
 
-    def add_regions_and_areas_to_spectra(self, regions, areas):
+    def add_regions_and_areas_to_spectra(self, regions: list, areas: list):
         """
         Define each spectra by its region and area defintions.
 
@@ -1202,7 +1205,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
         else:
             print("This binary encoding is not supported.")
 
-    def extract_unit(self, key, value):
+    def extract_unit(self, key: str, value):
         """
         Extract units for the metadata containing unit information.
 
@@ -1249,7 +1252,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         return value, unit
 
-    def map_values(self, key, value, field_type):
+    def map_values(self, key: str, value, field_type):
         """
         Map values to corresponding structure and field type.
 
@@ -1322,7 +1325,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
         for spectrum in self.spectra:
             spectrum.update(flattened_metadata)
 
-    def _flatten_dict(self, metadata_dict):
+    def _flatten_dict(self, metadata_dict: Dict[str, Any]):
         """
         Flatten metadata dict so that key-value pairs of nested
         dictionaries are at the top level.
@@ -1339,7 +1342,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         """
 
-        def shorten_supkey(supkey):
+        def shorten_supkey(supkey: str):
             """Shorted the key for some nested dicts."""
             shortened_key_map = {
                 "xray_source": "xray",
@@ -1372,18 +1375,18 @@ class PhiParser:  # pylint: disable=too-few-public-methods
         return flattened_dict
 
 
-def convert_pascal_to_snake(str_value):
+def convert_pascal_to_snake(str_value: str):
     """Convert pascal case text to snake case."""
     pattern = re.compile(r"(?<!^)(?=[A-Z])")
     return pattern.sub("_", str_value).lower()
 
 
-def convert_snake_to_pascal(str_value):
+def convert_snake_to_pascal(str_value: str):
     """Convert snakecase text to pascal case."""
     return str_value.replace("_", " ").title().replace(" ", "")
 
 
-def _map_file_type(value):
+def _map_file_type(value: str):
     """Map file_type to easily understandable values."""
     value = value.strip()
     file_type_map = {
@@ -1396,7 +1399,7 @@ def _map_file_type(value):
     return value
 
 
-def _parse_datetime(value):
+def _parse_datetime(value: str):
     """
     Parse datetime into a datetime.datetime object.
 
@@ -1420,7 +1423,7 @@ def _parse_datetime(value):
     return date_object.isoformat()
 
 
-def _convert_bool(value):
+def _convert_bool(value: str):
     """Convert "yes", "no" to actual boooleans."""
     if value in ["yes", "Yes"]:
         return True
@@ -1429,33 +1432,31 @@ def _convert_bool(value):
     return None
 
 
-def _map_to_list(value):
+def _map_to_list(value: str):
     """Map all items in value to a list."""
     try:
         sep = ", " if ", " in value else " "
-        values = value.split(sep)
-        values = [float(value) for value in value.split(sep)]
+        values = [float(val) for val in value.split(sep)]
     except ValueError:
         sep = ","
-        values = value.split(sep)
-        values = [float(value) for value in value.split(sep)]
+        values = [float(val) for val in value.split(sep)]
 
     return values
 
 
-def _map_to_xy(value):
+def _map_to_xy(value: str):
     """Map items in value to a dictionary with keys x and y."""
     x, y = value.split(" ")
     return {"x": x, "y": y}
 
 
-def _map_to_xy_with_units(value):
+def _map_to_xy_with_units(value: str):
     """Map items in value to a dictionary with keys x ."""
     x, y, unit = value.split(" ")
     return {"x": x, "x_units": unit, "y": y, "y_units": unit}
 
 
-def _convert_experimental_technique(value):
+def _convert_experimental_technique(value: str):
     """Map technique to the values defined in NXmpes."""
     measurement_types_map = {
         "XPS": "X-ray photoelectron spectroscopy (XPS)",
@@ -1469,13 +1470,13 @@ def _convert_experimental_technique(value):
     return value
 
 
-def _convert_energy_referencing(value):
+def _convert_energy_referencing(value: str):
     """Map all items in energy_referencing to a dictionary."""
     peak, energy = value.split(" ")
     return {"peak": peak, "energy": energy, "energy_units": "eV"}
 
 
-def _convert_energy_scan_mode(value):
+def _convert_energy_scan_mode(value: str):
     """Map energy_scan_mode to the values defined in NXmpes."""
     energy_scan_mode_map = {
         "FixedAnalyzerTransmission": "fixed_analyser_transmission",
@@ -1492,13 +1493,13 @@ def _convert_energy_scan_mode(value):
     return value
 
 
-def _convert_channel_info(value):
+def _convert_channel_info(value: str):
     """Split channel information into list."""
     channel_number, setting_a, setting_b = value.split(" ")
     return [int(setting_a), float(setting_b)]
 
 
-def _convert_xray_source_params(value):
+def _convert_xray_source_params(value: str):
     """Map all items in xray_source_params to a dictionary."""
     label, energy, mono = value.split(" ")
 
@@ -1510,7 +1511,7 @@ def _convert_xray_source_params(value):
     }
 
 
-def _convert_xray_source_settings(value):
+def _convert_xray_source_settings(value: str):
     """Map all items in xray_source_settings to a dictionary."""
     (xray_settings) = re.split(r"(\d+)", value)
 
@@ -1530,7 +1531,7 @@ def _convert_xray_source_settings(value):
     }
 
 
-def _convert_stage_positions(value):
+def _convert_stage_positions(value: str):
     """Map all items in stage_positions to a dictionary."""
     x, y, z, azimuth, polar = value.split(" ")
 

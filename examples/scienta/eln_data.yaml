@@ -1,0 +1,92 @@
+title: XPS Experiment
+definition:
+  value: NXmpes
+  version: "1.0"
+method: XPS
+User:
+  name: Alexei Nefedov
+  email: alexei.nefedov@kit.edu
+  affiliation: Karlsruhe Institute of Technology (KIT), Institut für Funktionelle Grenzflächen
+  address: KIT
+  orcid: 0000-0001-9361-8333
+Instrument:
+  energy_resolution:
+    unit: null
+    value: null
+  Source:
+    type: Synchrotron X-ray Source
+    name: BESSY II"
+    probe: x-ray
+    current:
+      value: 298
+      unit: mA
+  Beam:
+    distance:
+      unit: mm
+      value: 0.0
+    #current:
+      #value: 30
+      #unit: "pA"
+  Analyser:
+    name: Hemispherical Analyser dummy
+    description: hemispherical
+    Collectioncolumn:
+      scheme: Angular dispersive
+    Energydispersion:
+      scheme: hemispherical
+      pass_energy:
+        unit: eV
+      APERTURE[entrance_slit]:
+        description: Analyser slit Nr. 3
+        shape: curved slit
+        size:
+          value: 0.4
+          unit: mm
+    Detector:
+      amplifier_type: channeltron
+      detector_type: Multi-anode
+  Manipulator:
+    drain_current:
+      unit: A
+      value: 0.0
+    sample_temperature:
+      unit: K
+      value: 298.0
+    sample_bias:
+      unit: V
+      value: 0.0
+    POSITIONER[positioner_x]:
+      value:
+        value: 15.5
+        unit: cm
+    POSITIONER[positioner_y]:
+      value:
+        value: 11
+        unit: cm
+    POSITIONER[positioner_z]:
+      value:
+        value: 36
+        unit: cm
+    POSITIONER[positioner_phi]:
+      value:
+        value: 45
+        unit: degree
+Sample:
+  chemical_formula: Cu
+  temperature:
+    unit: K
+    value: 298.0
+  situation: vacuum
+  gas_pressure:
+    unit: mbar
+    value: 0.000000001
+  bias:
+    unit: V
+    value: 0.0
+  preparation_date: "2023-03-08T10:49:12+01:00"
+  sample_history: transferred to analysis chamber
+  preparation_description: loaded in the endstation and transferred to analysis chamber
+  description: Cu-HHTP/Glass on standard sample holder
+Process:
+  energy_calibration:
+    applied: True

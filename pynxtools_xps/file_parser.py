@@ -24,7 +24,7 @@ Generic Classes for reading XPS files into python dictionary.
 from typing import List, Dict
 
 from pynxtools_xps.sle.sle_specs import SleMapperSpecs
-from pynxtools_xps.scienta.txt_scienta import TxtMapperScienta
+from pynxtools_xps.scienta.scienta_txt import TxtMapperScienta
 
 # from pynxtools_xps.txt.txt_specs import TxtMapperSpecs
 from pynxtools_xps.vms.txt_vamas_export import TxtMapperVamasExport

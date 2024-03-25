@@ -578,7 +578,7 @@
     "@axes":["energy"],
     "data":"@data:cycle",
     "data/@units":"@xps_token:data/intensity/@units",
-    "energy":"@link:/entry/process/energy_referencing/calibrated_axis",
+    "energy":"@data:energy",
     "energy/@type":"@xps_token:data/energy/@type",
     "energy/@units":"@xps_token:data/energy/@units",
     "@energy_indices":"None",

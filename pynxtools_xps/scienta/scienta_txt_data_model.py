@@ -37,7 +37,7 @@ class ScientaRegion(XpsDataclass):
     region_name: str = ""
     energy_type: str = ""
     energy_size: int = 0
-    energy_axis: np.ndarray = np.array([])
+    energy_axis: np.ndarray = field(default_factory=lambda: np.zeros(0))
     lens_mode: str = ""
     pass_energy: float = 0.0
     pass_energy_units: str = "eV"

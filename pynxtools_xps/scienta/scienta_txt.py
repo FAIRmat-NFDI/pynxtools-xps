@@ -509,12 +509,8 @@ class ScientaTxtHelper:
 
         for k in keys:
             if k in input_key:
-                if not isinstance(value_map[k], list):
-                    map_methods = [value_map[k]]
-                else:
-                    map_methods = value_map[k]
-                for method in map_methods:
-                    value = method(value)
+                map_method = value_map[k]
+                value = map_method(value)  # type: ignore[operator]
         return value
 
 

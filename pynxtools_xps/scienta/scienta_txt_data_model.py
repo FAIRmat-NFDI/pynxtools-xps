@@ -35,8 +35,10 @@ class ScientaHeader(XpsDataclass):
 class ScientaRegion(XpsDataclass):
     region_id: int = 0
     region_name: str = ""
-    energy_type: str = ""
+    dim_energy_type: str = ""
+    energy_type: str = "binding"  # energy_scale
     energy_size: int = 0
+    energy_units: int = 0
     energy_axis: np.ndarray = field(default_factory=lambda: np.zeros(0))
     lens_mode: str = ""
     pass_energy: float = 0.0
@@ -44,9 +46,8 @@ class ScientaRegion(XpsDataclass):
     no_of_scans: int = 0
     excitation_energy: float = 0.0
     excitation_energy_units: str = "eV"
-    energy_type: str = "binding"  # energy_scale
     acquisition_mode: str = ""
-    energy_units: str = "kinetic"  # ???
+    # energy_units: str = "kinetic"  # ???
     center_energy: float = 0.0
     center_energy_units: str = "eV"
     start_energy: float = 0.0
@@ -54,7 +55,7 @@ class ScientaRegion(XpsDataclass):
     stop_energy: float = 0.0
     stop_energy_units: str = "eV"
     step_size: float = 0.0
-    stop_energy_units: str = "eV"
+    step_size_units: str = "eV"
     dwell_time: float = 0.0
     dwell_time_units: str = "eV"
     detector_first_x_channel: int = 0

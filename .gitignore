@@ -201,6 +201,6 @@ cython_debug/
 *.txt
 !requirements.txt
 !dev-requirements.txt
-!mkdocs-requirements.txt
+!Ag_*.txt
 build/
 .python-version

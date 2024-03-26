@@ -180,7 +180,7 @@ class TxtMapperScienta(XPSMapper):
 
         """
         # pylint: disable=too-many-locals,duplicate-code
-        group_parent = f'{self._root_path}/Region_{spectrum["spectrum_type"]}'
+        group_parent = f'{self._root_path}/Group_{spectrum["spectrum_type"]}'
         region_parent = f'{group_parent}/regions/Region_{spectrum["region_name"]}'
         file_parent = f"{region_parent}/file_info"
         instrument_parent = f"{region_parent}/instrument"
@@ -200,7 +200,7 @@ class TxtMapperScienta(XPSMapper):
             "calibration": f"{instrument_parent}/calibration",
             "sample": f"{region_parent}/sample",
             "data": f"{region_parent}/data",
-            "region": f"{region_parent}",
+            "region": f"{region_parent}/region",
         }
 
         for grouping, spectrum_keys in key_map.items():

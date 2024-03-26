@@ -124,7 +124,7 @@
           "identifier":"@eln"
         },
         "raw_data":{
-          "@signal":"None",
+          "@signal":"raw",
           "raw":"@detector_data:cycles/Cycle_",
           "raw/@units":"counts"
         }

@@ -39,6 +39,37 @@ from pynxtools_xps.reader_utils import (
 
 from pynxtools_xps.scienta.scienta_txt_data_model import ScientaHeader, ScientaRegion
 
+KEY_MAP: Dict[str, str] = {
+    "number_of_regions": "no_of_regions",
+    "version": "software_version",
+    "dimension_name": "energy_type",
+    "dimension_size": "energy_size",
+    "dimension_scale": "energy_axis",
+    "number_of_sweeps": "no_of_scans",
+    "low_energy": "start_energy",
+    "high_energy": "stop_energy",
+    "energy_step": "step_size",
+    "step_time": "dwell_time",
+    "detector_first_x-_channel": "detector_first_x_channel",
+    "detector_last_x-_channel": "detector_last_x_channel",
+    "detector_first_y-_channel": "detector_first_y_channel",
+    "detector_last_y-_channel": "detector_last_y_channel",
+    "file": "data_file",
+    "sequence": "sequence_file",
+    "spectrum_name": "spectrum_type",
+    "instrument": "instrument_name",
+    "location": "vendor",
+    "user": "user_name",
+    "sample": "sample_name",
+    "comments": "spectrum_comment",
+    "date": "start_date",
+    "time": "start_time",
+    "name": "energy_type",
+    "size": "energy_size",
+    "scale": "energy_axis",
+    "Transmission": "fixed analyzer transmission",
+}
+
 
 class TxtMapperScienta(XPSMapper):
     """
@@ -78,7 +109,10 @@ class TxtMapperScienta(XPSMapper):
                 "vendor",
             ],
             "source": [],
-            "beam": ["excitation_energy"],
+            "beam": [
+                "excitation_energy",
+                "excitation_energy/@units",
+            ],
             "analyser": [],
             "collectioncolumn": [
                 "lens_mode",
@@ -86,6 +120,7 @@ class TxtMapperScienta(XPSMapper):
             "energydispersion": [
                 "acquisition_mode",
                 "pass_energy",
+                "pass_energy/@units",
             ],
             "detector": [
                 "detector_first_x_channel",
@@ -94,18 +129,28 @@ class TxtMapperScienta(XPSMapper):
                 "detector_last_y_channel",
                 "detector_mode",
                 "dwell_time",
+                "dwell_time/@units",
+                "time_per_spectrum_channel",
+                "time_per_spectrum_channel/@units",
             ],
             "manipulator": [],
             "calibration": [],
             "sample": ["sample_name"],
             "data": [
-                "x_units",
+                "energy_unit",
+                "energy/@units",
                 "energy_axis",
                 "energy_type",
+                "center_energy",
+                "center_energy/@units",
+                "start_energy",
+                "start_energy/@units",
+                "stop_energy",
+                "stop_energy/@units",
                 "step_size",
+                "step_size/@units",
             ],
             "region": [
-                "center_energy",
                 "energy_scale",
                 "energy_size",
                 "no_of_scans",
@@ -177,15 +222,15 @@ class TxtMapperScienta(XPSMapper):
         detector_data_key = f'{path_map["detector"]}/{detector_data_key_child}/counts'
 
         # Write raw data to detector.
-        self._xps_dict[detector_data_key] = spectrum["data"]["y"]
+        self._xps_dict[detector_data_key] = spectrum["data"]["intensity"]
 
         # If multiple spectra exist to entry, only create a new
         # xr.Dataset if the entry occurs for the first time.
         if entry not in self._xps_dict["data"]:
             self._xps_dict["data"][entry] = xr.Dataset()
 
-        energy = np.array(spectrum["data"]["x"])
-        intensity = spectrum["data"]["y"]
+        energy = np.array(spectrum["data"]["energy"])
+        intensity = spectrum["data"]["intensity"]
 
         # Write to data in order: scan, cycle, channel
 
@@ -215,47 +260,6 @@ class TxtMapperScienta(XPSMapper):
         self._xps_dict["data"][entry][channel_key] = xr.DataArray(
             data=intensity, coords={"energy": energy}
         )
-
-
-# =============================================================================
-# dimension_1_name
-# dimension_1_size
-# dimension_1_size
-# dimension_1_scale
-# dimension_1_scale
-# =============================================================================
-
-KEY_MAP = {
-    "number_of_regions": "no_of_regions",
-    "version": "software_version",
-    "dimension_name": "energy_type",
-    "dimension_size": "energy_size",
-    "dimension_scale": "energy_axis",
-    "number_of_sweeps": "no_of_scans",
-    "energy_unit": "x_units",
-    "low_energy": "start_energy",
-    "high_energy": "stop_energy",
-    "energy_step": "step_size",
-    "step_time": "dwell_time",
-    "detector_first_x-_channel": "detector_first_x_channel",
-    "detector_last_x-_channel": "detector_last_x_channel",
-    "detector_first_y-_channel": "detector_first_y_channel",
-    "detector_last_y-_channel": "detector_last_y_channel",
-    "file": "data_file",
-    "sequence": "sequence_file",
-    "spectrum_name": "spectrum_type",
-    "instrument": "instrument_name",
-    "location": "vendor",
-    "user": "user_name",
-    "sample": "sample_name",
-    "comments": "spectrum_comment",
-    "date": "start_date",
-    "time": "start_time",
-    "name": "energy_type",
-    "size": "energy_size",
-    "scale": "energy_axis",
-    "Transmission": "fixed analyzer transmission",
-}
 
 
 class ScientaTxtHelper:
@@ -380,8 +384,8 @@ class ScientaTxtHelper:
                     key = self._re_map_keys(key_part)
 
                     value = self._re_map_values(key, value)
-                    if self._check_valid_value(value):
-                        setattr(region, key, value)
+                if self._check_valid_value(value):
+                    setattr(region, key, value)
 
             if begin_info:
                 # Read instrument meta data for this region.
@@ -396,7 +400,7 @@ class ScientaTxtHelper:
                 energies.append(energy)
                 intensities.append(intensity)
 
-        region.data = {"x": np.array(intensities), "y": np.array(energies)}
+        region.data = {"energy": np.array(energies), "intensity": np.array(intensities)}
 
         # Convert date and time to ISO8601 date time.
         region.time_stamp = _construct_date_time(region.start_date, region.start_time)
@@ -404,6 +408,11 @@ class ScientaTxtHelper:
         region.validate_types()
 
         region_dict = {**self.header.dict(), **region.dict()}
+
+        for key in region_dict.copy().keys():
+            if "_units" in key:
+                new_key = key.replace("_units", "/@units")
+                region_dict[new_key] = region_dict.pop(key)
 
         self.spectra.append(region_dict)
 
@@ -422,7 +431,10 @@ class ScientaTxtHelper:
             True if the string or np.ndarray is not empty.
 
         """
-        if isinstance(value, str) and value:
+        for datatype in [str, int, float]:
+            if isinstance(value, datatype) and value:
+                return True
+        if isinstance(value, bool):
             return True
         if isinstance(value, np.ndarray) and value.size != 0:
             return True
@@ -498,7 +510,7 @@ class ScientaTxtHelper:
             "detector_first_y_channel": int,
             "detector_last_y_channel": int,
             "time_per_spectrum_channel": float,
-            "x_units": _change_energy_type,
+            "energy_unit": _change_energy_type,
             "energy_axis": _separate_dimension_scale,
             "energy_scale": _change_energy_type,
             "acquisition_mode": _change_scan_mode,
@@ -536,9 +548,9 @@ def _change_energy_type(energy_type: str):
 
     """
     if "Binding" in energy_type:
-        return "binding energy"
+        return "binding"
     if "Kinetic" in energy_type:
-        return "kinetic energy"
+        return "kinetic"
     return None
 
 

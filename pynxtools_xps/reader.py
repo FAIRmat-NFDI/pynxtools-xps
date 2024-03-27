@@ -194,6 +194,7 @@ def fill_data_group(
                 ],
                 axis=0,
             )
+            template[f"{modified_key}_errors/@units"] = units
 
             template[f"{modified_key}/@long_name"] = "XPS intensity"
 

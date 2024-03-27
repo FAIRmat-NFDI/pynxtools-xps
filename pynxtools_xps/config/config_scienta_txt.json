@@ -7,7 +7,7 @@
     "title":"@eln",
     "start_time":"@xps_token:time_stamp",
     "end_time":"@eln",
-    "method":"@xps_token:region/analysis_method",
+    "method":"X-ray photoelectron spectroscopy (XPS)",
     "experiment_institution":"@eln",
     "experiment_facility":"@eln",
     "experiment_laboratory":"@eln",
@@ -33,8 +33,8 @@
     "energy_resolution":{
       "physical_quantity":"energy",
       "type":"derived",
-      "resolution":"@xps_token:data/step_size",
-      "resolution/@units":"@xps_token:data/step_size/@units"
+      "resolution":"@xps_token:region/step_size",
+      "resolution/@units":"@xps_token:region/step_size/@units"
     },
     "source_TYPE[source_xray]":{
       "type":"@eln",
@@ -75,8 +75,8 @@
       "energy_resolution":{
         "physical_quantity":"energy",
         "type":"derived ",
-        "resolution":"@xps_token:data/step_size",
-        "resolution/@units":"@xps_token:data/step_size/@units"
+        "resolution":"@xps_token:region/step_size",
+        "resolution/@units":"@xps_token:region/step_size/@units"
       },
       "transmission_function":"None",
       "COLLECTIONCOLUMN[collectioncolumn]":{
@@ -267,8 +267,8 @@
     "data":"@data:cycle",
     "data/@units":"counts_per_second",
     "energy":"@data:energy",
-    "energy/@units":"eV",
-    "energy/@type":"@xps_token:data/energy_type",
+    "energy/@units":"@xps_token:region/energy/@units",
+    "energy/@type":"@xps_token:region/energy_scale",
     "@energy_indices":"None",
     "@energy_depends":"None"
   }

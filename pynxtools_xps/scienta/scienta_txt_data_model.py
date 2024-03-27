@@ -36,8 +36,9 @@ class ScientaRegion(XpsDataclass):
     region_id: int = 0
     region_name: str = ""
     dim_energy_type: str = ""
-    energy_type: str = "binding"  # energy_scale
     energy_size: int = 0
+    energy_scale: str = ""
+    energy_scale_2: str = ""
     energy_units: str = "eV"
     energy_axis: np.ndarray = field(default_factory=lambda: np.zeros(0))
     lens_mode: str = ""

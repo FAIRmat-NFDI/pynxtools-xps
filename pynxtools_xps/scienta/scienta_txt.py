@@ -42,10 +42,11 @@ from pynxtools_xps.scienta.scienta_txt_data_model import ScientaHeader, ScientaR
 KEY_MAP: Dict[str, str] = {
     "number_of_regions": "no_of_regions",
     "version": "software_version",
-    "dimension_name": "energy_type",
+    "dimension_name": "energy_units",
     "dimension_size": "energy_size",
     "dimension_scale": "energy_axis",
     "number_of_sweeps": "no_of_scans",
+    "energy_unit": "energy_scale_2",
     "low_energy": "start_energy",
     "high_energy": "stop_energy",
     "energy_step": "step_size",
@@ -64,10 +65,7 @@ KEY_MAP: Dict[str, str] = {
     "comments": "spectrum_comment",
     "date": "start_date",
     "time": "start_time",
-    "name": "energy_type",
-    "size": "energy_size",
-    "scale": "energy_axis",
-    "Transmission": "fixed analyzer transmission",
+    "transmission": "fixed analyzer transmission",
 }
 
 
@@ -136,28 +134,23 @@ class TxtMapperScienta(XPSMapper):
             "manipulator": [],
             "calibration": [],
             "sample": ["sample_name"],
-            "data": [
-                "energy_unit",
-                "energy/@units",
-                "energy_axis",
-                "energy_type",
+            "region": [
                 "center_energy",
                 "center_energy/@units",
-                "start_energy",
-                "start_energy/@units",
-                "stop_energy",
-                "stop_energy/@units",
-                "step_size",
-                "step_size/@units",
-            ],
-            "region": [
+                "energy_axis",
                 "energy_scale",
+                "energy_scale_2",
                 "energy_size",
+                "energy/@units",
                 "no_of_scans",
                 "region_id",
                 "spectrum_comment",
                 "start_energy",
+                "start_energy/@units",
+                "step_size",
+                "step_size/@units",
                 "stop_energy",
+                "stop_energy/@units",
                 "time_stamp",
             ],
             # 'unused': [
@@ -510,9 +503,10 @@ class ScientaTxtHelper:
             "detector_first_y_channel": int,
             "detector_last_y_channel": int,
             "time_per_spectrum_channel": float,
-            "energy_unit": _change_energy_type,
+            "energy_units": _extract_energy_units,
             "energy_axis": _separate_dimension_scale,
-            "energy_scale": _change_energy_type,
+            "energy_scale": _change_energy_scale,
+            "energy_scale_2": _change_energy_scale,
             "acquisition_mode": _change_scan_mode,
             "time_per_spectrum_channel": float,
         }
@@ -542,16 +536,34 @@ def str_to_float(str_value: str):
     return int(str_value)
 
 
-def _change_energy_type(energy_type: str):
+def _extract_energy_units(energy_units: str):
     """
-    Change the strings for energy type to the preferred format.
+    Extract energy units from the strings for energy_units.
+    Binding Energy [eV] -> eV
 
     """
-    if "Binding" in energy_type:
-        return "binding"
-    if "Kinetic" in energy_type:
-        return "kinetic"
-    return None
+    return re.search(r"\[(.*?)\]", energy_units).group(1)
+
+
+def _change_energy_scale(energy_scale: str):
+    """
+    Change the strings for energy scale to the preferred format.
+
+    """
+    energy_scale_map = {
+        "Binding": "binding",
+        "binding": "binding",
+        "Binding Energy": "binding",
+        "binding energy": "binding",
+        "Kinetic": "kinetic",
+        "kinetic": "kinetic",
+        "Kinetic Energy": "kinetic",
+        "kinetic energy": "kinetic",
+    }
+
+    if energy_scale in energy_scale_map:
+        return energy_scale_map[energy_scale]
+    return energy_scale
 
 
 def _separate_dimension_scale(scale: str):

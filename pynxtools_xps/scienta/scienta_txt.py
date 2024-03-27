@@ -167,7 +167,9 @@ class TxtMapperScienta(XPSMapper):
         for spectrum in spectra:
             self._update_xps_dict_with_spectrum(spectrum, key_map)
 
-    def _update_xps_dict_with_spectrum(self, spectrum, key_map):
+    def _update_xps_dict_with_spectrum(
+        self, spectrum: Dict[str, Any], key_map: Dict[str, List[str]]
+    ):
         """
         Map one spectrum from raw data to NXmpes-ready dict.
 
@@ -265,7 +267,7 @@ class ScientaTxtHelper:
         self.header = ScientaHeader()
         self.spectra: Dict[str, Any] = []
 
-    def parse_file(self, file):
+    def parse_file(self, file: Union[str, Path]):
         """
         Parse the file's data and metadata into a flat
         list of dictionaries.
@@ -290,7 +292,7 @@ class ScientaTxtHelper:
 
         return self.spectra
 
-    def _read_lines(self, file):
+    def _read_lines(self, file: Union[str, Path]):
         """
         Read all lines from the input txt files.
 
@@ -409,7 +411,7 @@ class ScientaTxtHelper:
 
         self.spectra.append(region_dict)
 
-    def _check_valid_value(self, value):
+    def _check_valid_value(self, value: Union[str, int, float, bool, np.ndarray]):
         """
         Check if a string or an array is empty.
 
@@ -433,7 +435,7 @@ class ScientaTxtHelper:
             return True
         return False
 
-    def _get_key_value_pair(self, line):
+    def _get_key_value_pair(self, line: str):
         """
         Split the line at the '=' sign and return a
         key-value pair. The values are mapped according
@@ -465,7 +467,7 @@ class ScientaTxtHelper:
 
         return key, value
 
-    def _re_map_keys(self, key):
+    def _re_map_keys(self, key: str):
         """
         Map the keys returned from the file to the preferred keys for
         the parser output.

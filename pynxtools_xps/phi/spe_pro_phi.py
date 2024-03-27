@@ -879,22 +879,21 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         def map_keys(key: str, channel_count: int):
             """Maps key names for better identification of fields."""
-            if key.startswith("neut"):
-                key = key.replace("neut_", "neutral_")
+            prefix_map = {
+                "neut": ("neut_", "neutral_"),
+                "prof": ("prof_", "profiling_"),
+                "x_ray": ("x_ray", "xray"),
+                "egun_neut": ("egun_neut", "flood_gun"),
+            }
 
-            elif key.startswith("prof"):
-                key = key.replace("prof_", "profiling_")
+            for prefix, (initial, replacement) in prefix_map.items():
+                if key.startswith(prefix):
+                    key = key.replace(initial, replacement)
 
-            elif key.startswith("x_ray"):
-                key = key.replace("x_ray", "xray")
-
-            elif key.startswith("egun_neut"):
-                key = key.replace("egun_neut", "flood_gun")
-
-            elif key.startswith("sxi_lens"):
+            if key.startswith("sxi_lens"):
                 key += "_voltage"
 
-            elif key.startswith("channel _info"):
+            if key.startswith("channel _info"):
                 key = f"channel_{channel_count}_info"
                 channel_count += 1
 

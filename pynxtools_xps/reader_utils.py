@@ -286,7 +286,7 @@ def construct_detector_data_key(spectrum):
     if "scan_no" in spectrum:
         scan_key = f'scans/Scan_{spectrum["scan_no"]}'
     else:
-        scan_key = f"scans/Scan_0"
+        scan_key = "scans/Scan_0"
 
     key = f"{cycle_key}/{scan_key}"
 
@@ -296,15 +296,18 @@ def construct_detector_data_key(spectrum):
     return key
 
 
+KEY_PATTERNS = [
+    re.compile(rf"{key_part}(.*?)(?=\/|$)")
+    for key_part in ["Group_", "Region_", "RegionData_"]
+]
+
+
 def construct_entry_name(key):
-    """Construction entry name."""
+    """Construct entry name."""
     name_parts = []
 
-    for key_part in ["Group_", "Region_", "RegionData_"]:
-        try:
-            pattern = rf"{key_part}(.*?)(?=\/|$)"
-            name_parts += [re.search(pattern, key).group(1)]
-        except AttributeError:
-            pass
-
+    for key_pattern in KEY_PATTERNS:
+        match = re.search(key_pattern, key)
+        if match:
+            name_parts.append(match.group(1))
     return "__".join(name_parts)

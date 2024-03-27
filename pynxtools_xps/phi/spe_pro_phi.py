@@ -77,7 +77,7 @@ SETTINGS_MAP: Dict[str, str] = {
     "neutral_condensor_volt": "neutral_condenser_lens_voltage",
     "neutral_objective_volt": "neutral_objective_lens_voltage",
     "neutral_bend_volt": "neutral_bend_voltage",
-    "no_d_p_data_cyc": "no_depth_profile_data_cycles",
+    "no_d_p_data_cyc": "no_depth_profile_cycles",
     "no_pre_sputter_cyc": "no_pre_sputter_cycles",
     "sample_rotation": "profiling_sample_rotation",
     "depth_recal": "profiling_depth_recalibration",
@@ -648,7 +648,7 @@ class MapperPhi(XPSMapper):
                 "tfc_parameters",
             ],
             "profiling": [
-                "no_depth_profile_data_cycles",
+                "no_depth_profile_cycles",
                 "no_pre_sputter_cycles",
                 "profiling_sputter_delay",
                 "profiling_sputter_delay/@units",
@@ -720,11 +720,8 @@ class MapperPhi(XPSMapper):
         for grouping, spectrum_keys in key_map.items():
             root = path_map[str(grouping)]
             for spectrum_key in spectrum_keys:
-                try:
-                    mpes_key = spectrum_key
-                    self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
-                except KeyError:
-                    pass
+                mpes_key = spectrum_key
+                self._xps_dict[f"{root}/{mpes_key}"] = spectrum.get(spectrum_key)
 
         # Create keys for writing to data and detector
         entry = construct_entry_name(region_parent)

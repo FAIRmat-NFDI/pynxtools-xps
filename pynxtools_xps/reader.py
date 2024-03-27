@@ -145,7 +145,7 @@ def fill_data_group(
             count += 1
             template[f"{root}@default"] = entry
 
-        modified_key = key.replace("entry", entry)
+        modified_key = key.replace("/ENTRY[entry]/", f"/ENTRY[{entry}]/")
 
         if key_part == "energy":
             energy = np.array(xr_data.coords["energy"].values)
@@ -210,7 +210,7 @@ def fill_detector_group(key, entries_values, config_dict, xps_data_dict, templat
     unit_config_value = config_dict[f"{key}/@units"]
 
     for entry, xr_data in entries_values.items():
-        modified_key = key.replace("entry", entry)
+        modified_key = key.replace("/ENTRY[entry]/", f"/ENTRY[{entry}]/")
 
         if XPS_TOKEN in unit_config_value:
             key_part = unit_config_value.split(XPS_TOKEN)[-1]
@@ -240,8 +240,9 @@ def fill_detector_group(key, entries_values, config_dict, xps_data_dict, templat
                     detector_scans[detector_nm] += [xr_data[data_var].data]
                     cycle_scan_num = data_var.split(chan_count)[0]
                     detector_key = modified_key.replace(
-                        "[detector]", f"[{detector_nm}]"
+                        "/DETECTOR[detector]/", f"/DETECTOR[{detector_nm}]/"
                     )
+
                     cycle_scan_key = detector_key.replace(
                         "raw_data/raw", f"raw_data/{cycle_scan_num}"
                     )
@@ -249,7 +250,9 @@ def fill_detector_group(key, entries_values, config_dict, xps_data_dict, templat
                     template[f"{cycle_scan_key}/@units"] = units
             else:
                 # If there is no channel data, iterate over scans
-                detector_key = modified_key.replace("[detector]", "[detector0]")
+                detector_key = modified_key.replace(
+                    "/DETECTOR[detector]/", "/DETECTOR[detector_0]/"
+                )
                 if scan_count in data_var:
                     detector_scans["detector0"] += [xr_data[data_var].data]
                     scan_key = detector_key.replace(
@@ -261,7 +264,9 @@ def fill_detector_group(key, entries_values, config_dict, xps_data_dict, templat
 
         # Add multi-dimensional `raw` array for each detector
         for detector_nm, value in detector_scans.items():
-            modified_key = modified_key.replace("[detector]", f"[{detector_nm}]")
+            modified_key = modified_key.replace(
+                "/DETECTOR[detector]/", f"/DETECTOR[{detector_nm}]/"
+            )
             template[modified_key] = np.array(value)
 
 
@@ -296,14 +301,17 @@ def fill_template_with_value(key, value, template):
     for entry in ENTRY_SET:
         if isinstance(value, dict) and LINK_TOKEN in value:
             # Reset link to original
-            value[LINK_TOKEN] = initial_link_text.replace("entry", f"{entry}")
+            value[LINK_TOKEN] = initial_link_text.replace("/entry/", f"/{entry}/")
 
-        modified_key = key.replace("[entry]", f"[{entry}]")
+        modified_key = key.replace("/ENTRY[entry]/", f"/ENTRY[{entry}]/")
 
         # Do for all detectors
         if "[detector]" in key:
             for detector in DETECTOR_SET:
-                detr_key = modified_key.replace("[detector]", f"[{detector}]")
+                detr_key = modified_key.replace(
+                    "/DETECTOR[detector]/", f"/DETECTOR[{detector}]/"
+                )
+
                 template[detr_key] = value
 
                 if isinstance(value, dict) and LINK_TOKEN in value:
@@ -311,7 +319,7 @@ def fill_template_with_value(key, value, template):
                     if "/detector/" in link_text:
                         # Only replace if generic detector is given in
                         # link.
-                        link_text = link_text.replace("detector", f"{detector}")
+                        link_text = link_text.replace("/detector/", f"/{detector}/")
                         value = {LINK_TOKEN: link_text}
                 template[detr_key] = value
 
@@ -357,7 +365,7 @@ def fill_template_with_xps_data(config_dict, xps_data_dict, template):
                     xps_data_dict, key_part, dt_typ=XPS_TOKEN
                 )
                 for entry, ent_value in entries_values.items():
-                    modified_key = key.replace("[entry]", f"[{entry}]")
+                    modified_key = key.replace("/ENTRY[entry]/", f"/ENTRY[{entry}]/")
                     fill_template_with_value(modified_key, ent_value, template)
 
         else:

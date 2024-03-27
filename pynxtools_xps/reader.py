@@ -79,7 +79,6 @@ def find_entry_and_value(xps_data_dict, key_part, dt_typ):
     """Construct the entry name and pick up the corresponding data for
     that for that entry.
     """
-
     entries_values = {}
     if dt_typ == XPS_TOKEN:
         for key, val in xps_data_dict.items():
@@ -123,11 +122,15 @@ def get_entries_and_detectors(config_dict, xps_data_dict):
 
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
-def fill_data_group(key, key_part, entries_values, config_dict, template):
+def fill_data_group(
+    key, key_part, entries_values, config_dict, xps_data_dict, template
+):
     """Fill out fields and attributes for NXdata"""
 
     survey_count_ = 0
     count = 0
+
+    unit_config_value = config_dict[f"{key}/@units"]
 
     for entry, xr_data in entries_values.items():
         root = key[0]
@@ -149,12 +152,18 @@ def fill_data_group(key, key_part, entries_values, config_dict, template):
             template[modified_key] = energy
 
         else:
-            # Define energy axis and energy_indices
+            # Define energy long name and energy_indices
             data_group_key = modified_key.rsplit("/data", 1)[0]
             template[f"{data_group_key}/energy/@long_name"] = "energy"
             template[f"{data_group_key}/@energy_indices"] = 0
 
-            units = "counts_per_second"
+            if XPS_TOKEN in unit_config_value:
+                key_part = unit_config_value.split(XPS_TOKEN)[-1]
+                for key, val in xps_data_dict.items():
+                    if key.endswith(key_part):
+                        units = val
+            else:
+                units = unit_config_value
 
             chan_count = "_chan"
             scan_count = "_scan"
@@ -195,12 +204,20 @@ def fill_detector_group(key, entries_values, config_dict, xps_data_dict, templat
     chan_count = "_chan"
     scan_count = "_scan"
 
+    # print(unit_key, units)
+
+    unit_config_value = config_dict[f"{key}/@units"]
+
     for entry, xr_data in entries_values.items():
         modified_key = key.replace("entry", entry)
 
-        # unit_key = config_dict[f"{key}/@units"]
-        # units = find_entry_and_value(xps_data_dict, unit_key, XPS_TOKEN)
-        units = "counts_per_second"
+        if XPS_TOKEN in unit_config_value:
+            key_part = unit_config_value.split(XPS_TOKEN)[-1]
+            for key, val in xps_data_dict.items():
+                if key.endswith(key_part):
+                    units = val
+        else:
+            units = unit_config_value
 
         detector_scans = {detector: [] for detector in DETECTOR_SET}
 
@@ -319,7 +336,9 @@ def fill_template_with_xps_data(config_dict, xps_data_dict, template):
                 entries_values = find_entry_and_value(
                     xps_data_dict, key_part, dt_typ=XPS_DATA_TOKEN
                 )
-                fill_data_group(key, key_part, entries_values, config_dict, template)
+                fill_data_group(
+                    key, key_part, entries_values, config_dict, xps_data_dict, template
+                )
 
             elif XPS_DETECTOR_TOKEN in str(config_value):
                 key_part = config_value.split(XPS_DATA_TOKEN)[-1]

@@ -34,7 +34,7 @@
       "physical_quantity":"energy",
       "type":"derived",
       "resolution":"@xps_token:data/step_size",
-      "resolution/@units":"eV"
+      "resolution/@units":"@xps_token:data/step_size/@units"
     },
     "source_TYPE[source_xray]":{
       "type":"@eln",
@@ -51,7 +51,7 @@
       "distance":"@eln",
       "distance/@units":"@eln",
       "incident_energy":"@xps_token:beam/excitation_energy",
-      "incident_energy/@units":"eV",
+      "incident_energy/@units":"@xps_token:beam/excitation_energy/@units",
       "incident_energy_spread":"None",
       "incident_energy_spread/@units":"None",
       "incident_polarization":"None",
@@ -115,8 +115,8 @@
       "DETECTOR[detector]":{
         "@default":"raw_data",
         "amplifier_type":"@eln",
-        "count_time":"@xps_token:region/dwell_time",
-        "count_time/@units":"@xps_token:region/dwell_time/@units",
+        "count_time":"@xps_token:detector/dwell_time",
+        "count_time/@units":"@xps_token:detector/dwell_time/@units",
         "detector_type":"@eln",
         "device_information":{
           "vendor":"@eln",
@@ -126,7 +126,7 @@
         "raw_data":{
           "@signal":"raw",
           "raw":"@detector_data:cycles/Cycle_",
-          "raw/@units":"counts"
+          "raw/@units":"counts_per_second"
         }
       }
     },

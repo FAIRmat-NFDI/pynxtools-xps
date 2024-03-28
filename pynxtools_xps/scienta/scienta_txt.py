@@ -522,22 +522,6 @@ class ScientaTxtHelper:
         return value
 
 
-def str_to_int(str_value: str):
-    """
-    Make str_value an integer.
-    Maps e.g. from '0001' string to 1.
-    """
-    return int(str_value)
-
-
-def str_to_float(str_value: str):
-    """
-    Make str_value an integer.
-    Maps e.g. from '0001' string to 1.
-    """
-    return int(str_value)
-
-
 def _extract_energy_units(energy_units: str):
     """
     Extract energy units from the strings for energy_units.

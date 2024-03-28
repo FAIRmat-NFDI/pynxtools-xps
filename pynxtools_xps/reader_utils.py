@@ -112,8 +112,13 @@ def to_snake_case(str_value):
 
 def convert_pascal_to_snake(str_value):
     """Convert pascal case text to snake case."""
-    pattern = re.compile(r"(?<!^)(?=[A-Z])")
-    return pattern.sub("_", str_value).lower()
+    # Convert CamelCase to snake_case
+    snake_case = re.sub(r"(?<!^)(?=[A-Z])", "_", str_value)
+
+    # Convert whitespace to underscores and remove extra underscores
+    snake_case_cleaned = re.sub(r"\s+", "_", snake_case).replace("__", "_")
+
+    return snake_case_cleaned.lower()
 
 
 def convert_snake_to_pascal(str_value):
@@ -298,12 +303,13 @@ def construct_detector_data_key(spectrum):
 
 def construct_entry_name(key):
     """Construction entry name."""
-    key_parts = key.split("/")
-    try:
-        # entry example : sample__name_of_scan_region
-        entry_name = (
-            f'{key_parts[2].split("_", 1)[1]}' f"__" f'{key_parts[4].split("_", 1)[1]}'
-        )
-    except IndexError:
-        entry_name = ""
-    return entry_name
+    name_parts = []
+
+    for key_part in ["Group_", "Region_", "RegionData_"]:
+        try:
+            pattern = rf"{key_part}(.*?)(?=\/|$)"
+            name_parts += [re.search(pattern, key).group(1)]
+        except AttributeError:
+            pass
+
+    return "__".join(name_parts)

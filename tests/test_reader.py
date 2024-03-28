@@ -16,7 +16,7 @@ from pynxtools_xps.reader import XPSReader
 
 
 @pytest.mark.parametrize(
-    "reader_dir",
+    "sub_reader_data_dir",
     [
         # pytest.param(
         #     "spe",
@@ -26,6 +26,10 @@ from pynxtools_xps.reader import XPSReader
         #     "pro",
         #     id="Phi .pro reader",
         # ),
+        pytest.param(
+            "scienta_txt",
+            id="Scienta txt export reader",
+        ),
         pytest.param(
             "vms_regular",
             id="Regular VAMAS reader",
@@ -40,7 +44,7 @@ from pynxtools_xps.reader import XPSReader
         ),
     ],
 )
-def test_example_data(reader_dir):
+def test_example_data(sub_reader_data_dir):
     """
     Test the example data for the XPS reader
     """
@@ -50,7 +54,7 @@ def test_example_data(reader_dir):
     def_dir = get_nexus_definitions_path()
 
     data_dir = os.path.join(os.path.dirname(__file__), "data")
-    reader_dir = os.path.join(data_dir, reader_dir)
+    reader_dir = os.path.join(data_dir, sub_reader_data_dir)
 
     input_files = sorted(glob(os.path.join(reader_dir, "*")))
 

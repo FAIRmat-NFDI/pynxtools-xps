@@ -1,0 +1,173 @@
+title: Cu-HTTP
+definition:
+  value: NXmpes
+  version: "1.0"
+method: XPS
+start_time: 2022-04-08T11:47:02.0200Z
+experiment_institution: Helmholtz-Zentrum Berlin
+experiment_facility: BESSY II
+experiment_laboratory: XPS beamline
+user:
+  name: Alexei Nefedov
+  email: alexei.nefedov@kit.edu
+  affiliation: Karlsruhe Institute of Technology (KIT), Institut für Funktionelle Grenzflächen
+  address: KIT
+  orcid: 0000-0001-9361-8333
+instrument:
+  energy_resolution:
+    type: calibrated
+    resolution:
+      value: 0.1
+      unit: eV
+  source_xray:
+    type: Synchrotron X-ray Source
+    name: BESSY II
+    probe: x-ray
+    device_information:
+      vendor: Helmholtz-Zentrum Berlin
+      model: BESSY II
+      identifier: null
+    current:
+      value: 298
+      unit: mA
+  beam_xray:
+    distance:
+      unit: mm
+      value: 0.0
+    current:
+      value: 30
+      unit: "pA"
+  analyser:
+    name: Hemispherical Analyser dummy
+    description: hemispherical
+    device_information:
+      vendor: Scienta Omicron
+      model: null
+      identifier: null
+    collectioncolumn:
+      device_information:
+        vendor: Scienta Omicron
+        model: null
+        identifier: null
+      scheme: angular dispersive
+    energydispersion:
+      device_information:
+        vendor: Scienta Omicron
+        model: null
+        identifier: null
+      scheme: hemispherical
+      pass_energy:
+        unit: eV
+      APERTURE[entrance_slit]:
+        description: Analyser slit Nr. 3
+        shape: curved slit
+        size:
+          value: 0.4
+          unit: mm
+    detector:
+      amplifier_type: channeltron
+      detector_type: Multi-anode
+  manipulator:
+    device_information:
+      vendor: Scienta Omicron
+    temperature_sensor:
+      name: type K thermocouple
+      measurement: temperature
+      attached_to: sample
+      type: type K thermocouple
+      value:
+        value: 298.0
+        unit: K
+    sample_heater:
+      name: Coherent Compact Evolution IR Diode LASER (DILAS)
+      physical_quantity: temperature
+      type: IR diode laser
+      heater_power:
+        value: 0.0
+        unit: W
+      pid:
+        setpoint:
+          value: 298.0
+          unit: K
+    cryostat:
+      name: null
+      physical_quantity: null
+      type: null
+      pid:
+        setpoint: null
+    drain_current_amperemeter:
+      name: Amperemeter 1.0
+      measurement: current
+      type: wire
+      value:
+        value: 0.1
+        unit: nA
+    sample_bias_voltmeter:
+      name: XPS sample voltmeter
+      measurement: voltage
+      attached_to: sample
+      type: oscilloscope
+      value:
+        value: 0.0
+        unit: V
+    sample_bias_potentiostat:
+      name: XPS sample potentiostat
+      physical_quantity: voltage
+      type: potentiostat
+      pid:
+        setpoint:
+          value: 0.0
+          unit: V
+    POSITIONER[positioner_x]:
+      value:
+        value: 15.5
+        unit: cm
+    POSITIONER[positioner_y]:
+      value:
+        value: 11
+        unit: cm
+    POSITIONER[positioner_z]:
+      value:
+        value: 36
+        unit: cm
+    POSITIONER[positioner_phi]:
+      value:
+        value: 45
+        unit: degree
+  pressure_gauge:
+    name: Atmion
+    measurement: pressure
+    type: hot-filament ionization gauge
+    value:
+      value: 0.000000001
+      unit: mbar
+    value_log:
+      value:
+        value: null
+        unit: null
+  flood_gun:
+    name: FG 22/35
+    physical_quantity: current
+    type: low energy electron source
+    current:
+      value: 0.0
+      unit: A
+    current_log:
+      value:
+        value: null
+        unit: null
+sample:
+  chemical_formula: Cu
+  description: Cu-HHTP/Glass on standard sample holder
+  situation: vacuum
+  sample_history:
+    sample_preparation:
+      start_time: 2022-04-08T11:25:00.200Z
+      end_time: 2022-04-08T11:45:00.200Z
+      description: sputter cleaned with Ar ions for 20 min
+      method: Ar sputtering
+    PHYSICAL_PROCESS[sample_loading]:
+      start_time: 2023-03-08T10:49:12+01:00
+      end_time: 2023-03-08T10:52:47+01:00
+      description: loaded in the endstation and transferred to analysis chamber
+      method: vacuum transfer

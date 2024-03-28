@@ -157,7 +157,7 @@ def fill_data_group(
             template[f"{data_group_key}/energy/@long_name"] = "energy"
             template[f"{data_group_key}/@energy_indices"] = 0
 
-            if XPS_TOKEN in unit_config_value:
+            if unit_config_value.startswith(XPS_TOKEN):
                 key_part = unit_config_value.split(XPS_TOKEN)[-1]
                 for key, val in xps_data_dict.items():
                     if key.endswith(key_part):
@@ -212,7 +212,7 @@ def fill_detector_group(key, entries_values, config_dict, xps_data_dict, templat
     for entry, xr_data in entries_values.items():
         modified_key = key.replace("/ENTRY[entry]/", f"/ENTRY[{entry}]/")
 
-        if XPS_TOKEN in unit_config_value:
+        if unit_config_value.startswith(XPS_TOKEN):
             key_part = unit_config_value.split(XPS_TOKEN)[-1]
             for key, val in xps_data_dict.items():
                 if key.endswith(key_part):
@@ -340,7 +340,7 @@ def fill_template_with_xps_data(config_dict, xps_data_dict, template):
         if isinstance(config_value, str) and any(
             token in config_value for token in TOKEN_SET
         ):
-            if XPS_DATA_TOKEN in str(config_value):
+            if str(config_value).startswith(XPS_DATA_TOKEN):
                 key_part = config_value.split(XPS_DATA_TOKEN)[-1]
                 entries_values = find_entry_and_value(
                     xps_data_dict, key_part, dt_typ=XPS_DATA_TOKEN
@@ -349,7 +349,7 @@ def fill_template_with_xps_data(config_dict, xps_data_dict, template):
                     key, key_part, entries_values, config_dict, xps_data_dict, template
                 )
 
-            elif XPS_DETECTOR_TOKEN in str(config_value):
+            elif str(config_value).startswith(XPS_DETECTOR_TOKEN):
                 key_part = config_value.split(XPS_DATA_TOKEN)[-1]
                 entries_values = find_entry_and_value(
                     xps_data_dict, key_part, dt_typ=XPS_DETECTOR_TOKEN
@@ -359,7 +359,7 @@ def fill_template_with_xps_data(config_dict, xps_data_dict, template):
                     key, entries_values, config_dict, xps_data_dict, template
                 )
 
-            elif XPS_TOKEN in str(config_value):
+            elif str(config_value).startswith(XPS_TOKEN):
                 key_part = config_value.split(XPS_TOKEN)[-1]
                 entries_values = find_entry_and_value(
                     xps_data_dict, key_part, dt_typ=XPS_TOKEN
@@ -375,7 +375,7 @@ def fill_template_with_xps_data(config_dict, xps_data_dict, template):
 def fill_template_with_eln_data(eln_data_dict, config_dict, template):
     """Fill the template from provided eln data"""
     for key, config_value in config_dict.items():
-        if ELN_TOKEN in str(config_value):
+        if str(config_value).startswith(ELN_TOKEN):
             try:
                 field_value = eln_data_dict[key]
                 fill_template_with_value(key, field_value, template)

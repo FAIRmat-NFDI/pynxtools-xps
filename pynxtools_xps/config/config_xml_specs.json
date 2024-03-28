@@ -239,7 +239,7 @@
       "@axes":["energy"],
       "data":"@data:cycle",
       "data/@units":"counts",
-      "energy":"@link:/entry/process/energy_calibration/calibrated_axis",
+      "energy":"@data:energy",
       "energy/@type":"kinetic",
       "energy/@units":"eV",
       "@energy_indices":"None",

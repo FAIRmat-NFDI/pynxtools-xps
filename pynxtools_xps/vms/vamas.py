@@ -31,7 +31,7 @@ import numpy as np
 
 from pynxtools_xps.vms.vamas_data_model import VamasHeader, VamasBlock
 from pynxtools_xps.vms.casa_data_model import CasaProcess
-# from pynxtools_xps.phi.spe_pro_phi import PhiParser
+from pynxtools_xps.phi.spe_pro_phi import PhiParser
 
 from pynxtools_xps.reader_utils import (
     XPSMapper,
@@ -855,7 +855,7 @@ class VamasParser:
         special_keys = {
             "Casa Info Follows": self._handle_casa_header,
             "SpecsLab Prodigy": self._handle_prodigy_header,
-            # "SOFH": self._handle_phi_header,
+            "SOFH": self._handle_phi_header,
         }
 
         for keyword, handle_func in special_keys.items():
@@ -879,7 +879,7 @@ class VamasParser:
                     special_comments = comment_list[index : end_index + 1]  # type: ignore[assignment]
                     del comment_list[index : end_index + 1]
 
-                comments.update(handle_func(special_comments))
+                comments.update(handle_func(special_comments))  # type: ignore[operator]
 
         # Handle non-special comments.
         for line in comment_list:
@@ -904,25 +904,23 @@ class VamasParser:
         """Get information about SpecsLab Prodigy version."""
         return {"prodigy_version": comment_line.split("Version")[1].strip()}
 
-    # =============================================================================
-    #     def _handle_phi_header(self, comment_list: List[str]):
-    #         """Get metadta from Phi system."""
-    #         phi_parser = PhiParser()
-    #         phi_parser.parse_header_into_metadata(comment_list)
-    #
-    #         phi_comments = phi_parser.metadata.dict()
-    #
-    #         regions = phi_parser.parse_spectral_regions(comment_list)
-    #         areas = phi_parser.parse_spatial_areas(comment_list)
-    #
-    #         for region in regions:
-    #             for area in areas:
-    #                 concatenated = {**region.dict(), **area.dict()}
-    #
-    #             phi_comments.update(concatenated)
-    #
-    #         return phi_comments
-    # =============================================================================
+    def _handle_phi_header(self, comment_list: List[str]):
+        """Get metadta from Phi system."""
+        phi_parser = PhiParser()
+        phi_parser.parse_header_into_metadata(comment_list)
+
+        phi_comments = phi_parser.metadata.dict()
+
+        regions = phi_parser.parse_spectral_regions(comment_list)
+        areas = phi_parser.parse_spatial_areas(comment_list)
+
+        for region in regions:
+            for area in areas:
+                concatenated = {**region.dict(), **area.dict()}
+
+            phi_comments.update(concatenated)
+
+        return phi_comments
 
     def handle_block_comments(self, comment_list: List[str]):
         """Handle comments (incl. Casa fitting) for each block."""

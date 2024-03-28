@@ -669,7 +669,8 @@ class XmlParserSpecs:
             "scans": {},
         }
         for key, val in self.metadata_dict.items():
-            entry = construct_entry_name(key)
+            if not key.endswith("parameters/File"):
+                entry = construct_entry_name(key)
 
             if entry and (entry not in entry_list):
                 self.entry_to_data[entry] = {"raw_data": copy.deepcopy(raw_dict)}

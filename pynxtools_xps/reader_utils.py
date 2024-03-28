@@ -296,14 +296,18 @@ def construct_detector_data_key(spectrum):
     return key
 
 
+KEY_PATTERNS = [
+    re.compile(rf"{key_part}(.*?)(?=\/|$)")
+    for key_part in ["Group_", "Region_", "RegionData_"]
+]
+
+
 def construct_entry_name(key):
-    """Construction entry name."""
-    key_parts = key.split("/")
-    try:
-        # entry example : sample__name_of_scan_region
-        entry_name = (
-            f'{key_parts[2].split("_", 1)[1]}' f"__" f'{key_parts[4].split("_", 1)[1]}'
-        )
-    except IndexError:
-        entry_name = ""
-    return entry_name
+    """Construct entry name."""
+    name_parts = []
+
+    for key_pattern in KEY_PATTERNS:
+        match = re.search(key_pattern, key)
+        if match:
+            name_parts.append(match.group(1))
+    return "__".join(name_parts)

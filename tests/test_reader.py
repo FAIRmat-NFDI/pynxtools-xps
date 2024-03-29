@@ -18,14 +18,14 @@ from pynxtools_xps.reader import XPSReader
 @pytest.mark.parametrize(
     "sub_reader_data_dir",
     [
-        # pytest.param(
-        #     "spe",
-        #     id="Phi .spe reader",
-        # ),
-        # pytest.param(
-        #     "pro",
-        #     id="Phi .pro reader",
-        # ),
+        pytest.param(
+            "spe",
+            id="Phi .spe reader",
+        ),
+        pytest.param(
+            "pro",
+            id="Phi .pro reader",
+        ),
         pytest.param(
             "scienta_txt",
             id="Scienta txt export reader",

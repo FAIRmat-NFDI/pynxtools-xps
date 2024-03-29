@@ -131,7 +131,7 @@ class TxtMapperVamasExport(XPSMapper):
         """
         # pylint: disable=too-many-locals,duplicate-code
         group_parent = f'{self._root_path}/Group_{spectrum["group_name"]}'
-        region_parent = f'{group_parent}/regions/Region_{spectrum["spectrum_type"]}'
+        region_parent = f'{group_parent}/Region_{spectrum["spectrum_type"]}'
         file_parent = f"{region_parent}/file_info"
         instrument_parent = f"{region_parent}/instrument"
         analyser_parent = f"{instrument_parent}/analyser"

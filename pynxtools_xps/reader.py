@@ -157,6 +157,7 @@ def fill_data_group(
             template[f"{data_group_key}/energy/@long_name"] = "energy"
             template[f"{data_group_key}/@energy_indices"] = 0
 
+            units = "counts_per_seconds"
             if unit_config_value.startswith(XPS_TOKEN):
                 key_part = unit_config_value.split(XPS_TOKEN)[-1]
                 for key, val in xps_data_dict.items():
@@ -175,7 +176,8 @@ def fill_data_group(
                     indv_scan_key = f"{data_group_key}/{cycle_scan}"
                     indv_scan_key_unit = f"{indv_scan_key}/@units"
                     template[indv_scan_key] = xr_data[data_var].data
-                    template[indv_scan_key_unit] = units
+                    if units:
+                        template[indv_scan_key_unit] = units
 
             template[modified_key] = np.mean(
                 [
@@ -205,13 +207,12 @@ def fill_detector_group(key, entries_values, config_dict, xps_data_dict, templat
     chan_count = "_chan"
     scan_count = "_scan"
 
-    # print(unit_key, units)
-
     unit_config_value = config_dict[f"{key}/@units"]
 
     for entry, xr_data in entries_values.items():
         modified_key = key.replace("/ENTRY[entry]/", f"/ENTRY[{entry}]/")
 
+        units = "counts"
         if unit_config_value.startswith(XPS_TOKEN):
             key_part = unit_config_value.split(XPS_TOKEN)[-1]
             for key, val in xps_data_dict.items():
@@ -247,7 +248,8 @@ def fill_detector_group(key, entries_values, config_dict, xps_data_dict, templat
                         "raw_data/raw", f"raw_data/{cycle_scan_num}"
                     )
                     template[cycle_scan_key] = xr_data[data_var].data
-                    template[f"{cycle_scan_key}/@units"] = units
+                    if units:
+                        template[f"{cycle_scan_key}/@units"] = units
             else:
                 # If there is no channel data, iterate over scans
                 detector_key = modified_key.replace(
@@ -260,7 +262,8 @@ def fill_detector_group(key, entries_values, config_dict, xps_data_dict, templat
                     )
 
                     template[scan_key] = xr_data[data_var].data
-                    template[f"{scan_key}/@units"] = units
+                    if units:
+                        template[f"{scan_key}/@units"] = units
 
         # Add multi-dimensional `raw` array for each detector
         for detector_nm, value in detector_scans.items():
@@ -311,7 +314,6 @@ def fill_template_with_value(key, value, template):
                 detr_key = modified_key.replace(
                     "/DETECTOR[detector]/", f"/DETECTOR[{detector}]/"
                 )
-
                 template[detr_key] = value
 
                 if isinstance(value, dict) and LINK_TOKEN in value:

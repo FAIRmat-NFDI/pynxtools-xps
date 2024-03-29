@@ -408,7 +408,7 @@
         "raw_data":{
           "@signal":"raw",
           "raw":"@detector_data:cycles/Cycle_",
-          "raw/@units":"@xps_token:detector/raw_data/raw/@units"
+          "raw/@units":"counts"
         }
       }
     },
@@ -528,7 +528,8 @@
       "binding_energy":"@xps_token:process/energy_reference_energy",
       "binding_energy/@units":"@xps_token:process/energy_reference_energy/@units",
       "offset":"None",
-      "calibrated_axis":"@data:energy"
+      "calibrated_axis":"@data:energy",
+      "calibrated_axis/@units":"@xps_token:data/energy/@units"
     },
     "transmission_correction":{
       "intensity_calibration_coefficients":"@xps_token:data/intensity_calibration_coefficients"

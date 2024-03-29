@@ -79,7 +79,6 @@ def find_entry_and_value(xps_data_dict, key_part, dt_typ):
     """Construct the entry name and pick up the corresponding data for
     that for that entry.
     """
-
     entries_values = {}
     if dt_typ == XPS_TOKEN:
         for key, val in xps_data_dict.items():
@@ -123,11 +122,15 @@ def get_entries_and_detectors(config_dict, xps_data_dict):
 
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
-def fill_data_group(key, key_part, entries_values, config_dict, template):
+def fill_data_group(
+    key, key_part, entries_values, config_dict, xps_data_dict, template
+):
     """Fill out fields and attributes for NXdata"""
 
     survey_count_ = 0
     count = 0
+
+    unit_config_value = config_dict[f"{key}/@units"]
 
     for entry, xr_data in entries_values.items():
         root = key[0]
@@ -144,29 +147,45 @@ def fill_data_group(key, key_part, entries_values, config_dict, template):
 
         modified_key = key.replace("/ENTRY[entry]/", f"/ENTRY[{entry}]/")
 
+        long_names = {
+            "energy": "energy",
+        }
+
         if key_part == "energy":
             energy = np.array(xr_data.coords["energy"].values)
             template[modified_key] = energy
+            long_name = key_part
+            if key_part in long_names:
+                long_name = long_names[key_part]
+            template[f"{modified_key}/@long_name"] = long_name
 
         else:
-            # Define energy axis and energy_indices
+            # Define energy long name and energy_indices
             data_group_key = modified_key.rsplit("/data", 1)[0]
-            template[f"{data_group_key}/energy/@long_name"] = "energy"
             template[f"{data_group_key}/@energy_indices"] = 0
 
-            units = "counts_per_second"
+            units = "counts_per_seconds"
+            if unit_config_value.startswith(XPS_TOKEN):
+                key_part = unit_config_value.split(XPS_TOKEN)[-1]
+                for unit_key, val in xps_data_dict.items():
+                    if unit_key.endswith(key_part):
+                        units = val
+            else:
+                units = unit_config_value
 
             chan_count = "_chan"
             scan_count = "_scan"
             for data_var in xr_data.data_vars:
                 cycle_scan = data_var
                 # Collecting only accumulated counts
-                # indivisual channeltron counts goes to detector data section
+                # individual channeltron counts go to detector data section
                 if chan_count not in cycle_scan and scan_count in cycle_scan:
                     indv_scan_key = f"{data_group_key}/{cycle_scan}"
                     indv_scan_key_unit = f"{indv_scan_key}/@units"
                     template[indv_scan_key] = xr_data[data_var].data
-                    template[indv_scan_key_unit] = units
+
+                    if units:
+                        template[indv_scan_key_unit] = units
 
             template[modified_key] = np.mean(
                 [
@@ -185,6 +204,7 @@ def fill_data_group(key, key_part, entries_values, config_dict, template):
                 ],
                 axis=0,
             )
+            template[f"{modified_key}_errors/@units"] = units
 
             template[f"{modified_key}/@long_name"] = "XPS intensity"
 
@@ -195,12 +215,19 @@ def fill_detector_group(key, entries_values, config_dict, xps_data_dict, templat
     chan_count = "_chan"
     scan_count = "_scan"
 
+    unit_config_value = config_dict[f"{key}/@units"]
+
     for entry, xr_data in entries_values.items():
         modified_key = key.replace("/ENTRY[entry]/", f"/ENTRY[{entry}]/")
 
-        # unit_key = config_dict[f"{key}/@units"]
-        # units = find_entry_and_value(xps_data_dict, unit_key, XPS_TOKEN)
-        units = "counts_per_second"
+        units = "counts"
+        if unit_config_value.startswith(XPS_TOKEN):
+            key_part = unit_config_value.split(XPS_TOKEN)[-1]
+            for unit_key, val in xps_data_dict.items():
+                if unit_key.endswith(key_part):
+                    units = val
+        else:
+            units = unit_config_value
 
         detector_scans = {detector: [] for detector in DETECTOR_SET}
 
@@ -224,15 +251,17 @@ def fill_detector_group(key, entries_values, config_dict, xps_data_dict, templat
                     detector_key = modified_key.replace(
                         "/DETECTOR[detector]/", f"/DETECTOR[{detector_nm}]/"
                     )
+
                     cycle_scan_key = detector_key.replace(
                         "raw_data/raw", f"raw_data/{cycle_scan_num}"
                     )
                     template[cycle_scan_key] = xr_data[data_var].data
-                    template[f"{cycle_scan_key}/@units"] = units
+                    if units:
+                        template[f"{cycle_scan_key}/@units"] = units
             else:
                 # If there is no channel data, iterate over scans
                 detector_key = modified_key.replace(
-                    "/DETECTOR[detector]/", "/DETECTOR[{detector0}]/"
+                    "/DETECTOR[detector]/", "/DETECTOR[detector0]/"
                 )
                 if scan_count in data_var:
                     detector_scans["detector0"] += [xr_data[data_var].data]
@@ -241,7 +270,8 @@ def fill_detector_group(key, entries_values, config_dict, xps_data_dict, templat
                     )
 
                     template[scan_key] = xr_data[data_var].data
-                    template[f"{scan_key}/@units"] = units
+                    if units:
+                        template[f"{scan_key}/@units"] = units
 
         # Add multi-dimensional `raw` array for each detector
         for detector_nm, value in detector_scans.items():
@@ -299,7 +329,7 @@ def fill_template_with_value(key, value, template):
                     if "/detector/" in link_text:
                         # Only replace if generic detector is given in
                         # link.
-                        link_text = link_text.replace("detector", f"{detector}")
+                        link_text = link_text.replace("/detector/", f"/{detector}/")
                         value = {LINK_TOKEN: link_text}
                 template[detr_key] = value
 
@@ -320,15 +350,17 @@ def fill_template_with_xps_data(config_dict, xps_data_dict, template):
         if isinstance(config_value, str) and any(
             token in config_value for token in TOKEN_SET
         ):
-            if XPS_DATA_TOKEN in str(config_value):
+            if str(config_value).startswith(XPS_DATA_TOKEN):
                 key_part = config_value.split(XPS_DATA_TOKEN)[-1]
                 entries_values = find_entry_and_value(
                     xps_data_dict, key_part, dt_typ=XPS_DATA_TOKEN
                 )
-                fill_data_group(key, key_part, entries_values, config_dict, template)
+                fill_data_group(
+                    key, key_part, entries_values, config_dict, xps_data_dict, template
+                )
 
-            elif XPS_DETECTOR_TOKEN in str(config_value):
-                key_part = config_value.split(XPS_DATA_TOKEN)[-1]
+            elif str(config_value).startswith(XPS_DETECTOR_TOKEN):
+                key_part = config_value.split(XPS_DETECTOR_TOKEN)[-1]
                 entries_values = find_entry_and_value(
                     xps_data_dict, key_part, dt_typ=XPS_DETECTOR_TOKEN
                 )
@@ -337,7 +369,7 @@ def fill_template_with_xps_data(config_dict, xps_data_dict, template):
                     key, entries_values, config_dict, xps_data_dict, template
                 )
 
-            elif XPS_TOKEN in str(config_value):
+            elif str(config_value).startswith(XPS_TOKEN):
                 key_part = config_value.split(XPS_TOKEN)[-1]
                 entries_values = find_entry_and_value(
                     xps_data_dict, key_part, dt_typ=XPS_TOKEN
@@ -353,7 +385,7 @@ def fill_template_with_xps_data(config_dict, xps_data_dict, template):
 def fill_template_with_eln_data(eln_data_dict, config_dict, template):
     """Fill the template from provided eln data"""
     for key, config_value in config_dict.items():
-        if ELN_TOKEN in str(config_value):
+        if str(config_value).startswith(ELN_TOKEN):
             try:
                 field_value = eln_data_dict[key]
                 fill_template_with_value(key, field_value, template)

@@ -27,6 +27,10 @@ from pynxtools_xps.reader import XPSReader
             id="Phi .pro reader",
         ),
         pytest.param(
+            "scienta_txt",
+            id="Scienta txt export reader",
+        ),
+        pytest.param(
             "vms_regular",
             id="Regular VAMAS reader",
         ),

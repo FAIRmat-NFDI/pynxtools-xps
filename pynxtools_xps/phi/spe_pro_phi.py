@@ -221,6 +221,7 @@ KEYS_WITH_UNITS: List[str] = [
 ]
 
 UNIT_MISSING: Dict[str, str] = {
+    "intensity": "counts_per_second",
     "grid_voltage": "V",
     "condenser_lens_voltage": "V",
     "objective_lens_voltage": "V",
@@ -613,6 +614,7 @@ class MapperPhi(XPSMapper):
                 "energy/@type",
                 "energy/@units",
                 "n_values",
+                "intensity/@units",
             ],
             "file_info": [
                 "experiment_id",
@@ -1320,6 +1322,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         for spectrum in self.spectra:
             spectrum.update(flattened_metadata)
+            spectrum["intensity/@units"] = UNIT_MISSING["intensity"]
 
     def _flatten_dict(self, metadata_dict: Dict[str, Any]):
         """

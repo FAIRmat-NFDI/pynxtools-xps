@@ -4,6 +4,7 @@ function update_phi_examples {
   cd phi/
   echo "Update .spe (single spectrum) examples"
   dataconverter SnO2_10nm.spe eln_data_phi.yaml --reader xps --nxdl NXmpes --output SnO2_10nm.spe.nxs
+  echo
   echo "Update .pro (depth_profiling) examples"
   dataconverter SnO2_10nm_1.pro eln_data_phi.yaml --reader xps --nxdl NXmpes --output SnO2_10nm_1.pro.nxs
   cd ..

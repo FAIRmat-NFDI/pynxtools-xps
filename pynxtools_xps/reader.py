@@ -147,21 +147,28 @@ def fill_data_group(
 
         modified_key = key.replace("/ENTRY[entry]/", f"/ENTRY[{entry}]/")
 
+        long_names = {
+            "energy": "energy",
+        }
+
         if key_part == "energy":
             energy = np.array(xr_data.coords["energy"].values)
             template[modified_key] = energy
+            long_name = key_part
+            if key_part in long_names:
+                long_name = long_names[key_part]
+            template[f"{modified_key}/@long_name"] = long_name
 
         else:
             # Define energy long name and energy_indices
             data_group_key = modified_key.rsplit("/data", 1)[0]
-            template[f"{data_group_key}/energy/@long_name"] = "energy"
             template[f"{data_group_key}/@energy_indices"] = 0
 
             units = "counts_per_seconds"
             if unit_config_value.startswith(XPS_TOKEN):
                 key_part = unit_config_value.split(XPS_TOKEN)[-1]
-                for key, val in xps_data_dict.items():
-                    if key.endswith(key_part):
+                for unit_key, val in xps_data_dict.items():
+                    if unit_key.endswith(key_part):
                         units = val
             else:
                 units = unit_config_value
@@ -171,11 +178,12 @@ def fill_data_group(
             for data_var in xr_data.data_vars:
                 cycle_scan = data_var
                 # Collecting only accumulated counts
-                # indivisual channeltron counts goes to detector data section
+                # individual channeltron counts go to detector data section
                 if chan_count not in cycle_scan and scan_count in cycle_scan:
                     indv_scan_key = f"{data_group_key}/{cycle_scan}"
                     indv_scan_key_unit = f"{indv_scan_key}/@units"
                     template[indv_scan_key] = xr_data[data_var].data
+
                     if units:
                         template[indv_scan_key_unit] = units
 
@@ -215,8 +223,8 @@ def fill_detector_group(key, entries_values, config_dict, xps_data_dict, templat
         units = "counts"
         if unit_config_value.startswith(XPS_TOKEN):
             key_part = unit_config_value.split(XPS_TOKEN)[-1]
-            for key, val in xps_data_dict.items():
-                if key.endswith(key_part):
+            for unit_key, val in xps_data_dict.items():
+                if unit_key.endswith(key_part):
                     units = val
         else:
             units = unit_config_value
@@ -352,7 +360,7 @@ def fill_template_with_xps_data(config_dict, xps_data_dict, template):
                 )
 
             elif str(config_value).startswith(XPS_DETECTOR_TOKEN):
-                key_part = config_value.split(XPS_DATA_TOKEN)[-1]
+                key_part = config_value.split(XPS_DETECTOR_TOKEN)[-1]
                 entries_values = find_entry_and_value(
                     xps_data_dict, key_part, dt_typ=XPS_DETECTOR_TOKEN
                 )

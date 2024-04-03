@@ -163,10 +163,6 @@ def test_xps_writing(tmp_path):
     assert log == ref_log
 
 
-pwd = os.path.join(Path(__file__).parent, "data")
-test_xps_writing(pwd)
-
-
 def test_shows_correct_warnings():
     """
     Checks whether the read function generates the correct warnings.

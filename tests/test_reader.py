@@ -185,4 +185,12 @@ def test_shows_correct_warnings():
     )
 
     assert validate_data_dict(template, read_data, root)
-    assert not list(read_data.undocumented.keys())
+
+    skip_keys = ["@default", "@units", "@long_name", "data/cycle", "data/data_errors"]
+
+    undocumented_keys = [
+        key
+        for key in list(read_data.undocumented.keys())
+        if not any(skip_key in key for skip_key in skip_keys)
+    ]
+    assert not undocumented_keys

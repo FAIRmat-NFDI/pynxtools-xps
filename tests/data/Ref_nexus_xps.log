@@ -68,9 +68,9 @@ DEBUG -
                  to ensure compatibility. We recommened the following field names
                  for common data fields:
                  
-                 - **kx**: Calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/Angström).
-                 - **ky**: Calibrated y axis in k-space. Unit category: NX_ANY (1/Angström).
-                 - **kz**: Calibrated z axis in k-space. Unit category: NX_ANY (1/Angström).
+                 - **kx**: Calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/AngstrÃ¶m).
+                 - **ky**: Calibrated y axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
+                 - **kz**: Calibrated z axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
                  - **angular0**: Fast-axis angular coordinate (or second slow axis if angularly integrated).
                    Unit category: NX_ANGLE
                  - **angular1**: Slow-axis angular coordinate (or second fast axis if simultaneously dispersed in 2 dimensions)
@@ -84,11 +84,11 @@ DEBUG -
                    outgoing beam. This could be a link to
                    /entry/instrument/beam/incident_polarization_angle or
                    /entry/instrument/beam/final_polarization_angle if they exist.
-                   Unit category: NX_ANGLE (° or rad)
+                   Unit category: NX_ANGLE (Â° or rad)
                  - **ellipticity**: Ellipticity of the incoming or outgoing beam.
                    Could be a link to /entry/instrument/beam/incident_ellipticity or
                    /entry/instrument/beam/final_ellipticity if they exist.
-                   Unit category: NX_ANGLE (° or rad)
+                   Unit category: NX_ANGLE (Â° or rad)
             
 DEBUG - documentation (C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXentry.nxdl.xml:/DATA):
 DEBUG - 
@@ -927,7 +927,7 @@ DEBUG - documentation (C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtoo
 DEBUG - 
              Description of the detector type, DLD, Phosphor+CCD, CMOS.
         
-DEBUG - ===== GROUP (//PBTTT_1.2_V__C1s/instrument/electronanalyser/detector0/raw_data [NXmpes::/NXentry/NXinstrument/NXelectronanalyser/NXdetector/NXdata]): <HDF5 group "/PBTTT_1.2_V__C1s/instrument/electronanalyser/detector0/raw_data" (2 members)>
+DEBUG - ===== GROUP (//PBTTT_1.2_V__C1s/instrument/electronanalyser/detector0/raw_data [NXmpes::/NXentry/NXinstrument/NXelectronanalyser/NXdetector/NXdata]): <HDF5 group "/PBTTT_1.2_V__C1s/instrument/electronanalyser/detector0/raw_data" (3 members)>
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyser', 'NXdetector', 'NXdata']
 DEBUG - classes:
 C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\contributed_definitions\NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYSER/DETECTOR/raw_data
@@ -948,9 +948,9 @@ DEBUG -
                              - **pixel_x**: Detector pixel in x direction.
                              - **pixel_y**: Detector pixel in y direction.
                              - **energy**: (Un)calibrated energy (kinetic or binding energy). Unit category: NX_ENERGY (e.g., eV).
-                             - **kx**: (Un)calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/Angström).
-                             - **ky**: (Un)calibrated y axis in k-space. Unit category: NX_ANY (1/Angström).
-                             - **kz**: (Un)calibrated z axis in k-space. Unit category: NX_ANY (1/Angström).
+                             - **kx**: (Un)calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/AngstrÃ¶m).
+                             - **ky**: (Un)calibrated y axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
+                             - **kz**: (Un)calibrated z axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
                              - **angular0**: Fast-axis angular coordinate (or second slow axis if angularly integrated).
                                Unit category: NX_ANGLE
                              - **angular1**: Slow-axis angular coordinate (or second fast axis if simultaneously dispersed in 2 dimensions)
@@ -962,9 +962,9 @@ DEBUG -
                              - **delay**: Calibrated delay time. Unit category: NX_TIME (s).
                              - **polarization_angle**: Linear polarization angle of the incoming or
                                outgoing beam.
-                               Unit category: NX_ANGLE (° or rad)
+                               Unit category: NX_ANGLE (Â° or rad)
                              - **ellipticity**: Ellipticity of the incoming or outgoing beam.
-                               Unit category: NX_ANGLE (° or rad)
+                               Unit category: NX_ANGLE (Â° or rad)
                              - **time_of_flight**: Total time of flight. Unit category: NX_TIME_OF_FLIGHT
                              - **time_of_flight_adc**: Time-of-flight values, analog-to-digital converted.
                              - **external_AXIS**: Describes an axis which is coming from outside the detectors scope.
@@ -1163,6 +1163,34 @@ DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyser', 'NXdetector
 DEBUG - classes:
 C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME
 DEBUG - C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME@units - REQUIRED, but undefined unit category
+DEBUG - ===== FIELD (//PBTTT_1.2_V__C1s/instrument/electronanalyser/detector0/raw_data/raw): <HDF5 dataset "raw": shape (2, 201), type "<f8">
+DEBUG - value: [ 25.  29.  26.  32.  29.  21.  35.  17.  29.  32.  35.  33.  30.  19. ...
+DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyser', 'NXdetector', 'NXdata', 'NX_NUMBER']
+DEBUG - classes:
+C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\contributed_definitions\NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYSER/DETECTOR/raw_data/raw
+C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME
+DEBUG - <<REQUIRED>>
+DEBUG - Dataset referenced as NXdata SIGNAL
+DEBUG - documentation (C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\contributed_definitions\NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYSER/DETECTOR/raw_data/raw):
+DEBUG - 
+                                 Raw data before calibration.
+                            
+DEBUG - documentation (C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME):
+DEBUG - 
+             Dimension scale defining an axis of the data.
+             Client is responsible for defining the dimensions of the data.
+             The name of this field may be changed to fit the circumstances.
+             Standard NeXus client tools will use the attributes to determine
+             how to use this field.
+        
+DEBUG - ===== ATTRS (//PBTTT_1.2_V__C1s/instrument/electronanalyser/detector0/raw_data/raw@units)
+DEBUG - value: counts 
+DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyser', 'NXdetector', 'NXdata', 'NX_NUMBER']
+DEBUG - classes:
+C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\contributed_definitions\NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYSER/DETECTOR/raw_data/raw
+C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME
+DEBUG - C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\contributed_definitions\NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYSER/DETECTOR/raw_data/raw@units - REQUIRED, but undefined unit category
+DEBUG - C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME@units - REQUIRED, but undefined unit category
 DEBUG - ===== GROUP (//PBTTT_1.2_V__C1s/instrument/electronanalyser/detector1 [NXmpes::/NXentry/NXinstrument/NXelectronanalyser/NXdetector]): <HDF5 group "/PBTTT_1.2_V__C1s/instrument/electronanalyser/detector1" (3 members)>
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyser', 'NXdetector']
 DEBUG - classes:
@@ -1251,7 +1279,7 @@ DEBUG - documentation (C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtoo
 DEBUG - 
              Description of the detector type, DLD, Phosphor+CCD, CMOS.
         
-DEBUG - ===== GROUP (//PBTTT_1.2_V__C1s/instrument/electronanalyser/detector1/raw_data [NXmpes::/NXentry/NXinstrument/NXelectronanalyser/NXdetector/NXdata]): <HDF5 group "/PBTTT_1.2_V__C1s/instrument/electronanalyser/detector1/raw_data" (3 members)>
+DEBUG - ===== GROUP (//PBTTT_1.2_V__C1s/instrument/electronanalyser/detector1/raw_data [NXmpes::/NXentry/NXinstrument/NXelectronanalyser/NXdetector/NXdata]): <HDF5 group "/PBTTT_1.2_V__C1s/instrument/electronanalyser/detector1/raw_data" (2 members)>
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyser', 'NXdetector', 'NXdata']
 DEBUG - classes:
 C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\contributed_definitions\NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYSER/DETECTOR/raw_data
@@ -1272,9 +1300,9 @@ DEBUG -
                              - **pixel_x**: Detector pixel in x direction.
                              - **pixel_y**: Detector pixel in y direction.
                              - **energy**: (Un)calibrated energy (kinetic or binding energy). Unit category: NX_ENERGY (e.g., eV).
-                             - **kx**: (Un)calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/Angström).
-                             - **ky**: (Un)calibrated y axis in k-space. Unit category: NX_ANY (1/Angström).
-                             - **kz**: (Un)calibrated z axis in k-space. Unit category: NX_ANY (1/Angström).
+                             - **kx**: (Un)calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/AngstrÃ¶m).
+                             - **ky**: (Un)calibrated y axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
+                             - **kz**: (Un)calibrated z axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
                              - **angular0**: Fast-axis angular coordinate (or second slow axis if angularly integrated).
                                Unit category: NX_ANGLE
                              - **angular1**: Slow-axis angular coordinate (or second fast axis if simultaneously dispersed in 2 dimensions)
@@ -1286,9 +1314,9 @@ DEBUG -
                              - **delay**: Calibrated delay time. Unit category: NX_TIME (s).
                              - **polarization_angle**: Linear polarization angle of the incoming or
                                outgoing beam.
-                               Unit category: NX_ANGLE (° or rad)
+                               Unit category: NX_ANGLE (Â° or rad)
                              - **ellipticity**: Ellipticity of the incoming or outgoing beam.
-                               Unit category: NX_ANGLE (° or rad)
+                               Unit category: NX_ANGLE (Â° or rad)
                              - **time_of_flight**: Total time of flight. Unit category: NX_TIME_OF_FLIGHT
                              - **time_of_flight_adc**: Time-of-flight values, analog-to-digital converted.
                              - **external_AXIS**: Describes an axis which is coming from outside the detectors scope.
@@ -1487,34 +1515,6 @@ DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyser', 'NXdetector
 DEBUG - classes:
 C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME
 DEBUG - C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME@units - REQUIRED, but undefined unit category
-DEBUG - ===== FIELD (//PBTTT_1.2_V__C1s/instrument/electronanalyser/detector1/raw_data/raw): <HDF5 dataset "raw": shape (2, 201), type "<f8">
-DEBUG - value: [ 24.  28.  19.  22.  24.  22.  27.  21.  18.  26.  32.  22.  23.  17. ...
-DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyser', 'NXdetector', 'NXdata', 'NX_NUMBER']
-DEBUG - classes:
-C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\contributed_definitions\NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYSER/DETECTOR/raw_data/raw
-C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME
-DEBUG - <<REQUIRED>>
-DEBUG - Dataset referenced as NXdata SIGNAL
-DEBUG - documentation (C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\contributed_definitions\NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYSER/DETECTOR/raw_data/raw):
-DEBUG - 
-                                 Raw data before calibration.
-                            
-DEBUG - documentation (C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME):
-DEBUG - 
-             Dimension scale defining an axis of the data.
-             Client is responsible for defining the dimensions of the data.
-             The name of this field may be changed to fit the circumstances.
-             Standard NeXus client tools will use the attributes to determine
-             how to use this field.
-        
-DEBUG - ===== ATTRS (//PBTTT_1.2_V__C1s/instrument/electronanalyser/detector1/raw_data/raw@units)
-DEBUG - value: counts 
-DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyser', 'NXdetector', 'NXdata', 'NX_NUMBER']
-DEBUG - classes:
-C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\contributed_definitions\NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYSER/DETECTOR/raw_data/raw
-C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME
-DEBUG - C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\contributed_definitions\NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYSER/DETECTOR/raw_data/raw@units - REQUIRED, but undefined unit category
-DEBUG - C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME@units - REQUIRED, but undefined unit category
 DEBUG - ===== GROUP (//PBTTT_1.2_V__C1s/instrument/electronanalyser/detector2 [NXmpes::/NXentry/NXinstrument/NXelectronanalyser/NXdetector]): <HDF5 group "/PBTTT_1.2_V__C1s/instrument/electronanalyser/detector2" (3 members)>
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyser', 'NXdetector']
 DEBUG - classes:
@@ -1624,9 +1624,9 @@ DEBUG -
                              - **pixel_x**: Detector pixel in x direction.
                              - **pixel_y**: Detector pixel in y direction.
                              - **energy**: (Un)calibrated energy (kinetic or binding energy). Unit category: NX_ENERGY (e.g., eV).
-                             - **kx**: (Un)calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/Angström).
-                             - **ky**: (Un)calibrated y axis in k-space. Unit category: NX_ANY (1/Angström).
-                             - **kz**: (Un)calibrated z axis in k-space. Unit category: NX_ANY (1/Angström).
+                             - **kx**: (Un)calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/AngstrÃ¶m).
+                             - **ky**: (Un)calibrated y axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
+                             - **kz**: (Un)calibrated z axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
                              - **angular0**: Fast-axis angular coordinate (or second slow axis if angularly integrated).
                                Unit category: NX_ANGLE
                              - **angular1**: Slow-axis angular coordinate (or second fast axis if simultaneously dispersed in 2 dimensions)
@@ -1638,9 +1638,9 @@ DEBUG -
                              - **delay**: Calibrated delay time. Unit category: NX_TIME (s).
                              - **polarization_angle**: Linear polarization angle of the incoming or
                                outgoing beam.
-                               Unit category: NX_ANGLE (° or rad)
+                               Unit category: NX_ANGLE (Â° or rad)
                              - **ellipticity**: Ellipticity of the incoming or outgoing beam.
-                               Unit category: NX_ANGLE (° or rad)
+                               Unit category: NX_ANGLE (Â° or rad)
                              - **time_of_flight**: Total time of flight. Unit category: NX_TIME_OF_FLIGHT
                              - **time_of_flight_adc**: Time-of-flight values, analog-to-digital converted.
                              - **external_AXIS**: Describes an axis which is coming from outside the detectors scope.
@@ -1948,9 +1948,9 @@ DEBUG -
                              - **pixel_x**: Detector pixel in x direction.
                              - **pixel_y**: Detector pixel in y direction.
                              - **energy**: (Un)calibrated energy (kinetic or binding energy). Unit category: NX_ENERGY (e.g., eV).
-                             - **kx**: (Un)calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/Angström).
-                             - **ky**: (Un)calibrated y axis in k-space. Unit category: NX_ANY (1/Angström).
-                             - **kz**: (Un)calibrated z axis in k-space. Unit category: NX_ANY (1/Angström).
+                             - **kx**: (Un)calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/AngstrÃ¶m).
+                             - **ky**: (Un)calibrated y axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
+                             - **kz**: (Un)calibrated z axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
                              - **angular0**: Fast-axis angular coordinate (or second slow axis if angularly integrated).
                                Unit category: NX_ANGLE
                              - **angular1**: Slow-axis angular coordinate (or second fast axis if simultaneously dispersed in 2 dimensions)
@@ -1962,9 +1962,9 @@ DEBUG -
                              - **delay**: Calibrated delay time. Unit category: NX_TIME (s).
                              - **polarization_angle**: Linear polarization angle of the incoming or
                                outgoing beam.
-                               Unit category: NX_ANGLE (° or rad)
+                               Unit category: NX_ANGLE (Â° or rad)
                              - **ellipticity**: Ellipticity of the incoming or outgoing beam.
-                               Unit category: NX_ANGLE (° or rad)
+                               Unit category: NX_ANGLE (Â° or rad)
                              - **time_of_flight**: Total time of flight. Unit category: NX_TIME_OF_FLIGHT
                              - **time_of_flight_adc**: Time-of-flight values, analog-to-digital converted.
                              - **external_AXIS**: Describes an axis which is coming from outside the detectors scope.
@@ -2272,9 +2272,9 @@ DEBUG -
                              - **pixel_x**: Detector pixel in x direction.
                              - **pixel_y**: Detector pixel in y direction.
                              - **energy**: (Un)calibrated energy (kinetic or binding energy). Unit category: NX_ENERGY (e.g., eV).
-                             - **kx**: (Un)calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/Angström).
-                             - **ky**: (Un)calibrated y axis in k-space. Unit category: NX_ANY (1/Angström).
-                             - **kz**: (Un)calibrated z axis in k-space. Unit category: NX_ANY (1/Angström).
+                             - **kx**: (Un)calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/AngstrÃ¶m).
+                             - **ky**: (Un)calibrated y axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
+                             - **kz**: (Un)calibrated z axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
                              - **angular0**: Fast-axis angular coordinate (or second slow axis if angularly integrated).
                                Unit category: NX_ANGLE
                              - **angular1**: Slow-axis angular coordinate (or second fast axis if simultaneously dispersed in 2 dimensions)
@@ -2286,9 +2286,9 @@ DEBUG -
                              - **delay**: Calibrated delay time. Unit category: NX_TIME (s).
                              - **polarization_angle**: Linear polarization angle of the incoming or
                                outgoing beam.
-                               Unit category: NX_ANGLE (° or rad)
+                               Unit category: NX_ANGLE (Â° or rad)
                              - **ellipticity**: Ellipticity of the incoming or outgoing beam.
-                               Unit category: NX_ANGLE (° or rad)
+                               Unit category: NX_ANGLE (Â° or rad)
                              - **time_of_flight**: Total time of flight. Unit category: NX_TIME_OF_FLIGHT
                              - **time_of_flight_adc**: Time-of-flight values, analog-to-digital converted.
                              - **external_AXIS**: Describes an axis which is coming from outside the detectors scope.
@@ -5356,9 +5356,9 @@ DEBUG -
                  to ensure compatibility. We recommened the following field names
                  for common data fields:
                  
-                 - **kx**: Calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/Angström).
-                 - **ky**: Calibrated y axis in k-space. Unit category: NX_ANY (1/Angström).
-                 - **kz**: Calibrated z axis in k-space. Unit category: NX_ANY (1/Angström).
+                 - **kx**: Calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/AngstrÃ¶m).
+                 - **ky**: Calibrated y axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
+                 - **kz**: Calibrated z axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
                  - **angular0**: Fast-axis angular coordinate (or second slow axis if angularly integrated).
                    Unit category: NX_ANGLE
                  - **angular1**: Slow-axis angular coordinate (or second fast axis if simultaneously dispersed in 2 dimensions)
@@ -5372,11 +5372,11 @@ DEBUG -
                    outgoing beam. This could be a link to
                    /entry/instrument/beam/incident_polarization_angle or
                    /entry/instrument/beam/final_polarization_angle if they exist.
-                   Unit category: NX_ANGLE (° or rad)
+                   Unit category: NX_ANGLE (Â° or rad)
                  - **ellipticity**: Ellipticity of the incoming or outgoing beam.
                    Could be a link to /entry/instrument/beam/incident_ellipticity or
                    /entry/instrument/beam/final_ellipticity if they exist.
-                   Unit category: NX_ANGLE (° or rad)
+                   Unit category: NX_ANGLE (Â° or rad)
             
 DEBUG - documentation (C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXentry.nxdl.xml:/DATA):
 DEBUG - 
@@ -6214,7 +6214,7 @@ DEBUG - documentation (C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtoo
 DEBUG - 
              Description of the detector type, DLD, Phosphor+CCD, CMOS.
         
-DEBUG - ===== GROUP (//PBTTT_1.2_V__Survey/instrument/electronanalyser/detector0/raw_data [NXmpes::/NXentry/NXinstrument/NXelectronanalyser/NXdetector/NXdata]): <HDF5 group "/PBTTT_1.2_V__Survey/instrument/electronanalyser/detector0/raw_data" (1 members)>
+DEBUG - ===== GROUP (//PBTTT_1.2_V__Survey/instrument/electronanalyser/detector0/raw_data [NXmpes::/NXentry/NXinstrument/NXelectronanalyser/NXdetector/NXdata]): <HDF5 group "/PBTTT_1.2_V__Survey/instrument/electronanalyser/detector0/raw_data" (2 members)>
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyser', 'NXdetector', 'NXdata']
 DEBUG - classes:
 C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\contributed_definitions\NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYSER/DETECTOR/raw_data
@@ -6235,9 +6235,9 @@ DEBUG -
                              - **pixel_x**: Detector pixel in x direction.
                              - **pixel_y**: Detector pixel in y direction.
                              - **energy**: (Un)calibrated energy (kinetic or binding energy). Unit category: NX_ENERGY (e.g., eV).
-                             - **kx**: (Un)calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/Angström).
-                             - **ky**: (Un)calibrated y axis in k-space. Unit category: NX_ANY (1/Angström).
-                             - **kz**: (Un)calibrated z axis in k-space. Unit category: NX_ANY (1/Angström).
+                             - **kx**: (Un)calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/AngstrÃ¶m).
+                             - **ky**: (Un)calibrated y axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
+                             - **kz**: (Un)calibrated z axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
                              - **angular0**: Fast-axis angular coordinate (or second slow axis if angularly integrated).
                                Unit category: NX_ANGLE
                              - **angular1**: Slow-axis angular coordinate (or second fast axis if simultaneously dispersed in 2 dimensions)
@@ -6249,9 +6249,9 @@ DEBUG -
                              - **delay**: Calibrated delay time. Unit category: NX_TIME (s).
                              - **polarization_angle**: Linear polarization angle of the incoming or
                                outgoing beam.
-                               Unit category: NX_ANGLE (° or rad)
+                               Unit category: NX_ANGLE (Â° or rad)
                              - **ellipticity**: Ellipticity of the incoming or outgoing beam.
-                               Unit category: NX_ANGLE (° or rad)
+                               Unit category: NX_ANGLE (Â° or rad)
                              - **time_of_flight**: Total time of flight. Unit category: NX_TIME_OF_FLIGHT
                              - **time_of_flight_adc**: Time-of-flight values, analog-to-digital converted.
                              - **external_AXIS**: Describes an axis which is coming from outside the detectors scope.
@@ -6430,6 +6430,34 @@ DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyser', 'NXdetector
 DEBUG - classes:
 C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME
 DEBUG - C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME@units - REQUIRED, but undefined unit category
+DEBUG - ===== FIELD (//PBTTT_1.2_V__Survey/instrument/electronanalyser/detector0/raw_data/raw): <HDF5 dataset "raw": shape (1, 1403), type "<f8">
+DEBUG - value: [ 98.  99. 104. 126. 113. 118.  91. 131. 109.  88. 109. 100.  92.  83. ...
+DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyser', 'NXdetector', 'NXdata', 'NX_NUMBER']
+DEBUG - classes:
+C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\contributed_definitions\NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYSER/DETECTOR/raw_data/raw
+C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME
+DEBUG - <<REQUIRED>>
+DEBUG - Dataset referenced as NXdata SIGNAL
+DEBUG - documentation (C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\contributed_definitions\NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYSER/DETECTOR/raw_data/raw):
+DEBUG - 
+                                 Raw data before calibration.
+                            
+DEBUG - documentation (C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME):
+DEBUG - 
+             Dimension scale defining an axis of the data.
+             Client is responsible for defining the dimensions of the data.
+             The name of this field may be changed to fit the circumstances.
+             Standard NeXus client tools will use the attributes to determine
+             how to use this field.
+        
+DEBUG - ===== ATTRS (//PBTTT_1.2_V__Survey/instrument/electronanalyser/detector0/raw_data/raw@units)
+DEBUG - value: counts 
+DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyser', 'NXdetector', 'NXdata', 'NX_NUMBER']
+DEBUG - classes:
+C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\contributed_definitions\NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYSER/DETECTOR/raw_data/raw
+C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME
+DEBUG - C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\contributed_definitions\NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYSER/DETECTOR/raw_data/raw@units - REQUIRED, but undefined unit category
+DEBUG - C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME@units - REQUIRED, but undefined unit category
 DEBUG - ===== GROUP (//PBTTT_1.2_V__Survey/instrument/electronanalyser/detector1 [NXmpes::/NXentry/NXinstrument/NXelectronanalyser/NXdetector]): <HDF5 group "/PBTTT_1.2_V__Survey/instrument/electronanalyser/detector1" (3 members)>
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyser', 'NXdetector']
 DEBUG - classes:
@@ -6518,7 +6546,7 @@ DEBUG - documentation (C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtoo
 DEBUG - 
              Description of the detector type, DLD, Phosphor+CCD, CMOS.
         
-DEBUG - ===== GROUP (//PBTTT_1.2_V__Survey/instrument/electronanalyser/detector1/raw_data [NXmpes::/NXentry/NXinstrument/NXelectronanalyser/NXdetector/NXdata]): <HDF5 group "/PBTTT_1.2_V__Survey/instrument/electronanalyser/detector1/raw_data" (2 members)>
+DEBUG - ===== GROUP (//PBTTT_1.2_V__Survey/instrument/electronanalyser/detector1/raw_data [NXmpes::/NXentry/NXinstrument/NXelectronanalyser/NXdetector/NXdata]): <HDF5 group "/PBTTT_1.2_V__Survey/instrument/electronanalyser/detector1/raw_data" (1 members)>
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyser', 'NXdetector', 'NXdata']
 DEBUG - classes:
 C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\contributed_definitions\NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYSER/DETECTOR/raw_data
@@ -6539,9 +6567,9 @@ DEBUG -
                              - **pixel_x**: Detector pixel in x direction.
                              - **pixel_y**: Detector pixel in y direction.
                              - **energy**: (Un)calibrated energy (kinetic or binding energy). Unit category: NX_ENERGY (e.g., eV).
-                             - **kx**: (Un)calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/Angström).
-                             - **ky**: (Un)calibrated y axis in k-space. Unit category: NX_ANY (1/Angström).
-                             - **kz**: (Un)calibrated z axis in k-space. Unit category: NX_ANY (1/Angström).
+                             - **kx**: (Un)calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/AngstrÃ¶m).
+                             - **ky**: (Un)calibrated y axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
+                             - **kz**: (Un)calibrated z axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
                              - **angular0**: Fast-axis angular coordinate (or second slow axis if angularly integrated).
                                Unit category: NX_ANGLE
                              - **angular1**: Slow-axis angular coordinate (or second fast axis if simultaneously dispersed in 2 dimensions)
@@ -6553,9 +6581,9 @@ DEBUG -
                              - **delay**: Calibrated delay time. Unit category: NX_TIME (s).
                              - **polarization_angle**: Linear polarization angle of the incoming or
                                outgoing beam.
-                               Unit category: NX_ANGLE (° or rad)
+                               Unit category: NX_ANGLE (Â° or rad)
                              - **ellipticity**: Ellipticity of the incoming or outgoing beam.
-                               Unit category: NX_ANGLE (° or rad)
+                               Unit category: NX_ANGLE (Â° or rad)
                              - **time_of_flight**: Total time of flight. Unit category: NX_TIME_OF_FLIGHT
                              - **time_of_flight_adc**: Time-of-flight values, analog-to-digital converted.
                              - **external_AXIS**: Describes an axis which is coming from outside the detectors scope.
@@ -6734,34 +6762,6 @@ DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyser', 'NXdetector
 DEBUG - classes:
 C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME
 DEBUG - C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME@units - REQUIRED, but undefined unit category
-DEBUG - ===== FIELD (//PBTTT_1.2_V__Survey/instrument/electronanalyser/detector1/raw_data/raw): <HDF5 dataset "raw": shape (1, 1403), type "<f8">
-DEBUG - value: [ 69.  79.  69.  65.  56.  72.  63.  62.  80.  76.  54.  62.  77.  63. ...
-DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyser', 'NXdetector', 'NXdata', 'NX_NUMBER']
-DEBUG - classes:
-C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\contributed_definitions\NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYSER/DETECTOR/raw_data/raw
-C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME
-DEBUG - <<REQUIRED>>
-DEBUG - Dataset referenced as NXdata SIGNAL
-DEBUG - documentation (C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\contributed_definitions\NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYSER/DETECTOR/raw_data/raw):
-DEBUG - 
-                                 Raw data before calibration.
-                            
-DEBUG - documentation (C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME):
-DEBUG - 
-             Dimension scale defining an axis of the data.
-             Client is responsible for defining the dimensions of the data.
-             The name of this field may be changed to fit the circumstances.
-             Standard NeXus client tools will use the attributes to determine
-             how to use this field.
-        
-DEBUG - ===== ATTRS (//PBTTT_1.2_V__Survey/instrument/electronanalyser/detector1/raw_data/raw@units)
-DEBUG - value: counts 
-DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyser', 'NXdetector', 'NXdata', 'NX_NUMBER']
-DEBUG - classes:
-C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\contributed_definitions\NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYSER/DETECTOR/raw_data/raw
-C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME
-DEBUG - C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\contributed_definitions\NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYSER/DETECTOR/raw_data/raw@units - REQUIRED, but undefined unit category
-DEBUG - C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools\pynxtools\nexus\..\definitions\base_classes\NXdata.nxdl.xml:/AXISNAME@units - REQUIRED, but undefined unit category
 DEBUG - ===== GROUP (//PBTTT_1.2_V__Survey/instrument/electronanalyser/detector2 [NXmpes::/NXentry/NXinstrument/NXelectronanalyser/NXdetector]): <HDF5 group "/PBTTT_1.2_V__Survey/instrument/electronanalyser/detector2" (3 members)>
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyser', 'NXdetector']
 DEBUG - classes:
@@ -6871,9 +6871,9 @@ DEBUG -
                              - **pixel_x**: Detector pixel in x direction.
                              - **pixel_y**: Detector pixel in y direction.
                              - **energy**: (Un)calibrated energy (kinetic or binding energy). Unit category: NX_ENERGY (e.g., eV).
-                             - **kx**: (Un)calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/Angström).
-                             - **ky**: (Un)calibrated y axis in k-space. Unit category: NX_ANY (1/Angström).
-                             - **kz**: (Un)calibrated z axis in k-space. Unit category: NX_ANY (1/Angström).
+                             - **kx**: (Un)calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/AngstrÃ¶m).
+                             - **ky**: (Un)calibrated y axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
+                             - **kz**: (Un)calibrated z axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
                              - **angular0**: Fast-axis angular coordinate (or second slow axis if angularly integrated).
                                Unit category: NX_ANGLE
                              - **angular1**: Slow-axis angular coordinate (or second fast axis if simultaneously dispersed in 2 dimensions)
@@ -6885,9 +6885,9 @@ DEBUG -
                              - **delay**: Calibrated delay time. Unit category: NX_TIME (s).
                              - **polarization_angle**: Linear polarization angle of the incoming or
                                outgoing beam.
-                               Unit category: NX_ANGLE (° or rad)
+                               Unit category: NX_ANGLE (Â° or rad)
                              - **ellipticity**: Ellipticity of the incoming or outgoing beam.
-                               Unit category: NX_ANGLE (° or rad)
+                               Unit category: NX_ANGLE (Â° or rad)
                              - **time_of_flight**: Total time of flight. Unit category: NX_TIME_OF_FLIGHT
                              - **time_of_flight_adc**: Time-of-flight values, analog-to-digital converted.
                              - **external_AXIS**: Describes an axis which is coming from outside the detectors scope.
@@ -7175,9 +7175,9 @@ DEBUG -
                              - **pixel_x**: Detector pixel in x direction.
                              - **pixel_y**: Detector pixel in y direction.
                              - **energy**: (Un)calibrated energy (kinetic or binding energy). Unit category: NX_ENERGY (e.g., eV).
-                             - **kx**: (Un)calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/Angström).
-                             - **ky**: (Un)calibrated y axis in k-space. Unit category: NX_ANY (1/Angström).
-                             - **kz**: (Un)calibrated z axis in k-space. Unit category: NX_ANY (1/Angström).
+                             - **kx**: (Un)calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/AngstrÃ¶m).
+                             - **ky**: (Un)calibrated y axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
+                             - **kz**: (Un)calibrated z axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
                              - **angular0**: Fast-axis angular coordinate (or second slow axis if angularly integrated).
                                Unit category: NX_ANGLE
                              - **angular1**: Slow-axis angular coordinate (or second fast axis if simultaneously dispersed in 2 dimensions)
@@ -7189,9 +7189,9 @@ DEBUG -
                              - **delay**: Calibrated delay time. Unit category: NX_TIME (s).
                              - **polarization_angle**: Linear polarization angle of the incoming or
                                outgoing beam.
-                               Unit category: NX_ANGLE (° or rad)
+                               Unit category: NX_ANGLE (Â° or rad)
                              - **ellipticity**: Ellipticity of the incoming or outgoing beam.
-                               Unit category: NX_ANGLE (° or rad)
+                               Unit category: NX_ANGLE (Â° or rad)
                              - **time_of_flight**: Total time of flight. Unit category: NX_TIME_OF_FLIGHT
                              - **time_of_flight_adc**: Time-of-flight values, analog-to-digital converted.
                              - **external_AXIS**: Describes an axis which is coming from outside the detectors scope.
@@ -7479,9 +7479,9 @@ DEBUG -
                              - **pixel_x**: Detector pixel in x direction.
                              - **pixel_y**: Detector pixel in y direction.
                              - **energy**: (Un)calibrated energy (kinetic or binding energy). Unit category: NX_ENERGY (e.g., eV).
-                             - **kx**: (Un)calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/Angström).
-                             - **ky**: (Un)calibrated y axis in k-space. Unit category: NX_ANY (1/Angström).
-                             - **kz**: (Un)calibrated z axis in k-space. Unit category: NX_ANY (1/Angström).
+                             - **kx**: (Un)calibrated x axis in k-space. Unit category: NX_ANY (e.g., 1/AngstrÃ¶m).
+                             - **ky**: (Un)calibrated y axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
+                             - **kz**: (Un)calibrated z axis in k-space. Unit category: NX_ANY (1/AngstrÃ¶m).
                              - **angular0**: Fast-axis angular coordinate (or second slow axis if angularly integrated).
                                Unit category: NX_ANGLE
                              - **angular1**: Slow-axis angular coordinate (or second fast axis if simultaneously dispersed in 2 dimensions)
@@ -7493,9 +7493,9 @@ DEBUG -
                              - **delay**: Calibrated delay time. Unit category: NX_TIME (s).
                              - **polarization_angle**: Linear polarization angle of the incoming or
                                outgoing beam.
-                               Unit category: NX_ANGLE (° or rad)
+                               Unit category: NX_ANGLE (Â° or rad)
                              - **ellipticity**: Ellipticity of the incoming or outgoing beam.
-                               Unit category: NX_ANGLE (° or rad)
+                               Unit category: NX_ANGLE (Â° or rad)
                              - **time_of_flight**: Total time of flight. Unit category: NX_TIME_OF_FLIGHT
                              - **time_of_flight_adc**: Time-of-flight values, analog-to-digital converted.
                              - **external_AXIS**: Describes an axis which is coming from outside the detectors scope.

@@ -132,8 +132,8 @@ def test_xps_writing(tmp_path):
     """Check if xps example can be reproduced"""
     data_dir = os.path.join(Path(__file__).parent, "data")
     input_files = (
-        os.path.join(data_dir, "xml", "In-situ_PBTTT_XPS_SPECS.xml"),
-        os.path.join(data_dir, "xml", "eln_data_xml.yaml"),
+        os.path.join(data_dir, "vms_regular", "regular.vms"),
+        os.path.join(data_dir, "vms_regular", "eln_data_vms_regular.yaml"),
     )
     dataconverter.convert(
         input_files,

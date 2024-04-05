@@ -69,7 +69,7 @@ git clone https://github.com/FAIRmat-NFDI/pynxtools-xps.git \\
 cd pynxtools_xps
 python -m pip install --upgrade pip
 python -m pip install -e .
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[dev,consistency_with_pynxtools]"
 ```
 
 There is also a [pre-commit hook](https://pre-commit.com/#intro) available

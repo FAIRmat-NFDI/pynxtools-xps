@@ -48,6 +48,9 @@ dev = [
     "pip-tools",
     "pre-commit"
 ]
+consistency_with_pynxtools = [
+    "pynxtools>=0.1.1",
+]
 
 [tool.setuptools.package-data]
 pynxtools_xps = ["*.json"]

@@ -15,17 +15,18 @@ It is recommended to use python 3.11 with a dedicated virtual environment for th
 Learn how to manage [python versions](https://github.com/pyenv/pyenv) and
 [virtual environments](https://realpython.com/python-virtual-environments-a-primer/).
 
-Install this package with
+This package is a reader plugin for [`pynxtools`](https://github.com/FAIRmat-NFDI/pynxtools) and thus should be installed together with `pynxtools`:
+
 
 ```shell
-pip install git+https://github.com/FAIRmat-NFDI/pynxtools-xps.git
+pip install pynxtools[xps]
 ```
 
 for the latest development version.
 
 
 # Purpose
-This reader plugin for [pynxtools](https://github.com/FAIRmat-NFDI/pynxtools) is used to translate diverse file formats from the scientific community and technology partners
+This reader plugin for [`pynxtools`](https://github.com/FAIRmat-NFDI/pynxtools) is used to translate diverse file formats from the scientific community and technology partners
 within the field of X-ray photoelectron spectroscopy into a standardized representation using the
 [NeXus](https://www.nexusformat.org/) application definition [NXmpes](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXmpes.html#nxmpes).
 
@@ -43,7 +44,7 @@ The reader decides which parser to use based on the file extension of the files 
 We are continously working on adding parsers for other data formats and technology partners. If you would like to implement a parser for your data, feel free to get in contact.
 
 # Getting started
-An example script to run the XPS reader in pynxtools:
+An example script to run the XPS reader in `pynxtools`:
 ```sh
  ! dataconverter \
 --reader xps \

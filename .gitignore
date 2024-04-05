@@ -201,7 +201,7 @@ cython_debug/
 *.txt
 !requirements.txt
 !dev-requirements.txt
-!Cu-*.txt
-!Ag_*.txt
+!examples/scienta/Cu-*.txt
+!tests/data/Ag_*.txt
 build/
 .python-version

@@ -37,6 +37,7 @@
       "resolution":"@eln",
       "resolution/@units":"@eln"
     },
+    "depends_on": "/entry/instrument/source_xray/transformations/source_analyser_angle",
     "TRANSFORMATIONS[transformations]": {
       "AXISNAME[source_analyser_angle]":"@xps_token/source_analyser_angle",
       "AXISNAME[source_analyser_angle]/@transformation_type": "rotation",
@@ -47,7 +48,7 @@
         1
       ]
     },
-    "source_TYPE[source_xray]":{
+    "sourceTYPE[source_xray]":{
       "type":"@eln",
       "name":"@xps_token:xray_source/name",
       "probe":"@eln",
@@ -75,7 +76,7 @@
       "offset/@units":"@xps_token:xray_source/xray_offset/@units",
       "voltage":"@xps_token:xray_source/xray_high_voltage",
       "voltage/@units":"@xps_token:xray_source/xray_high_voltage/@units",
-      "associated_beam":"@link:/entry/instrument/beam_xray",
+      "associated_beam":"/entry/instrument/beam_xray",
       "LENS_EM[blanking_lens]":{
         "name":"blanking lens",
         "voltage":"@xps_token:xray_source/xray_blanking_voltage",
@@ -109,7 +110,7 @@
         "offset_y":"@xps_token:xray_source/xray_stigmator_y",
         "offset_y/@units":"@xps_token:xray_source/xray_stigmator_y/@units"
       },
-      "depends_on": "/entry/instrument/source_xray/transformations/trans_z",
+      "depends_on": "/entry/instrument/source_xray/transformations/xray_rotation",
       "TRANSFORMATIONS[transformations]": {
         "AXISNAME[xray_rotation]":"@xps_token:xray_source/xray_rotation",
         "AXISNAME[xray_rotation]/@transformation_type": "rotation",
@@ -121,7 +122,7 @@
         ]
       }
     },
-    "beam_TYPE[beam_xray]":{
+    "beamTYPE[beam_xray]":{
       "distance":"@eln",
       "distance/@units":"@eln",
       "incident_energy":"@xps_token:beam/xray_energy",
@@ -132,9 +133,9 @@
       "incident_polarization/@units":"None",
       "extent":"@xps_token:beam/xray_beam_diameter",
       "extent/@units":"@xps_token:beam/xray_beam_diameter/@units",
-      "associated_source":"@link:/entry/instrument/source_xray"
+      "associated_source":"/entry/instrument/source_xray"
     },
-    "source_TYPE[source_flood_gun]":{
+    "sourceTYPE[source_flood_gun]":{
       "current":"@xps_token:flood_gun/flood_gun_current",
       "current/@units":"@xps_token:flood_gun/flood_gun_current/@units",
       "energy":"@xps_token:flood_gun/flood_gun_energy",
@@ -161,7 +162,7 @@
         "voltage/@units":"@xps_token:flood_gun/extractor_voltage/@units"
       }
     },
-    "source_TYPE[source_gas_cluster_ion_beam]":{
+    "sourceTYPE[source_gas_cluster_ion_beam]":{
       "description":"@eln",
       "cluster_size":"@xps_token:gcib/gcib_cluster_size",
       "cluster_size/@units":"@xps_token:gcib/gcib_cluster_size/@units",
@@ -207,7 +208,7 @@
         "voltage/@units":"@xps_token:gcib/gcib_objective/@units"
       }
     },
-    "source_TYPE[source_neutral_ion_gun]":{
+    "sourceTYPE[source_neutral_ion_gun]":{
       "description":"@eln",
       "current":"@xps_token:neutral_ion_gun/neutral_current",
       "current/@units":"@xps_token:neutral_ion_gun/neutral_current/@units",
@@ -252,7 +253,7 @@
         "voltage/@units":"@xps_token:neutral_ion_gun/neutral_objective_lens_voltage/@units"
       }
     },
-    "source_TYPE[source_sputter_gun]":{
+    "sourceTYPE[source_sputter_gun]":{
       "description":"@eln",
       "current":"@xps_token:sputter_gun/sputter_current",
       "current/@units":"@xps_token:sputter_gun/sputter_current/@units",
@@ -520,7 +521,7 @@
       "value":"@link:/entry/instrument/source_flood_gun/current"   
     }
   },
-  "/ENTRY[entry]/PROCESS[process]":{
+  "/ENTRY[entry]/PROCESS_MPES[process]":{
     "energy_calibration":"None",
     "energy_referencing":{
       "level":"None",
@@ -547,7 +548,7 @@
       "cas_number":"@eln",
       "molecular_formula_hill":"@eln"
     },
-    "sample_history":{
+    "history":{
       "sample_preparation":{
         "start_time":"@eln",
         "end_time":"@eln",

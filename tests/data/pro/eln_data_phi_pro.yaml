@@ -149,7 +149,7 @@ sample:
       unit: g/mol
     cas_number: 18282-10-5
     molecular_formula_hill: SnO2
-  sample_history:
+  history:
     sample_preparation:
       start_time: 2022-01-22T12:48:00.200Z
       end_time: 2022-01-22T13:18:00.200Z

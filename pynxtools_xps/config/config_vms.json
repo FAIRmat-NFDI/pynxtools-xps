@@ -36,7 +36,7 @@
        "resolution":"@xps_token:data/step_size",
        "resolution/@units":"eV"
      },
-     "source_TYPE[source_probe]":{
+     "sourceTYPE[source_xray]":{
        "type":"@eln",
        "name":"@xps_token:source/source_label",
        "probe":"photon",
@@ -45,11 +45,21 @@
          "identifier":"@eln",
          "model":"@eln"
        },
-       "associated_beam":"@link:/entry/instrument/beam_probe",
-       "source_analyzer_angle":"source_analyzer_angle",
-       "source_analyzer_angle/@units":"degree"
+       "associated_beam":"/entry/instrument/beam_xray",
+       "depends_on": "/entry/instrument/source_xray/transformations/source_analyzer_angle",
+       "TRANSFORMATIONS[transformations]": {
+         "AXISNAME[source_analyzer_angle]/@depends_on":".",
+         "AXISNAME[source_analyzer_angle]":"@xps_token:source/source_analyzer_angle",
+         "AXISNAME[source_analyzer_angle]/@transformation_type": "rotation",
+         "AXISNAME[source_analyzer_angle]/@units":"degree",
+         "AXISNAME[source_analyzer_angle]/@vector": [
+           0,
+           0,
+           1
+         ]
+       }
      },
-     "beam_TYPE[beam_probe]":{
+     "beamTYPE[beam_xray]":{
        "distance":"@eln",
        "distance/@units":"@eln",
        "incident_energy":"@xps_token:beam/excitation_energy",
@@ -59,7 +69,7 @@
        "incident_polarization":"None",
        "incident_polarization/@units":"None",
        "extent":"None",
-       "associated_source":"@link:/entry/instrument/source_probe"
+       "associated_source":"/entry/instrument/source_xray"
      },
      "ELECTRONANALYSER[electronanalyser]":{
        "@default":"detector0",
@@ -242,7 +252,7 @@
        "cas_number":"@eln",
        "molecular_formula_hill":"@eln"
      },
-     "sample_history":{
+     "history":{
        "sample_preparation":{
          "start_time":"@eln",
          "end_time":"@eln",

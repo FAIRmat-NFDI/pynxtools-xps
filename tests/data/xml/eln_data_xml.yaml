@@ -19,14 +19,14 @@ instrument:
     resolution:
       value: 0.2
       unit: eV
-  source_probe:
+  source_xray:
     type: Synchrotron X-ray Source
     probe: x-ray
     device_information:
       vendor: null
       model: null
       identifier: null
-  beam_probe:
+  beam_xray:
     distance:
       value: 0.0
       unit: mm
@@ -137,7 +137,7 @@ sample:
   substance:
     molecular_formula_hill: (C42H62S4)n
   situation: vacuum
-  sample_history:
+  history:
     sample_preparation:
       start_time: 2022-04-08T11:02:38.0200Z
       end_time: 2022-04-08T11:06:42.200Z

@@ -1446,13 +1446,14 @@ def _map_to_list(value: str):
 def _map_to_xy(value: str):
     """Map items in value to a dictionary with keys x and y."""
     x, y = value.split(" ")
-    return {"x": x, "y": y}
+
+    return {"x": float(x), "y": float(y)}
 
 
 def _map_to_xy_with_units(value: str):
     """Map items in value to a dictionary with keys x ."""
     x, y, unit = value.split(" ")
-    return {"x": x, "x_units": unit, "y": y, "y_units": unit}
+    return {"x": float(x), "x_units": unit, "y": float(y), "y_units": unit}
 
 
 def _convert_experimental_technique(value: str):

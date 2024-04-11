@@ -314,6 +314,9 @@ def fill_template_with_value(key, value, template):
             # Reset link to original
             value[LINK_TOKEN] = initial_link_text.replace("/entry/", f"/{entry}/")
 
+        if isinstance(value, str) and "/entry/" in value:
+            value = value.replace("/entry/", f"/{entry}/")
+
         modified_key = key.replace("/ENTRY[entry]/", f"/ENTRY[{entry}]/")
 
         # Do for all detectors
@@ -331,6 +334,9 @@ def fill_template_with_value(key, value, template):
                         # link.
                         link_text = link_text.replace("/detector/", f"/{detector}/")
                         value = {LINK_TOKEN: link_text}
+
+                if isinstance(value, str) and "/detector/" in value:
+                    value = value.replace("/detector/", f"/{detector}/")
                 template[detr_key] = value
 
         else:

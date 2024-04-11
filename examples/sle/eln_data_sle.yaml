@@ -25,14 +25,14 @@ instrument:
     resolution:
       value: 0.2
       unit: eV
-  source_probe:
+  source_xray:
     type: Fixed Tube X-ray
     probe: photon
     device_information:
       vendor: SPECS GmbH
       model: µFOCUS 500
       identifier: null
-  beam_probe:
+  beam_xray:
     distance:
       value: 0.0
       unit: mm
@@ -152,7 +152,7 @@ sample:
       unit: g/mol
     cas_number: 7440-57-5
     molecular_formula_hill: Au
-  sample_history:
+  history:
     sample_preparation:
       start_time: 2022-04-08T11:25:00.200Z
       end_time: 2022-04-08T11:45:00.200Z

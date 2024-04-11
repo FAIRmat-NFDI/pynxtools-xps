@@ -160,7 +160,7 @@ sample:
   chemical_formula: Cu
   description: Cu-HHTP/Glass on standard sample holder
   situation: vacuum
-  sample_history:
+  history:
     sample_preparation:
       start_time: 2022-04-08T11:25:00.200Z
       end_time: 2022-04-08T11:45:00.200Z

@@ -576,7 +576,7 @@ def _change_scan_mode(acquisition_mode: str):
     the allowed values in NXmpes.
 
     """
-    mode_map = {"Fixed": "fixed", "Swept": "fixed_analyser_transmission"}
+    mode_map = {"Fixed": "fixed_energy", "Swept": "fixed_analyser_transmission"}
     if acquisition_mode in mode_map:
         return mode_map[acquisition_mode]
     return None

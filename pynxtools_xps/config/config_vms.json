@@ -48,6 +48,7 @@
        "associated_beam":"/entry/instrument/beam_xray",
        "depends_on": "/entry/instrument/source_xray/transformations/source_analyzer_angle",
        "TRANSFORMATIONS[transformations]": {
+         "AXISNAME[source_analyzer_angle]/@depends_on":".",
          "AXISNAME[source_analyzer_angle]":"@xps_token:source/source_analyzer_angle",
          "AXISNAME[source_analyzer_angle]/@transformation_type": "rotation",
          "AXISNAME[source_analyzer_angle]/@units":"degree",

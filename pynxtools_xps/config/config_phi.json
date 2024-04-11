@@ -39,6 +39,7 @@
     },
     "depends_on": "/entry/instrument/source_xray/transformations/source_analyser_angle",
     "TRANSFORMATIONS[transformations]": {
+      "AXISNAME[source_analyser_angle]/@depends_on":".",
       "AXISNAME[source_analyser_angle]":"@xps_token/source_analyser_angle",
       "AXISNAME[source_analyser_angle]/@transformation_type": "rotation",
       "AXISNAME[source_analyser_angle]/@units":"@xps_token/source_analyser_angle/@units",
@@ -74,6 +75,8 @@
       "power/@units":"@xps_token:xray_source/xray_power/@units",
       "offset":"@xps_token:xray_source/xray_offset",
       "offset/@units":"@xps_token:xray_source/xray_offset/@units",
+      "rotation":"@xps_token:xray_source/xray_rotation",
+      "rotation/@units":"@xps_token:xray_source/xray_rotation/@units",
       "voltage":"@xps_token:xray_source/xray_high_voltage",
       "voltage/@units":"@xps_token:xray_source/xray_high_voltage/@units",
       "associated_beam":"/entry/instrument/beam_xray",
@@ -109,17 +112,6 @@
         "offset_x/@units":"@xps_token:xray_source/xray_stigmator_x/@units",
         "offset_y":"@xps_token:xray_source/xray_stigmator_y",
         "offset_y/@units":"@xps_token:xray_source/xray_stigmator_y/@units"
-      },
-      "depends_on": "/entry/instrument/source_xray/transformations/xray_rotation",
-      "TRANSFORMATIONS[transformations]": {
-        "AXISNAME[xray_rotation]":"@xps_token:xray_source/xray_rotation",
-        "AXISNAME[xray_rotation]/@transformation_type": "rotation",
-        "AXISNAME[xray_rotation]/@units":"@xps_token:xray_source/xray_rotation/@units",
-        "AXISNAME[xray_rotation]/@vector": [
-          0,
-          0,
-          1
-        ]
       }
     },
     "beamTYPE[beam_xray]":{

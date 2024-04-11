@@ -437,7 +437,7 @@ class XPSReader(BaseReader):
 
     supported_nxdls = [
         "NXmpes",
-        # "NXxps",
+        "NXxps",
     ]
 
     def read(

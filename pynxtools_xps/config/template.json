@@ -26,7 +26,7 @@
         "resolution":"None",
         "resolution/@units":"None"
       },
-      "source_TYPE[source_probe]":{
+      "sourceTYPE[source_xray]":{
         "type":"None",
         "type_other":"None",
         "name":"None",
@@ -38,7 +38,7 @@
         },
         "associated_beam":"None"
       },
-      "beam_TYPE[beam_probe]":{
+      "beamTYPE[beam_xray]":{
         "distance":"None",
         "distance/@units":"None",
         "incident_energy":"None",
@@ -210,7 +210,7 @@
       "SUBSTANCE[substance]":{
         "molecular_formula_hill":"None"
       },
-      "sample_history":{
+      "history":{
         "sample_preparation":{
           "start_time":"None",
           "end_time":"None",

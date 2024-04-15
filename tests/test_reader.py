@@ -9,7 +9,6 @@ from glob import glob
 import xml.etree.ElementTree as ET
 from pathlib import Path
 import pytest
-import logging
 
 import pynxtools.dataconverter.convert as dataconverter
 from pynxtools.dataconverter.convert import get_reader
@@ -54,13 +53,42 @@ for test_case in test_cases:
 )
 def test_example_data(nxdl, sub_reader_data_dir, tmp_path, caplog) -> None:
     """
-    Test the example data for the XPS reader
+    Test XPS reader
+
+    Parameters
+    ----------
+    nxdl : str
+        Name of the NXDL application definition that is to be tested by
+        this reader plugin (e.g. NXsts, NXmpes, etc)..
+    files_or_dir : TYPE
+        List of input files or full path string to the test data
+        directory that contains all the files required for running the data
+        conversion through the reader.
+    tmp_path : pathlib.PosixPath
+        Pytest fixture variable, used to clean up the files generated during
+        the test.
+    caplog : _pytest.logging.LogCaptureFixture
+        Pytest fixture variable, used to capture the log messages during the
+        test.
+
+    Returns
+    -------
+    None.
+
     """
     caplog.clear()
     reader = XPSReader
     assert callable(reader.read)
 
-    def_dir = get_nexus_definitions_path()
+    test = ReaderTest(
+        nxdl=nxdl,
+        reader=READER,
+        files_or_dir=files_or_dir,
+        tmp_path=tmp_path,
+        caplog=caplog,
+    )
+    test.convert_to_nexus()
+    test.check_reproducibility_of_nexus()
 
     data_dir = os.path.join(os.path.dirname(__file__), "data")
     reader_dir = os.path.join(data_dir, sub_reader_data_dir)
@@ -89,6 +117,67 @@ def test_example_data(nxdl, sub_reader_data_dir, tmp_path, caplog) -> None:
         assert is_success
     assert caplog.text == ""
 
+# =============================================================================
+# @pytest.mark.parametrize(
+#     "sub_reader_data_dir",
+#     [
+#         pytest.param(
+#             "spe",
+#             id="Phi .spe reader",
+#         ),
+#         pytest.param(
+#             "pro",
+#             id="Phi .pro reader",
+#         ),
+#         pytest.param(
+#             "scienta_txt",
+#             id="Scienta txt export reader",
+#         ),
+#         pytest.param(
+#             "vms_regular",
+#             id="Regular VAMAS reader",
+#         ),
+#         pytest.param(
+#             "vms_irregular",
+#             id="Irregular VAMAS reader",
+#         ),
+#         pytest.param(
+#             "xml",
+#             id="Specs XML reader",
+#         ),
+#     ],
+# )
+# def test_example_data(sub_reader_data_dir):
+#     """
+#     Test the example data for the XPS reader
+#     """
+#     reader = XPSReader
+#     assert callable(reader.read)
+#
+#     def_dir = get_nexus_definitions_path()
+#
+#     data_dir = os.path.join(os.path.dirname(__file__), "data")
+#     reader_dir = os.path.join(data_dir, sub_reader_data_dir)
+#
+#     input_files = sorted(glob(os.path.join(reader_dir, "*")))
+#
+#     for supported_nxdl in reader.supported_nxdls:
+#         nxdl_file = os.path.join(
+#             def_dir, "contributed_definitions", f"{supported_nxdl}.nxdl.xml"
+#         )
+#
+#         root = ET.parse(nxdl_file).getroot()
+#         template = Template()
+#         generate_template_from_nxdl(root, template)
+#
+#         read_data = reader().read(
+#             template=Template(template), file_paths=tuple(input_files)
+#         )
+#
+#         assert isinstance(read_data, Template)
+#         assert validate_data_dict(template, read_data, root)
+#
+# =============================================================================
 
 ## This will be implemented in the future.
 # =============================================================================
@@ -128,39 +217,41 @@ def test_example_data(nxdl, sub_reader_data_dir, tmp_path, caplog) -> None:
 # =============================================================================
 
 
-def test_xps_writing(tmp_path):
-    """Check if xps example can be reproduced"""
-    data_dir = os.path.join(Path(__file__).parent, "data")
-    input_files = (
-        os.path.join(data_dir, "vms_regular", "regular.vms"),
-        os.path.join(data_dir, "vms_regular", "eln_data_vms_regular.yaml"),
-    )
-    dataconverter.convert(
-        input_files,
-        "xps",
-        "NXmpes",
-        os.path.join(tmp_path, "xps.small_test.nxs"),
-        False,
-        False,
-    )
-    # check generated nexus file
-    test_data = os.path.join(tmp_path, "xps.small_test.nxs")
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
-    handler = logging.FileHandler(os.path.join(tmp_path, "xps_test.log"), "w")
-    formatter = logging.Formatter("%(levelname)s - %(message)s")
-    handler.setLevel(logging.DEBUG)
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    nexus_helper = nexus.HandleNexus(logger, test_data, None, None)
-    nexus_helper.process_nexus_master_file(None)
-    with open(os.path.join(tmp_path, "xps_test.log"), "r", encoding="utf-8") as logfile:
-        log = logfile.readlines()
-    with open(
-        os.path.join(data_dir, "Ref_nexus_xps.log"), "r", encoding="utf-8"
-    ) as logfile:
-        ref_log = logfile.readlines()
-    assert log == ref_log
+# =============================================================================
+# def test_xps_writing(tmp_path):
+#     """Check if xps example can be reproduced"""
+#     data_dir = os.path.join(Path(__file__).parent, "data")
+#     input_files = (
+#         os.path.join(data_dir, "vms_regular", "regular.vms"),
+#         os.path.join(data_dir, "vms_regular", "eln_data_vms_regular.yaml"),
+#     )
+#     dataconverter.convert(
+#         input_files,
+#         "xps",
+#         "NXmpes",
+#         os.path.join(tmp_path, "xps.small_test.nxs"),
+#         False,
+#         False,
+#     )
+#     # check generated nexus file
+#     test_data = os.path.join(tmp_path, "xps.small_test.nxs")
+#     logger = logging.getLogger(__name__)
+#     logger.setLevel(logging.DEBUG)
+#     handler = logging.FileHandler(os.path.join(tmp_path, "xps_test.log"), "w")
+#     formatter = logging.Formatter("%(levelname)s - %(message)s")
+#     handler.setLevel(logging.DEBUG)
+#     handler.setFormatter(formatter)
+#     logger.addHandler(handler)
+#     nexus_helper = nexus.HandleNexus(logger, test_data, None, None)
+#     nexus_helper.process_nexus_master_file(None)
+#     with open(os.path.join(tmp_path, "xps_test.log"), "r", encoding="utf-8") as logfile:
+#         log = logfile.readlines()
+#     with open(
+#         os.path.join(data_dir, "Ref_nexus_xps.log"), "r", encoding="utf-8"
+#     ) as logfile:
+#         ref_log = logfile.readlines()
+#     assert log == ref_log
+# =============================================================================
 
 
 def test_shows_correct_warnings():

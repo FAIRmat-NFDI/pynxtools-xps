@@ -50,16 +50,11 @@ dev = [
     "pip-tools",
     "pre-commit"
 ]
-<<<<<<< HEAD
 docs = [
     "mkdocs",
     "mkdocs-material",
     "mkdocs-material-extensions",
     "mkdocs-macros-plugin",
-=======
-consistency_with_pynxtools = [
-    "pynxtools>=0.1.1",
->>>>>>> 88502fb (move consistency extra to optional deps)
 ]
 
 [tool.setuptools.packages.find]

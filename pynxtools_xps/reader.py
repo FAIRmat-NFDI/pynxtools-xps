@@ -2,6 +2,7 @@
 A generic reader for loading XPS (X-ray Photoelectron Spectroscopy) data
 file into mpes nxdl (NeXus Definition Language) template.
 """
+
 import datetime
 import sys
 

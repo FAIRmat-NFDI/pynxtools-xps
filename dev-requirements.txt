@@ -435,7 +435,7 @@ requests==2.31.0
     #   requests-cache
 requests-cache==1.1.1
     # via pynxtools
-ruff==0.1.7
+ruff==0.3.4
     # via pynxtools-xps (pyproject.toml)
 scikit-image==0.20.0
     # via

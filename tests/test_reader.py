@@ -1,6 +1,7 @@
 """
 Basic example based test for the XPS reader
 """
+
 import os
 import xml.etree.ElementTree as ET
 from glob import glob

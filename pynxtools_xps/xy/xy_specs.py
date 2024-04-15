@@ -231,9 +231,9 @@ class XyMapperSpecs(XPSMapper):
         ):
             # Write channel data to 'data'.
             channel_no = spectrum["channel_no"]
-            self._xps_dict["data"][entry][
-                f"{scan_key}_chan{channel_no}"
-            ] = xr.DataArray(data=intensity, coords={x_units: energy})
+            self._xps_dict["data"][entry][f"{scan_key}_chan{channel_no}"] = (
+                xr.DataArray(data=intensity, coords={x_units: energy})
+            )
 
 
 class XyProdigyParser:  # pylint: disable=too-few-public-methods

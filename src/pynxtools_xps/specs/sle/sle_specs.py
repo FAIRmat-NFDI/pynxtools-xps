@@ -337,6 +337,22 @@ class SleProdigyParser(ABC):
 
         self.measurement_types = ["XPS", "UPS", "ElectronSpectroscopy"]
 
+        self.measurement_types_map = {
+            "XPS": "X-ray photoelectron spectroscopy (XPS)",
+            "UPS": "ultraviolet photoelectron spectroscopy (UPS)",
+            "ElectronSpectroscopy": "electron spectroscopy for chemical analysis (ESCA)",
+            "NAPXPS": "near ambient pressure X-ray photoelectron spectroscopy (NAPXPS)",
+            "ARXPS": "angle-resolved X-ray photoelectron spectroscopy (ARXPS)",
+        }
+
+        self.energy_scan_mode_map = {
+            "FixedAnalyzerTransmission": "fixed_analyser_transmission",
+            "FixedRetardationRatio": "fixed_retardation_ratio",
+            "FixedEnergies": "fixed_energy",
+            "Snapshot": "snapshot",
+            "SnapshotFAT": "snapshot",
+        }
+
     def initiate_file_connection(self, filepath):
         """Set the filename of the file to be opened."""
         sql_connection = filepath

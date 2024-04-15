@@ -3,6 +3,7 @@ Parser for reading XPS (X-ray Photoelectron Spectroscopy) data from
 Specs Lab Prodigy XML export, to be passed to mpes nxdl
 (NeXus Definition Language) template.
 """
+
 # Copyright The NOMAD Authors.
 #
 # This file is part of NOMAD. See https://nomad-lab.eu for further info.
@@ -159,11 +160,11 @@ class XmlMapperSpecs(XPSMapper):
                         channel_counts[0, :] += count_on_row
 
                         # Storing detector's raw counts
-                        self._xps_dict["data"][entry][
-                            f"{scan_nm}_chan_{row}"
-                        ] = xr.DataArray(
-                            data=channel_counts[row + 1, :],
-                            coords={"energy": binding_energy},
+                        self._xps_dict["data"][entry][f"{scan_nm}_chan_{row}"] = (
+                            xr.DataArray(
+                                data=channel_counts[row + 1, :],
+                                coords={"energy": binding_energy},
+                            )
                         )
 
                         # Storing callibrated and after accumulated each scan counts
@@ -183,11 +184,11 @@ class XmlMapperSpecs(XPSMapper):
                         channel_counts[0, :] += count_on_row
 
                         # Storing detector's raw counts
-                        self._xps_dict["data"][entry][
-                            f"{scan_nm}_chan{row}"
-                        ] = xr.DataArray(
-                            data=channel_counts[row + 1, :],
-                            coords={"energy": binding_energy},
+                        self._xps_dict["data"][entry][f"{scan_nm}_chan{row}"] = (
+                            xr.DataArray(
+                                data=channel_counts[row + 1, :],
+                                coords={"energy": binding_energy},
+                            )
                         )
 
                         # Storing callibrated and after accumulated each scan counts
@@ -330,9 +331,9 @@ class XmlParserSpecs:
         for unit in units:
             if f"_[{unit}]" in section_nm_reslvr:
                 section_nm_reslvr, _ = section_nm_reslvr.split("_")
-                self.metadata_dict[
-                    f"{parent_path}/" f"{section_nm_reslvr}/@unit"
-                ] = unit
+                self.metadata_dict[f"{parent_path}/" f"{section_nm_reslvr}/@unit"] = (
+                    unit
+                )
 
         parent_path, self.tail_part_frm_struct = self.check_last_part_repetition(
             parent_path, self.tail_part_frm_struct, section_nm_reslvr

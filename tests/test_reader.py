@@ -9,23 +9,35 @@ from glob import glob
 import xml.etree.ElementTree as ET
 from pathlib import Path
 import pytest
-
-import pynxtools.dataconverter.convert as dataconverter
-from pynxtools.dataconverter.convert import get_reader
+import glob
 
 from pynxtools.dataconverter.convert import get_reader
+<<<<<<< HEAD
+
+from pynxtools.dataconverter.convert import get_reader
+=======
+from pynxtools.dataconverter.template import Template
+>>>>>>> 18fac35 (removed unneeded code, run tests for all test files)
 from pynxtools.dataconverter.helpers import (
     generate_template_from_nxdl,
     write_nexus_def_to_entry,
 )
+<<<<<<< HEAD
 from pynxtools.dataconverter.validation import validate_dict_against
 from pynxtools.dataconverter.template import Template
+=======
+
+>>>>>>> 18fac35 (removed unneeded code, run tests for all test files)
 from pynxtools.nexus import nexus  # noqa: E402 # noqa: E402
 from pynxtools.definitions.dev_tools.utils.nxdl_utils import get_nexus_definitions_path
 from pynxtools_xps.reader import XPSReader
 
+<<<<<<< HEAD
 
 READER = get_reader("xps")
+=======
+from pynxtools.test_suite.reader_plugin import ReaderTest
+>>>>>>> 18fac35 (removed unneeded code, run tests for all test files)
 
 test_cases = [
     ("phi_spe", "Phi .spe reader"),
@@ -190,71 +202,75 @@ def test_example_data(nxdl, sub_reader_data_dir, tmp_path, caplog) -> None:
 # =============================================================================
 
 
-# =============================================================================
-# def test_xps_writing(tmp_path):
-#     """Check if xps example can be reproduced"""
-#     data_dir = os.path.join(Path(__file__).parent, "data")
-#     input_files = (
-#         os.path.join(data_dir, "vms_regular", "regular.vms"),
-#         os.path.join(data_dir, "vms_regular", "eln_data_vms_regular.yaml"),
-#     )
-#     dataconverter.convert(
-#         input_files,
-#         "xps",
-#         "NXmpes",
-#         os.path.join(tmp_path, "xps.small_test.nxs"),
-#         False,
-#         False,
-#     )
-#     # check generated nexus file
-#     test_data = os.path.join(tmp_path, "xps.small_test.nxs")
-#     logger = logging.getLogger(__name__)
-#     logger.setLevel(logging.DEBUG)
-#     handler = logging.FileHandler(os.path.join(tmp_path, "xps_test.log"), "w")
-#     formatter = logging.Formatter("%(levelname)s - %(message)s")
-#     handler.setLevel(logging.DEBUG)
-#     handler.setFormatter(formatter)
-#     logger.addHandler(handler)
-#     nexus_helper = nexus.HandleNexus(logger, test_data, None, None)
-#     nexus_helper.process_nexus_master_file(None)
-#     with open(os.path.join(tmp_path, "xps_test.log"), "r", encoding="utf-8") as logfile:
-#         log = logfile.readlines()
-#     with open(
-#         os.path.join(data_dir, "Ref_nexus_xps.log"), "r", encoding="utf-8"
-#     ) as logfile:
-#         ref_log = logfile.readlines()
-#     assert log == ref_log
-# =============================================================================
-
-
-def test_shows_correct_warnings():
+@pytest.mark.parametrize(
+    "sub_reader_data_dir",
+    [
+        pytest.param(
+            "spe",
+            id="Phi .spe reader",
+        ),
+        pytest.param(
+            "pro",
+            id="Phi .pro reader",
+        ),
+        pytest.param(
+            "scienta_txt",
+            id="Scienta txt export reader",
+        ),
+        pytest.param(
+            "vms_regular",
+            id="Regular VAMAS reader",
+        ),
+        pytest.param(
+            "vms_irregular",
+            id="Irregular VAMAS reader",
+        ),
+        pytest.param(
+            "xml",
+            id="Specs XML reader",
+        ),
+    ],
+)
+def test_shows_correct_warnings(sub_reader_data_dir):
     """
     Checks whether the read function generates the correct warnings.
     """
     def_dir = get_nexus_definitions_path()
 
-    data_dir = os.path.join(Path(__file__).parent, "data")
-    input_files = (
-        os.path.join(data_dir, "xml", "In-situ_PBTTT_XPS_SPECS.xml"),
-        os.path.join(data_dir, "xml", "eln_data_xml.yaml"),
-    )
-    nxdl_file = os.path.join(def_dir, "contributed_definitions", "NXmpes.nxdl.xml")
+    data_dir = os.path.join(os.path.dirname(__file__), "data")
+    reader_dir = os.path.join(data_dir, sub_reader_data_dir)
+    input_files = sorted(glob(os.path.join(reader_dir, "*")))
+    input_files = [file for file in input_files if not file.endswith(".nxs")]
 
-    root = ET.parse(nxdl_file).getroot()
-    template = Template()
-    generate_template_from_nxdl(root, template)
+    reader = get_reader("xps")
 
-    read_data = get_reader("xps")().read(
-        template=Template(template), file_paths=tuple(input_files)
-    )
+    for supported_nxdl in reader.supported_nxdls:
+        nxdl_file = os.path.join(
+            def_dir, "contributed_definitions", f"{supported_nxdl}.nxdl.xml"
+        )
 
-    assert validate_data_dict(template, read_data, root)
+        root = ET.parse(nxdl_file).getroot()
+        template = Template()
+        generate_template_from_nxdl(root, template)
 
-    skip_keys = ["@default", "@units", "@long_name", "data/cycle", "data/data_errors"]
+        read_data = reader().read(
+            template=Template(template), file_paths=tuple(input_files)
+        )
 
-    undocumented_keys = [
-        key
-        for key in list(read_data.undocumented.keys())
-        if not any(skip_key in key for skip_key in skip_keys)
-    ]
-    assert not undocumented_keys
+        assert isinstance(read_data, Template)
+        assert validate_data_dict(template, read_data, root)
+
+        skip_keys = [
+            "@default",
+            "@units",
+            "@long_name",
+            "data/cycle",
+            "data/data_errors",
+        ]
+
+        undocumented_keys = [
+            key
+            for key in list(read_data.undocumented.keys())
+            if not any(skip_key in key for skip_key in skip_keys)
+        ]
+        assert not undocumented_keys

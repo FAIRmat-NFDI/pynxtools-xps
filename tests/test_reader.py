@@ -12,32 +12,18 @@ import pytest
 import glob
 
 from pynxtools.dataconverter.convert import get_reader
-<<<<<<< HEAD
-
-from pynxtools.dataconverter.convert import get_reader
-=======
-from pynxtools.dataconverter.template import Template
->>>>>>> 18fac35 (removed unneeded code, run tests for all test files)
 from pynxtools.dataconverter.helpers import (
     generate_template_from_nxdl,
     write_nexus_def_to_entry,
 )
-<<<<<<< HEAD
 from pynxtools.dataconverter.validation import validate_dict_against
 from pynxtools.dataconverter.template import Template
-=======
-
->>>>>>> 18fac35 (removed unneeded code, run tests for all test files)
 from pynxtools.nexus import nexus  # noqa: E402 # noqa: E402
 from pynxtools.definitions.dev_tools.utils.nxdl_utils import get_nexus_definitions_path
 from pynxtools_xps.reader import XPSReader
 
-<<<<<<< HEAD
 
 READER = get_reader("xps")
-=======
-from pynxtools.test_suite.reader_plugin import ReaderTest
->>>>>>> 18fac35 (removed unneeded code, run tests for all test files)
 
 test_cases = [
     ("phi_spe", "Phi .spe reader"),
@@ -102,68 +88,6 @@ def test_example_data(nxdl, sub_reader_data_dir, tmp_path, caplog) -> None:
     test.convert_to_nexus()
     test.check_reproducibility_of_nexus()
 
-# =============================================================================
-# @pytest.mark.parametrize(
-#     "sub_reader_data_dir",
-#     [
-#         pytest.param(
-#             "spe",
-#             id="Phi .spe reader",
-#         ),
-#         pytest.param(
-#             "pro",
-#             id="Phi .pro reader",
-#         ),
-#         pytest.param(
-#             "scienta_txt",
-#             id="Scienta txt export reader",
-#         ),
-#         pytest.param(
-#             "vms_regular",
-#             id="Regular VAMAS reader",
-#         ),
-#         pytest.param(
-#             "vms_irregular",
-#             id="Irregular VAMAS reader",
-#         ),
-#         pytest.param(
-#             "xml",
-#             id="Specs XML reader",
-#         ),
-#     ],
-# )
-# def test_example_data(sub_reader_data_dir):
-#     """
-#     Test the example data for the XPS reader
-#     """
-#     reader = XPSReader
-#     assert callable(reader.read)
-#
-#     def_dir = get_nexus_definitions_path()
-#
-#     data_dir = os.path.join(os.path.dirname(__file__), "data")
-#     reader_dir = os.path.join(data_dir, sub_reader_data_dir)
-#
-#     input_files = sorted(glob(os.path.join(reader_dir, "*")))
-#
-#     for supported_nxdl in reader.supported_nxdls:
-#         nxdl_file = os.path.join(
-#             def_dir, "contributed_definitions", f"{supported_nxdl}.nxdl.xml"
-#         )
-#
-#         root = ET.parse(nxdl_file).getroot()
-#         template = Template()
-#         generate_template_from_nxdl(root, template)
-#
-#         read_data = reader().read(
-#             template=Template(template), file_paths=tuple(input_files)
-#         )
-#
-#         assert isinstance(read_data, Template)
-#         assert validate_data_dict(template, read_data, root)
-#
-# =============================================================================
-
 ## This will be implemented in the future.
 # =============================================================================
 # def test_vms_mapper():
@@ -200,77 +124,3 @@ def test_example_data(nxdl, sub_reader_data_dir, tmp_path, caplog) -> None:
 #         if "REG" in v:
 #             print(k)
 # =============================================================================
-
-
-@pytest.mark.parametrize(
-    "sub_reader_data_dir",
-    [
-        pytest.param(
-            "spe",
-            id="Phi .spe reader",
-        ),
-        pytest.param(
-            "pro",
-            id="Phi .pro reader",
-        ),
-        pytest.param(
-            "scienta_txt",
-            id="Scienta txt export reader",
-        ),
-        pytest.param(
-            "vms_regular",
-            id="Regular VAMAS reader",
-        ),
-        pytest.param(
-            "vms_irregular",
-            id="Irregular VAMAS reader",
-        ),
-        pytest.param(
-            "xml",
-            id="Specs XML reader",
-        ),
-    ],
-)
-def test_shows_correct_warnings(sub_reader_data_dir):
-    """
-    Checks whether the read function generates the correct warnings.
-    """
-    def_dir = get_nexus_definitions_path()
-
-    data_dir = os.path.join(os.path.dirname(__file__), "data")
-    reader_dir = os.path.join(data_dir, sub_reader_data_dir)
-    input_files = sorted(glob(os.path.join(reader_dir, "*")))
-    input_files = [file for file in input_files if not file.endswith(".nxs")]
-
-    reader = get_reader("xps")
-
-    for supported_nxdl in reader.supported_nxdls:
-        nxdl_file = os.path.join(
-            def_dir, "contributed_definitions", f"{supported_nxdl}.nxdl.xml"
-        )
-
-        root = ET.parse(nxdl_file).getroot()
-        template = Template()
-        generate_template_from_nxdl(root, template)
-
-        read_data = reader().read(
-            template=Template(template), file_paths=tuple(input_files)
-        )
-
-        assert isinstance(read_data, Template)
-        assert validate_data_dict(template, read_data, root)
-
-        skip_keys = [
-            "@default",
-            "@units",
-            "@long_name",
-            "data/cycle",
-            "data/data_errors",
-        ]
-
-        undocumented_keys = [
-            key
-            for key in list(read_data.undocumented.keys())
-            if not any(skip_key in key for skip_key in skip_keys)
-        ]
-        assert not undocumented_keys

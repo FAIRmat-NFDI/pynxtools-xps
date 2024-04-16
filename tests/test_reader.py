@@ -7,9 +7,8 @@ import sys
 import logging
 from glob import glob
 import xml.etree.ElementTree as ET
-from pathlib import Path
 import pytest
-import glob
+from glob import glob
 
 from pynxtools.dataconverter.convert import get_reader
 from pynxtools.dataconverter.helpers import (

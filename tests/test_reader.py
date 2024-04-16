@@ -90,33 +90,6 @@ def test_example_data(nxdl, sub_reader_data_dir, tmp_path, caplog) -> None:
     test.convert_to_nexus()
     test.check_reproducibility_of_nexus()
 
-    data_dir = os.path.join(os.path.dirname(__file__), "data")
-    reader_dir = os.path.join(data_dir, sub_reader_data_dir)
-
-    input_files = sorted(glob(os.path.join(reader_dir, "*")))
-
-    nxdl_file = os.path.join(def_dir, "contributed_definitions", f"{nxdl}.nxdl.xml")
-
-    root = ET.parse(nxdl_file).getroot()
-    template = Template()
-    generate_template_from_nxdl(root, template)
-
-    read_data = reader().read(
-        template=Template(template), file_paths=tuple(input_files)
-    )
-
-    entry_names = read_data.get_all_entry_names()  # type: ignore[attr-defined]
-    for entry_name in entry_names:
-        write_nexus_def_to_entry(read_data, entry_name, nxdl)
-
-    assert isinstance(read_data, Template)
-
-    with caplog.at_level(logging.WARNING):
-        is_success = validate_dict_against(nxdl, read_data, ignore_undocumented=True)
-        sys.stdout.write(caplog.text)
-        assert is_success
-    assert caplog.text == ""
-
 # =============================================================================
 # @pytest.mark.parametrize(
 #     "sub_reader_data_dir",

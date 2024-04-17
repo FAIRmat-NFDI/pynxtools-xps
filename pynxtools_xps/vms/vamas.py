@@ -29,7 +29,13 @@ from itertools import groupby
 import xarray as xr
 import numpy as np
 
-from pynxtools_xps.vms.vamas_data_model import VamasHeader, VamasBlock, ExpVariable
+from pynxtools_xps.vms.vamas_data_model import (
+    VamasHeader,
+    VamasBlock,
+    ExpVariable,
+    VamasAdditionalParam,
+    OrdinateValue,
+)
 from pynxtools_xps.vms.casa_data_model import CasaProcess
 from pynxtools_xps.phi.spe_pro_phi import PhiParser
 
@@ -73,21 +79,33 @@ ALLOWED_TECHNIQUES = [
 
 
 UNITS: dict = {
-    "instrument/sample_normal_polarangle_tilt": "degree ",
-    "instrument/sample_tilt_azimuth": "degree",
-    "instrument/sample_rotation_angle": "degree",
-    "source/source_analyser_angle": "degree",
-    "source/excitation_energy": "eV",
-    "source/particle_charge": "C",
+    "beam_xray/excitation_energy": "eV",
+    "beam_xray/particle_charge": "C",
+    "beam_xray/source_beam_width_x": "micro-m",
+    "beam_xray/source_beam_width_y": "micro-m",
+    "source_xray/source_analyser_angle": "degree",
+    "source_xray/source_azimuth": "degree",
+    "source_xray/source_power": "W",
+    "source_sputter/sputter_ion_charge": "C",
+    "source_sputter/sputter_source_energy": "eV",
+    "source_sputter/sputter_source_beam_current": "A",
+    "source_sputter/sputter_source_width_x": "micro-m",
+    "source_sputter/sputter_source_width_y": "micro-m",
+    "source_sputter/sputter_source_incidence_polar_angle": "degree",
+    "source_sputter/sputter_source_azimuth_angle": "degree",
     "analyser/analyser_take_off_azimuth": "degree",
-    "analyser/analyser_take_off_polar": "degree",
+    "analyser/analyser_take_off_polar_angle": "degree",
     "analyser/analysis_width_x": "m",
     "analyser/analysis_width_y": "m",
     "analyser/target_bias": "V",
     "analyser/time_correction": "s",
     "analyser/work_function": "eV",
     "energydispersion/pass_energy": "eV",
+    "energydispersion/differential_width_aes": "eV",
     "detector/dwell_time": "s",
+    "sample/sample_normal_polar_angle_tilt": "degree ",
+    "sample/sample_tilt_azimuth": "degree",
+    "sample/sample_rotation_angle": "degree",
     "data/start_energy": "eV",
     "data/step_size": "eV",
 }
@@ -123,19 +141,32 @@ class VamasMapper(XPSMapper):
 
         key_map = {
             "user": [],
-            "instrument": [
-                "sample_normal_polarangle_tilt",
-                "sample_tilt_azimuth",
-                "sample_rotation_angle",
-            ],
-            "source": [
+            "instrument": [],
+            "beam_xray": ["excitation_energy", "particle_charge"],
+            "source_xray": [
                 "source_label",
                 "source_analyser_angle",
+                "source_beam_width_x",
+                "source_beam_width_y",
+                "source_azimuth",
+                "source_power",
+                "field_of_view_x",
+                "field_of_view_y",
             ],
-            "beam": ["excitation_energy", "particle_charge"],
+            "source_sputter": [
+                "sputter_ion_atomic_number",
+                "sputter_ion_num_atoms",
+                "sputter_ion_charge",
+                "sputter_source_energy",
+                "sputter_source_beam_current",
+                "sputter_source_width_x",
+                "sputter_source_width_y",
+                "sputter_source_incidence_polar_angle",
+                "sputter_source_azimuth_angle",
+            ],
             "analyser": [
                 "analyser_take_off_azimuth",
-                "analyser_take_off_polar",
+                "analyser_take_off_polar_angle",
                 "analysis_width_x",
                 "analysis_width_y",
                 "target_bias",
@@ -148,16 +179,23 @@ class VamasMapper(XPSMapper):
             "energydispersion": [
                 "scan_mode",
                 "pass_energy",
+                "differential_width_aes",
             ],
             "detector": [
                 "signal_mode",
                 "dwell_time",
             ],
             "manipulator": [],
-            "sample": ["sample_name"],
+            "sample": [
+                "sample_name",
+                "sample_angle_tilt",
+                "sample_normal_polar_angle_tilt",
+                "sample_tilt_azimuth",
+                "sample_rotation_angle",
+            ],
             "data": [
-                "x_label",
-                "x_units",
+                "energy_label",
+                "energy_units",
                 "y_labels_1",
                 "y_units_1",
                 "y_labels_2",
@@ -165,6 +203,14 @@ class VamasMapper(XPSMapper):
                 "n_values",
                 "start_energy",
                 "step_size",
+            ],
+            "profiling": [
+                "first_linescan_x_start",
+                "first_linescan_y_start",
+                "first_linescan_x_end",
+                "first_linescan_y_end",
+                "last_linescan_x_end",
+                "last_linescan_y_end",
             ],
             "region": [
                 "analysis_method",
@@ -178,6 +224,8 @@ class VamasMapper(XPSMapper):
                 "spectrum_type",
                 "transition",
                 "time_stamp",
+                "x_coord",
+                "y_coord",
             ],
         }
 
@@ -197,8 +245,9 @@ class VamasMapper(XPSMapper):
         path_map: Dict[str, str] = {
             "user": f"{region_parent}/user",
             "instrument": f"{instrument_parent}",
-            "source": f"{instrument_parent}/source",
-            "beam": f"{instrument_parent}/beam",
+            "beam_xray": f"{instrument_parent}/beam_xray",
+            "source_xray": f"{instrument_parent}/source_xray",
+            "source_sputter": f"{instrument_parent}/source_sputter",
             "analyser": f"{analyser_parent}",
             "collectioncolumn": f"{analyser_parent}/collectioncolumn",
             "energydispersion": f"{analyser_parent}/energydispersion",
@@ -208,6 +257,7 @@ class VamasMapper(XPSMapper):
             "data": f"{region_parent}/data",
             "energy_referencing": f"{region_parent}/calibrations/energy_referencing",
             "peak_fitting": f"{region_parent}/peak_fitting",
+            "profiling": f"{region_parent}/profiling",
             "region": f"{region_parent}",
         }
 
@@ -217,12 +267,16 @@ class VamasMapper(XPSMapper):
             root = path_map[grouping]
             for spectrum_key in spectrum_keys:
                 mpes_key = spectrum_key.rsplit(" ", 1)[0]
-                self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
+                try:
+                    self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
+                except KeyError:
+                    pass
 
                 unit_key = f"{grouping}/{spectrum_key}"
                 units = self._get_units_for_key(unit_key)
                 if units:
                     self._xps_dict[f"{root}/{mpes_key}/@units"] = units
+                used_keys += [spectrum_key]
 
         # Write process data
         process_key_map: Dict[str, List[str]] = {
@@ -335,149 +389,6 @@ class VamasParser:
         self.header = VamasHeader()
         self.blocks: List[VamasBlock] = []
 
-        self.attrs = {
-            "common_header": [
-                "format_id",
-                "institute_id",
-                "instrument_model_id",
-                "operator_id",
-                "experiment_id",
-                "no_comment_lines",
-                "exp_mode",
-                "scan_mode",
-            ],
-            "norm_block": [
-                "block_id",
-                "sample_id",
-                "year",
-                "month",
-                "day",
-                "hour",
-                "minute",
-                "second",
-                "no_hrs_in_advance_of_gmt",
-                "no_comment_lines",
-                "comment_lines",
-                "technique",
-                "exp_var_value",
-                "source_label",
-                "source_energy",
-                "source_power",
-                "source_beam_width_x",
-                "source_beam_width_y",
-                "source_analyser_angle",
-                "unknown_4",
-                "analyser_mode",
-                "resolution",
-                "magnification",
-                "work_function",
-                "target_bias",
-                "analyser_width_x",
-                "analyser_width_y",
-                "analyser_take_off_polar_angle",
-                "analyser_azimuth",
-                "species_label",
-                "transition_label",
-                "particle_charge",
-                "abscissa_label",
-                "abscissa_units",
-                "abscissa_start",
-                "abscissa_step",
-                "no_variables",
-                "variable_label1",
-                "variable_units1",
-                "variable_label2",
-                "variable_units2",
-                "signal_mode",
-                "dwell_time",
-                "no_scans",
-                "time_correction",
-                "sample_angle_tilt",
-                "sample_tilt_azimuth",
-                "sample_rotation",
-                "no_additional_params",
-                "param_label_1",
-                "param_unit_1",
-                "param_value_1",
-                "param_label_2",
-                "param_unit_2",
-                "param_value_2",
-                "num_ord_values",
-                "min_ord_value_1",
-                "max_ord_value_1",
-                "min_ord_value_2",
-                "max_ord_value_2",
-                "data_string",
-            ],
-            "map_block": [
-                "block_id",
-                "sample_id",
-                "year",
-                "month",
-                "day",
-                "hour",
-                "minute",
-                "second",
-                "no_hrs_in_advance_of_gmt",
-                "no_comment_lines",
-                "comment_lines",
-                "technique",
-                "x_coord",
-                "y_coord",
-                "exp_var_value",
-                "source_label",
-                "source_energy",
-                "source_power",
-                "source_beam_width_x",
-                "source_beam_width_y",
-                "fov_x",
-                "fov_y",
-                "source_analyser_angle",
-                "unknown_4",
-                "analyser_mode",
-                "resolution",
-                "magnification",
-                "work_function",
-                "target_bias",
-                "analyser_width_x",
-                "analyser_width_y",
-                "analyser_take_off_polar_angle",
-                "analyser_azimuth",
-                "species_label",
-                "transition_label",
-                "particle_charge",
-                "abscissa_label",
-                "abscissa_units",
-                "abscissa_start",
-                "abscissa_step",
-                "no_variables",
-                "variable_label_1",
-                "variable_units_1",
-                "variable_label_2",
-                "variable_units_2",
-                "signal_mode",
-                "dwell_time",
-                "no_scans",
-                "time_correction",
-                "sample_angle_tilt",
-                "sample_tilt_azimuth",
-                "sample_rotation",
-                "no_additional_params",
-                "param_label_1",
-                "param_unit_1",
-                "param_value_1",
-                "param_label_2",
-                "param_unit_2",
-                "param_value_2",
-                "num_ord_values",
-                "min_ord_value_1",
-                "max_ord_value_1",
-                "min_ord_value_2",
-                "max_ord_value_2",
-                "data_string",
-            ],
-        }
-
     def parse_file(self, file: Union[str, Path]):
         """Parse the vamas file into a list of dictionaries.
 
@@ -524,14 +435,14 @@ class VamasParser:
             "instrument_model_id",
             "operator_id",
             "experiment_id",
-            "no_comment_lines",
+            "num_comment_lines",
         ]
         map_attrs = ["num_analysis_positions", "num_x_coords", "num_y_coords"]
 
         for attr in common_attrs:
             self._setattr_with_datacls_type(self.header, attr, self.data.pop(0).strip())
 
-        num_comment_lines = int(self.header.no_comment_lines)
+        num_comment_lines = int(self.header.num_comment_lines)
         self.header.comment_lines = self._extract_n_lines_to_list(num_comment_lines)
 
         self.header.exp_mode = _check_for_allowed(self.data.pop(0).strip(), EXP_MODES)
@@ -540,7 +451,7 @@ class VamasParser:
         if self.header.exp_mode in ["MAP", "MAPDP", "NORM", "SDP"]:
             self.header.num_spectral_regions = int(self.data.pop(0).strip())
         else:
-            delattr(self.header, "nr_spectral_regions")
+            delattr(self.header, "num_spectral_regions")
 
         for attr in map_attrs:
             if self.header.exp_mode in ["MAP", "MAPDP"]:
@@ -552,11 +463,13 @@ class VamasParser:
 
         self.header.num_exp_var = int(self.data.pop(0).strip())
 
-        for i in range(int(self.header.num_exp_var)):
+        for exp_var_no in range(int(self.header.num_exp_var)):
             exp_var = ExpVariable()
             for attr in ["label", "unit"]:
                 self._setattr_with_datacls_type(exp_var, attr, self.data.pop(0).strip())
-                setattr(self.header, f"exp_var_{i}_{attr}", getattr(exp_var, attr))
+                setattr(
+                    self.header, f"exp_var_{exp_var_no}_{attr}", getattr(exp_var, attr)
+                )
 
         self.header.num_entries_in_inclusion_list = int(self.data.pop(0).strip())
         self.header.inclusion_list = self._extract_n_lines_to_list(
@@ -580,7 +493,7 @@ class VamasParser:
     def _parse_blocks(self):
         """Parse all (metadata) of Vamas blocks."""
         for _ in range(int(self.header.num_blocks)):
-            self._parse_one_block()
+            self.blocks += [self._parse_one_block()]
 
     def _parse_one_block(self):
         """
@@ -603,8 +516,8 @@ class VamasParser:
         block.minute = int(self.data.pop(0).strip())
         block.second = int(self.data.pop(0).strip().split(".")[0])
         block.no_hrs_in_advance_of_gmt = int(self.data.pop(0).strip())
-        block.no_comment_lines = int(self.data.pop(0).strip())
-        for _ in range(block.no_comment_lines):
+        block.num_comment_lines = int(self.data.pop(0).strip())
+        for _ in range(block.num_comment_lines):
             block.comment_lines += [self.data.pop(0)]
         block.technique = _check_for_allowed(
             self.data.pop(0).strip(), ALLOWED_TECHNIQUES
@@ -747,13 +660,11 @@ class VamasParser:
         block.sample_rotation = float(self.data.pop(0).strip())
         block.no_additional_params = int(self.data.pop(0).strip())
 
-        for param in range(block.no_additional_params):
-            name = "param_label_" + str(param + 1)
-            setattr(block, name, self.data.pop(0))
-            name = "param_unit_" + str(param + 1)
-            setattr(block, name, self.data.pop(0))
-            name = "param_value_" + str(param + 1)
-            setattr(block, name, self.data.pop(0))
+        for param_no in range(block.no_additional_params):
+            param = VamasAdditionalParam()
+            for attr in ["label", "unit", "value"]:
+                self._setattr_with_datacls_type(param, attr, self.data.pop(0).strip())
+                setattr(block, f"param_{param_no}_{attr}", getattr(param, attr))
 
         block.future_upgrade_block_entries = self._extract_n_lines_to_list(
             self.header.num_future_upgrade_block_entries
@@ -763,11 +674,11 @@ class VamasParser:
         if self.header.scan_mode == "IRREGULAR":
             del self.data[:2]
 
-        for var in range(block.no_variables):
-            name = "min_ord_value_" + str(var + 1)
-            setattr(block, name, float(self.data.pop(0).strip()))
-            name = "max_ord_value_" + str(var + 1)
-            setattr(block, name, float(self.data.pop(0).strip()))
+        for var_no in range(block.no_variables):
+            var = OrdinateValue()
+            for attr in ["min_ord_value", "max_ord_value"]:
+                self._setattr_with_datacls_type(var, attr, self.data.pop(0).strip())
+                setattr(block, f"{attr}_{var_no + 1}", getattr(var, attr))
 
         self._add_data_values(block)
 
@@ -1030,42 +941,33 @@ class VamasParser:
 
             spectrum_type = str(block.species_label + block.transition_label)
 
-            settings = {
-                "region": block.block_id,
-                "sample_name": block.sample_id,
-                "analysis_method": block.technique,
-                "source_label": block.source_label,
-                "excitation_energy": block.source_energy,
-                "source_analyser_angle": block.source_analyser_angle,
-                "scan_mode": block.analyser_mode,
-                "pass_energy": block.resolution,
-                "magnification": block.magnification,
-                "work_function": block.work_function,
-                "target_bias": block.target_bias,
-                "analysis_width_x": block.analysis_width_x,
-                "analysis_width_y": block.analysis_width_y,
-                "analyser_take_off_polar": block.analyser_take_off_polar_angle,
-                "analyser_take_off_azimuth": block.analyser_azimuth,
-                "element": block.species_label,
-                "transition": block.transition_label,
-                "particle_charge": block.particle_charge,
-                "x_label": block.abscissa_label,
-                "x_units": block.abscissa_units,
-                "start_energy": block.abscissa_start,
-                "step_size": block.abscissa_step,
-                "y_labels_1": block.variable_label_1,
-                "y_units_1": block.variable_units_1,
-                "y_labels_2": block.variable_label_2,
-                "y_units_2": block.variable_units_2,
-                "signal_mode": block.signal_mode,
-                "dwell_time": block.dwell_time,
-                "time_correction": block.time_correction,
-                "sample_normal_polarangle_tilt": block.sample_angle_tilt,
-                "sample_tilt_azimuth": block.sample_tilt_azimuth,
-                "sample_rotation_angle": block.sample_rotation,
-                "n_values": int(block.num_ord_values / block.no_variables),
-            }
+            settings = {to_snake_case(k): v for (k, v) in block.dict().items()}
             settings.update(header_dict)
+
+            key_map = {
+                "block_id": "region",
+                "sample_id": "sample_name",
+                "technique": "analysis_method",
+                "source_energy": "excitation_energy",
+                "analyser_mode": "scan_mode",
+                "resolution": "pass_energy",
+                "analyser_azimuth": "analyser_take_off_azimuth",
+                "transition_label": "transition",
+                "abscissa_label": "energy_label",
+                "abscissa_units": "energy_units",
+                "abscissa_start": "start_energy",
+                "abscissa_step": "step_size",
+                "variable_label_1": "y_labels_1",
+                "variable_units_1": "y_units_1",
+                "variable_label_2": "y_labels_2",
+                "variable_units_2": "y_units_2",
+                "species_label": "element",
+                "sample_angle_tilt": "sample_normal_polar_angle_tilt",
+                "sample_rotation": "sample_rotation_angle",
+            }
+            settings["n_values"] = int(block.num_ord_values / block.no_variables)
+
+            self._re_map_keys(settings, key_map)
 
             comment_dict = self.handle_block_comments(block.comment_lines)
             settings.update(comment_dict)
@@ -1089,11 +991,28 @@ class VamasParser:
                 date_time = datetime.datetime.min
 
             data = {"x": block.x}
+
+            remove_keys = [
+                "comment_lines",
+                "year",
+                "month",
+                "day",
+                "hour",
+                "minute",
+                "second",
+                "no_hrs_in_advance_of_gmt",
+                "x",
+            ]
+
+            for key in remove_keys:
+                del settings[key]
+
             for var in range(int(block.no_variables)):
                 if var == 0:
                     key = "y"
 
                     data["y"] = getattr(block, "y")
+                    del settings["y"]
 
                     if block.variable_label_1 in ["Intensity", "counts"]:
                         y_cps = [np.round(y / block.dwell_time, 2) for y in block.y]
@@ -1102,6 +1021,7 @@ class VamasParser:
                 else:
                     key = "y" + str(var)
                     data[key] = getattr(block, key)
+                    del settings[key]
 
             spec_dict = {
                 "time_stamp": date_time,
@@ -1118,6 +1038,18 @@ class VamasParser:
         spectra = self._get_scan_numbers_for_spectra(spectra)
 
         return spectra
+
+    def _re_map_keys(self, dictionary, key_map):
+        """
+        Map the keys returned from the SQL table to the preferred keys for
+        the parser output.
+
+        """
+        keys = list(key_map.keys())
+        for k in keys:
+            if k in dictionary.keys():
+                dictionary[key_map[k]] = dictionary.pop(k)
+        return dictionary
 
 
 def _check_for_allowed(value, allowed_values):

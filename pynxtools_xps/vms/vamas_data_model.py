@@ -34,7 +34,7 @@ class VamasHeader(XpsDataclass):
     instrument_model_id: str = "Not Specified"
     operator_id: str = "Not Specified"
     experiment_id: str = "Not Specified"
-    no_comment_lines: int = 0
+    num_comment_lines: int = 0
     comment_lines: list = field(
         default_factory=list
     )  # ["Casa Info Follows CasaXPS Version 2.3.22PR1.0\n0"]
@@ -61,12 +61,6 @@ class VamasHeader(XpsDataclass):
 
 
 @dataclass
-class ExpVariable(XpsDataclass):
-    label: str = "Exp Variable"
-    unit: str = "d"
-
-
-@dataclass
 class VamasBlock(XpsDataclass):
     """An object to store a block of spectrum data and meta-data."""
 
@@ -79,7 +73,7 @@ class VamasBlock(XpsDataclass):
     minute: int = 0
     second: int = 0
     no_hrs_in_advance_of_gmt: int = 0
-    no_comment_lines: int = 0
+    num_comment_lines: int = 0
     # This list should contain one element per for each
     # line in the comment block
     comment_lines: list = field(default_factory=list)
@@ -103,7 +97,7 @@ class VamasBlock(XpsDataclass):
     first_linescan_y_end: float = 0.0
     last_linescan_x_end: float = 0.0
     last_linescan_y_end: float = 0.0
-    source_analyzer_angle: float = 0.0
+    source_analyser_angle: float = 0.0
     source_azimuth: str = "180"
     analyser_mode: str = ""
     resolution: float = 0.0
@@ -113,12 +107,12 @@ class VamasBlock(XpsDataclass):
     target_bias: float = 0.0
     # analyser slit length divided by the magnification
     # of the analyser transfer lens
-    analyzer_width_x: float = 0.0
-    analyzer_width_y: float = 0.0
+    analysis_width_x: float = 0.0
+    analysis_width_y: float = 0.0
     # degrees from upward z-direction,
     # defined by the sample stage
-    analyzer_take_off_polar_angle: float = 0.0
-    analyzer_azimuth: float = 0.0
+    analyser_take_off_polar_angle: float = 0.0
+    analyser_azimuth: float = 0.0
     species_label: str = ""
     transition_label: str = ""
     particle_charge: int = -1
@@ -151,18 +145,24 @@ class VamasBlock(XpsDataclass):
     sample_tilt_azimuth: float = 0.0
     sample_rotation: float = 0.0
     no_additional_params: int = 2
-
+    num_ord_values: int = 0
     future_upgrade_block_entries: list = field(default_factory=list)
 
-    param_label_1: str = "ESCAPE DEPTH TYPE"
-    param_unit_1: str = "d"
-    param_value_1: str = "0"
-    param_label_2: str = "MFP Exponent"
-    param_unit_2: str = "d"
-    param_value_2: str = "0"
-    num_ord_values: int = 0
-    min_ord_value_1: float = 0.0
-    max_ord_value_1: float = 0.0
-    min_ord_value_2: float = 0.0
-    max_ord_value_2: float = 0.0
-    data_string: str = ""
+
+@dataclass
+class ExpVariable(XpsDataclass):
+    label: str = ""
+    unit: str = ""
+
+
+@dataclass
+class VamasAdditionalParam(XpsDataclass):
+    label: str = ""
+    unit: str = ""
+    value: float = 0.0
+
+
+@dataclass
+class OrdinateValue(XpsDataclass):
+    min_ord_value: float = 0.0
+    max_ord_value: float = 0.0

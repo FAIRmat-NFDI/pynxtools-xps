@@ -38,7 +38,7 @@
      },
      "sourceTYPE[source_xray]":{
        "type":"@eln",
-       "name":"@xps_token:source/source_label",
+       "name":"@xps_token:source_xray/source_label",
        "probe":"photon",
        "device_information":{
          "vendor":"@eln",
@@ -49,7 +49,7 @@
        "depends_on": "/entry/instrument/source_xray/transformations/source_analyser_angle",
        "TRANSFORMATIONS[transformations]": {
          "AXISNAME[source_analyser_angle]/@depends_on":".",
-         "AXISNAME[source_analyser_angle]":"@xps_token:source/source_analyser_angle",
+         "AXISNAME[source_analyser_angle]":"@xps_token:source_xray/source_analyser_angle",
          "AXISNAME[source_analyser_angle]/@transformation_type": "rotation",
          "AXISNAME[source_analyser_angle]/@units":"degree",
          "AXISNAME[source_analyser_angle]/@vector": [
@@ -62,7 +62,7 @@
      "beamTYPE[beam_xray]":{
        "distance":"@eln",
        "distance/@units":"@eln",
-       "incident_energy":"@xps_token:beam/excitation_energy",
+       "incident_energy":"@xps_token:beam_xray/excitation_energy",
        "incident_energy/@units":"eV",
        "incident_energy_spread":"None",
        "incident_energy_spread/@units":"None",

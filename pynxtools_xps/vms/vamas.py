@@ -29,7 +29,7 @@ from itertools import groupby
 import xarray as xr
 import numpy as np
 
-from pynxtools_xps.vms.vamas_data_model import VamasHeader, VamasBlock
+from pynxtools_xps.vms.vamas_data_model import VamasHeader, VamasBlock, ExpVariable
 from pynxtools_xps.vms.casa_data_model import CasaProcess
 from pynxtools_xps.phi.spe_pro_phi import PhiParser
 
@@ -42,15 +42,45 @@ from pynxtools_xps.reader_utils import (
     get_minimal_step,
 )
 
+EXP_MODES = [
+    "MAP",
+    "MAPDP",
+    "MAPSV",
+    "MAPSVDP",
+    "NORM",
+    "SDP",
+    "SDPSC",
+    "SEM",
+]
+
+ALLOWED_TECHNIQUES = [
+    "AES",
+    "AES diff",
+    "AES dir",
+    "EDX",
+    "ELS",
+    "FABMS",
+    "FABMS energy spec",
+    "ISS",
+    "SIMS",
+    "SIMS energy spec",
+    "SNMS",
+    "SNMS energy spec",
+    "UPS",
+    "XPS",
+    "XRF",
+]
+
+
 UNITS: dict = {
     "instrument/sample_normal_polarangle_tilt": "degree ",
     "instrument/sample_tilt_azimuth": "degree",
     "instrument/sample_rotation_angle": "degree",
-    "source/source_analyzer_angle": "degree",
+    "source/source_analyser_angle": "degree",
     "source/excitation_energy": "eV",
     "source/particle_charge": "C",
-    "analyser/analyzer_take_off_azimuth": "degree",
-    "analyser/analyzer_take_off_polar": "degree",
+    "analyser/analyser_take_off_azimuth": "degree",
+    "analyser/analyser_take_off_polar": "degree",
     "analyser/analysis_width_x": "m",
     "analyser/analysis_width_y": "m",
     "analyser/target_bias": "V",
@@ -100,12 +130,12 @@ class VamasMapper(XPSMapper):
             ],
             "source": [
                 "source_label",
-                "source_analyzer_angle",
+                "source_analyser_angle",
             ],
             "beam": ["excitation_energy", "particle_charge"],
             "analyser": [
-                "analyzer_take_off_azimuth",
-                "analyzer_take_off_polar",
+                "analyser_take_off_azimuth",
+                "analyser_take_off_polar",
                 "analysis_width_x",
                 "analysis_width_y",
                 "target_bias",
@@ -309,34 +339,12 @@ class VamasParser:
             "common_header": [
                 "format_id",
                 "institute_id",
-                "instrumentModel_id",
+                "instrument_model_id",
                 "operator_id",
                 "experiment_id",
                 "no_comment_lines",
-            ],
-            "exp_var": ["exp_var_label", "exp_var_unit"],
-            "norm_header": [
+                "exp_mode",
                 "scan_mode",
-                "nr_regions",
-                "nr_exp_var",
-                "unknown_3",
-                "unknown_4",
-                "unknown_5",
-                "unknown_6",
-                "no_blocks",
-            ],
-            "map_header": [
-                "scan_mode",
-                "nr_regions",
-                "nr_positions",
-                "nr_x_coords",
-                "nr_y_coords",
-                "nr_exp_var",
-                "unknown_3",
-                "unknown_4",
-                "unknown_5",
-                "unknown_6",
-                "no_blocks",
             ],
             "norm_block": [
                 "block_id",
@@ -354,20 +362,20 @@ class VamasParser:
                 "exp_var_value",
                 "source_label",
                 "source_energy",
-                "unknown_1",
-                "unknown_2",
-                "unknown_3",
-                "source_analyzer_angle",
+                "source_power",
+                "source_beam_width_x",
+                "source_beam_width_y",
+                "source_analyser_angle",
                 "unknown_4",
-                "analyzer_mode",
+                "analyser_mode",
                 "resolution",
                 "magnification",
                 "work_function",
                 "target_bias",
-                "analyzer_width_x",
-                "analyzer_width_y",
-                "analyzer_take_off_polar_angle",
-                "analyzer_azimuth",
+                "analyser_width_x",
+                "analyser_width_y",
+                "analyser_take_off_polar_angle",
+                "analyser_azimuth",
                 "species_label",
                 "transition_label",
                 "particle_charge",
@@ -419,22 +427,22 @@ class VamasParser:
                 "exp_var_value",
                 "source_label",
                 "source_energy",
-                "unknown_1",
-                "unknown_2",
-                "unknown_3",
+                "source_power",
+                "source_beam_width_x",
+                "source_beam_width_y",
                 "fov_x",
                 "fov_y",
-                "source_analyzer_angle",
+                "source_analyser_angle",
                 "unknown_4",
-                "analyzer_mode",
+                "analyser_mode",
                 "resolution",
                 "magnification",
                 "work_function",
                 "target_bias",
-                "analyzer_width_x",
-                "analyzer_width_y",
-                "analyzer_take_off_polar_angle",
-                "analyzer_azimuth",
+                "analyser_width_x",
+                "analyser_width_y",
+                "analyser_take_off_polar_angle",
+                "analyser_azimuth",
                 "species_label",
                 "transition_label",
                 "particle_charge",
@@ -490,58 +498,93 @@ class VamasParser:
                 if line.endswith(b"\r\n"):
                     self.data += [line.decode("utf-8", errors="ignore").strip()]
 
+    def _extract_n_lines_to_list(self, number_of_lines):
+        extracted = []
+        for _ in range(number_of_lines):
+            extracted += [self.data.pop(0)]
+
+        return extracted
+
+    def _setattr_with_datacls_type(self, datacls, attr, value):
+        field_type = type(getattr(datacls, attr))
+        setattr(datacls, attr, field_type(value))
+
     def _parse_header(self):
         """Parse the vama header into a VamasHeader object.
 
         The common_header_attr are the header attributes that are common
-        to both types of Vamas format (NORM and MAP).
+        to all types of Vamas experiment modes.
         Returns
         -------
         None.
         """
-        for attr in self.attrs["common_header"]:
-            setattr(self.header, attr, self.data.pop(0).strip())
-        no_comment_lines = int(self.header.no_comment_lines)
-        comments = []
-        for _ in range(no_comment_lines):
-            comments += [self.data.pop(0)]
-        self.header.comment_lines = comments
-        self.header.exp_mode = self.data.pop(0).strip()
-        if self.header.exp_mode == "NORM":
-            for attr in self.attrs["norm_header"]:
-                setattr(self.header, attr, self.data.pop(0).strip())
-                if attr == "nr_exp_var":
-                    self._add_exp_var()
+        common_attrs = [
+            "format_id",
+            "institute_id",
+            "instrument_model_id",
+            "operator_id",
+            "experiment_id",
+            "no_comment_lines",
+        ]
+        map_attrs = ["num_analysis_positions", "num_x_coords", "num_y_coords"]
 
-        elif self.header.exp_mode == "MAP":
-            for attr in self.attrs["map_header"]:
-                setattr(self.header, attr, self.data.pop(0).strip())
-                if attr == "nr_exp_var":
-                    self._add_exp_var()
+        for attr in common_attrs:
+            self._setattr_with_datacls_type(self.header, attr, self.data.pop(0).strip())
 
+        num_comment_lines = int(self.header.no_comment_lines)
+        self.header.comment_lines = self._extract_n_lines_to_list(num_comment_lines)
+
+        self.header.exp_mode = _check_for_allowed(self.data.pop(0).strip(), EXP_MODES)
+        self.header.scan_mode = self.data.pop(0).strip()
+
+        if self.header.exp_mode in ["MAP", "MAPDP", "NORM", "SDP"]:
+            self.header.num_spectral_regions = int(self.data.pop(0).strip())
+        else:
+            delattr(self.header, "nr_spectral_regions")
+
+        for attr in map_attrs:
+            if self.header.exp_mode in ["MAP", "MAPDP"]:
+                self._setattr_with_datacls_type(
+                    self.header, attr, self.data.pop(0).strip()
+                )
+            else:
+                delattr(self.header, attr)
+
+        self.header.num_exp_var = int(self.data.pop(0).strip())
+
+        for i in range(int(self.header.num_exp_var)):
+            exp_var = ExpVariable()
+            for attr in ["label", "unit"]:
+                self._setattr_with_datacls_type(exp_var, attr, self.data.pop(0).strip())
+                setattr(self.header, f"exp_var_{i}_{attr}", getattr(exp_var, attr))
+
+        self.header.num_entries_in_inclusion_list = int(self.data.pop(0).strip())
+        self.header.inclusion_list = self._extract_n_lines_to_list(
+            self.header.num_entries_in_inclusion_list
+        )
+
+        self.header.num_manually_entered_items_in_block = int(self.data.pop(0).strip())
+        self.header.manually_entered_items_in_block = self._extract_n_lines_to_list(
+            self.header.num_manually_entered_items_in_block
+        )
+
+        self.header.num_future_upgrade_exp_entries = int(self.data.pop(0).strip())
+        self.header.num_future_upgrade_block_entries = int(self.data.pop(0).strip())
+        self.header.future_upgrade_exp_entries = self._extract_n_lines_to_list(
+            self.header.num_future_upgrade_exp_entries
+        )
+
+        self.header.num_blocks = int(self.data.pop(0).strip())
         self.header.validate_types()
-
-    def _add_exp_var(self):
-        """Add experimental variable to header."""
-        for _ in range(int(self.header.nr_exp_var)):
-            for attr in self.attrs["exp_var"]:
-                setattr(self.header, attr, self.data.pop(0).strip())
 
     def _parse_blocks(self):
         """Parse all (metadata) of Vamas blocks."""
-        for _ in range(int(self.header.no_blocks)):
+        for _ in range(int(self.header.num_blocks)):
             self._parse_one_block()
 
     def _parse_one_block(self):
-        """Parse one Vamas Block."""
-        if self.header.exp_mode == "NORM":
-            self.blocks += [self._parse_norm_block()]
-        elif self.header.exp_mode == "MAP":
-            self.blocks += [self._parse_map_block()]
-
-    def _parse_norm_block(self):
         """
-        Use this method when the NORM keyword is present.
+        Parse one Vamas Block.
 
         Returns
         -------
@@ -563,25 +606,83 @@ class VamasParser:
         block.no_comment_lines = int(self.data.pop(0).strip())
         for _ in range(block.no_comment_lines):
             block.comment_lines += [self.data.pop(0)]
-        block.technique = self.data.pop(0).strip()
-        for _ in range(int(self.header.nr_exp_var)):
+        block.technique = _check_for_allowed(
+            self.data.pop(0).strip(), ALLOWED_TECHNIQUES
+        )
+
+        for attr in ["x_coord", "y_coord"]:
+            if self.header.exp_mode in ["MAP", "MAPDP"]:
+                self._setattr_with_datacls_type(block, attr, self.data.pop(0).strip())
+            else:
+                delattr(block, attr)
+
+        for _ in range(int(self.header.num_exp_var)):
             block.exp_var_value = self.data.pop(0).strip()
         block.source_label = self.data.pop(0).strip()
+
+        for attr in [
+            "sputter_ion_atomic_number",
+            "sputter_ion_num_atoms",
+            "sputter_ion_charge",
+        ]:
+            if self.header.exp_mode in [
+                "MAPDP",
+                "MAPSVDP",
+                "SDP",
+                "SDPSV",
+            ] or block.technique in [
+                "FABMS",
+                "FABMS energy spec",
+                "ISS",
+                "SIMS",
+                "SIMS energy spec",
+                "SNMS",
+                "SNMS energy spec",
+            ]:
+                self._setattr_with_datacls_type(block, attr, self.data.pop(0).strip())
+            else:
+                delattr(block, attr)
         block.source_energy = float(self.data.pop(0).strip())
-        block.unknown_1 = self.data.pop(0).strip()
-        block.unknown_2 = self.data.pop(0).strip()
-        block.unknown_3 = self.data.pop(0).strip()
-        block.source_analyzer_angle = float(self.data.pop(0).strip())
-        block.unknown_4 = self.data.pop(0).strip()
-        block.analyzer_mode = self.data.pop(0).strip()
+        block.source_power = self.data.pop(0).strip()
+        block.source_beam_width_x = self.data.pop(0).strip()
+        block.source_beam_width_x = self.data.pop(0).strip()
+
+        for attr in ["field_of_view_x", "field_of_view_y"]:
+            if self.header.exp_mode in ["MAP", "MAPDP", "MAPSV", "MAPSVDP", "SEM"]:
+                self._setattr_with_datacls_type(block, attr, self.data.pop(0).strip())
+            else:
+                delattr(block, attr)
+
+        for attr in [
+            "first_linescan_x_start",
+            "first_linescan_y_start",
+            "first_linescan_x_end",
+            "first_linescan_y_end",
+            "last_linescan_x_end",
+            "last_linescan_y_end",
+        ]:
+            if self.header.exp_mode in ["MAP", "MAPSVDP", "SEM"]:
+                self._setattr_with_datacls_type(block, attr, self.data.pop(0).strip())
+            else:
+                delattr(block, attr)
+
+        block.source_analyser_angle = float(self.data.pop(0).strip())
+        block.source_azimuth = self.data.pop(0).strip()
+        block.analyser_mode = self.data.pop(0).strip()
         block.resolution = float(self.data.pop(0).strip())
+
+        if block.technique == "AES diff":
+            self.header.differential_width_aes = float(self.data.pop(0).strip())
+        else:
+            delattr(block, "differential_width_aes")
+
         block.magnification = self.data.pop(0).strip()
         block.work_function = float(self.data.pop(0).strip())
         block.target_bias = float(self.data.pop(0).strip())
-        block.analyzer_width_x = float(self.data.pop(0).strip())
-        block.analyzer_width_y = float(self.data.pop(0).strip())
-        block.analyzer_take_off_polar_angle = float(self.data.pop(0).strip())
-        block.analyzer_azimuth = float(self.data.pop(0).strip())
+        block.analysis_width_x = float(self.data.pop(0).strip())
+        block.analysis_width_y = float(self.data.pop(0).strip())
+        block.analyser_take_off_polar_angle = float(self.data.pop(0).strip())
+        block.analyser_azimuth = float(self.data.pop(0).strip())
         block.species_label = self.data.pop(0).strip()
         block.transition_label = self.data.pop(0).strip()
         block.particle_charge = int(self.data.pop(0).strip())
@@ -612,11 +713,40 @@ class VamasParser:
         block.signal_mode = self.data.pop(0).strip()
         block.dwell_time = float(self.data.pop(0).strip())
         block.no_scans = int(self.data.pop(0).strip())
-        block.time_correction = self.data.pop(0).strip()
+        block.time_correction = float(self.data.pop(0).strip())
+
+        for attr in [
+            "sputter_source_energy",
+            "sputter_source_beam_current",
+            "sputter_source_width_x",
+            "sputter_source_width_y",
+            "sputter_source_incidence_polar_angle",
+            "sputter_source_azimuth_angle",
+        ]:
+            if self.header.exp_mode in [
+                "MAPDP",
+                "MAPSVDP",
+                "SDP",
+                "SDPSV",
+            ] and block.technique in [
+                "AES",
+                "AES diff",
+                "AES dir",
+                "EDX",
+                "ELS",
+                "UPS",
+                "XPS",
+                "XRF",
+            ]:
+                self._setattr_with_datacls_type(block, attr, self.data.pop(0).strip())
+            else:
+                delattr(block, attr)
+
         block.sample_angle_tilt = float(self.data.pop(0).strip())
         block.sample_tilt_azimuth = float(self.data.pop(0).strip())
         block.sample_rotation = float(self.data.pop(0).strip())
         block.no_additional_params = int(self.data.pop(0).strip())
+
         for param in range(block.no_additional_params):
             name = "param_label_" + str(param + 1)
             setattr(block, name, self.data.pop(0))
@@ -624,9 +754,15 @@ class VamasParser:
             setattr(block, name, self.data.pop(0))
             name = "param_value_" + str(param + 1)
             setattr(block, name, self.data.pop(0))
+
+        block.future_upgrade_block_entries = self._extract_n_lines_to_list(
+            self.header.num_future_upgrade_block_entries
+        )
+
         block.num_ord_values = int(self.data.pop(0).strip())
         if self.header.scan_mode == "IRREGULAR":
             del self.data[:2]
+
         for var in range(block.no_variables):
             name = "min_ord_value_" + str(var + 1)
             setattr(block, name, float(self.data.pop(0).strip()))
@@ -636,107 +772,6 @@ class VamasParser:
         self._add_data_values(block)
 
         block.validate_types()
-        return block
-
-    def _parse_map_block(self):
-        """
-        Use this method when the MAP keyword is present.
-
-        Returns
-        -------
-        block : vamas.Block object.
-            A block represents one spectrum with its metadata.
-
-        """
-        # pylint: disable=too-many-statements
-        block = VamasBlock()
-        block.block_id = self.data.pop(0).strip()
-        block.sample_id = self.data.pop(0).strip()
-        block.year = int(self.data.pop(0).strip())
-        block.month = int(self.data.pop(0).strip())
-        block.day = int(self.data.pop(0).strip())
-        block.hour = int(self.data.pop(0).strip())
-        block.minute = int(self.data.pop(0).strip())
-        block.second = int(self.data.pop(0).strip())
-        block.no_hrs_in_advance_of_gmt = int(self.data.pop(0).strip())
-        block.no_comment_lines = int(self.data.pop(0).strip())
-        for _ in range(block.no_comment_lines):
-            self.data.pop(0)
-            block.comment_lines += [self.data.pop(0)]
-        block.technique = self.data.pop(0).strip()
-        block.x_coord = self.data.pop(0).strip()
-        block.y_coord = self.data.pop(0).strip()
-        block.exp_var_value = self.data.pop(0).strip()
-        block.source_label = self.data.pop(0).strip()
-        block.source_energy = float(self.data.pop(0).strip())
-        block.unknown_1 = self.data.pop(0).strip()
-        block.unknown_2 = self.data.pop(0).strip()
-        block.unknown_3 = self.data.pop(0).strip()
-        block.fov_x = self.data.pop(0).strip()
-        block.fov_y = self.data.pop(0).strip()
-        block.source_analyzer_angle = float(self.data.pop(0).strip())
-        block.unknown_4 = self.data.pop(0).strip()
-        block.analyzer_mode = self.data.pop(0).strip()
-        block.resolution = float(self.data.pop(0).strip())
-        block.magnification = self.data.pop(0).strip()
-        block.work_function = float(self.data.pop(0).strip())
-        block.target_bias = float(self.data.pop(0).strip())
-        block.analyzer_width_x = float(self.data.pop(0).strip())
-        block.analyzer_width_y = float(self.data.pop(0).strip())
-        block.analyzer_take_off_polar_angle = float(self.data.pop(0).strip())
-        block.analyzer_azimuth = float(self.data.pop(0).strip())
-        block.species_label = self.data.pop(0).strip()
-        block.transition_label = self.data.pop(0).strip()
-        block.particle_charge = int(self.data.pop(0).strip())
-
-        if self.header.scan_mode == "REGULAR":
-            block.abscissa_label = self.data.pop(0).strip()
-            block.abscissa_units = self.data.pop(0).strip()
-            block.abscissa_start = float(self.data.pop(0).strip())
-            block.abscissa_step = float(self.data.pop(0).strip())
-
-            block.no_variables = int(self.data.pop(0).strip())
-            for var in range(block.no_variables):
-                name = "variable_label_" + str(var + 1)
-                setattr(block, name, self.data.pop(0).strip())
-                name = "variable_units_" + str(var + 1)
-                setattr(block, name, self.data.pop(0).strip())
-
-        else:
-            block.no_variables = int(self.data.pop(0).strip()) - 1
-            block.abscissa_label = self.data.pop(0).strip()
-            block.abscissa_units = self.data.pop(0).strip()
-            for var in range(block.no_variables):
-                name = "variable_label_" + str(var + 1)
-                setattr(block, name, self.data.pop(0).strip())
-                name = "variable_units_" + str(var + 1)
-                setattr(block, name, self.data.pop(0).strip())
-
-        block.signal_mode = self.data.pop(0).strip()
-        block.dwell_time = float(self.data.pop(0).strip())
-        block.no_scans = int(self.data.pop(0).strip())
-        block.time_correction = self.data.pop(0).strip()
-        block.sample_angle_tilt = float(self.data.pop(0).strip())
-        block.sample_tilt_azimuth = float(self.data.pop(0).strip())
-        block.sample_rotation = float(self.data.pop(0).strip())
-        block.no_additional_params = int(self.data.pop(0).strip())
-        for param in range(block.no_additional_params):
-            name = "param_label_" + str(param + 1)
-            setattr(block, name, self.data.pop(0))
-            name = "param_unit_" + str(param + 1)
-            setattr(block, name, self.data.pop(0))
-            name = "param_value_" + str(param + 1)
-            setattr(block, name, self.data.pop(0))
-        block.num_ord_values = int(self.data.pop(0).strip())
-        if self.header.scan_mode == "IRREGULAR":
-            del self.data[:2]
-        for var in range(block.no_variables):
-            name = "min_ord_value_" + str(var + 1)
-            setattr(block, name, float(self.data.pop(0).strip()))
-            name = "max_ord_value_" + str(var + 1)
-            setattr(block, name, float(self.data.pop(0).strip()))
-
-        self._add_data_values(block)
 
         return block
 
@@ -746,6 +781,8 @@ class VamasParser:
             self._add_regular_data(block)
         elif self.header.scan_mode == "IRREGULAR":
             self._add_irregular_data(block)
+        elif self.header.scan_mode == "MAPPING":
+            self._add_mapping_data(block)
 
     def _add_regular_data(self, block: VamasBlock):
         """Parse data with regularly spaced energy axis."""
@@ -811,6 +848,10 @@ class VamasParser:
             setattr(block, name, data_dict[name])
 
         self.data = self.data[block.num_ord_values :]
+
+    def _add_mapping_data(self, block: VamasBlock):
+        """Parse data in mapping format."""
+        pass
 
     def _get_scan_numbers_for_spectra(self, spectra: List[Dict]):
         """
@@ -995,16 +1036,16 @@ class VamasParser:
                 "analysis_method": block.technique,
                 "source_label": block.source_label,
                 "excitation_energy": block.source_energy,
-                "source_analyzer_angle": block.source_analyzer_angle,
-                "scan_mode": block.analyzer_mode,
+                "source_analyser_angle": block.source_analyser_angle,
+                "scan_mode": block.analyser_mode,
                 "pass_energy": block.resolution,
                 "magnification": block.magnification,
                 "work_function": block.work_function,
                 "target_bias": block.target_bias,
-                "analysis_width_x": block.analyzer_width_x,
-                "analysis_width_y": block.analyzer_width_y,
-                "analyzer_take_off_polar": block.analyzer_take_off_polar_angle,
-                "analyzer_take_off_azimuth": block.analyzer_azimuth,
+                "analysis_width_x": block.analysis_width_x,
+                "analysis_width_y": block.analysis_width_y,
+                "analyser_take_off_polar": block.analyser_take_off_polar_angle,
+                "analyser_take_off_azimuth": block.analyser_azimuth,
                 "element": block.species_label,
                 "transition": block.transition_label,
                 "particle_charge": block.particle_charge,
@@ -1077,3 +1118,9 @@ class VamasParser:
         spectra = self._get_scan_numbers_for_spectra(spectra)
 
         return spectra
+
+
+def _check_for_allowed(value, allowed_values):
+    if value not in allowed_values:
+        raise Exception("An non-allowed techniques was entered in the VAMAS file.")
+    return value

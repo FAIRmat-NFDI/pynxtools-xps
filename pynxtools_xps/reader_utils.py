@@ -403,7 +403,7 @@ def update_dict_without_overwrite(d1: Dict[str, Any], d2: Dict[str, Any]):
     d1.update({k: v for k, v in d2.items() if k not in d1})
 
 
-def construct_data_key(spectrum: Dict[str, Any]) -> str:
+def construct_data_key(spectrum: Dict[str, Any]):
     """
     Construct a key for the 'data' field of the xps_dict.
     Output example: cycle0_scan0.

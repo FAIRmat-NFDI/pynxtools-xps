@@ -44,8 +44,17 @@ from pynxtools_xps.reader_utils import (
     construct_entry_name,
     construct_data_key,
     construct_detector_data_key,
-    to_snake_case,
+    convert_pascal_to_snake,
     get_minimal_step,
+    check_for_allowed_in_list,
+    re_map_keys,
+    re_map_values,
+    drop_unused_keys,
+)
+from pynxtools_xps.value_mappers import (
+    convert_measurement_method,
+    convert_energy_type,
+    convert_energy_scan_mode,
 )
 
 EXP_MODES = [
@@ -76,7 +85,6 @@ ALLOWED_TECHNIQUES = [
     "XPS",
     "XRF",
 ]
-
 
 UNITS: dict = {
     "beam_xray/excitation_energy": "eV",
@@ -139,7 +147,7 @@ class VamasMapper(XPSMapper):
 
         self._xps_dict["data"]: Dict[str, Any] = {}
 
-        key_map = {
+        template_key_map = {
             "user": [],
             "instrument": [],
             "beam_xray": ["excitation_energy", "particle_charge"],
@@ -230,10 +238,10 @@ class VamasMapper(XPSMapper):
         }
 
         for spectrum in spectra:
-            self._update_xps_dict_with_spectrum(spectrum, key_map)
+            self._update_xps_dict_with_spectrum(spectrum, template_key_map)
 
     def _update_xps_dict_with_spectrum(
-        self, spectrum: Dict[str, Any], key_map: Dict[str, str]
+        self, spectrum: Dict[str, Any], template_key_map: Dict[str, str]
     ):
         """Map one spectrum from raw data to NXmpes-ready dict."""
         # pylint: disable=too-many-locals,duplicate-code
@@ -263,7 +271,7 @@ class VamasMapper(XPSMapper):
 
         used_keys = []
 
-        for grouping, spectrum_keys in key_map.items():
+        for grouping, spectrum_keys in template_key_map.items():
             root = path_map[grouping]
             for spectrum_key in spectrum_keys:
                 mpes_key = spectrum_key.rsplit(" ", 1)[0]
@@ -372,6 +380,35 @@ class VamasMapper(XPSMapper):
                 return ""
 
 
+KEY_MAP = {
+    "block_id": "region",
+    "sample_id": "sample_name",
+    "technique": "analysis_method",
+    "source_energy": "excitation_energy",
+    "analyser_mode": "scan_mode",
+    "resolution": "pass_energy",
+    "analyser_azimuth": "analyser_take_off_azimuth",
+    "transition_label": "transition",
+    "abscissa_label": "energy_label",
+    "abscissa_units": "energy_units",
+    "abscissa_start": "start_energy",
+    "abscissa_step": "step_size",
+    "variable_label_1": "y_labels_1",
+    "variable_units_1": "y_units_1",
+    "variable_label_2": "y_labels_2",
+    "variable_units_2": "y_units_2",
+    "species_label": "element",
+    "sample_angle_tilt": "sample_normal_polar_angle_tilt",
+    "sample_rotation": "sample_rotation_angle",
+}
+
+VALUE_MAP = {
+    "analysis_method": convert_measurement_method,
+    "energy_label": convert_energy_type,
+    "scan_mode": convert_energy_scan_mode,
+}
+
+
 class VamasParser:
     """A parser for reading vamas files."""
 
@@ -410,6 +447,7 @@ class VamasParser:
                     self.data += [line.decode("utf-8", errors="ignore").strip()]
 
     def _extract_n_lines_to_list(self, number_of_lines):
+        """Ectract n number of lines to a list."""
         extracted = []
         for _ in range(number_of_lines):
             extracted += [self.data.pop(0)]
@@ -417,6 +455,10 @@ class VamasParser:
         return extracted
 
     def _setattr_with_datacls_type(self, datacls, attr, value):
+        """
+        Set attribute of dataclass instance with the field_type
+        defined in the dataclass.
+        """
         field_type = type(getattr(datacls, attr))
         setattr(datacls, attr, field_type(value))
 
@@ -445,7 +487,9 @@ class VamasParser:
         num_comment_lines = int(self.header.num_comment_lines)
         self.header.comment_lines = self._extract_n_lines_to_list(num_comment_lines)
 
-        self.header.exp_mode = _check_for_allowed(self.data.pop(0).strip(), EXP_MODES)
+        self.header.exp_mode = check_for_allowed_in_list(
+            self.data.pop(0).strip(), EXP_MODES
+        )
         self.header.scan_mode = self.data.pop(0).strip()
 
         if self.header.exp_mode in ["MAP", "MAPDP", "NORM", "SDP"]:
@@ -519,7 +563,7 @@ class VamasParser:
         block.num_comment_lines = int(self.data.pop(0).strip())
         for _ in range(block.num_comment_lines):
             block.comment_lines += [self.data.pop(0)]
-        block.technique = _check_for_allowed(
+        block.technique = check_for_allowed_in_list(
             self.data.pop(0).strip(), ALLOWED_TECHNIQUES
         )
 
@@ -761,7 +805,11 @@ class VamasParser:
         self.data = self.data[block.num_ord_values :]
 
     def _add_mapping_data(self, block: VamasBlock):
-        """Parse data in mapping format."""
+        """
+        Parse data in mapping format.
+
+        TBD!
+        """
         pass
 
     def _get_scan_numbers_for_spectra(self, spectra: List[Dict]):
@@ -838,7 +886,7 @@ class VamasParser:
             for sep in ("=", ":"):
                 try:
                     key, value = [part.strip(" ") for part in line.split(sep, 1)]
-                    comments[to_snake_case(key)] = value
+                    comments[convert_pascal_to_snake(key)] = value
                 except ValueError:
                     continue
 
@@ -907,7 +955,7 @@ class VamasParser:
             for sep in ("=", ":"):
                 try:
                     key, value = [part.strip(" ") for part in line.split("=", 1)]
-                    comments[to_snake_case(key)] = value
+                    comments[convert_pascal_to_snake(key)] = value
                 except ValueError:
                     continue
         return comments
@@ -927,7 +975,9 @@ class VamasParser:
         temp_group_name = ""
         spectra = []
 
-        header_dict = {to_snake_case(k): v for (k, v) in self.header.dict().items()}
+        header_dict = {
+            convert_pascal_to_snake(k): v for (k, v) in self.header.dict().items()
+        }
         del header_dict["comment_lines"]
         header_dict.update(self.handle_header_comments(self.header.comment_lines))
 
@@ -941,35 +991,20 @@ class VamasParser:
 
             spectrum_type = str(block.species_label + block.transition_label)
 
-            settings = {to_snake_case(k): v for (k, v) in block.dict().items()}
+            settings = {
+                convert_pascal_to_snake(k): v for (k, v) in block.dict().items()
+            }
             settings.update(header_dict)
 
-            key_map = {
-                "block_id": "region",
-                "sample_id": "sample_name",
-                "technique": "analysis_method",
-                "source_energy": "excitation_energy",
-                "analyser_mode": "scan_mode",
-                "resolution": "pass_energy",
-                "analyser_azimuth": "analyser_take_off_azimuth",
-                "transition_label": "transition",
-                "abscissa_label": "energy_label",
-                "abscissa_units": "energy_units",
-                "abscissa_start": "start_energy",
-                "abscissa_step": "step_size",
-                "variable_label_1": "y_labels_1",
-                "variable_units_1": "y_units_1",
-                "variable_label_2": "y_labels_2",
-                "variable_units_2": "y_units_2",
-                "species_label": "element",
-                "sample_angle_tilt": "sample_normal_polar_angle_tilt",
-                "sample_rotation": "sample_rotation_angle",
-            }
             settings["n_values"] = int(block.num_ord_values / block.no_variables)
 
-            self._re_map_keys(settings, key_map)
+            # Remap to the MPES-prefered keys and values .
+            re_map_keys(settings, KEY_MAP)
+            re_map_values(settings, VALUE_MAP)
 
             comment_dict = self.handle_block_comments(block.comment_lines)
+            re_map_keys(comment_dict, KEY_MAP)
+            re_map_values(comment_dict, VALUE_MAP)
             settings.update(comment_dict)
 
             # Convert the native time format to the datetime string
@@ -1004,8 +1039,7 @@ class VamasParser:
                 "x",
             ]
 
-            for key in remove_keys:
-                del settings[key]
+            drop_unused_keys(settings, remove_keys)
 
             for var in range(int(block.no_variables)):
                 if var == 0:
@@ -1038,21 +1072,3 @@ class VamasParser:
         spectra = self._get_scan_numbers_for_spectra(spectra)
 
         return spectra
-
-    def _re_map_keys(self, dictionary, key_map):
-        """
-        Map the keys returned from the SQL table to the preferred keys for
-        the parser output.
-
-        """
-        keys = list(key_map.keys())
-        for k in keys:
-            if k in dictionary.keys():
-                dictionary[key_map[k]] = dictionary.pop(k)
-        return dictionary
-
-
-def _check_for_allowed(value, allowed_values):
-    if value not in allowed_values:
-        raise Exception("An non-allowed techniques was entered in the VAMAS file.")
-    return value

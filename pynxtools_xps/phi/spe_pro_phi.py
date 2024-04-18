@@ -36,6 +36,13 @@ from pynxtools_xps.reader_utils import (
     XPSMapper,
     construct_entry_name,
     safe_arange_with_edges,
+    convert_pascal_to_snake,
+)
+
+from pynxtools_xps.value_mappers import (
+    convert_energy_scan_mode,
+    convert_measurement_method,
+    convert_bool,
 )
 
 from pynxtools_xps.phi.phi_data_model import (
@@ -1270,42 +1277,42 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         """
         value_function_map = {
-            "technique": _convert_experimental_technique,
-            "technique_ex": _convert_experimental_technique,
+            "technique": convert_measurement_method,
+            "technique_ex": convert_measurement_method,
             "file_type": _map_file_type,
             "file_date": _parse_datetime,
             "acquisition_file_date": _parse_datetime,
             "energy_reference": _convert_energy_referencing,
             "intensity_calibration_coefficients": _map_to_list,
-            "energy_recalibration": _convert_bool,
+            "energy_recalibration": convert_bool,
             "scan_deflection_span": _map_to_xy,
             "scan_deflection_offset": _map_to_xy,
             "tfc_parameters": _map_to_list,
             "image_size": _map_to_xy,
-            "float_enabled": _convert_bool,
+            "float_enabled": convert_bool,
             "sputter_raster": _map_to_xy_with_units,
             "sputter_raster_offset": _map_to_xy_with_units,
             "neutral_raster": _map_to_xy_with_units,
             "neutral_raster_offset": _map_to_xy_with_units,
-            "profiling_xray_off_during_sputter": _convert_bool,
-            "profiling_source_blank_during_sputter": _convert_bool,
-            "profiling_depth_recalibration": _convert_bool,
-            "energy_scan_mode": _convert_energy_scan_mode,
+            "profiling_xray_off_during_sputter": convert_bool,
+            "profiling_source_blank_during_sputter": convert_bool,
+            "profiling_depth_recalibration": convert_bool,
+            "energy_scan_mode": convert_energy_scan_mode,
             "xray_source": _convert_xray_source_params,
             "xray_stigmator": _map_to_xy,
             "xray_magnification_factor": _map_to_xy,
             "xray_delay_factor": _map_to_xy,
-            "xray_high_power": _convert_bool,
-            "xray_emission_control": _convert_bool,
+            "xray_high_power": convert_bool,
+            "xray_emission_control": convert_bool,
             "xray_settings": _convert_xray_source_settings,
-            "sxi_auto_contrast": _convert_bool,
-            "sxi_shutter_bias": _convert_bool,
+            "sxi_auto_contrast": convert_bool,
+            "sxi_shutter_bias": convert_bool,
             "stage_positions": _convert_stage_positions,
             "gcib_raster_size": _map_to_xy_with_units,
             "gcib_raster_offset": _map_to_xy_with_units,
-            "auto_flood_gun": _convert_bool,
-            "auto_neutral_ion_source": _convert_bool,
-            "presputter": _convert_bool,
+            "auto_flood_gun": convert_bool,
+            "auto_neutral_ion_source": convert_bool,
+            "presputter": convert_bool,
         }
 
         if key in value_function_map:
@@ -1374,17 +1381,6 @@ class PhiParser:  # pylint: disable=too-few-public-methods
         return flattened_dict
 
 
-def convert_pascal_to_snake(str_value: str):
-    """Convert pascal case text to snake case."""
-    pattern = re.compile(r"(?<!^)(?=[A-Z])")
-    return pattern.sub("_", str_value).lower()
-
-
-def convert_snake_to_pascal(str_value: str):
-    """Convert snakecase text to pascal case."""
-    return str_value.replace("_", " ").title().replace(" ", "")
-
-
 def _map_file_type(value: str):
     """Map file_type to easily understandable values."""
     value = value.strip()
@@ -1422,15 +1418,6 @@ def _parse_datetime(value: str):
     return date_object.isoformat()
 
 
-def _convert_bool(value: str):
-    """Convert "yes", "no" to actual boooleans."""
-    if value in ["yes", "Yes"]:
-        return True
-    if value in ["no", "No"]:
-        return True
-    return None
-
-
 def _map_to_list(value: str):
     """Map all items in value to a list."""
     try:
@@ -1456,41 +1443,10 @@ def _map_to_xy_with_units(value: str):
     return {"x": float(x), "x_units": unit, "y": float(y), "y_units": unit}
 
 
-def _convert_experimental_technique(value: str):
-    """Map technique to the values defined in NXmpes."""
-    measurement_types_map = {
-        "XPS": "X-ray photoelectron spectroscopy (XPS)",
-        "UPS": "ultraviolet photoelectron spectroscopy (UPS)",
-        "ElectronSpectroscopy": "electron spectroscopy for chemical analysis (ESCA)",
-        "NAPXPS": "near ambient pressure X-ray photoelectron spectroscopy (NAPXPS)",
-        "ARXPS": "angle-resolved X-ray photoelectron spectroscopy (ARXPS)",
-    }
-    if value in measurement_types_map:
-        return measurement_types_map[value]
-    return value
-
-
 def _convert_energy_referencing(value: str):
     """Map all items in energy_referencing to a dictionary."""
     peak, energy = value.split(" ")
     return {"peak": peak, "energy": energy, "energy_units": "eV"}
-
-
-def _convert_energy_scan_mode(value: str):
-    """Map energy_scan_mode to the values defined in NXmpes."""
-    energy_scan_mode_map = {
-        "FixedAnalyzerTransmission": "fixed_analyser_transmission",
-        "FAT": "fixed_analyser_transmission",
-        "FixedRetardationRatio": "fixed_retardation_ratio",
-        "FRR": "fixed_retardation_ratio",
-        "FixedEnergies": "fixed_energy",
-        "fixed": "fixed_retardation_ratio",
-        "Snapshot": "snapshot",
-    }
-
-    if value in energy_scan_mode_map:
-        return energy_scan_mode_map[value]
-    return value
 
 
 def _convert_channel_info(value: str):

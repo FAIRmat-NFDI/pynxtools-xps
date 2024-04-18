@@ -33,11 +33,18 @@ import numpy as np
 
 from pynxtools_xps.reader_utils import (
     XPSMapper,
+    re_map_keys,
+    re_map_values,
     check_uniform_step_width,
     get_minimal_step,
     construct_entry_name,
     construct_data_key,
     construct_detector_data_key,
+)
+from pynxtools_xps.value_mappers import (
+    convert_measurement_method,
+    convert_energy_scan_mode,
+    convert_intensity_units,
 )
 
 
@@ -275,6 +282,11 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
             "Spectrum ID": "spectrum_id",
         }
 
+        self.value_map = {
+            "analysis_method": convert_measurement_method,
+            "scan_mode": convert_energy_scan_mode,
+        }
+
     def parse_file(self, file, **kwargs):
         """
         Parse the .xy file into a list of dictionaries.
@@ -413,8 +425,11 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
         for name_header, group_data in zip(grouped_list[::2], grouped_list[1::2]):
             name = self._strip_param(name_header[0], "Group:")
             group_settings = {"group_name": name}
+            group_settings = re_map_keys(group_settings, self.settings_map)
+            group_settings = re_map_values(group_settings, self.value_map)
+
             groups[name] = {
-                "group_settings": self._replace_keys(group_settings, self.settings_map),
+                "group_settings": group_settings,
             }
             groups[name].update(self._handle_regions(group_data))
 
@@ -460,11 +475,10 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
                 val = setting.split(self.prefix)[-1].strip().split(":")[1].strip()
                 region_settings[setting_name] = val
 
-            regions[name] = {
-                "region_settings": self._replace_keys(
-                    region_settings, self.settings_map
-                ),
-            }
+            region_settings = re_map_keys(region_settings, self.settings_map)
+            region_settings = re_map_values(region_settings, self.value_map)
+
+            regions[name] = {"region_settings": region_settings}
             regions[name].update(self._handle_cycles(region_data))
 
         return regions
@@ -507,9 +521,13 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
             cycle_settings = {"loop_no": i}
             cycle_data = region_data[line_no_a:line_no_b]
 
+            cycle_settings = re_map_keys(cycle_settings, self.settings_map)
+            cycle_settings = re_map_values(cycle_settings, self.value_map)
+
             cycles[name] = {
-                "cycle_settings": self._replace_keys(cycle_settings, self.settings_map),
+                "cycle_settings": cycle_settings,
             }
+
             cycles[name].update(self._handle_individual_cycles(cycle_data))
 
         return cycles
@@ -610,12 +628,12 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
                     if not self.export_settings["Transmission Function"]:
                         x_units, y_units = val.split(" ")
                         scan_settings["x_units"] = x_units
-                        scan_settings["y_units"] = self._reformat_y_units(y_units)
+                        scan_settings["y_units"] = convert_intensity_units(y_units)
 
                     else:
                         x_units, y_units, tf_units = val.split(" ")
                         scan_settings["x_units"] = x_units
-                        scan_settings["y_units"] = self._reformat_y_units(y_units)
+                        scan_settings["y_units"] = convert_intensity_units(y_units)
                         scan_settings["tf_units"] = tf_units
 
             if not line.startswith(self.prefix) and line.strip("\n"):
@@ -629,12 +647,15 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
         if check_uniform_step_width(energy):
             scan_settings["step_size"] = get_minimal_step(energy)
 
+        scan_settings = re_map_keys(scan_settings, self.settings_map)
+        scan_settings = re_map_values(scan_settings, self.value_map)
+
         scan = {
             "data": {
                 "x": np.array(energy),
                 "y": np.array(intensity),
             },
-            "scan_settings": self._replace_keys(scan_settings, self.settings_map),
+            "scan_settings": scan_settings,
         }
 
         if self.export_settings["Transmission Function"]:
@@ -764,46 +785,3 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
         date_object = datetime.strptime(date, "%m/%d/%y %H:%M:%S")
 
         return date_object
-
-    def _replace_keys(self, dictionary, key_map):
-        """
-        Replaced keys in dictionar if there is a replacement in
-        key_map.
-
-        Parameters
-        ----------
-        dictionary : dict
-            Input non-nested dictionary.
-        key_map : dict
-            Dictionary with mapping for different keys.
-
-        Returns
-        -------
-        dictionary : dict
-            Updated dictionary with new keys.
-
-        """
-        for key in key_map.keys():
-            if key in dictionary.keys():
-                dictionary[key_map[key]] = dictionary[key]
-                dictionary.pop(key, None)
-        return dictionary
-
-    def _reformat_y_units(self, y_units):
-        """
-        Map y_units to shortened values.
-
-        Parameters
-        ----------
-        y_units : str
-            String value for intensity units.
-
-        Returns
-        -------
-        str
-            Shortened intensity units.
-
-        """
-        unit_map = {"counts/s": "CPS", "counts": "Counts"}
-
-        return unit_map[y_units]

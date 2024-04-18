@@ -104,14 +104,12 @@ class XPSMapper(ABC):
         """
 
 
-def to_snake_case(str_value):
-    """Convert a string to snake_case."""
-    if " " in str_value:
-        return "_".join(word.lower() for word in str_value.split())
-    return convert_pascal_to_snake(str_value)
+def convert_snake_to_pascal(str_value: str):
+    """Convert snakecase text to pascal case."""
+    return str_value.replace("_", " ").title().replace(" ", "")
 
 
-def convert_pascal_to_snake(str_value):
+def convert_pascal_to_snake(str_value: str):
     """Convert pascal case text to snake case."""
     # Convert CamelCase to snake_case
     snake_case = re.sub(r"(?<!^)(?=[A-Z])", "_", str_value)
@@ -122,12 +120,7 @@ def convert_pascal_to_snake(str_value):
     return snake_case_cleaned.lower()
 
 
-def convert_snake_to_pascal(str_value):
-    """Convert snakecase text to pascal case."""
-    return str_value.replace("_", " ").title().replace(" ", "")
-
-
-def safe_arange_with_edges(start, stop, step):
+def safe_arange_with_edges(start: float, stop: float, step: float):
     """
     In order to avoid float point errors in the division by step.
 
@@ -150,7 +143,7 @@ def safe_arange_with_edges(start, stop, step):
     return step * np.arange(start / step, (stop + step) / step)
 
 
-def check_uniform_step_width(lst):
+def check_uniform_step_width(lst: List[float]):
     """
     Check to see if a non-uniform step width is used in an list.
 
@@ -182,7 +175,7 @@ def get_minimal_step(lst):
 
     Parameters
     ----------
-    lst : list
+    lst : list or np.ndarray
         List of data points.
 
     Returns
@@ -208,7 +201,7 @@ def _resample_array(y, x0, x1):
     Parameters
     ----------
     y : array
-        Lineshape array.
+        Lineshape array or list.
     x0 : array
         x array with old spacing.
     x1 : array
@@ -225,7 +218,7 @@ def _resample_array(y, x0, x1):
     return interp_fn(x1)
 
 
-def interpolate_arrays(x, array_list):
+def interpolate_arrays(x: List[float], array_list: List[np.ndarray]):
     """
     Interpolate data points in case a non-uniform step width was used.
 
@@ -259,7 +252,107 @@ def interpolate_arrays(x, array_list):
     return new_x, output_list
 
 
-def construct_data_key(spectrum):
+def check_for_allowed_in_list(value, allowed_values: List[Any]):
+    """
+    Check if a value is a list of values.
+    If not, raise Exception.
+    """
+
+    if value not in allowed_values:
+        raise Exception(f"{value} not in allowed values: {allowed_values}.")
+    return value
+
+
+def re_map_keys(dictionary: Dict[str, Any], key_map: Dict[str, str]):
+    """
+    Map the keys in a dictionary such that they are replaced by the values
+    in key_map and return the dictionary with replaced keys.
+
+    This is often used to map some metadata keys in a vendor file format
+    to the common metadata names. used in NXmpes/NXxps.
+
+    Parameters
+    ----------
+    dictionary : Dict[str, Any]
+        Dictionary with XPS metadata.
+    key_map : Dict[str, str]
+        Mapping of keys from vendor file format to common metadata names.
+        Example from the VMS parser:
+            key_map = {
+               "block_id": "region",
+               "sample_id": "sample_name",
+               "technique": "analysis_method",
+               "source_energy": "excitation_energy",
+            }
+
+    Returns
+    -------
+    dictionary : Dict[str, Any]
+        Dictionary with changed keys.
+
+    """
+    for k in key_map.keys():
+        if k in dictionary:
+            dictionary[key_map[k]] = dictionary.pop(k)
+    return dictionary
+
+
+def re_map_values(dictionary: Dict[str, Any], map_functions: Dict[str, Any]):
+    """
+    Map the values in a dicitionary using functions defined in a
+    mapping functions dictionary.
+
+    This is often used to map some metadata in a vendor file format
+    to the enumerations used in NXmpes/NXxps.
+
+    Parameters
+    ----------
+    dictionary : Dict[str, Any]
+        Dictionary with XPS metadata.
+    map_functions : Dict[str, Any]
+       Mapping functions for keys in the dictionary.
+       Example from the SLE parser:
+           map_functions = {
+               "energy/@type": self._change_energy_type,
+               "excitation_energy": self._convert_excitation_energy,
+               "time_stamp": self._convert_date_time,
+               "energy_scan_mode": self._convert_energy_scan_mode,
+           }
+
+    Returns
+    -------
+    dictionary : Dict[str, Any]
+        Dictionary with changed values.
+
+    """
+    for key, map_fn in map_functions.items():
+        if key in dictionary:
+            dictionary[key] = map_fn(dictionary[key])
+    return dictionary
+
+
+def drop_unused_keys(dictionary: Dict[str, Any], keys_to_drop: List[str]):
+    """
+    Remove any keys parsed from sle that are not needed
+
+    Parameters
+    ----------
+    dictionary : dict
+        Dictionary with data and metadata for a spectrum.
+    keys_to_drop : list
+        List of metadata keys that are not needed.
+
+    Returns
+    -------
+    None.
+
+    """
+    for key in keys_to_drop:
+        if key in dictionary:
+            dictionary.pop(key)
+
+
+def construct_data_key(spectrum: Dict[str, Any]):
     """
     Construct a key for the 'data' field of the xps_dict.
     Output example: cycle0_scan0.
@@ -278,7 +371,7 @@ def construct_data_key(spectrum):
     return f"{cycle_key}_{scan_key}"
 
 
-def construct_detector_data_key(spectrum):
+def construct_detector_data_key(spectrum: Dict[str, Any]):
     """
     Construct a key for the detector data fields of the xps_dict.
     Output example: 'cycles/Cycle_0/scans/Scan_0'

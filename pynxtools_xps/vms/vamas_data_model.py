@@ -45,11 +45,6 @@ class VamasHeader(XpsDataclass):
     num_x_coords: int = 0
     num_y_coords: int = 0
     num_exp_var: int = 1
-    num_spectral_regions: int = 0
-    num_analysis_positions: int = 0
-    num_x_coords: int = 0
-    num_y_coords: int = 0
-    num_exp_var: int = 1
     num_entries_in_inclusion_list: int = 0
     inclusion_list: list = field(default_factory=list)
     num_manually_entered_items_in_block: int = 0

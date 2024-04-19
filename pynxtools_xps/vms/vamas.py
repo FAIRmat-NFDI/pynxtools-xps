@@ -111,9 +111,9 @@ UNITS: dict = {
     "energydispersion/pass_energy": "eV",
     "energydispersion/differential_width_aes": "eV",
     "detector/dwell_time": "s",
-    "sample/sample_normal_polar_angle_tilt": "degree ",
+    "sample/sample_tilt_normal_polar": "degree ",
     "sample/sample_tilt_azimuth": "degree",
-    "sample/sample_rotation_angle": "degree",
+    "sample/sample_rotation": "degree",
     "data/start_energy": "eV",
     "data/step_size": "eV",
 }
@@ -199,10 +199,9 @@ class VamasMapper(XPSMapper):
             "manipulator": [],
             "sample": [
                 "sample_name",
-                "sample_angle_tilt",
-                "sample_normal_polar_angle_tilt",
+                "sample_tilt_normal_polar",
                 "sample_tilt_azimuth",
-                "sample_rotation_angle",
+                "sample_rotation",
             ],
             "data": [
                 "energy_label",
@@ -401,8 +400,6 @@ KEY_MAP = {
     "variable_label_2": "y_labels_2",
     "variable_units_2": "y_units_2",
     "species_label": "element",
-    "sample_angle_tilt": "sample_normal_polar_angle_tilt",
-    "sample_rotation": "sample_rotation_angle",
 }
 
 VALUE_MAP = {
@@ -702,7 +699,7 @@ class VamasParser:
             else:
                 delattr(block, attr)
 
-        block.sample_angle_tilt = float(self.data.pop(0).strip())
+        block.sample_tilt_normal_polar = float(self.data.pop(0).strip())
         block.sample_tilt_azimuth = float(self.data.pop(0).strip())
         block.sample_rotation = float(self.data.pop(0).strip())
         block.no_additional_params = int(self.data.pop(0).strip())

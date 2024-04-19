@@ -326,10 +326,10 @@
       "AXISNAME[sample_tilt_azimuth]/@units":"@xps_token:sample/sample_tilt_azimuth/@units",
       "AXISNAME[sample_tilt_azimuth]/@vector": [0, 1, 0],
 
-      "AXISNAME[sample_tilt_polar]":"@xps_token:sample/sample_normal_polar_angle_tilt",
+      "AXISNAME[sample_tilt_polar]":"@xps_token:sample/sample_normal_polar_tilt",
       "AXISNAME[sample_tilt_polar]/@depends_on":"angle_beam_sample",      
       "AXISNAME[sample_tilt_polar]/@transformation_type": "rotation",
-      "AXISNAME[sample_tilt_polar]/@units":"@xps_token:sample/sample_tilt_polar/@units",
+      "AXISNAME[sample_tilt_polar]/@units":"@xps_token:sample/sample_normal_polar_tilt/@units",
       "AXISNAME[sample_tilt_polar]/@vector": [0, 0, 1],      
       "AXISNAME[angle_beam_sample]": "@link:/entry/geometries/sample_coordinate_system/coordinate_transformations"
     }

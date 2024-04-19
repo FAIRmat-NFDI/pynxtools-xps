@@ -91,7 +91,7 @@ UNITS: dict = {
     "beam_xray/particle_charge": "C",
     "beam_xray/source_beam_width_x": "micro-m",
     "beam_xray/source_beam_width_y": "micro-m",
-    "source_xray/source_analyser_angle": "degree",
+    "beam_xray/source_analyser_angle": "degree",
     "source_xray/source_azimuth": "degree",
     "source_xray/source_power": "W",
     "source_sputter/sputter_ion_charge": "C",
@@ -102,7 +102,7 @@ UNITS: dict = {
     "source_sputter/sputter_source_incidence_polar_angle": "degree",
     "source_sputter/sputter_source_azimuth_angle": "degree",
     "analyser/analyser_take_off_azimuth": "degree",
-    "analyser/analyser_take_off_polar_angle": "degree",
+    "analyser/analyser_take_off_polar": "degree",
     "analyser/analysis_width_x": "m",
     "analyser/analysis_width_y": "m",
     "analyser/target_bias": "V",
@@ -150,10 +150,13 @@ class VamasMapper(XPSMapper):
         template_key_map = {
             "user": [],
             "instrument": [],
-            "beam_xray": ["excitation_energy", "particle_charge"],
+            "beam_xray": [
+                "excitation_energy",
+                "particle_charge",
+                "source_analyser_angle",
+            ],
             "source_xray": [
                 "source_label",
-                "source_analyser_angle",
                 "source_beam_width_x",
                 "source_beam_width_y",
                 "source_azimuth",
@@ -174,7 +177,7 @@ class VamasMapper(XPSMapper):
             ],
             "analyser": [
                 "analyser_take_off_azimuth",
-                "analyser_take_off_polar_angle",
+                "analyser_take_off_polar",
                 "analysis_width_x",
                 "analysis_width_y",
                 "target_bias",
@@ -638,7 +641,7 @@ class VamasParser:
         block.target_bias = float(self.data.pop(0).strip())
         block.analysis_width_x = float(self.data.pop(0).strip())
         block.analysis_width_y = float(self.data.pop(0).strip())
-        block.analyser_take_off_polar_angle = float(self.data.pop(0).strip())
+        block.analyser_take_off_polar = float(self.data.pop(0).strip())
         block.analyser_azimuth = float(self.data.pop(0).strip())
         block.species_label = self.data.pop(0).strip()
         block.transition_label = self.data.pop(0).strip()

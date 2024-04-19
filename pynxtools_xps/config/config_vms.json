@@ -7,7 +7,7 @@
      "title":"@eln",
      "start_time":"@xps_token:region/time_stamp",
      "end_time":"@eln",
-     "experiment_institution":"@eln",
+     "experiment_institution":"@xps_token:region/institute_id",
      "experiment_facility":"@eln",
      "experiment_laboratory":"@eln",
      "entry_identifier":"@eln",
@@ -15,6 +15,21 @@
      "duration/@units":"s",
      "method":"@xps_token:region/analysis_method",
      "program_name":"@eln"
+   },
+   "/ENTRY[entry]/geometries":{
+      "/COORDINATE_SYSTEM[sample_coordinate_system]":{
+        "origin":"sample surface",
+        "handedness":"right_handed",
+        "z_direction":"sample normal",
+        "depends_on": "/entry/geometries/sample_coordinate_system/coordinate_transformations/angle_beam_sample",
+       "TRANSFORMATIONS[coordinate_transformations]": {
+         "AXISNAME[angle_beam_sample]/@depends_on":".",
+         "AXISNAME[angle_beam_sample]":"@xps_token:source_xray/source_analyser_angle",
+         "AXISNAME[angle_beam_sample]/@transformation_type": "rotation",
+         "AXISNAME[angle_beam_sample]/@units":"@xps_token:source_xray/source_analyser_angle/@units",
+         "AXISNAME[angle_beam_sample]/@vector": [0, 0 , -1]
+       }
+      }
    },
    "/ENTRY[entry]/USER[user]":{
      "name":"@eln",
@@ -34,7 +49,7 @@
        "physical_quantity":"energy",
        "type":"derived",
        "resolution":"@xps_token:data/step_size",
-       "resolution/@units":"eV"
+       "resolution/@units":"@xps_token:data/step_size/@units"
      },
      "sourceTYPE[source_xray]":{
        "type":"@eln",
@@ -46,17 +61,13 @@
          "model":"@eln"
        },
        "associated_beam":"/entry/instrument/beam_xray",
-       "depends_on": "/entry/instrument/source_xray/transformations/source_analyser_angle",
+       "depends_on": "/entry/instrument/source_xray/transformations/source_azimuth_to_sample",
        "TRANSFORMATIONS[transformations]": {
-         "AXISNAME[source_analyser_angle]/@depends_on":".",
-         "AXISNAME[source_analyser_angle]":"@xps_token:source_xray/source_analyser_angle",
-         "AXISNAME[source_analyser_angle]/@transformation_type": "rotation",
-         "AXISNAME[source_analyser_angle]/@units":"degree",
-         "AXISNAME[source_analyser_angle]/@vector": [
-           0,
-           0,
-           1
-         ]
+         "AXISNAME[source_azimuth_to_sample]/@depends_on":"entry/geometries/sample_coordinate_system/coordinate_transformations/angle_beam_sample",
+         "AXISNAME[source_azimuth_to_sample]":"@xps_token:source_xray/source_azimuth",
+         "AXISNAME[source_azimuth_to_sample]/@transformation_type": "rotation",
+         "AXISNAME[source_azimuth_to_sample]/@units":"@xps_token:source_xray/source_azimuth/@units",
+         "AXISNAME[source_azimuth_to_sample]/@vector": [0, 1, 0],
        }
      },
      "beamTYPE[beam_xray]":{
@@ -69,7 +80,14 @@
        "incident_polarization":"None",
        "incident_polarization/@units":"None",
        "extent":"None",
-       "associated_source":"/entry/instrument/source_xray"
+       "associated_source":"/entry/instrument/source_xray",
+       "depends_on": "/entry/instrument/beam_xray/transformations/source_analyser_angle",
+       "TRANSFORMATIONS[transformations]": {
+         "AXISNAME[angle_beam_analyser]/@depends_on":".",
+         "AXISNAME[angle_beam_analyser]":"@xps_token:beam_xray/source_analyser_angle",
+         "AXISNAME[angle_beam_analyser]/@transformation_type": "rotation",
+         "AXISNAME[angle_beam_analyser]/@units":"@xps_token:beam_xray/source_analyser_angle/@units",
+         "AXISNAME[angle_beam_analyser]/@vector": [0, 0, 1]
      },
      "ELECTRONANALYSER[electronanalyser]":{
        "@default":"detector0",
@@ -79,10 +97,6 @@
        "work_function/@units":"eV",
        "fast_axes":"None",
        "slow_axes":"energy",
-       "analyser_take_off_azimuth":"@xps_token:analyser/analyser_take_off_azimuth",
-       "analyser_take_off_azimuth/@units":"degree",
-       "analyser_take_off_polar":"@xps_token:analyser/analyser_take_off_polar",
-       "analyser_take_off_polar/@units":"degree",
        "analysis_width_x":"@xps_token:analyser/analysis_width_x",
        "analysis_width_x/@units":"mm",
        "analysis_width_y":"@xps_token:analyser/analysis_width_y",
@@ -107,7 +121,7 @@
          ],
          "kinetic_energy":"@xps_token:transmission_function/kinetic_energy",
          "kinetic_energy/@units":"@xps_token:transmission_function/kinetic_energy/@units",
-         "relative_intensity":"@xps_token:collectioncolumn/transmission_function/relative_intensity"
+         "relative_intensity":"@xps_token:collectioncolumn/transmission_function/relative_intensity",
        },
        "COLLECTIONCOLUMN[collectioncolumn]":{
          "scheme":"@eln",
@@ -155,6 +169,20 @@
            "raw":"@detector_data:cycles/Cycle_",
            "raw/@units":"counts"
          }
+       },
+       "depends_on": "transformations/analyser_take_off_azimuth",
+       "TRANSFORMATIONS[transformations]": {
+         "AXISNAME[analyser_take_off_azimuth]":"@xps_token:instrument/analyser/analyser_take_off_azimuth",
+         "AXISNAME[analyser_take_off_azimuth]/@depends_on":"analyser_take_off_polar",      
+         "AXISNAME[analyser_take_off_azimuth]/@transformation_type": "rotation",
+         "AXISNAME[analyser_take_off_azimuth]/@units":"@xps_token:instrument/analyser/analyser_take_off_azimuth/@units",
+         "AXISNAME[analyser_take_off_azimuth]/@vector": [0, 1, 0],
+
+         "AXISNAME[analyser_take_off_polar]":"@xps_token:instrument/analyser/analyser_take_off_polar",
+         "AXISNAME[analyser_take_off_polar]/@depends_on":"entry/geometries/sample_coordinate_system/coordinate_transformations/angle_beam_sample",      
+         "AXISNAME[analyser_take_off_polar]/@transformation_type": "rotation",
+         "AXISNAME[analyser_take_off_polar]/@units":"@xps_token:instrument/analyser/analyser_take_off_polar/@units",
+         "AXISNAME[analyser_take_off_polar]/@vector": [0, 0, 1]
        }
      },
      "MANIPULATOR[manipulator]":{
@@ -283,7 +311,28 @@
      },
      "flood_gun_current":{
        "flood_gun":"@link:/entry/instrument/flood_gun"
-     }
+     },
+     "depends_on":"/entry/sample/transformations/sample_rotation",
+     "TRANSFORMATIONS[transformations]": {
+      "AXISNAME[sample_rotation]":"@xps_token:sample/sample_rotation_angle",
+      "AXISNAME[sample_rotation]/@depends_on":"sample_tilt_azimuth",
+      "AXISNAME[sample_rotation]/@transformation_type": "rotation",
+      "AXISNAME[sample_rotation]/@units":"@xps_token:sample/sample_rotation_angle/@units",
+      "AXISNAME[sample_rotation]/@vector": [1, 0, 0],
+
+      "AXISNAME[sample_tilt_azimuth]":"@xps_token:sample/sample_tilt_azimuth",
+      "AXISNAME[sample_tilt_azimuth]/@depends_on":"sample_tilt_polar",      
+      "AXISNAME[sample_tilt_azimuth]/@transformation_type": "rotation",
+      "AXISNAME[sample_tilt_azimuth]/@units":"@xps_token:sample/sample_tilt_azimuth/@units",
+      "AXISNAME[sample_tilt_azimuth]/@vector": [0, 1, 0],
+
+      "AXISNAME[sample_tilt_polar]":"@xps_token:sample/sample_normal_polar_angle_tilt",
+      "AXISNAME[sample_tilt_polar]/@depends_on":"angle_beam_sample",      
+      "AXISNAME[sample_tilt_polar]/@transformation_type": "rotation",
+      "AXISNAME[sample_tilt_polar]/@units":"@xps_token:sample/sample_tilt_polar/@units",
+      "AXISNAME[sample_tilt_polar]/@vector": [0, 0, 1],      
+      "AXISNAME[angle_beam_sample]": "@link:/entry/geometries/sample_coordinate_system/coordinate_transformations"
+    }
    },
    "/ENTRY[entry]/data":{
      "@signal":"data",
@@ -293,8 +342,8 @@
      "data":"@data:cycle",
      "data/@units":"@xps_token:data/y_units_1",
      "energy":"@data:energy",
-     "energy/@type":"@xps_token:data/x_units",
-     "energy/@units":"eV",
+     "energy/@type":"@xps_token:data/energy_label",
+     "energy/@units":"@xps_token:data/energy_units",
      "@energy_indices":"None",
      "@energy_depends":"None"
    }

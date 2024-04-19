@@ -106,7 +106,7 @@ class VamasBlock(XpsDataclass):
     analysis_width_y: float = 0.0
     # degrees from upward z-direction,
     # defined by the sample stage
-    analyser_take_off_polar_angle: float = 0.0
+    analyser_take_off_polar: float = 0.0
     analyser_azimuth: float = 0.0
     species_label: str = ""
     transition_label: str = ""

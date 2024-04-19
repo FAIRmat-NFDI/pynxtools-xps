@@ -88,6 +88,7 @@ ALLOWED_TECHNIQUES = [
 
 UNITS: dict = {
     "beam_xray/excitation_energy": "eV",
+    "beam_xray/extent": "micro-m",
     "beam_xray/particle_charge": "C",
     "beam_xray/source_beam_width_x": "micro-m",
     "beam_xray/source_beam_width_y": "micro-m",
@@ -109,6 +110,7 @@ UNITS: dict = {
     "analyser/time_correction": "s",
     "analyser/work_function": "eV",
     "energydispersion/pass_energy": "eV",
+    "energydispersion/spatial_acceptance": "m",
     "energydispersion/differential_width_aes": "eV",
     "detector/dwell_time": "s",
     "sample/sample_tilt_normal_polar": "degree ",
@@ -152,13 +154,12 @@ class VamasMapper(XPSMapper):
             "instrument": [],
             "beam_xray": [
                 "excitation_energy",
+                "extent",
                 "particle_charge",
                 "source_analyser_angle",
             ],
             "source_xray": [
                 "source_label",
-                "source_beam_width_x",
-                "source_beam_width_y",
                 "source_azimuth",
                 "source_power",
                 "field_of_view_x",
@@ -191,6 +192,7 @@ class VamasMapper(XPSMapper):
                 "scan_mode",
                 "pass_energy",
                 "differential_width_aes",
+                "spatial_acceptance",
             ],
             "detector": [
                 "signal_mode",
@@ -633,7 +635,7 @@ class VamasParser:
         else:
             delattr(block, "differential_width_aes")
 
-        block.magnification = self.data.pop(0).strip()
+        block.magnification = float(self.data.pop(0).strip())
         block.work_function = float(self.data.pop(0).strip())
         block.target_bias = float(self.data.pop(0).strip())
         block.analysis_width_x = float(self.data.pop(0).strip())
@@ -1025,21 +1027,17 @@ class VamasParser:
             except ValueError:
                 date_time = datetime.datetime.min
 
-            data = {"x": block.x}
-
-            remove_keys = [
-                "comment_lines",
-                "year",
-                "month",
-                "day",
-                "hour",
-                "minute",
-                "second",
-                "no_hrs_in_advance_of_gmt",
-                "x",
+            # Map x-y values to 2D lists.
+            settings["extent"] = [
+                settings["source_beam_width_x"],
+                settings["source_beam_width_y"],
+            ]
+            settings["spatial_acceptance"] = [
+                settings["analysis_width_x"],
+                settings["analysis_width_y"],
             ]
 
-            drop_unused_keys(settings, remove_keys)
+            data = {"x": block.x}
 
             for var in range(int(block.no_variables)):
                 if var == 0:
@@ -1066,6 +1064,23 @@ class VamasParser:
                 "scans": block.no_scans,
                 "data": data,
             }
+
+            remove_keys = [
+                "comment_lines",
+                "year",
+                "month",
+                "day",
+                "hour",
+                "minute",
+                "second",
+                "no_hrs_in_advance_of_gmt",
+                "source_beam_width_x",
+                "source_beam_width_y",
+                "x",
+            ]
+
+            drop_unused_keys(settings, remove_keys)
+
             spec_dict.update(settings)
             spectra += [spec_dict]
 

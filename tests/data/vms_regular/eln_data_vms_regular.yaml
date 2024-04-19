@@ -133,7 +133,6 @@ instrument:
         unit: null
 sample:
   description: A polymer material called PBTTT with chemical name  poly[2,5-bis(3-dodecylthiophen-2-yl)thieno[3,2-b]thiophene].
-  name: Test
   substance:
     molecular_formula_hill: (C42H62S4)n
   situation: vacuum

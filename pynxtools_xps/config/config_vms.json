@@ -73,13 +73,14 @@
      "beamTYPE[beam_xray]":{
        "distance":"@eln",
        "distance/@units":"@eln",
+       "extent":"@xps_token:beam_xray/extent",
+       "extent/@units":"@xps_token:beam_xray/extent/@units",
        "incident_energy":"@xps_token:beam_xray/excitation_energy",
        "incident_energy/@units":"eV",
        "incident_energy_spread":"None",
        "incident_energy_spread/@units":"None",
        "incident_polarization":"None",
        "incident_polarization/@units":"None",
-       "extent":"None",
        "associated_source":"/entry/instrument/source_xray",
      },
      "ELECTRONANALYSER[electronanalyser]":{
@@ -119,6 +120,7 @@
        "COLLECTIONCOLUMN[collectioncolumn]":{
          "scheme":"@eln",
          "lens_mode":"@xps_token:collectioncolumn/lens_mode",
+         "magnification":"@xps_token:collectioncolumn/magnification",
          "projection":"None",
          "angular_acceptance":"None",
          "spatial_acceptance":"None",
@@ -137,6 +139,7 @@
          "energy_scan_mode":"@xps_token:energydispersion/scan_mode",
          "entrance_slit":"@eln",
          "exit_slit":"@eln",
+         "spatial_acceptance":"@xps_token:energydispersion/spatial_acceptance",
          "device_information":{
            "vendor":"@eln",
            "model":"@eln",
@@ -150,7 +153,7 @@
          "detector_voltage":"@xps_token:detector/detector_voltage",
          "detector_voltage/@units":"V",
          "count_time":"@xps_token:detector/dwell_time",
-         "count_time/@units":"s",
+         "count_time/@units":"@xps_token:detector/dwell_time/@units",
          "signal_mode":"@xps_token:detector/signal_mode",
          "device_information":{
            "vendor":"@eln",
@@ -222,7 +225,7 @@
          "name":"@eln",
          "measurement":"@eln",
          "type":"@eln",
-         "value":"@xps_token:sample/target_bias",
+         "value":"@eln",
          "value/@units":"V"
        },
        "sample_bias_potentiostat":{
@@ -270,7 +273,7 @@
      }
    },
    "/ENTRY[entry]/SAMPLE[sample]":{
-     "name":"@eln",
+     "name":"@xps_token:sample/sample_name",
      "sample_id":"@eln",
      "atom_types":"@eln",
      "physical_form":"@eln",
@@ -315,7 +318,7 @@
      },
      "depends_on":"/entry/sample/transformations/sample_rotation",
      "TRANSFORMATIONS[transformations]": {
-      "AXISNAME[sample_rotation]":"@xps_token:sample/sample_rotation_angle",
+      "AXISNAME[sample_rotation]":"@xps_token:sample/sample_rotation",
       "AXISNAME[sample_rotation]/@depends_on":"sample_tilt_azimuth",
       "AXISNAME[sample_rotation]/@transformation_type": "rotation",
       "AXISNAME[sample_rotation]/@units":"@xps_token:sample/sample_rotation_angle/@units",
@@ -327,10 +330,10 @@
       "AXISNAME[sample_tilt_azimuth]/@units":"@xps_token:sample/sample_tilt_azimuth/@units",
       "AXISNAME[sample_tilt_azimuth]/@vector": [0, 1, 0],
 
-      "AXISNAME[sample_tilt_polar]":"@xps_token:sample/sample_normal_polar_tilt",
+      "AXISNAME[sample_tilt_polar]":"@xps_token:sample/sample_tilt_normal_polar",
       "AXISNAME[sample_tilt_polar]/@depends_on":"angle_beam_sample",      
       "AXISNAME[sample_tilt_polar]/@transformation_type": "rotation",
-      "AXISNAME[sample_tilt_polar]/@units":"@xps_token:sample/sample_normal_polar_tilt/@units",
+      "AXISNAME[sample_tilt_polar]/@units":"@xps_token:sample/sample_tilt_normal_polar/@units",
       "AXISNAME[sample_tilt_polar]/@vector": [0, 0, 1],      
       "AXISNAME[angle_beam_sample]": "@link:/entry/geometries/xps_coordinate_system/coordinate_transformations"
     }

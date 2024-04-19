@@ -97,7 +97,7 @@ class VamasBlock(XpsDataclass):
     analyser_mode: str = ""
     resolution: float = 0.0
     differential_width_aes: float = 0.0
-    magnification: str = "1"
+    magnification: float = 1.0
     work_function: float = 0.0
     target_bias: float = 0.0
     # analyser slit length divided by the magnification

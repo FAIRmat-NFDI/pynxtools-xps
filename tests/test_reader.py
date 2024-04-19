@@ -89,7 +89,7 @@ def test_example_data(nxdl, sub_reader_data_dir, tmp_path, caplog) -> None:
         caplog=caplog,
     )
     test.convert_to_nexus()
-    # test.check_reproducibility_of_nexus()
+    test.check_reproducibility_of_nexus()
 
 ## This will be implemented in the future.
 # =============================================================================

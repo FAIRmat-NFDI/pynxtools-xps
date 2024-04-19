@@ -17,11 +17,11 @@
      "program_name":"@eln"
    },
    "/ENTRY[entry]/geometries":{
-      "/COORDINATE_SYSTEM[sample_coordinate_system]":{
+      "/COORDINATE_SYSTEM[xps_coordinate_system]":{
         "origin":"sample surface",
         "handedness":"right_handed",
         "z_direction":"sample normal",
-        "depends_on": "/entry/geometries/sample_coordinate_system/coordinate_transformations/angle_beam_sample",
+        "depends_on": "/entry/geometries/xps_coordinate_system/coordinate_transformations/angle_beam_sample",
        "TRANSFORMATIONS[coordinate_transformations]": {
          "AXISNAME[angle_beam_sample]/@depends_on":".",
          "AXISNAME[angle_beam_sample]":"@xps_token:source_xray/source_analyser_angle",
@@ -63,11 +63,11 @@
        "associated_beam":"/entry/instrument/beam_xray",
        "depends_on": "/entry/instrument/source_xray/transformations/source_azimuth_to_sample",
        "TRANSFORMATIONS[transformations]": {
-         "AXISNAME[source_azimuth_to_sample]/@depends_on":"entry/geometries/sample_coordinate_system/coordinate_transformations/angle_beam_sample",
+         "AXISNAME[source_azimuth_to_sample]/@depends_on":"entry/geometries/xps_coordinate_system/coordinate_transformations/angle_beam_sample",
          "AXISNAME[source_azimuth_to_sample]":"@xps_token:source_xray/source_azimuth",
          "AXISNAME[source_azimuth_to_sample]/@transformation_type": "rotation",
          "AXISNAME[source_azimuth_to_sample]/@units":"@xps_token:source_xray/source_azimuth/@units",
-         "AXISNAME[source_azimuth_to_sample]/@vector": [0, 1, 0],
+         "AXISNAME[source_azimuth_to_sample]/@vector": [0, 1, 0]
        }
      },
      "beamTYPE[beam_xray]":{
@@ -81,13 +81,6 @@
        "incident_polarization/@units":"None",
        "extent":"None",
        "associated_source":"/entry/instrument/source_xray",
-       "depends_on": "/entry/instrument/beam_xray/transformations/source_analyser_angle",
-       "TRANSFORMATIONS[transformations]": {
-         "AXISNAME[angle_beam_analyser]/@depends_on":".",
-         "AXISNAME[angle_beam_analyser]":"@xps_token:beam_xray/source_analyser_angle",
-         "AXISNAME[angle_beam_analyser]/@transformation_type": "rotation",
-         "AXISNAME[angle_beam_analyser]/@units":"@xps_token:beam_xray/source_analyser_angle/@units",
-         "AXISNAME[angle_beam_analyser]/@vector": [0, 0, 1]
      },
      "ELECTRONANALYSER[electronanalyser]":{
        "@default":"detector0",
@@ -179,10 +172,18 @@
          "AXISNAME[analyser_take_off_azimuth]/@vector": [0, 1, 0],
 
          "AXISNAME[analyser_take_off_polar]":"@xps_token:instrument/analyser/analyser_take_off_polar",
-         "AXISNAME[analyser_take_off_polar]/@depends_on":"entry/geometries/sample_coordinate_system/coordinate_transformations/angle_beam_sample",      
+         "AXISNAME[analyser_take_off_polar]/@depends_on":"entry/geometries/xps_coordinate_system/coordinate_transformations/angle_beam_sample",      
          "AXISNAME[analyser_take_off_polar]/@transformation_type": "rotation",
          "AXISNAME[analyser_take_off_polar]/@units":"@xps_token:instrument/analyser/analyser_take_off_polar/@units",
-         "AXISNAME[analyser_take_off_polar]/@vector": [0, 0, 1]
+         "AXISNAME[analyser_take_off_polar]/@vector": [0, 0, 1],
+
+         "depends_on": "/entry/instrument/beam_xray/transformations/angle_beam_analyser",
+         "TRANSFORMATIONS[transformations]": {
+           "AXISNAME[angle_beam_analyser]/@depends_on":".",
+           "AXISNAME[angle_beam_analyser]":"@xps_token:beam_xray/source_analyser_angle",
+           "AXISNAME[angle_beam_analyser]/@transformation_type": "rotation",
+           "AXISNAME[angle_beam_analyser]/@units":"@xps_token:beam_xray/source_analyser_angle/@units",
+           "AXISNAME[angle_beam_analyser]/@vector": [0, 0, 1]
        }
      },
      "MANIPULATOR[manipulator]":{
@@ -331,7 +332,7 @@
       "AXISNAME[sample_tilt_polar]/@transformation_type": "rotation",
       "AXISNAME[sample_tilt_polar]/@units":"@xps_token:sample/sample_normal_polar_tilt/@units",
       "AXISNAME[sample_tilt_polar]/@vector": [0, 0, 1],      
-      "AXISNAME[angle_beam_sample]": "@link:/entry/geometries/sample_coordinate_system/coordinate_transformations"
+      "AXISNAME[angle_beam_sample]": "@link:/entry/geometries/xps_coordinate_system/coordinate_transformations"
     }
    },
    "/ENTRY[entry]/data":{

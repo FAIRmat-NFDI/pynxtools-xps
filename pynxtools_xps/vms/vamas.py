@@ -109,8 +109,8 @@ UNITS: dict = {
     "analyser/target_bias": "V",
     "analyser/time_correction": "s",
     "analyser/work_function": "eV",
+    "collectioncolumn/spatial_acceptance": "micro-m",
     "energydispersion/pass_energy": "eV",
-    "energydispersion/spatial_acceptance": "m",
     "energydispersion/differential_width_aes": "eV",
     "detector/dwell_time": "s",
     "sample/sample_tilt_normal_polar": "degree ",
@@ -187,12 +187,12 @@ class VamasMapper(XPSMapper):
             ],
             "collectioncolumn": [
                 "magnification",
+                "spatial_acceptance",
             ],
             "energydispersion": [
                 "scan_mode",
                 "pass_energy",
                 "differential_width_aes",
-                "spatial_acceptance",
             ],
             "detector": [
                 "signal_mode",
@@ -1028,14 +1028,20 @@ class VamasParser:
                 date_time = datetime.datetime.min
 
             # Map x-y values to 2D lists.
-            settings["extent"] = [
-                settings["source_beam_width_x"],
-                settings["source_beam_width_y"],
-            ]
-            settings["spatial_acceptance"] = [
-                settings["analysis_width_x"],
-                settings["analysis_width_y"],
-            ]
+            settings["extent"] = np.array(
+                [
+                    settings["source_beam_width_x"],
+                    settings["source_beam_width_y"],
+                ],
+                dtype=float,
+            )
+            settings["spatial_acceptance"] = np.array(
+                [
+                    settings["analysis_width_x"],
+                    settings["analysis_width_y"],
+                ],
+                dtype=float,
+            )
 
             data = {"x": block.x}
 

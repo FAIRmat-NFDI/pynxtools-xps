@@ -17,19 +17,19 @@
      "program_name":"@eln"
    },
    "/ENTRY[entry]/geometries":{
-      "/COORDINATE_SYSTEM[xps_coordinate_system]":{
+      "COORDINATE_SYSTEM[xps_coordinate_system]":{
         "origin":"sample surface",
         "handedness":"right_handed",
         "z_direction":"sample normal",
         "depends_on": "/entry/geometries/xps_coordinate_system/coordinate_transformations/angle_beam_sample",
-       "TRANSFORMATIONS[coordinate_transformations]": {
-         "AXISNAME[angle_beam_sample]/@depends_on":".",
-         "AXISNAME[angle_beam_sample]":"@xps_token:source_xray/source_analyser_angle",
-         "AXISNAME[angle_beam_sample]/@transformation_type": "rotation",
-         "AXISNAME[angle_beam_sample]/@units":"@xps_token:source_xray/source_analyser_angle/@units",
-         "AXISNAME[angle_beam_sample]/@vector": [0, 0 , -1]
+        "TRANSFORMATIONS[coordinate_transformations]": {
+          "AXISNAME[angle_beam_sample]/@depends_on":".",
+          "AXISNAME[angle_beam_sample]":"@xps_token:source_xray/source_analyser_angle",
+          "AXISNAME[angle_beam_sample]/@transformation_type": "rotation",
+          "AXISNAME[angle_beam_sample]/@units":"@xps_token:source_xray/source_analyser_angle/@units",
+          "AXISNAME[angle_beam_sample]/@vector": [0, 0 , -1]
        }
-      }
+     }
    },
    "/ENTRY[entry]/USER[user]":{
      "name":"@eln",
@@ -81,7 +81,7 @@
        "incident_energy_spread/@units":"None",
        "incident_polarization":"None",
        "incident_polarization/@units":"None",
-       "associated_source":"/entry/instrument/source_xray",
+       "associated_source":"/entry/instrument/source_xray"
      },
      "ELECTRONANALYSER[electronanalyser]":{
        "@default":"detector0",
@@ -108,22 +108,14 @@
          "resolution":"@xps_token:data/step_size",
          "resolution/@units":"eV"
        },
-       "transmission_function":{
-         "@signal":"relative_intensity",
-         "@axes":[
-           "kinetic_energy"
-         ],
-         "kinetic_energy":"@xps_token:transmission_function/kinetic_energy",
-         "kinetic_energy/@units":"@xps_token:transmission_function/kinetic_energy/@units",
-         "relative_intensity":"@xps_token:collectioncolumn/transmission_function/relative_intensity",
-       },
+       "transmission_function":"None",
        "COLLECTIONCOLUMN[collectioncolumn]":{
          "scheme":"@eln",
          "lens_mode":"@xps_token:collectioncolumn/lens_mode",
-         "magnification":"@xps_token:collectioncolumn/magnification",
          "projection":"None",
          "angular_acceptance":"None",
-         "spatial_acceptance":"None",
+         "spatial_acceptance":"@xps_token:collectioncolumn/spatial_acceptance",
+         "spatial_acceptance/@units":"@xps_token:collectioncolumn/spatial_acceptance/@units",
          "field_aperture":"None",
          "contrast_aperture":"None",
          "device_information":{
@@ -139,7 +131,6 @@
          "energy_scan_mode":"@xps_token:energydispersion/scan_mode",
          "entrance_slit":"@eln",
          "exit_slit":"@eln",
-         "spatial_acceptance":"@xps_token:energydispersion/spatial_acceptance",
          "device_information":{
            "vendor":"@eln",
            "model":"@eln",
@@ -180,13 +171,11 @@
          "AXISNAME[analyser_take_off_polar]/@units":"@xps_token:instrument/analyser/analyser_take_off_polar/@units",
          "AXISNAME[analyser_take_off_polar]/@vector": [0, 0, 1],
 
-         "depends_on": "/entry/instrument/beam_xray/transformations/angle_beam_analyser",
-         "TRANSFORMATIONS[transformations]": {
-           "AXISNAME[angle_beam_analyser]/@depends_on":".",
-           "AXISNAME[angle_beam_analyser]":"@xps_token:beam_xray/source_analyser_angle",
-           "AXISNAME[angle_beam_analyser]/@transformation_type": "rotation",
-           "AXISNAME[angle_beam_analyser]/@units":"@xps_token:beam_xray/source_analyser_angle/@units",
-           "AXISNAME[angle_beam_analyser]/@vector": [0, 0, 1]
+         "AXISNAME[angle_beam_analyser]/@depends_on":".",
+         "AXISNAME[angle_beam_analyser]":"@xps_token:beam_xray/source_analyser_angle",
+         "AXISNAME[angle_beam_analyser]/@transformation_type": "rotation",
+         "AXISNAME[angle_beam_analyser]/@units":"@xps_token:beam_xray/source_analyser_angle/@units",
+         "AXISNAME[angle_beam_analyser]/@vector": [0, 0, 1]
        }
      },
      "MANIPULATOR[manipulator]":{
@@ -335,7 +324,7 @@
       "AXISNAME[sample_tilt_polar]/@transformation_type": "rotation",
       "AXISNAME[sample_tilt_polar]/@units":"@xps_token:sample/sample_tilt_normal_polar/@units",
       "AXISNAME[sample_tilt_polar]/@vector": [0, 0, 1],      
-      "AXISNAME[angle_beam_sample]": "@link:/entry/geometries/xps_coordinate_system/coordinate_transformations"
+      "AXISNAME[angle_beam_sample]":"@link:/entry/geometries/xps_coordinate_system/coordinate_transformations/angle_beam_sample"
     }
    },
    "/ENTRY[entry]/data":{

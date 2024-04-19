@@ -1,4 +1,4 @@
-name: Backward Compatibility with Pynxtools
+name: Compatibility with main pynxtools branch
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  backward_compatibility:
+  pynx_main_compatibility:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

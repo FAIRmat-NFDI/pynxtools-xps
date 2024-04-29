@@ -1,4 +1,4 @@
-name: Compatibility with main pynxtools branch
+name: Compatibility with pynxtools master branch
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  pynx_main_compatibility:
+  pynx_compatibility:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

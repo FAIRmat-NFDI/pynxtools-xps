@@ -5,7 +5,7 @@
 ![](https://img.shields.io/pypi/pyversions/pynxtools-xps)
 ![](https://img.shields.io/pypi/l/pynxtools-xps)
 ![](https://img.shields.io/pypi/v/pynxtools-xps)
-![](https://coveralls.io/repos/github/FAIRmat-NFDI/pynxtools_xps/badge.svg?branch=master)
+![](https://coveralls.io/repos/github/FAIRmat-NFDI/pynxtools_xps/badge.svg?branch=main)
 
 # A reader for XPS data
 
@@ -64,7 +64,7 @@ Install the package with its dependencies:
 
 ```shell
 git clone https://github.com/FAIRmat-NFDI/pynxtools-xps.git \\
-    --branch master \\
+    --branch main \\
     --recursive pynxtools_xps
 cd pynxtools_xps
 python -m pip install --upgrade pip

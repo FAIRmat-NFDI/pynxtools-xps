@@ -15,18 +15,11 @@ from pynxtools.dataconverter.helpers import (
     generate_template_from_nxdl,
     write_nexus_def_to_entry,
 )
-<<<<<<< HEAD
 from pynxtools.dataconverter.validation import validate_dict_against
 from pynxtools.dataconverter.template import Template
-from pynxtools.nexus import nexus  # noqa: E402 # noqa: E402
 from pynxtools.definitions.dev_tools.utils.nxdl_utils import get_nexus_definitions_path
-from pynxtools_xps.reader import XPSReader
+from pynxtools.testing.nexus_conversion import ReaderTest
 
-=======
-
-from pynxtools.definitions.dev_tools.utils.nxdl_utils import get_nexus_definitions_path
-from pynxtools.test_suite.reader_plugin import ReaderTest
->>>>>>> b783412 (restructure test params)
 
 READER = get_reader("xps")
 

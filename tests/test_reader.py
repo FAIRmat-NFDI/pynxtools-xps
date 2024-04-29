@@ -15,12 +15,18 @@ from pynxtools.dataconverter.helpers import (
     generate_template_from_nxdl,
     write_nexus_def_to_entry,
 )
+<<<<<<< HEAD
 from pynxtools.dataconverter.validation import validate_dict_against
 from pynxtools.dataconverter.template import Template
 from pynxtools.nexus import nexus  # noqa: E402 # noqa: E402
 from pynxtools.definitions.dev_tools.utils.nxdl_utils import get_nexus_definitions_path
 from pynxtools_xps.reader import XPSReader
 
+=======
+
+from pynxtools.definitions.dev_tools.utils.nxdl_utils import get_nexus_definitions_path
+from pynxtools.test_suite.reader_plugin import ReaderTest
+>>>>>>> b783412 (restructure test params)
 
 READER = get_reader("xps")
 
@@ -48,7 +54,7 @@ for test_case in test_cases:
     "nxdl, sub_reader_data_dir",
     test_params,
 )
-def test_example_data(nxdl, sub_reader_data_dir, tmp_path, caplog) -> None:
+def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
     """
     Test XPS reader
 
@@ -89,8 +95,51 @@ def test_example_data(nxdl, sub_reader_data_dir, tmp_path, caplog) -> None:
         caplog=caplog,
     )
     test.convert_to_nexus()
-    # test.check_reproducibility_of_nexus()
 
+
+# =============================================================================
+# @pytest.mark.parametrize(
+#     "nxdl, sub_reader_data_dir",
+#     test_params,
+# )
+# def test_reproducibility_of_nexus(nxdl, sub_reader_data_dir, tmp_path, caplog):
+#     """
+#     Test reproducibility of the NeXus writing.
+#
+#     Parameters
+#     ----------
+#     nxdl : str
+#         Name of the NXDL application definition that is to be tested by
+#         this reader plugin (e.g. NXsts, NXmpes, etc)..
+#     sub_reader_data_dir : str
+#         Test data directory that contains all the files required for running the data
+#         conversion through one of the sub-readers. All of these data dirs
+#         are placed within tests/data/...
+#     tmp_path : pathlib.PosixPath
+#         Pytest fixture variable, used to clean up the files generated during
+#         the test.
+#     caplog : _pytest.logging.LogCaptureFixture
+#         Pytest fixture variable, used to capture the log messages during the
+#         test.
+#
+#     Returns
+#     -------
+#     None.
+#
+#     """
+#     files_or_dir = os.path.join(
+#         *[os.path.dirname(__file__), "data", sub_reader_data_dir]
+#     )
+#
+#     test = ReaderTest(
+#         nxdl=nxdl,
+#         reader=READER,
+#         files_or_dir=files_or_dir,
+#         tmp_path=tmp_path,
+#         caplog=caplog,
+#     )
+#     test.check_reproducibility_of_nexus()
+#
 ## This will be implemented in the future.
 # =============================================================================
 # def test_vms_mapper():

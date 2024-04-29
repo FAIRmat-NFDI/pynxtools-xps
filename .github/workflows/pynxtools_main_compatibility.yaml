@@ -2,7 +2,7 @@ name: Compatibility with main pynxtools branch
 
 on:
   push:
-    branches: ['*']
+    branches: [main]
   pull_request:
     branches: [main]
 

@@ -12,7 +12,7 @@ function update_pro_ref {
 }
 
 function update_scienta_txt_ref {
-  cd scienta_txt
+  cd scienta_txt/
   echo "Update scienta txt NeXus reference"
   cd scienta_txt/
   dataconverter Ag_000*.txt eln_data.yaml --reader $READER --nxdl $NXDL --output Ag_ref.nxs

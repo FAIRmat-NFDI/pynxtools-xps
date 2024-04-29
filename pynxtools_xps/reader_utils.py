@@ -308,12 +308,27 @@ KEY_PATTERNS = [
 ]
 
 
-def construct_entry_name(key):
+def align_name_part(name_part: str):
+    """Make one part of the entry name compliant with NeXus standards."""
+    replacements = {
+        " ": "_",
+        ",": "",
+        ".": "_",
+    }
+
+    for key, val in replacements.items():
+        name_part = name_part.replace(key, val)
+
+    return name_part
+
+
+def construct_entry_name(key: str):
     """Construct entry name."""
     name_parts = []
 
     for key_pattern in KEY_PATTERNS:
         match = re.search(key_pattern, key)
         if match:
-            name_parts.append(match.group(1))
+            name_part = align_name_part(match.group(1))
+            name_parts.append(name_part)
     return "__".join(name_parts)

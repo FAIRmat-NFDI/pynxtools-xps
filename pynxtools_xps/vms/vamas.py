@@ -50,6 +50,7 @@ from pynxtools_xps.reader_utils import (
     re_map_keys,
     re_map_values,
     drop_unused_keys,
+    update_dict_without_overwrite,
 )
 from pynxtools_xps.value_mappers import (
     convert_measurement_method,
@@ -981,7 +982,10 @@ class VamasParser:
             convert_pascal_to_snake(k): v for (k, v) in self.header.dict().items()
         }
         del header_dict["comment_lines"]
-        header_dict.update(self.handle_header_comments(self.header.comment_lines))
+
+        header_comments = self.handle_header_comments(self.header.comment_lines)
+
+        update_dict_without_overwrite(header_dict, header_comments)
 
         for spectrum_id, block in enumerate(self.blocks):
             group_name = block.sample_id
@@ -996,7 +1000,8 @@ class VamasParser:
             settings = {
                 convert_pascal_to_snake(k): v for (k, v) in block.dict().items()
             }
-            settings.update(header_dict)
+
+            update_dict_without_overwrite(settings, header_dict)
 
             settings["n_values"] = int(block.num_ord_values / block.no_variables)
 
@@ -1007,7 +1012,8 @@ class VamasParser:
             comment_dict = self.handle_block_comments(block.comment_lines)
             re_map_keys(comment_dict, KEY_MAP)
             re_map_values(comment_dict, VALUE_MAP)
-            settings.update(comment_dict)
+
+            update_dict_without_overwrite(settings, comment_dict)
 
             # Convert the native time format to the datetime string
             # in the ISO 8601 format

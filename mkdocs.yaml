@@ -19,7 +19,7 @@ nav:
     - explanation/nomad_integration.md
   - Reference:
     - reference/specs.md
-    - reference/scienta.md)
+    - reference/scienta.md
     - reference/phi.md
     - reference/vms.md
 theme:

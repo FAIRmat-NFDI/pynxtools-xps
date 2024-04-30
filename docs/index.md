@@ -41,7 +41,7 @@ How-to guides provide step-by-step instructions for a wide range of tasks, with 
 
 The explanation section provides background knowledge on the implementation design, how the data is structured, how data processing can be incorporated, how the integration works in NOMAD, and more.
 
-- [Implementation design](explanation/implementation.md)
+- [Design principles and implementation](explanation/implementation.md)
 - [NXmpes and NXxps](explanation/appdefs.md)
 - [How to map pieces of information to NeXus](explanation/contextualization.md)
 <!-- - [Data processing](explanation/data_processing.md) -->

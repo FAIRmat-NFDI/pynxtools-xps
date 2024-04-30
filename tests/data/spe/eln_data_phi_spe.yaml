@@ -27,11 +27,14 @@ instrument:
     distance:
       value: 0.0
       unit: mm
-  source_gas_cluster_ion_beam:
+  sourceTYPE[source_gas_cluster_ion_beam]:
+    type_other: argon gas cluster ion beam gun
     description: argon cluster GCIB
-  source_neutral_ion_gun:
+  sourceTYPE[source_neutral_ion_gun]:
+    type_other: monoatomic neutral ion beam gun
     description: monoatomic ion source
-  source_sputter_gun:
+  sourceTYPE[source_sputter_gun]:
+    type_other: ion sputter gun
     description: sputter gun
   analyser:
     description: hemispherical

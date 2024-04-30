@@ -2,7 +2,7 @@
 hide: toc
 ---
 
-# Documentation for pynxtools-xps: 
+# Documentation for pynxtools-xps
 
 pynxtools-xps is a free, and open-source data software for harmonizing X-ray photolectron spectroscopy data and metadata for research data management using [NeXus](https://www.nexusformat.org/), implemented with the goal to make scientific research data FAIR (findable, accessible, interoperable and reusable).
 
@@ -22,7 +22,7 @@ A series of tutorials giving you an overview on how to store or convert your XPS
 - [Installation guide](tutorial/installation.md)
 - [Standalone usage](tutorial/standalone.md)
 - [How to use a NeXus/HDF5 file](tutorial/nexusio.md)
-- [Usage on NOMAD](tutorial/nomad.md)
+- [Usage in NOMAD](tutorial/nomad.md)
 
 </div>
 <div markdown="block">
@@ -63,6 +63,7 @@ Here you can learn which specific measurement setups and file formats from techn
 </div>
 
 <h2>Project and community</h2>
-- [Code guidelines](reference/code_guidelines.md)
 
-Thinking about using NOMAD for your next project? Get in touch!
+- [NOMAD code guidelines](reference/code_guidelines.md) 
+
+Any questions or suggestions? [Get in touch!](https://www.fair-di.eu/fairmat/about-fairmat/team-fairmat)

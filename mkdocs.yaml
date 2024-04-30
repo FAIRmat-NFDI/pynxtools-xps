@@ -1,0 +1,56 @@
+site_name: pynxtools-xps
+site_description: |
+  The documentation for the pynxtools-xps plugin
+site_author: The FAIRmat authors
+nav:
+  - Home: index.md
+  - Tutorials:
+    - tutorial/installation.md
+    - tutorial/standalone.md
+    - tutorial/nexusio.md
+    - tutorial/nomad.md
+  - How-tos:
+    - how-tos/build_a_reader.md
+  - Learn:
+    - explanation/implementation.md
+    - explanation/appdefs.md
+    - explanation/contextualization.md
+    - explanation/data_processing.md
+    - explanation/nomad_integration.md
+  - Reference:
+    - reference/specs.md
+    - reference/scienta.md)
+    - reference/phi.md
+    - reference/vms.md
+theme:
+  name: material
+  features:
+    - content.code.copy
+    - content.code.annotate
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - admonition
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - toc:
+      permalink: True
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.emoji
+  - pymdownx.extra
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+use_directory_urls: false
+plugins:
+    - search
+    - macros:
+        module_name: docs/macros
+extra_css:
+  - stylesheets/extra.css

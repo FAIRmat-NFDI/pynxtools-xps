@@ -74,7 +74,7 @@
       },
       "energy_resolution":{
         "physical_quantity":"energy",
-        "type":"derived ",
+        "type":"derived",
         "resolution":"@xps_token:region/step_size",
         "resolution/@units":"@xps_token:region/step_size/@units"
       },

@@ -397,14 +397,7 @@ def drop_unused_keys(dictionary: Dict[str, Any], keys_to_drop: List[str]):
         if key in dictionary:
             dictionary.pop(key)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 
-=======
->>>>>>> 7874553 (prevent overwriting through comments in vms)
-=======
-
->>>>>>> 6ebd6ac (add method that was lost during rebase)
 def update_dict_without_overwrite(d1: Dict[str, Any], d2: Dict[str, Any]):
     """Update d1 with d2, but don't overwrite existing keys."""
     d1.update({k: v for k, v in d2.items() if k not in d1})

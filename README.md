@@ -24,8 +24,7 @@ pip install pynxtools[xps]
 
 for the latest development version.
 
-
-# Purpose
+## Purpose
 This reader plugin for [`pynxtools`](https://github.com/FAIRmat-NFDI/pynxtools) is used to translate diverse file formats from the scientific community and technology partners
 within the field of X-ray photoelectron spectroscopy into a standardized representation using the
 [NeXus](https://www.nexusformat.org/) application definition [NXmpes](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXmpes.html#nxmpes).

@@ -8,6 +8,8 @@ The reader supports [SpecsLabProdigy](https://www.specs-group.com/nc/specs/produ
 
 <!-- How is this data structured --> 
 
+The readers for the SPECS data can be found [here](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/pynxtools_xps/specs).
+
 Example data for the SLE reader is available [here](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/specs).
 
 The example conversion can be run with the following command.

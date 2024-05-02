@@ -4,6 +4,8 @@ The reader supports [Phi MultiPak](https://www.phi.com/surface-analysis-equipmen
 
 <!-- How is this data structured -->
 
+The reader for the Phi data can be found [here](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/pynxtools_xps/phi).
+
 Example data for this file format is available [here](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/phi).
 
 The example conversion can be run with the following commands:

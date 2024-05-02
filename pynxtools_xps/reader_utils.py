@@ -398,9 +398,13 @@ def drop_unused_keys(dictionary: Dict[str, Any], keys_to_drop: List[str]):
             dictionary.pop(key)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
 >>>>>>> 7874553 (prevent overwriting through comments in vms)
+=======
+
+>>>>>>> 6ebd6ac (add method that was lost during rebase)
 def update_dict_without_overwrite(d1: Dict[str, Any], d2: Dict[str, Any]):
     """Update d1 with d2, but don't overwrite existing keys."""
     d1.update({k: v for k, v in d2.items() if k not in d1})
@@ -447,6 +451,20 @@ def construct_detector_data_key(spectrum: Dict[str, Any]) -> str:
         key += f'/channels/Channel_{spectrum["channel_no"]}'
 
     return key
+
+
+def align_name_part(name_part: str):
+    """Make one part of the entry name compliant with NeXus standards."""
+    replacements = {
+        " ": "_",
+        ",": "",
+        ".": "_",
+    }
+
+    for key, val in replacements.items():
+        name_part = name_part.replace(key, val)
+
+    return name_part
 
 
 KEY_PATTERNS = [

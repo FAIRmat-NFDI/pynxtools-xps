@@ -133,67 +133,6 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
 #     )
 #     test.check_reproducibility_of_nexus()
 #
-<<<<<<< HEAD
-=======
-#
-# @pytest.mark.parametrize(
-#     "nxdl, sub_reader_data_dir",
-#     test_params,
-# )
-# def test_undocumented(nxdl, sub_reader_data_dir):
-#     """
-#     Checks whether the read function generates the correct warnings
-#     for undocumented keys.
-#     """
-#     def_dir = get_nexus_definitions_path()
-#
-#     reader_dir = os.path.join(*[os.path.dirname(__file__), "data", sub_reader_data_dir])
-#     input_files = sorted(glob(os.path.join(reader_dir, "*")))
-#     input_files = [file for file in input_files if not file.endswith(".nxs")]
-#
-#     reader = get_reader("xps")
-#
-#     nxdl_file = os.path.join(
-#         def_dir, "contributed_definitions", f"{nxdl}.nxdl.xml"
-#     )
-#
-#     root = ET.parse(nxdl_file).getroot()
-#     template = Template()
-#     generate_template_from_nxdl(root, template)
-#
-#     read_data = reader().read(
-#         template=Template(template), file_paths=tuple(input_files)
-#     )
-#
-#     assert isinstance(read_data, Template)
-#     assert validate_data_dict(template, read_data, root)
-#
-#     skip_keys = [
-#         "@default",
-#         "@units",
-#         "@long_name",
-#         "data/cycle",
-#         "data/data_errors",
-#     ]
-#
-#     undocumented_keys = [
-#         key
-#         for key in list(read_data.undocumented.keys())
-#         if not any(skip_key in key for skip_key in skip_keys)
-#     ]
-#     assert not undocumented_keys
-# =============================================================================
-
-
-def test_pynxtools_version():
-    """Test if the pynxtools version is correct"""
-    # path to pyproject.toml file
-    module_dir = os.path.dirname(os.path.abspath(__file__))
-    toml_file = f"{module_dir}/../pyproject.toml"
-    test_verfy_pynxtools_version(toml_file, pynx_key="Pynxtools")
-
-
->>>>>>> f9c1dcf (add rest for pynx version)
 ## This will be implemented in the future.
 # =============================================================================
 # def test_vms_mapper():

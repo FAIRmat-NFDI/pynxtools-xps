@@ -51,6 +51,12 @@ dev = [
 consistency_with_pynxtools = [
     "pynxtools>=0.1.1",
 ]
+docs = [
+    "mkdocs",
+    "mkdocs-material",
+    "mkdocs-material-extensions",
+    "mkdocs-macros-plugin",
+]
 
 [tool.setuptools.package-data]
 pynxtools_xps = ["*.json"]

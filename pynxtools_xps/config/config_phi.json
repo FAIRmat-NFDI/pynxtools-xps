@@ -128,6 +128,7 @@
       "associated_source":"/entry/instrument/source_xray"
     },
     "sourceTYPE[source_flood_gun]":{
+      "type": "Monochromatized electron source",
       "current":"@xps_token:flood_gun/flood_gun_current",
       "current/@units":"@xps_token:flood_gun/flood_gun_current/@units",
       "energy":"@xps_token:flood_gun/flood_gun_energy",
@@ -152,9 +153,12 @@
         "name":"extractor",
         "voltage":"@xps_token:flood_gun/extractor_voltage",
         "voltage/@units":"@xps_token:flood_gun/extractor_voltage/@units"
-      }
+      },
+      "associated_beam":"none"
     },
     "sourceTYPE[source_gas_cluster_ion_beam]":{
+      "type": "other",
+      "type_other":"@eln",
       "description":"@eln",
       "cluster_size":"@xps_token:gcib/gcib_cluster_size",
       "cluster_size/@units":"@xps_token:gcib/gcib_cluster_size/@units",
@@ -184,6 +188,7 @@
       "wien_filter_voltage/@units":"@xps_token:gcib/gcib_wien_filter_voltage/@units",
       "voltage":"@xps_token:gcib/gcib_high_voltage",
       "voltage/@units":"@xps_token:gcib/gcib_high_voltage/@units",
+      "associated_beam":"none",
       "LENS_EM[bending_lens]":{
         "name":"bending lens",
         "voltage":"@xps_token:gcib/gcib_bend_voltage",
@@ -201,6 +206,8 @@
       }
     },
     "sourceTYPE[source_neutral_ion_gun]":{
+      "type": "other",
+      "type_other":"@eln",
       "description":"@eln",
       "current":"@xps_token:neutral_ion_gun/neutral_current",
       "current/@units":"@xps_token:neutral_ion_gun/neutral_current/@units",
@@ -229,6 +236,7 @@
       "raster_size_y/@units":"@xps_token:neutral_ion_gun/neutral_raster_y/@units",
       "target_sputter_time":"@xps_token:neutral_ion_gun/neutral_target_timed_on_time",
       "target_sputter_time/@units":"@xps_token:neutral_ion_gun/neutral_target_timed_on_time/@units",
+      "associated_beam":"none",
       "LENS_EM[bending_lens]":{
         "name":"bending lens",
         "voltage":"@xps_token:neutral_ion_gun/neutral_bend_voltage",
@@ -246,6 +254,8 @@
       }
     },
     "sourceTYPE[source_sputter_gun]":{
+      "type": "other",
+      "type_other":"@eln",
       "description":"@eln",
       "current":"@xps_token:sputter_gun/sputter_current",
       "current/@units":"@xps_token:sputter_gun/sputter_current/@units",
@@ -275,6 +285,7 @@
       "raster_size_y/@units":"@xps_token:sputter_gun/sputter_raster_y/@units",
       "target_sputter_time":"@xps_token:sputter_gun/target_sputter_time",
       "target_sputter_time/@units":"@xps_token:sputter_gun/target_sputter_time/@units",
+      "associated_beam":"none",
       "LENS_EM[bending_lens]":{
         "name":"bending lens",
         "voltage":"@xps_token:sputter_gun/bend_voltage",

@@ -24,7 +24,6 @@ classifiers = [
 dependencies = [
     "h5py>=3.6.0",
     "xarray>=0.20.2",
-    "pynxtools>=0.0.10"
 ]
 
 [project.entry-points."pynxtools.reader"]
@@ -49,7 +48,7 @@ dev = [
     "pre-commit"
 ]
 consistency_with_pynxtools = [
-    "pynxtools>=0.1.1",
+    "pynxtools>=0.2.1",
 ]
 docs = [
     "mkdocs",

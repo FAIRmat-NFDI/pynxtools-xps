@@ -6,7 +6,7 @@ This is an example for parsing the .txt data export of Scienta Omicron
 The example conversion can be run with the following command.
 
 ```console
-user@box:~$ dataconverter Cu-HHTP_*.txt eln_data.yaml --reader xps --nxdl NXmpes --output Cu-HHTP.nxs
+user@box:~$ dataconverter Cu-HHTP_*.txt eln_data.yaml --reader xps --nxdl NXmpes --output Cu-HHTP.txt.nxs
 ```
 
 ## Contact person in FAIRmat for this example

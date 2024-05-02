@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pynxtools_versions: ["generic_test_in_ci_cd_updated"] # to be replaced by "master" branch
+        pynxtools_versions: ["generic_test_in_ci_cd"] # to be replaced by "master" branch
     steps:
       - uses: actions/checkout@v2
         with:

@@ -36,6 +36,7 @@ from pynxtools_xps.reader_utils import (
     construct_detector_data_key,
     convert_pascal_to_snake,
 )
+from pynxtools_xps.value_mappers import convert_energy_type, convert_energy_scan_mode
 
 from pynxtools_xps.scienta.scienta_txt_data_model import ScientaHeader, ScientaRegion
 
@@ -97,7 +98,7 @@ class TxtMapperScienta(XPSMapper):
 
         self._xps_dict["data"]: dict = {}
 
-        key_map = {
+        template_key_map = {
             "file_info": ["data_file", "sequence_file"],
             "user": [
                 "user_name",
@@ -165,10 +166,10 @@ class TxtMapperScienta(XPSMapper):
         }
 
         for spectrum in spectra:
-            self._update_xps_dict_with_spectrum(spectrum, key_map)
+            self._update_xps_dict_with_spectrum(spectrum, template_key_map)
 
     def _update_xps_dict_with_spectrum(
-        self, spectrum: Dict[str, Any], key_map: Dict[str, List[str]]
+        self, spectrum: Dict[str, Any], template_key_map: Dict[str, List[str]]
     ):
         """
         Map one spectrum from raw data to NXmpes-ready dict.
@@ -198,7 +199,7 @@ class TxtMapperScienta(XPSMapper):
             "region": f"{region_parent}/region",
         }
 
-        for grouping, spectrum_keys in key_map.items():
+        for grouping, spectrum_keys in template_key_map.items():
             root = path_map[str(grouping)]
             for spectrum_key in spectrum_keys:
                 try:
@@ -491,7 +492,6 @@ class ScientaTxtHelper:
         value_map = {
             "no_of_regions": int,
             "energy_size": int,
-            # "energy_axis",
             "pass_energy": float,
             "no_of_scans": int,
             "excitation_energy": float,
@@ -507,9 +507,9 @@ class ScientaTxtHelper:
             "time_per_spectrum_channel": float,
             "energy_units": _extract_energy_units,
             "energy_axis": _separate_dimension_scale,
-            "energy_scale": _change_energy_scale,
-            "energy_scale_2": _change_energy_scale,
-            "acquisition_mode": _change_scan_mode,
+            "energy_scale": convert_energy_type,
+            "energy_scale_2": convert_energy_type,
+            "acquisition_mode": convert_energy_scan_mode,
             "time_per_spectrum_channel": float,
         }
 
@@ -531,27 +531,6 @@ def _extract_energy_units(energy_units: str):
     return re.search(r"\[(.*?)\]", energy_units).group(1)
 
 
-def _change_energy_scale(energy_scale: str):
-    """
-    Change the strings for energy scale to the preferred format.
-
-    """
-    energy_scale_map = {
-        "Binding": "binding",
-        "binding": "binding",
-        "Binding Energy": "binding",
-        "binding energy": "binding",
-        "Kinetic": "kinetic",
-        "kinetic": "kinetic",
-        "Kinetic Energy": "kinetic",
-        "kinetic energy": "kinetic",
-    }
-
-    if energy_scale in energy_scale_map:
-        return energy_scale_map[energy_scale]
-    return energy_scale
-
-
 def _separate_dimension_scale(scale: str):
     """
     Seperate the str of the dimension scale into a numpy array
@@ -568,18 +547,6 @@ def _separate_dimension_scale(scale: str):
 
     """
     return np.array([float(s) for s in scale.split(" ")])
-
-
-def _change_scan_mode(acquisition_mode: str):
-    """
-    Change the strings for acquisition mode type to
-    the allowed values in NXmpes.
-
-    """
-    mode_map = {"Fixed": "fixed_energy", "Swept": "fixed_analyser_transmission"}
-    if acquisition_mode in mode_map:
-        return mode_map[acquisition_mode]
-    return None
 
 
 def _construct_date_time(date: str, time: str):

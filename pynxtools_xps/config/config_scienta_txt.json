@@ -206,7 +206,7 @@
       "current_log/value":"@eln"
     }
   },
-  "/ENTRY[entry]/PROCESS[process]":{
+  "/ENTRY[entry]/PROCESS_MPES[process]":{
     "energy_calibration":{
       "calibrated_axis":"@data:energy",
       "calibrated_axis/@units":"eV"

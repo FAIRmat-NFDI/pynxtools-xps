@@ -26,8 +26,9 @@ Specs Lab Prodigy SLE format, to be passed to mpes nxdl
 import re
 import struct
 import copy
-import sqlite3
+from typing import Dict, Any
 from datetime import datetime
+import sqlite3
 import xml.etree.ElementTree as ET
 from abc import ABC, abstractmethod
 import xarray as xr
@@ -38,6 +39,14 @@ from pynxtools_xps.reader_utils import (
     construct_entry_name,
     construct_data_key,
     construct_detector_data_key,
+    re_map_keys,
+    re_map_values,
+    drop_unused_keys,
+)
+from pynxtools_xps.value_mappers import (
+    convert_energy_type,
+    convert_energy_scan_mode,
+    convert_measurement_method,
 )
 
 
@@ -120,7 +129,7 @@ class SleMapperSpecs(XPSMapper):
         spectra = copy.deepcopy(self.raw_data)
 
         self._xps_dict["data"]: dict = {}
-        key_map = {
+        template_key_map = {
             "user": [],
             "instrument": [
                 "polar_angle",
@@ -190,9 +199,11 @@ class SleMapperSpecs(XPSMapper):
         }
 
         for spectrum in spectra:
-            self._update_xps_dict_with_spectrum(spectrum, key_map)
+            self._update_xps_dict_with_spectrum(spectrum, template_key_map)
 
-    def _update_xps_dict_with_spectrum(self, spectrum, key_map):
+    def _update_xps_dict_with_spectrum(
+        self, spectrum: Dict[str, Any], template_key_map: Dict[str, str]
+    ):
         """
         Map one spectrum from raw data to NXmpes-ready dict.
 
@@ -220,7 +231,7 @@ class SleMapperSpecs(XPSMapper):
             "region": f"{region_parent}/region",
         }
 
-        for grouping, spectrum_keys in key_map.items():
+        for grouping, spectrum_keys in template_key_map.items():
             root = path_map[str(grouping)]
             for spectrum_key in spectrum_keys:
                 mpes_key = spectrum_key.rsplit(" ", 1)[0]
@@ -399,10 +410,10 @@ class SleProdigyParser(ABC):
         ]
 
         self.value_map = {
-            "energy/@type": self._change_energy_type,
+            "energy/@type": convert_energy_type,
             "excitation_energy": self._convert_excitation_energy,
             "time_stamp": self._convert_date_time,
-            "energy_scan_mode": self._convert_energy_scan_mode,
+            "energy_scan_mode": convert_energy_scan_mode,
         }
 
         self.keys_to_drop = [
@@ -412,21 +423,6 @@ class SleProdigyParser(ABC):
         self.encoding = ["f", 4]
 
         self.measurement_types = ["XPS", "UPS", "ElectronSpectroscopy"]
-
-        self.measurement_types_map = {
-            "XPS": "X-ray photoelectron spectroscopy (XPS)",
-            "UPS": "ultraviolet photoelectron spectroscopy (UPS)",
-            "ElectronSpectroscopy": "electron spectroscopy for chemical analysis (ESCA)",
-            "NAPXPS": "near ambient pressure X-ray photoelectron spectroscopy (NAPXPS)",
-            "ARXPS": "angle-resolved X-ray photoelectron spectroscopy (ARXPS)",
-        }
-
-        self.energy_scan_mode_map = {
-            "FixedAnalyzerTransmission": "fixed_analyser_transmission",
-            "FixedRetardationRatio": "fixed_retardation_ratio",
-            "FixedEnergies": "fixed_energy",
-            "Snapshot": "snapshot",
-        }
 
     def initiate_file_connection(self, filepath):
         """Set the filename of the file to be opened."""
@@ -1290,49 +1286,6 @@ class SleProdigyParser(ABC):
         """
         self.con.close()
 
-    def _re_map_keys(self, dictionary, key_map):
-        """
-        Map the keys returned from the SQL table to the preferred keys for
-        the parser output.
-
-        """
-        keys = list(key_map.keys())
-        for k in keys:
-            if k in dictionary.keys():
-                dictionary[key_map[k]] = dictionary.pop(k)
-        return dictionary
-
-    def _drop_unused_keys(self, dictionary, keys_to_drop):
-        """
-        Remove any keys parsed from sle that are not needed
-
-        Parameters
-        ----------
-        dictionary : dict
-            Dictionary with data and metadata for a spectrum.
-        keys_to_drop : list
-            List of metadata keys that are not needed.
-
-        Returns
-        -------
-        None.
-
-        """
-        for key in keys_to_drop:
-            if key in dictionary.keys():
-                dictionary.pop(key)
-
-    def _change_energy_type(self, energy_type):
-        """
-        Change the strings for energy type to the preferred format.
-
-        """
-        if energy_type == "Binding":
-            return "binding"
-        elif energy_type == "Kinetic":
-            return "kinetic"
-        return None
-
     def _convert_excitation_energy(self, excitation_energy):
         """
         Convert the excitation_energy to a float.
@@ -1349,38 +1302,6 @@ class SleProdigyParser(ABC):
         date_time = datetime.strptime(timestamp, "%Y-%b-%d %H:%M:%S.%f")
         date_time = datetime.strftime(date_time, "%Y-%m-%d %H:%M:%S.%f")
         return date_time
-
-    def _convert_energy_scan_mode(self, energy_scan_mode):
-        """
-        Convert the native names for the energy scan modes to the ones
-        used in NXmpes.
-
-        """
-        try:
-            energy_scan_mode = self.energy_scan_mode_map[energy_scan_mode]
-        except KeyError:
-            pass
-        return energy_scan_mode
-
-    def _re_map_values(self, dictionary):
-        """
-        Map the values returned from the SQL table to the preferred format.
-
-        Parameters
-        ----------
-        dictionary : dict
-            Dictionary with data and metadata for a spectrum.
-
-        Returns
-        -------
-        dictionary : dict
-            Dictionary with data and metadata for a spectrum with
-            preferred keys for values.
-
-        """
-        for key, values in self.value_map.items():
-            dictionary[key] = values(dictionary[key])
-        return dictionary
 
     def _sum_channels(self, data):
         """
@@ -1466,15 +1387,15 @@ class SleProdigyParser(ABC):
 
     def _convert_to_common_format(self):
         """
-        Reformat spectra into the format needed for the Converter object
+        Reformat spectra into the format needed for the Mapper object
         """
         maps = {}
         for key_map in self.key_maps:
             maps.update(key_map)
         for spec in self.spectra:
-            self._re_map_keys(spec, maps)
-            self._re_map_values(spec)
-            self._drop_unused_keys(spec, self.keys_to_drop)
+            re_map_keys(spec, maps)
+            re_map_values(spec, self.value_map)
+            drop_unused_keys(spec, self.keys_to_drop)
             spec["data"] = {}
             spec["data"]["x"] = self._get_energy_data(spec)
 
@@ -1570,12 +1491,8 @@ class SleProdigyParserV1(SleProdigyParser):
         for measurement_type in self.measurement_types:
             for group in xml.iter(measurement_type):
                 data = {}
-                try:
-                    data["analysis_method"] = self.measurement_types_map[
-                        measurement_type
-                    ]
-                except KeyError:
-                    data["analysis_method"] = measurement_type
+                data["analysis_method"] = convert_measurement_method(measurement_type)
+
                 data["devices"] = []
 
                 for device in group.iter("DeviceCommand"):
@@ -1753,12 +1670,8 @@ class SleProdigyParserV4(SleProdigyParser):
         for measurement_type in self.measurement_types:
             for group in xml.iter(measurement_type):
                 data = {}
-                try:
-                    data["analysis_method"] = self.measurement_types_map[
-                        measurement_type
-                    ]
-                except KeyError:
-                    data["analysis_method"] = measurement_type
+                data["analysis_method"] = convert_measurement_method(measurement_type)
+
                 data["devices"] = []
                 data["device_group_id"] = group.attrib["ID"]
 
@@ -1824,7 +1737,7 @@ class SleProdigyParserV4(SleProdigyParser):
         common_spectrum_settings = {}
         for setting in comm_settings.iter():
             if setting.tag == "ScanMode":
-                energy_scan_mode = self.energy_scan_mode_map[setting.attrib["Name"]]
+                energy_scan_mode = convert_energy_scan_mode(setting.attrib["Name"])
                 common_spectrum_settings[setting.tag] = energy_scan_mode
             elif setting.tag == "SlitInfo":
                 for key, val in setting.attrib.items():

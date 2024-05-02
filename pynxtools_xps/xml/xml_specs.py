@@ -30,6 +30,7 @@ from pynxtools_xps.reader_utils import (
     XPSMapper,
     construct_entry_name,
 )
+from pynxtools_xps.value_mappers import convert_energy_scan_mode
 
 
 class XmlMapperSpecs(XPSMapper):
@@ -686,7 +687,7 @@ class XmlParserSpecs:
                 self.entry_to_data[entry]["raw_data"]["excitation_energy"] = val
 
             elif "region/scan_mode/name" in key:
-                val = self._convert_energy_scan_mode(val)
+                val = convert_energy_scan_mode(val)
                 self.entry_to_data[entry]["raw_data"]["scan_mode"] = val
 
             elif "region/kinetic_energy" in key:
@@ -736,22 +737,3 @@ class XmlParserSpecs:
                 scan_name = f"cycle{cycle_num}_scan{scan_num}"
 
                 self.entry_to_data[entry]["raw_data"]["scans"][scan_name] = val
-
-    def _convert_energy_scan_mode(self, energy_scan_mode):
-        """
-        Convert the native names for the energy scan modes to the ones
-        used in NXmpes.
-
-        """
-        energy_scan_mode_map = {
-            "FixedAnalyzerTransmission": "fixed_analyser_transmission",
-            "FixedRetardationRatio": "fixed_retardation_ratio",
-            "FixedEnergies": "fixed_energy",
-            "Snapshot": "snapshot",
-        }
-
-        try:
-            energy_scan_mode = energy_scan_mode_map[energy_scan_mode]
-        except KeyError:
-            pass
-        return energy_scan_mode

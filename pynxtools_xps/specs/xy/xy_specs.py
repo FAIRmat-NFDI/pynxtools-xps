@@ -444,8 +444,8 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
                 pass
             else:
                 setting = line.split(":", 1)[1].strip()
-                setting = bool_map.get(setting)
-                export_settings[line.split(":", 1)[0].strip()] = setting
+                setting_bool = bool_map.get(setting)
+                export_settings[line.split(":", 1)[0].strip()] = setting_bool
 
         return export_settings
 
@@ -602,12 +602,12 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
             Entries are as scan_name: scan_data.
 
         """
-        spec_pattern = rf"{self.prefix} Cycle: \d, Curve: \d"
+        spec_pattern_str = rf"{self.prefix} Cycle: \d, Curve: \d"
         if self.export_settings["Separate Scan Data"]:
-            spec_pattern += r", Scan: \d"
+            spec_pattern_str += r", Scan: \d"
         if self.export_settings["Separate Channel Data"]:
-            spec_pattern += r", Channel: \d"
-        spec_pattern = re.compile(spec_pattern, re.IGNORECASE)
+            spec_pattern_str += r", Channel: \d"
+        spec_pattern = re.compile(spec_pattern_str, re.IGNORECASE)
 
         scans = OrderedDict()
         scan_line_nrs = {}

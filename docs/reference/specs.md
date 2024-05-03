@@ -8,7 +8,6 @@ The reader supports [SpecsLabProdigy](https://www.specs-group.com/nc/specs/produ
 
 The readers for the SPECS data can be found [here](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/pynxtools_xps/specs).
 
-
 ## .sle data
 
 <!-- How is this data structured --> 

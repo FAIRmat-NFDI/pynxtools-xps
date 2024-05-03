@@ -1,4 +1,4 @@
-# Example for .sle data
+# Example for .xml data
 
 This is an example for SpecsLab 2files .xml files, the XML-based data format from SPECS GmbH. The SpecsLab2 software version that was used to measure this data is v1.6. The example conversion can be run with the following command.
 

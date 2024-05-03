@@ -1,12 +1,15 @@
 # Example for .sle data
 
-This is an example for [SpecsLabProdigy](https://www.specs-group.com/nc/specs/products/detail/prodigy/) .sle files, which is the propietary format of SPECS GmbH. The SpecsLabProdigy software version that was used to measure this data is v4.63.1. The example conversion can be run with the following command.
+This is an example for SpecsLab 2files .xml files, the XML-based data format from SPECS GmbH. The SpecsLab2 software version that was used to measure this data is v1.6. The example conversion can be run with the following command.
 
-```console
-user@box:~$ dataconverter --params-file params.yaml
+```sh
+! dataconverter \
+In-situ_PBTTT_XPS_SPECS.xml \
+eln_data.yaml \
+--reader xps \
+--nxdl NXmpes \
+--output In-situ_PBTTT.nxs \
 ```
-
-Note that the `params.yaml` file contains the `remove_align` keyword which is special for the SLE parser. It allows removal of alignment spectra that were taken during the experiment. For this example, it considerably speeds up the conversion.
 
 ## Contact person in FAIRmat for this example
 Lukas Pielsticker

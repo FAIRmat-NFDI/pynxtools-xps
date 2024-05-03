@@ -47,6 +47,14 @@ from pynxtools_xps.value_mappers import (
     convert_intensity_units,
 )
 
+UNITS: dict = {
+    "instrument/work_function": "eV",
+    "beam_xray/excitation_energy": "eV",
+    "energydispersion/pass_energy": "eV",
+    "detector/dwell_time": "s",
+    "data/step_size": "eV",
+}
+
 
 class XyMapperSpecs(XPSMapper):
     """
@@ -99,11 +107,11 @@ class XyMapperSpecs(XPSMapper):
             "instrument": [
                 "work_function",
             ],
-            "source": [
+            "source_xray": [
                 "source_label",
             ],
-            "beam": ["excitation_energy"],
-            "analyser": ["analyser_name"],
+            "beam_xray": ["excitation_energy"],
+            "analyser": ["analyser_name", "calibration"],
             "collectioncolumn": ["lens_mode"],
             "energydispersion": [
                 "scan_mode",
@@ -111,10 +119,10 @@ class XyMapperSpecs(XPSMapper):
             ],
             "detector": [
                 "detector_voltage",
+                "dwell_time",
             ],
             "manipulator": [],
-            "sample": ["target_bias"],
-            "calibration": [],
+            "sample": [],
             "data": [
                 "x_units",
                 "y_units",
@@ -126,7 +134,6 @@ class XyMapperSpecs(XPSMapper):
             "region": [
                 "analysis_method",
                 "spectrum_type",
-                "dwell_time",
                 "comments",
                 "spectrum_id",
                 "time_stamp",
@@ -155,8 +162,8 @@ class XyMapperSpecs(XPSMapper):
             "file_info": f"{file_parent}",
             "user": f"{region_parent}/user",
             "instrument": f"{instrument_parent}",
-            "source": f"{instrument_parent}/source",
-            "beam": f"{instrument_parent}/beam",
+            "source_xray": f"{instrument_parent}/source_xray",
+            "beam_xray": f"{instrument_parent}/beam_xray",
             "analyser": f"{analyser_parent}",
             "collectioncolumn": f"{analyser_parent}/collectioncolumn",
             "energydispersion": f"{analyser_parent}/energydispersion",
@@ -176,6 +183,11 @@ class XyMapperSpecs(XPSMapper):
                     self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
                 except KeyError:
                     pass
+
+                unit_key = f"{grouping}/{spectrum_key}"
+                units = self._get_units_for_key(unit_key)
+                if units:
+                    self._xps_dict[f"{root}/{mpes_key}/@units"] = units
 
         if self.parser.export_settings["Transmission Function"]:
             path = f"{path_map['collectioncolumn']}/transmission_function"
@@ -223,13 +235,14 @@ class XyMapperSpecs(XPSMapper):
         # Write averaged cycle data to 'data'.
         self._xps_dict["data"][entry][scan_key.split("_")[0]] = xr.DataArray(
             data=averaged_scans,
-            coords={x_units: energy},
+            coords={"energy": energy},
         )
+
         if self.parser.export_settings["Separate Scan Data"]:
             # Write average cycle data to 'data'.
             self._xps_dict["data"][entry][scan_key] = xr.DataArray(
                 data=averaged_channels,
-                coords={x_units: energy},
+                coords={"energy": energy},
             )
 
         if (
@@ -239,8 +252,32 @@ class XyMapperSpecs(XPSMapper):
             # Write channel data to 'data'.
             channel_no = spectrum["channel_no"]
             self._xps_dict["data"][entry][f"{scan_key}_chan{channel_no}"] = (
-                xr.DataArray(data=intensity, coords={x_units: energy})
+                xr.DataArray(data=intensity, coords={"energy": energy})
             )
+
+    def _get_units_for_key(self, unit_key: str):
+        """
+        Get correct units for a given key.
+
+        Parameters
+        ----------
+        unit_key : str
+           Key of type <mapping>:<spectrum_key>, e.g.
+           detector/detector_voltage
+
+        Returns
+        -------
+        str
+            Unit for that unit_key.
+
+        """
+        try:
+            return re.search(r"\[([A-Za-z0-9_]+)\]", unit_key).group(1)
+        except AttributeError:
+            try:
+                return UNITS[unit_key]
+            except KeyError:
+                return ""
 
 
 class XyProdigyParser:  # pylint: disable=too-few-public-methods
@@ -285,6 +322,16 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
         self.value_map = {
             "analysis_method": convert_measurement_method,
             "scan_mode": convert_energy_scan_mode,
+            "bias_voltage": float,
+            "n_values": int,
+            "excitation_energy": float,
+            "kinetic_energy": float,
+            "work_function": float,
+            "dwell_time": float,
+            "detector_voltage": float,
+            "curves_per_scan": int,
+            "pass_energy": float,
+            "spectrum_id": int,
         }
 
     def parse_file(self, file, **kwargs):

@@ -37,7 +37,7 @@
       },
       "sourceTYPE[source_xray]":{
         "type":"@eln",
-        "name": "@xps_token:source/source_label",
+        "name": "@xps_token:source_xray/source_label",
         "probe":"photon",
         "device_information":{
           "vendor":"@eln",
@@ -49,7 +49,7 @@
       "beamTYPE[beam_xray]":{
         "distance":"@eln",
         "distance/@units":"@eln",
-        "incident_energy":"@xps_token:beam/excitation_energy",
+        "incident_energy":"@xps_token:beam_xray/excitation_energy",
         "incident_energy/@units":"eV",
         "incident_energy_spread":"None",
         "incident_energy_spread/@units":"None",
@@ -62,8 +62,8 @@
         "@default": "detector0",
         "description":"@eln",
         "name": "@eln",
-        "work_function":"@eln",
-        "work_function/@units":"@eln",
+        "work_function":"@xps_token:instrument/work_function",
+        "work_function/@units":"@xps_token:instrument/work_function/@units",
         "fast_axes":"None",
         "slow_axes":"energy",
         "device_information":{
@@ -73,8 +73,9 @@
         },
         "energy_resolution":{
           "physical_quantity":"energy",
-          "type":"@xps_token:data/step_size",
-          "resolution":"eV"
+          "type":"derived",
+          "resolution":"@xps_token:data/step_size",
+          "resolution/@units":"eV"
         },
         "transmission_function":"None",
         "COLLECTIONCOLUMN[collectioncolumn]":{
@@ -96,7 +97,7 @@
           "scheme":"@eln",
           "pass_energy":"@xps_token:energydispersion/pass_energy",
           "pass_energy/@units":"eV",
-          "energy_scan_mode":"@xps_token:energydispersion/acquisition_mode",
+          "energy_scan_mode":"@xps_token:energydispersion/scan_mode",
           "entrance_slit":{
             "description":"@eln",
             "shape":"@eln",
@@ -113,8 +114,8 @@
         "DETECTOR[detector]":{
           "@default":"raw_data",
           "amplifier_type":"@eln",
-          "count_time": "@xps_token:region/dwell_time",
-          "count_time/@units": "@xps_token:region/dwell_time/time",
+          "count_time": "@xps_token:detector/dwell_time",
+          "count_time/@units": "@xps_token:detector/dwell_time/@units",
           "detector_type":"@eln",
           "device_information":{
             "vendor":"@eln",
@@ -187,7 +188,7 @@
         "POSITIONER[positioner_phi]":{
             "value": "@eln",
             "value/@units": "@eln"
-          },        
+          }
       },
       "pressure_gauge":{
         "name":"@eln",

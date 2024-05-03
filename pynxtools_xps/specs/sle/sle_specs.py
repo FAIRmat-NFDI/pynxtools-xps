@@ -56,7 +56,7 @@ class SleMapperSpecs(XPSMapper):
     specs vendor into python dictionary.
     """
 
-    config_file = "config_sle_specs.json"
+    config_file = "config_specs_sle.json"
 
     def __init__(self):
         self.parsers = [

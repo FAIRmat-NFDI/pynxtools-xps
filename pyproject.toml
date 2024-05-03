@@ -48,9 +48,6 @@ dev = [
     "pip-tools",
     "pre-commit"
 ]
-consistency_with_pynxtools = [
-    "pynxtools>=0.2.1",
-]
 docs = [
     "mkdocs",
     "mkdocs-material",

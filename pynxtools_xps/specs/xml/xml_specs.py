@@ -39,7 +39,7 @@ class XmlMapperSpecs(XPSMapper):
     specs vendor into python dictionary.
     """
 
-    config_file = "config_xml_specs.json"
+    config_file = "config_specs_xml.json"
 
     def _select_parser(self):
         """

@@ -24,9 +24,11 @@ Specs Lab Prodigy XY exports, to be passed to mpes nxdl
 # pylint: disable=too-many-lines,too-many-instance-attributes
 
 import re
+from typing import List, Dict, Any, Union
 import itertools
 from collections import OrderedDict
 import copy
+from pathlib import Path
 from datetime import datetime
 import xarray as xr
 import numpy as np
@@ -47,7 +49,7 @@ from pynxtools_xps.value_mappers import (
     convert_intensity_units,
 )
 
-SETTINGS_MAP = {
+SETTINGS_MAP: Dict[str, str] = {
     "Acquisition Date": "time_stamp",
     "Analysis Method": "analysis_method",
     "Analyzer": "analyser_name",
@@ -69,7 +71,7 @@ SETTINGS_MAP = {
     "Spectrum ID": "spectrum_id",
 }
 
-VALUE_MAP = {
+VALUE_MAP: Dict[str, Any] = {
     "analysis_method": convert_measurement_method,
     "scan_mode": convert_energy_scan_mode,
     "bias_voltage_electrons": float,
@@ -84,7 +86,7 @@ VALUE_MAP = {
     "spectrum_id": int,
 }
 
-UNITS: dict = {
+UNITS: Dict[str, str] = {
     "instrument/work_function": "eV",
     "beam_xray/excitation_energy": "eV",
     "energydispersion/pass_energy": "eV",
@@ -109,7 +111,7 @@ class XyMapperSpecs(XPSMapper):
     def _select_parser(self):
         return XyProdigyParser()
 
-    def parse_file(self, file, **kwargs):
+    def parse_file(self, file: str, **kwargs):
         """
         Parse the file using the Specs XY parser.
 
@@ -140,7 +142,7 @@ class XyMapperSpecs(XPSMapper):
 
         self._xps_dict["data"]: dict = {}
 
-        key_map = {
+        template_key_map = {
             "user": [],
             "instrument": [
                 "work_function",
@@ -183,9 +185,11 @@ class XyMapperSpecs(XPSMapper):
         }
 
         for spectrum in spectra:
-            self._update_xps_dict_with_spectrum(spectrum, key_map)
+            self._update_xps_dict_with_spectrum(spectrum, template_key_map)
 
-    def _update_xps_dict_with_spectrum(self, spectrum, key_map):
+    def _update_xps_dict_with_spectrum(
+        self, spectrum: Dict[str, Any], key_map: Dict[str, List[str]]
+    ):
         """
         Map one spectrum from raw data to NXmpes-ready dict.
 
@@ -336,7 +340,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
         self.n_headerlines = 14
         self.export_settings = {}
 
-    def parse_file(self, file, **kwargs):
+    def parse_file(self, file: Union[str, Path], **kwargs):
         """
         Parse the .xy file into a list of dictionaries.
 
@@ -376,7 +380,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
 
         return self._flatten_dict(groups)
 
-    def _read_lines(self, file):
+    def _read_lines(self, file: Union[str, Path]):
         """
         Read all lines from the input XY files.
 
@@ -413,7 +417,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
 
         return header, groups
 
-    def _parse_export_settings(self, header):
+    def _parse_export_settings(self, header: List[str]):
         """
         Parse the top-level Prodigy export settings into a dict.
 
@@ -484,7 +488,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
 
         return groups
 
-    def _handle_regions(self, group_data):
+    def _handle_regions(self, group_data: List[str]):
         """
         Separate the data list of an individual group into a
         dictionary, with each element containing the data list
@@ -532,7 +536,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
 
         return regions
 
-    def _handle_cycles(self, region_data):
+    def _handle_cycles(self, region_data: List[str]):
         """
         Separate the data list of an individual region into a
         dictionary, with each element containing the data list
@@ -581,7 +585,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
 
         return cycles
 
-    def _handle_individual_cycles(self, cycle_data):
+    def _handle_individual_cycles(self, cycle_data: List[str]):
         """
         Separate the data list of an individual cycle into a
         dictionary, with each element containing the data list
@@ -638,7 +642,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
 
         return scans
 
-    def _handle_individual_scan(self, scan_data):
+    def _handle_individual_scan(self, scan_data: List[str]):
         """
         Separate the data list of an individual scan into a
         dictionary, with each element containing the data and
@@ -712,7 +716,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
 
         return scan
 
-    def _extend_scan_settings(self, scan_name):
+    def _extend_scan_settings(self, scan_name: str):
         """
         Split the scan name and extract the scan metadata.
 
@@ -744,7 +748,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
 
         return settings
 
-    def _strip_param(self, line, key):
+    def _strip_param(self, line: str, key: str):
         """
         Split the scan name and extract the scan metadata.
 
@@ -770,7 +774,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
             return line.strip().split(self.prefix + " " + key)[-1].strip()
         return line
 
-    def _flatten_dict(self, data_dict):
+    def _flatten_dict(self, data_dict: Dict[str, Any]):
         """
         Flatten a raw data dict into a list, with each element
         being a dictionary with data and metadata for one spectrum.
@@ -810,7 +814,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
 
         return spectra
 
-    def _parse_datetime(self, date):
+    def _parse_datetime(self, date: str):
         """
         Parse datetime into a datetime.datetime object.
 

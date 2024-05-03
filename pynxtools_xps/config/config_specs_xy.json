@@ -117,6 +117,8 @@
           "count_time": "@xps_token:detector/dwell_time",
           "count_time/@units": "@xps_token:detector/dwell_time/@units",
           "detector_type":"@eln",
+          "amplifier_bias":"@xps_token:detector/bias_voltage_electrons",
+          "amplifier_bias/@units":"@xps_token:detector/bias_voltage_electrons/@units",
           "device_information":{
             "vendor":"@eln",
             "model":"@eln",

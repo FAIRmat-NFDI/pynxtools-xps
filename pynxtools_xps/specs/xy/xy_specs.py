@@ -47,10 +47,48 @@ from pynxtools_xps.value_mappers import (
     convert_intensity_units,
 )
 
+SETTINGS_MAP = {
+    "Acquisition Date": "time_stamp",
+    "Analysis Method": "analysis_method",
+    "Analyzer": "analyser_name",
+    "Analyzer Lens": "lens_mode",
+    "Analyzer Slit": "entrance_slit",
+    "Bias Voltage": "bias_voltage_electrons",
+    "Binding Energy": "start_energy",
+    "Scan Mode": "scan_mode",
+    "Values/Curve": "n_values",
+    "Eff. Workfunction": "work_function",
+    "Excitation Energy": "excitation_energy",
+    "Kinetic Energy": "kinetic_energy",
+    "Dwell Time": "dwell_time",
+    "Detector Voltage": "detector_voltage",
+    "Comment": "comments",
+    "Curves/Scan": "curves_per_scan",
+    "Pass Energy": "pass_energy",
+    "Source": "source_label",
+    "Spectrum ID": "spectrum_id",
+}
+
+VALUE_MAP = {
+    "analysis_method": convert_measurement_method,
+    "scan_mode": convert_energy_scan_mode,
+    "bias_voltage_electrons": float,
+    "n_values": int,
+    "excitation_energy": float,
+    "kinetic_energy": float,
+    "work_function": float,
+    "dwell_time": float,
+    "detector_voltage": float,
+    "curves_per_scan": int,
+    "pass_energy": float,
+    "spectrum_id": int,
+}
+
 UNITS: dict = {
     "instrument/work_function": "eV",
     "beam_xray/excitation_energy": "eV",
     "energydispersion/pass_energy": "eV",
+    "detector/bias_voltage_electrons": "V",
     "detector/dwell_time": "s",
     "data/step_size": "eV",
 }
@@ -111,13 +149,14 @@ class XyMapperSpecs(XPSMapper):
                 "source_label",
             ],
             "beam_xray": ["excitation_energy"],
-            "analyser": ["analyser_name", "calibration"],
+            "analyser": ["analyser_name"],
             "collectioncolumn": ["lens_mode"],
             "energydispersion": [
                 "scan_mode",
                 "pass_energy",
             ],
             "detector": [
+                "bias_voltage_electrons",
                 "detector_voltage",
                 "dwell_time",
             ],
@@ -297,43 +336,6 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
         self.n_headerlines = 14
         self.export_settings = {}
 
-        self.settings_map = {
-            "Acquisition Date": "time_stamp",
-            "Analysis Method": "analysis_method",
-            "Analyzer": "analyser_name",
-            "Analyzer Lens": "lens_mode",
-            "Analyzer Slit": "entrance_slit",
-            "Bias Voltage": "bias_voltage",
-            "Binding Energy": "start_energy",
-            "Scan Mode": "scan_mode",
-            "Values/Curve": "n_values",
-            "Eff. Workfunction": "work_function",
-            "Excitation Energy": "excitation_energy",
-            "Kinetic Energy": "kinetic_energy",
-            "Dwell Time": "dwell_time",
-            "Detector Voltage": "detector_voltage",
-            "Comment": "comments",
-            "Curves/Scan": "curves_per_scan",
-            "Pass Energy": "pass_energy",
-            "Source": "source_label",
-            "Spectrum ID": "spectrum_id",
-        }
-
-        self.value_map = {
-            "analysis_method": convert_measurement_method,
-            "scan_mode": convert_energy_scan_mode,
-            "bias_voltage": float,
-            "n_values": int,
-            "excitation_energy": float,
-            "kinetic_energy": float,
-            "work_function": float,
-            "dwell_time": float,
-            "detector_voltage": float,
-            "curves_per_scan": int,
-            "pass_energy": float,
-            "spectrum_id": int,
-        }
-
     def parse_file(self, file, **kwargs):
         """
         Parse the .xy file into a list of dictionaries.
@@ -472,8 +474,8 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
         for name_header, group_data in zip(grouped_list[::2], grouped_list[1::2]):
             name = self._strip_param(name_header[0], "Group:")
             group_settings = {"group_name": name}
-            group_settings = re_map_keys(group_settings, self.settings_map)
-            group_settings = re_map_values(group_settings, self.value_map)
+            group_settings = re_map_keys(group_settings, SETTINGS_MAP)
+            group_settings = re_map_values(group_settings, VALUE_MAP)
 
             groups[name] = {
                 "group_settings": group_settings,
@@ -522,8 +524,8 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
                 val = setting.split(self.prefix)[-1].strip().split(":")[1].strip()
                 region_settings[setting_name] = val
 
-            region_settings = re_map_keys(region_settings, self.settings_map)
-            region_settings = re_map_values(region_settings, self.value_map)
+            region_settings = re_map_keys(region_settings, SETTINGS_MAP)
+            region_settings = re_map_values(region_settings, VALUE_MAP)
 
             regions[name] = {"region_settings": region_settings}
             regions[name].update(self._handle_cycles(region_data))
@@ -568,8 +570,8 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
             cycle_settings = {"loop_no": i}
             cycle_data = region_data[line_no_a:line_no_b]
 
-            cycle_settings = re_map_keys(cycle_settings, self.settings_map)
-            cycle_settings = re_map_values(cycle_settings, self.value_map)
+            cycle_settings = re_map_keys(cycle_settings, SETTINGS_MAP)
+            cycle_settings = re_map_values(cycle_settings, VALUE_MAP)
 
             cycles[name] = {
                 "cycle_settings": cycle_settings,
@@ -694,8 +696,8 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
         if check_uniform_step_width(energy):
             scan_settings["step_size"] = get_minimal_step(energy)
 
-        scan_settings = re_map_keys(scan_settings, self.settings_map)
-        scan_settings = re_map_values(scan_settings, self.value_map)
+        scan_settings = re_map_keys(scan_settings, SETTINGS_MAP)
+        scan_settings = re_map_values(scan_settings, VALUE_MAP)
 
         scan = {
             "data": {

@@ -44,10 +44,12 @@ function update_vms_examples {
   echo "Update VAMAS examples"
   cd vms/
   echo "Update REGULAR file conversion example"
-  dataconverter regular.vms eln_data_vms.yaml --reader $READER --nxdl $NXDL --output vms_regular_example.nxs
+  dataconverter regular.vms eln_data_vms.yaml --reader $READER --nxdl $NXDL --output regular.vms.nxs
   echo
   echo "Update REGULAR file conversion example"
-  dataconverter irregular.vms eln_data_vms.yaml --reader $READER --nxdl $NXDL --output vms_irregular_example.nxs
+  dataconverter irregular.vms eln_data_vms.yaml --reader $READER --nxdl $NXDL --output irregular.vms.nxs
+  echo "Update REGULAR file conversion example"
+  dataconverter irregular.vms eln_data_vms_txt_export.yaml --reader $READER --nxdl $NXDL --output vms_txt_export.nxs
   cd ..
   echo
 }
@@ -56,3 +58,4 @@ function update_vms_examples {
 update_phi_examples
 update_scienta_examples
 update_sle_examples
+update_vms_examples

@@ -8,7 +8,7 @@ The reader for the VAMAS format can be found [here](https://github.com/FAIRmat-N
 
 Example data is available [here](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/vms).
 
-The example conversion for the REGULAR file can be run with the following command:
+The example conversion for the REGULAR VAMAS file can be run with the following command:
 
 ```sh
 ! dataconverter \
@@ -16,10 +16,10 @@ regular.vms \
 eln_data_vms.yaml \
 --reader xps \
 --nxdl NXmpes \
---output vms_regular_example.nxs \
+--output regular.vms.nxs \
 ```
 
-The example conversion for the IRREGULAR file can be run with the following command:
+The example conversion for the IRREGULAR VAMAS file can be run with the following command:
 
 ```sh
 ! dataconverter \
@@ -27,7 +27,18 @@ irregular.vms \
 eln_data_vms.yaml \
 --reader xps \
 --nxdl NXmpes \
---output vms_irregular_example.nxs \
+--output irregular.vms.nxs \
+```
+
+The example conversion for the .txt export file can be run with the following command:
+
+```sh
+! dataconverter \
+vms_txt_export.txt \
+eln_data_vms_txt_export.yaml \
+--reader xps \
+--nxdl NXmpes \
+--output vms_txt_export.nxs \
 ```
 
 <!-- ## Data analysis in CasaXPS -->

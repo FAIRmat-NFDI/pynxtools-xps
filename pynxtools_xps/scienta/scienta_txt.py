@@ -101,11 +101,11 @@ class TxtMapperScienta(XPSMapper):
 
         Returns
         -------
-        ScientaTxtHelper
+        ScientaTxtParser
             Parser for reading .txt file exported by Scienta.
 
         """
-        return ScientaTxtHelper()
+        return ScientaTxtParser()
 
     def construct_data(self):
         """Map TXT format to NXmpes-ready dict."""
@@ -271,7 +271,7 @@ class TxtMapperScienta(XPSMapper):
         )
 
 
-class ScientaTxtHelper:
+class ScientaTxtParser:
     """Parser for Scienta TXT exports."""
 
     # pylint: disable=too-few-public-methods

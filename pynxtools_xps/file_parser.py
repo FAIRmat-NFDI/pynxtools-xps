@@ -26,6 +26,7 @@ from typing import List, Dict
 from pynxtools_xps.phi.spe_pro_phi import MapperPhi
 from pynxtools_xps.sle.sle_specs import SleMapperSpecs
 from pynxtools_xps.scienta.scienta_txt import TxtMapperScienta
+from pynxtools_xps.scienta.scienta_igor import IgorMapperScienta
 
 from pynxtools_xps.vms.txt_vamas_export import TxtMapperVamasExport
 from pynxtools_xps.vms.vamas import VamasMapper
@@ -36,10 +37,11 @@ from pynxtools_xps.xml.xml_specs import XmlMapperSpecs
 class XpsDataFileParser:
     """Class intended for receiving any type of XPS data file."""
 
-    __prmt_file_ext__ = ["pro", "spe", "sle", "txt", "vms", "xml", "xy"]
+    __prmt_file_ext__ = ["ibw", "pro", "spe", "sle", "txt", "vms", "xml", "xy"]
     __prmt_metadata_file_ext__ = ["slh"]
     __vendors__ = ["kratos", "phi", "scienta", "specs", "unkwown"]
     __prmt_vndr_cls: Dict[str, Dict] = {
+        "ibw": {"scienta": IgorMapperScienta},
         "pro": {"phi": MapperPhi},
         "spe": {"phi": MapperPhi},
         "sle": {"specs": SleMapperSpecs},

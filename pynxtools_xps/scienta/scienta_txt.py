@@ -24,7 +24,7 @@ import re
 import copy
 import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Optional
 import xarray as xr
 import numpy as np
 
@@ -579,9 +579,7 @@ def _separate_dimension_scale(scale: str):
     return np.array([float(s) for s in scale.split(" ")])
 
 
-def _construct_date_time(
-    date_string: str, time_string: str
-) -> Union[datetime.datetime, None]:
+def _construct_date_time(date_string: str, time_string: str) -> Optional[str]:
     """
     Convert the native time format to the datetime string
     in the ISO 8601 format: '%Y-%b-%dT%H:%M:%S.%fZ'.
@@ -614,4 +612,6 @@ def _construct_date_time(
         return datetime_obj.astimezone().isoformat()
 
     except ValueError as e:
-        print(e)
+        raise ValueError(
+            "Date and time could not be converted to ISO 8601 format."
+        ) from e

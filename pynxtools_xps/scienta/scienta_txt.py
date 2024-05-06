@@ -34,6 +34,8 @@ from pynxtools_xps.reader_utils import (
     construct_data_key,
     construct_detector_data_key,
     convert_pascal_to_snake,
+    _re_map_single_key,
+    _re_map_single_value,
 )
 from pynxtools_xps.value_mappers import (
     convert_energy_type,
@@ -42,6 +44,72 @@ from pynxtools_xps.value_mappers import (
 )
 
 from pynxtools_xps.scienta.scienta_txt_data_model import ScientaHeader, ScientaRegion
+
+
+def _extract_energy_units(energy_units: str):
+    """
+    Extract energy units from the strings for energy_units.
+    Binding Energy [eV] -> eV
+
+    """
+    return re.search(r"\[(.*?)\]", energy_units).group(1)
+
+
+def _separate_dimension_scale(scale: str):
+    """
+    Seperate the str of the dimension scale into a numpy array
+
+    Parameters
+    ----------
+    scale : str
+        Str of the form "600 599.5 599 598.5 5".
+
+    Returns
+    -------
+    np.ndarray
+        Dimension scale as a numpy array.
+
+    """
+    return np.array([float(s) for s in scale.split(" ")])
+
+
+def _construct_date_time(date_string: str, time_string: str) -> Optional[str]:
+    """
+    Convert the native time format to the datetime string
+    in the ISO 8601 format: '%Y-%b-%dT%H:%M:%S.%fZ'.
+
+    """
+
+    def _parse_date(date_string: str) -> datetime.datetime:
+        possible_date_formats = ["%Y-%m-%d", "%m/%d/%Y"]
+        for date_fmt in possible_date_formats:
+            try:
+                return datetime.datetime.strptime(date_string, date_fmt)
+            except ValueError:
+                pass
+        raise ValueError("Date format not recognized")
+
+    def _parse_time(time_string: str) -> datetime.time:
+        possible_time_formats = ["%H:%M:%S", "%I:%M:%S %p"]
+        for time_fmt in possible_time_formats:
+            try:
+                return datetime.datetime.strptime(time_string, time_fmt).time()
+            except ValueError:
+                pass
+        raise ValueError("Time format not recognized")
+
+    try:
+        date = _parse_date(date_string)
+        time = _parse_time(time_string)
+        datetime_obj = datetime.datetime.combine(date, time)
+
+        return datetime_obj.astimezone().isoformat()
+
+    except ValueError as e:
+        raise ValueError(
+            "Date and time could not be converted to ISO 8601 format."
+        ) from e
+
 
 KEY_MAP: Dict[str, str] = {
     "number_of_regions": "no_of_regions",
@@ -70,6 +138,32 @@ KEY_MAP: Dict[str, str] = {
     "date": "start_date",
     "time": "start_time",
     "transmission": "fixed analyzer transmission",
+}
+
+VALUE_MAP = {
+    "no_of_regions": int,
+    "energy_size": int,
+    "pass_energy": float,
+    "no_of_scans": int,
+    "excitation_energy": float,
+    "center_energy": float,
+    "start_energy": float,
+    "stop_energy": float,
+    "step_size": float,
+    "dwell_time": float,
+    "detector_first_x_channel": int,
+    "detector_last_x_channel": int,
+    "detector_first_y_channel": int,
+    "detector_last_y_channel": int,
+    "time_per_spectrum_channel": float,
+    "energy_units": _extract_energy_units,
+    "energy_axis": _separate_dimension_scale,
+    "energy_scale": convert_energy_type,
+    "energy_scale_2": convert_energy_type,
+    "acquisition_mode": convert_energy_scan_mode,
+    "time_per_spectrum_channel": float,
+    "manipulator_r1": float,
+    "manipulator_r2": float,
 }
 
 UNITS: dict = {
@@ -342,7 +436,7 @@ class ScientaTxtParser:
         for line in headerlines:
             key, value = self._get_key_value_pair(line)
             if key:
-                value = self._re_map_values(key, value)
+                value = _re_map_single_value(key, value, VALUE_MAP)
                 setattr(self.header, key, value)
         self.header.validate_types()
 
@@ -397,9 +491,9 @@ class ScientaTxtParser:
                 key, value = self._get_key_value_pair(line)
                 if "dimension" in key:
                     key_part = f"dimension_{key.rsplit('_')[-1]}"
-                    key = self._re_map_keys(key_part)
+                    key = _re_map_single_key(key_part, KEY_MAP)
 
-                    value = self._re_map_values(key, value)
+                    value = _re_map_single_value(key, value, VALUE_MAP)
                 if self._check_valid_value(value):
                     setattr(region, key, value)
 
@@ -414,6 +508,7 @@ class ScientaTxtParser:
                 if self._check_valid_value(value):
                     if bool_variables["in_manipulator"]:
                         key = f"manipulator_{key}"
+                        value = _re_map_single_value(key, value, VALUE_MAP)
                     setattr(region, key, value)
 
             if bool_variables["in_data"]:
@@ -490,128 +585,10 @@ class ScientaTxtParser:
         try:
             [key, value] = line.split("=")
             key = convert_pascal_to_snake(key)
-            key = self._re_map_keys(key)
-            value = self._re_map_values(key, value)
+            key = _re_map_single_key(key, KEY_MAP)
+            value = _re_map_single_value(key, value, VALUE_MAP)
 
         except ValueError:
             key, value = "", ""
 
         return key, value
-
-    def _re_map_keys(self, key: str):
-        """
-        Map the keys returned from the file to the preferred keys for
-        the parser output.
-
-        """
-        if key in KEY_MAP:
-            return KEY_MAP[key]
-        return key
-
-    def _re_map_values(self, input_key: str, value: str):
-        """
-        Map the values returned from the file to the preferred format for
-        the parser output.
-
-        """
-        try:
-            value = value.rstrip("\n")
-        except AttributeError:
-            pass
-
-        value_map = {
-            "no_of_regions": int,
-            "energy_size": int,
-            "pass_energy": float,
-            "no_of_scans": int,
-            "excitation_energy": float,
-            "center_energy": float,
-            "start_energy": float,
-            "stop_energy": float,
-            "step_size": float,
-            "dwell_time": float,
-            "detector_first_x_channel": int,
-            "detector_last_x_channel": int,
-            "detector_first_y_channel": int,
-            "detector_last_y_channel": int,
-            "time_per_spectrum_channel": float,
-            "energy_units": _extract_energy_units,
-            "energy_axis": _separate_dimension_scale,
-            "energy_scale": convert_energy_type,
-            "energy_scale_2": convert_energy_type,
-            "acquisition_mode": convert_energy_scan_mode,
-            "time_per_spectrum_channel": float,
-        }
-
-        keys = list(value_map.keys())
-
-        for k in keys:
-            if k in input_key:
-                map_method = value_map[k]
-                value = map_method(value)  # type: ignore[operator]
-        return value
-
-
-def _extract_energy_units(energy_units: str):
-    """
-    Extract energy units from the strings for energy_units.
-    Binding Energy [eV] -> eV
-
-    """
-    return re.search(r"\[(.*?)\]", energy_units).group(1)
-
-
-def _separate_dimension_scale(scale: str):
-    """
-    Seperate the str of the dimension scale into a numpy array
-
-    Parameters
-    ----------
-    scale : str
-        Str of the form "600 599.5 599 598.5 5".
-
-    Returns
-    -------
-    np.ndarray
-        Dimension scale as a numpy array.
-
-    """
-    return np.array([float(s) for s in scale.split(" ")])
-
-
-def _construct_date_time(date_string: str, time_string: str) -> Optional[str]:
-    """
-    Convert the native time format to the datetime string
-    in the ISO 8601 format: '%Y-%b-%dT%H:%M:%S.%fZ'.
-
-    """
-
-    def _parse_date(date_string: str) -> datetime.datetime:
-        possible_date_formats = ["%Y-%m-%d", "%m/%d/%Y"]
-        for date_fmt in possible_date_formats:
-            try:
-                return datetime.datetime.strptime(date_string, date_fmt)
-            except ValueError:
-                pass
-        raise ValueError("Date format not recognized")
-
-    def _parse_time(time_string: str) -> datetime.time:
-        possible_time_formats = ["%H:%M:%S", "%I:%M:%S %p"]
-        for time_fmt in possible_time_formats:
-            try:
-                return datetime.datetime.strptime(time_string, time_fmt).time()
-            except ValueError:
-                pass
-        raise ValueError("Time format not recognized")
-
-    try:
-        date = _parse_date(date_string)
-        time = _parse_time(time_string)
-        datetime_obj = datetime.datetime.combine(date, time)
-
-        return datetime_obj.astimezone().isoformat()
-
-    except ValueError as e:
-        raise ValueError(
-            "Date and time could not be converted to ISO 8601 format."
-        ) from e

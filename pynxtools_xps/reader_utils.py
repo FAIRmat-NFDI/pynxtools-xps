@@ -291,10 +291,22 @@ def re_map_keys(dictionary: Dict[str, Any], key_map: Dict[str, str]):
         Dictionary with changed keys.
 
     """
-    for k in key_map.keys():
-        if k in dictionary:
-            dictionary[key_map[k]] = dictionary.pop(k)
+    for key in key_map:
+        if key in dictionary:
+            map_key = _re_map_single_key(key, key_map)
+            dictionary[map_key] = dictionary.pop(key)
     return dictionary
+
+
+def _re_map_single_key(key: str, key_map: Dict[str, str]):
+    """
+    Map a single keys from a file to the preferred keys for
+    the parser output.
+
+    """
+    if key in key_map:
+        return key_map[key]
+    return key
 
 
 def re_map_values(dictionary: Dict[str, Any], map_functions: Dict[str, Any]):
@@ -329,6 +341,24 @@ def re_map_values(dictionary: Dict[str, Any], map_functions: Dict[str, Any]):
         if key in dictionary:
             dictionary[key] = map_fn(dictionary[key])
     return dictionary
+
+
+def _re_map_single_value(input_key: str, value: str, map_functions: Dict[str, Any]):
+    """
+    Map the values returned from the file to the preferred format for
+    the parser output.
+
+    """
+    try:
+        value = value.rstrip("\n")
+    except AttributeError:
+        pass
+
+    for key in map_functions:
+        if key in input_key:
+            map_method = map_functions[key]
+            value = map_method(value)  # type: ignore[operator]
+    return value
 
 
 def drop_unused_keys(dictionary: Dict[str, Any], keys_to_drop: List[str]):

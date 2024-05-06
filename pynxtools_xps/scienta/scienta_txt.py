@@ -22,7 +22,7 @@ Class for reading XPS files from TXT export of Scienta.
 
 import re
 import copy
-from datetime import datetime
+import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Union
 import pytz
@@ -549,18 +549,39 @@ def _separate_dimension_scale(scale: str):
     return np.array([float(s) for s in scale.split(" ")])
 
 
-def _construct_date_time(date: str, time: str):
+def _construct_date_time(
+    date_string: str, time_string: str
+) -> Union[datetime.datetime, None]:
     """
     Convert the native time format to the datetime string
     in the ISO 8601 format: '%Y-%b-%dT%H:%M:%S.%fZ'.
 
     """
-    date_time = datetime.combine(
-        datetime.strptime(date, "%Y-%m-%d"),
-        datetime.strptime(time, "%H:%M:%S").time(),
-    )
 
-    localtz = pytz.timezone("Europe/Berlin")
-    date_time = localtz.localize(date_time)
+    def _parse_date(date_string: str) -> datetime.datetime:
+        possible_date_formats = ["%Y-%m-%d", "%m/%d/%Y"]
+        for date_fmt in possible_date_formats:
+            try:
+                return datetime.datetime.strptime(date_string, date_fmt)
+            except ValueError:
+                pass
+        raise ValueError("Date format not recognized")
 
-    return date_time.isoformat()
+    def _parse_time(time_string: str) -> datetime.time:
+        possible_time_formats = ["%H:%M:%S", "%I:%M:%S %p"]
+        for time_fmt in possible_time_formats:
+            try:
+                return datetime.datetime.strptime(time_string, time_fmt).time()
+            except ValueError:
+                pass
+        raise ValueError("Time format not recognized")
+
+    try:
+        date = _parse_date(date_string)
+        time = _parse_time(time_string)
+        datetime_obj = datetime.datetime.combine(date, time)
+
+        return datetime_obj.astimezone().isoformat()
+
+    except ValueError as e:
+        print(e)

@@ -25,7 +25,6 @@ import copy
 import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Union
-import pytz
 import xarray as xr
 import numpy as np
 
@@ -36,7 +35,11 @@ from pynxtools_xps.reader_utils import (
     construct_detector_data_key,
     convert_pascal_to_snake,
 )
-from pynxtools_xps.value_mappers import convert_energy_type, convert_energy_scan_mode
+from pynxtools_xps.value_mappers import (
+    convert_energy_type,
+    convert_energy_scan_mode,
+    get_units_for_key,
+)
 
 from pynxtools_xps.scienta.scienta_txt_data_model import ScientaHeader, ScientaRegion
 
@@ -67,6 +70,19 @@ KEY_MAP: Dict[str, str] = {
     "date": "start_date",
     "time": "start_time",
     "transmission": "fixed analyzer transmission",
+}
+
+UNITS: dict = {
+    # "energy": "eV",
+    "energydispersion/pass_energy": "eV",
+    "beam_xray/excitation_energy": "eV",
+    "region/energy_axis": "eV",
+    "region/center_energy": "eV",
+    "region/start_energy": "eV",
+    "region/stop_energy": "eV",
+    "region/step_size": "eV",
+    "detector/dwell_time": "eV",
+    "region/time_per_spectrum_channel": "s",
 }
 
 
@@ -107,10 +123,9 @@ class TxtMapperScienta(XPSMapper):
                 "instrument_name",
                 "vendor",
             ],
-            "source": [],
-            "beam": [
+            "source_xray": [],
+            "beam_xray": [
                 "excitation_energy",
-                "excitation_energy/@units",
             ],
             "analyser": [],
             "collectioncolumn": [
@@ -119,7 +134,6 @@ class TxtMapperScienta(XPSMapper):
             "energydispersion": [
                 "acquisition_mode",
                 "pass_energy",
-                "pass_energy/@units",
             ],
             "detector": [
                 "detector_first_x_channel",
@@ -128,30 +142,26 @@ class TxtMapperScienta(XPSMapper):
                 "detector_last_y_channel",
                 "detector_mode",
                 "dwell_time",
-                "dwell_time/@units",
                 "time_per_spectrum_channel",
-                "time_per_spectrum_channel/@units",
             ],
-            "manipulator": [],
+            "manipulator": [
+                "manipulator_r1",
+                "manipulator_r2",
+            ],
             "calibration": [],
             "sample": ["sample_name"],
             "region": [
                 "center_energy",
-                "center_energy/@units",
                 "energy_axis",
                 "energy_scale",
                 "energy_scale_2",
                 "energy_size",
-                "energy/@units",
                 "no_of_scans",
                 "region_id",
                 "spectrum_comment",
                 "start_energy",
-                "start_energy/@units",
                 "step_size",
-                "step_size/@units",
                 "stop_energy",
-                "stop_energy/@units",
                 "time_stamp",
             ],
             # 'unused': [
@@ -186,8 +196,8 @@ class TxtMapperScienta(XPSMapper):
             "file_info": f"{file_parent}",
             "user": f"{region_parent}/user",
             "instrument": f"{instrument_parent}",
-            "source": f"{instrument_parent}/source",
-            "beam": f"{instrument_parent}/beam",
+            "source_xray": f"{instrument_parent}/source_xray",
+            "beam_xray": f"{instrument_parent}/beam_xray",
             "analyser": f"{analyser_parent}",
             "collectioncolumn": f"{analyser_parent}/collectioncolumn",
             "energydispersion": f"{analyser_parent}/energydispersion",
@@ -201,15 +211,18 @@ class TxtMapperScienta(XPSMapper):
 
         for grouping, spectrum_keys in template_key_map.items():
             root = path_map[str(grouping)]
+
             for spectrum_key in spectrum_keys:
+                mpes_key = spectrum_key.rsplit(" ", 1)[0]
                 try:
-                    units = re.search(r"\[([A-Za-z0-9_]+)\]", spectrum_key).group(1)
-                    mpes_key = spectrum_key.rsplit(" ", 1)[0]
+                    self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
+                except KeyError as e:
+                    pass
+
+                unit_key = f"{grouping}/{spectrum_key}"
+                units = get_units_for_key(unit_key, UNITS)
+                if units:
                     self._xps_dict[f"{root}/{mpes_key}/@units"] = units
-                    self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
-                except AttributeError:
-                    mpes_key = spectrum_key
-                    self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
 
         # Create keys for writing to data and detector
         entry = construct_entry_name(region_parent)
@@ -351,28 +364,35 @@ class ScientaTxtHelper:
         region = ScientaRegion()
         region.region_id = region_id
 
-        begin_region = False
-        begin_info = False
-        begin_data = False
+        bool_variables = {
+            "in_region": False,
+            "in_info": False,
+            "in_run_mode_info": False,
+            "in_ui_info": False,
+            "in_manipulator": False,
+            "in_data": False,
+        }
 
         energies: List[float] = []
         intensities: List[float] = []
 
+        line_start_patterns = {
+            "in_region": f"[Region {region_id}",
+            "in_info": f"[Info {region_id}",
+            "in_run_mode_info": f"[Run Mode Information {region_id}",
+            "in_ui_info": f"[User Interface Information {region_id}",
+            "in_manipulator": f"[Manipulator {region_id}",
+            "in_data": f"[Data {region_id}",
+        }
+
         for line in self.lines:
-            if line.startswith(f"[Region {region_id}"):
-                begin_region = True
-            if line.startswith(f"[Info {region_id}"):
-                begin_info = True
-            if line.startswith(f"[Data {region_id}"):
-                begin_data = True
-                continue
+            for bool_key, line_start in line_start_patterns.items():
+                if line.startswith(line_start):
+                    bool_variables[bool_key] = True
+                if line.startswith("\n"):
+                    bool_variables[bool_key] = False
 
-            if line.startswith("\n"):
-                begin_region = False
-                begin_info = False
-                begin_data = False
-
-            if begin_region:
+            if bool_variables["in_region"]:
                 # Read region meta data.
                 key, value = self._get_key_value_pair(line)
                 if "dimension" in key:
@@ -383,18 +403,28 @@ class ScientaTxtHelper:
                 if self._check_valid_value(value):
                     setattr(region, key, value)
 
-            if begin_info:
+            if bool_variables["in_info"] or bool_variables["in_run_mode_info"]:
                 # Read instrument meta data for this region.
                 key, value = self._get_key_value_pair(line)
                 if self._check_valid_value(value):
                     setattr(region, key, value)
 
-            if begin_data:
-                # Read XY data for this region.
-                [energy, intensity] = [float(s) for s in line.split(" ") if s != ""]
+            if bool_variables["in_ui_info"]:
+                key, value = self._get_key_value_pair(line)
+                if self._check_valid_value(value):
+                    if bool_variables["in_manipulator"]:
+                        key = f"manipulator_{key}"
+                    setattr(region, key, value)
 
-                energies.append(energy)
-                intensities.append(intensity)
+            if bool_variables["in_data"]:
+                # Read XY data for this region.
+                try:
+                    [energy, intensity] = [float(s) for s in line.split(" ") if s != ""]
+                    energies.append(energy)
+                    intensities.append(intensity)
+                except ValueError:
+                    # First line
+                    pass
 
         region.data = {"energy": np.array(energies), "intensity": np.array(intensities)}
 

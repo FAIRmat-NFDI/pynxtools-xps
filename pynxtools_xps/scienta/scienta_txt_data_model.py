@@ -39,26 +39,18 @@ class ScientaRegion(XpsDataclass):
     energy_size: int = 0
     energy_scale: str = ""
     energy_scale_2: str = ""
-    energy_units: str = "eV"
     energy_axis: np.ndarray = field(default_factory=lambda: np.zeros(0))
     lens_mode: str = ""
     pass_energy: float = 0.0
-    pass_energy_units: str = "eV"
     no_of_scans: int = 0
     excitation_energy: float = 0.0
-    excitation_energy_units: str = "eV"
     acquisition_mode: str = ""
-    # energy_units: str = "kinetic"  # ???
+    energy_units: str = "kinetic"  # ???
     center_energy: float = 0.0
-    center_energy_units: str = "eV"
     start_energy: float = 0.0
-    start_energy_units: str = "eV"
     stop_energy: float = 0.0
-    stop_energy_units: str = "eV"
     step_size: float = 0.0
-    step_size_units: str = "eV"
     dwell_time: float = 0.0
-    dwell_time_units: str = "eV"
     detector_first_x_channel: int = 0
     detector_last_x_channel: int = 0
     detector_first_y_channel: int = 0
@@ -75,6 +67,5 @@ class ScientaRegion(XpsDataclass):
     start_date: str = ""
     start_time: str = ""
     time_per_spectrum_channel: float = 0.0
-    time_per_spectrum_channel_units: str = "s"
     detector_mode: str = ""
     data: dict = field(default_factory=dict)

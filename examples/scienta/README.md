@@ -1,7 +1,7 @@
 # Example for .txt data exported from Scienta spectrometer
 
-This is an example for parsing the .txt data export of Scienta Omicron
-[Scienta Omicron](https://www.scientaomicron.com/en/). We thank Dr. Alexei Nefedov from [KIT](https://www.ifg.kit.edu/21_1296.php) for providing this example data set.
+This is an example for parsing the data exported by Scienta Omicron
+[Scienta Omicron](https://www.scientaomicron.com/en/) instruments. We thank Dr. Alexei Nefedov from [KIT](https://www.ifg.kit.edu/21_1296.php) for providing this example data set.
 
 The example conversion for the .txt exports can be run with the following command.
 

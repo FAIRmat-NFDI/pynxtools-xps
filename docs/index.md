@@ -55,6 +55,7 @@ The explanation section provides background knowledge on the implementation desi
 Here you can learn which specific measurement setups and file formats from technology partners pynxtools-xps currently supports.
 
 The reader decides which data parser to use based on the file extension of the files provided. For the main XPS files, the following file extensions are supported:
+- .ibw: [Igor Binary Wave Format](https://www.wavemetrics.com/) files, exported from [Scienta Omicron](https://scientaomicron.com/en)
 - .spe, .pro: [Phi MultiPak](https://www.phi.com/surface-analysis-equipment/genesis.html#software:multi-pak-data-reduction-software/) files, propietary format of PHI Electronics
 - .sle: [SpecsLabProdigy](https://www.specs-group.com/nc/specs/products/detail/prodigy/) files, propietary format of SPECS GmbH (1 and v4)
 - .xml: SpecsLab 2files, XML format from SPECS GmbH (v1.6)

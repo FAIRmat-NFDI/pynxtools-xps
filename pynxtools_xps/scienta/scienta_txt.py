@@ -22,10 +22,9 @@ Class for reading XPS files from TXT export of Scienta.
 
 import re
 import copy
-from datetime import datetime
+import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Union
-import pytz
+from typing import Any, Dict, List, Union, Optional
 import xarray as xr
 import numpy as np
 
@@ -35,10 +34,82 @@ from pynxtools_xps.reader_utils import (
     construct_data_key,
     construct_detector_data_key,
     convert_pascal_to_snake,
+    _re_map_single_key,
+    _re_map_single_value,
 )
-from pynxtools_xps.value_mappers import convert_energy_type, convert_energy_scan_mode
+from pynxtools_xps.value_mappers import (
+    convert_energy_type,
+    convert_energy_scan_mode,
+    get_units_for_key,
+)
 
 from pynxtools_xps.scienta.scienta_txt_data_model import ScientaHeader, ScientaRegion
+
+
+def _extract_energy_units(energy_units: str):
+    """
+    Extract energy units from the strings for energy_units.
+    Binding Energy [eV] -> eV
+
+    """
+    return re.search(r"\[(.*?)\]", energy_units).group(1)
+
+
+def _separate_dimension_scale(scale: str):
+    """
+    Seperate the str of the dimension scale into a numpy array
+
+    Parameters
+    ----------
+    scale : str
+        Str of the form "600 599.5 599 598.5 5".
+
+    Returns
+    -------
+    np.ndarray
+        Dimension scale as a numpy array.
+
+    """
+    return np.array([float(s) for s in scale.split(" ")])
+
+
+def _construct_date_time(date_string: str, time_string: str) -> Optional[str]:
+    """
+    Convert the native time format to the datetime string
+    in the ISO 8601 format: '%Y-%b-%dT%H:%M:%S.%fZ'.
+
+    """
+
+    def _parse_date(date_string: str) -> datetime.datetime:
+        possible_date_formats = ["%Y-%m-%d", "%m/%d/%Y"]
+        for date_fmt in possible_date_formats:
+            try:
+                return datetime.datetime.strptime(date_string, date_fmt)
+            except ValueError:
+                pass
+        raise ValueError("Date format not recognized")
+
+    def _parse_time(time_string: str) -> datetime.time:
+        possible_time_formats = ["%H:%M:%S", "%I:%M:%S %p"]
+        for time_fmt in possible_time_formats:
+            try:
+                return datetime.datetime.strptime(time_string, time_fmt).time()
+            except ValueError:
+                pass
+        raise ValueError("Time format not recognized")
+
+    try:
+        date = _parse_date(date_string)
+        time = _parse_time(time_string)
+        datetime_obj = datetime.datetime.combine(date, time)
+
+        return datetime_obj.astimezone().isoformat()
+
+    except ValueError as e:
+        raise ValueError(
+            "Date and time could not be converted to ISO 8601 format."
+        ) from e
+
 
 KEY_MAP: Dict[str, str] = {
     "number_of_regions": "no_of_regions",
@@ -69,6 +140,45 @@ KEY_MAP: Dict[str, str] = {
     "transmission": "fixed analyzer transmission",
 }
 
+VALUE_MAP = {
+    "no_of_regions": int,
+    "energy_size": int,
+    "pass_energy": float,
+    "no_of_scans": int,
+    "excitation_energy": float,
+    "center_energy": float,
+    "start_energy": float,
+    "stop_energy": float,
+    "step_size": float,
+    "dwell_time": float,
+    "detector_first_x_channel": int,
+    "detector_last_x_channel": int,
+    "detector_first_y_channel": int,
+    "detector_last_y_channel": int,
+    "time_per_spectrum_channel": float,
+    "energy_units": _extract_energy_units,
+    "energy_axis": _separate_dimension_scale,
+    "energy_scale": convert_energy_type,
+    "energy_scale_2": convert_energy_type,
+    "acquisition_mode": convert_energy_scan_mode,
+    "time_per_spectrum_channel": float,
+    "manipulator_r1": float,
+    "manipulator_r2": float,
+}
+
+UNITS: dict = {
+    # "energy": "eV",
+    "energydispersion/pass_energy": "eV",
+    "beam_xray/excitation_energy": "eV",
+    "region/energy_axis": "eV",
+    "region/center_energy": "eV",
+    "region/start_energy": "eV",
+    "region/stop_energy": "eV",
+    "region/step_size": "eV",
+    "detector/dwell_time": "eV",
+    "region/time_per_spectrum_channel": "s",
+}
+
 
 class TxtMapperScienta(XPSMapper):
     """
@@ -85,11 +195,11 @@ class TxtMapperScienta(XPSMapper):
 
         Returns
         -------
-        ScientaTxtHelper
+        ScientaTxtParser
             Parser for reading .txt file exported by Scienta.
 
         """
-        return ScientaTxtHelper()
+        return ScientaTxtParser()
 
     def construct_data(self):
         """Map TXT format to NXmpes-ready dict."""
@@ -107,10 +217,9 @@ class TxtMapperScienta(XPSMapper):
                 "instrument_name",
                 "vendor",
             ],
-            "source": [],
-            "beam": [
+            "source_xray": [],
+            "beam_xray": [
                 "excitation_energy",
-                "excitation_energy/@units",
             ],
             "analyser": [],
             "collectioncolumn": [
@@ -119,7 +228,6 @@ class TxtMapperScienta(XPSMapper):
             "energydispersion": [
                 "acquisition_mode",
                 "pass_energy",
-                "pass_energy/@units",
             ],
             "detector": [
                 "detector_first_x_channel",
@@ -128,30 +236,26 @@ class TxtMapperScienta(XPSMapper):
                 "detector_last_y_channel",
                 "detector_mode",
                 "dwell_time",
-                "dwell_time/@units",
                 "time_per_spectrum_channel",
-                "time_per_spectrum_channel/@units",
             ],
-            "manipulator": [],
+            "manipulator": [
+                "manipulator_r1",
+                "manipulator_r2",
+            ],
             "calibration": [],
             "sample": ["sample_name"],
             "region": [
                 "center_energy",
-                "center_energy/@units",
                 "energy_axis",
                 "energy_scale",
                 "energy_scale_2",
                 "energy_size",
-                "energy/@units",
                 "no_of_scans",
                 "region_id",
                 "spectrum_comment",
                 "start_energy",
-                "start_energy/@units",
                 "step_size",
-                "step_size/@units",
                 "stop_energy",
-                "stop_energy/@units",
                 "time_stamp",
             ],
             # 'unused': [
@@ -186,8 +290,8 @@ class TxtMapperScienta(XPSMapper):
             "file_info": f"{file_parent}",
             "user": f"{region_parent}/user",
             "instrument": f"{instrument_parent}",
-            "source": f"{instrument_parent}/source",
-            "beam": f"{instrument_parent}/beam",
+            "source_xray": f"{instrument_parent}/source_xray",
+            "beam_xray": f"{instrument_parent}/beam_xray",
             "analyser": f"{analyser_parent}",
             "collectioncolumn": f"{analyser_parent}/collectioncolumn",
             "energydispersion": f"{analyser_parent}/energydispersion",
@@ -201,15 +305,18 @@ class TxtMapperScienta(XPSMapper):
 
         for grouping, spectrum_keys in template_key_map.items():
             root = path_map[str(grouping)]
+
             for spectrum_key in spectrum_keys:
+                mpes_key = spectrum_key.rsplit(" ", 1)[0]
                 try:
-                    units = re.search(r"\[([A-Za-z0-9_]+)\]", spectrum_key).group(1)
-                    mpes_key = spectrum_key.rsplit(" ", 1)[0]
+                    self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
+                except KeyError as e:
+                    pass
+
+                unit_key = f"{grouping}/{spectrum_key}"
+                units = get_units_for_key(unit_key, UNITS)
+                if units:
                     self._xps_dict[f"{root}/{mpes_key}/@units"] = units
-                    self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
-                except AttributeError:
-                    mpes_key = spectrum_key
-                    self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
 
         # Create keys for writing to data and detector
         entry = construct_entry_name(region_parent)
@@ -258,7 +365,7 @@ class TxtMapperScienta(XPSMapper):
         )
 
 
-class ScientaTxtHelper:
+class ScientaTxtParser:
     """Parser for Scienta TXT exports."""
 
     # pylint: disable=too-few-public-methods
@@ -329,7 +436,7 @@ class ScientaTxtHelper:
         for line in headerlines:
             key, value = self._get_key_value_pair(line)
             if key:
-                value = self._re_map_values(key, value)
+                value = _re_map_single_value(key, value, VALUE_MAP)
                 setattr(self.header, key, value)
         self.header.validate_types()
 
@@ -351,50 +458,68 @@ class ScientaTxtHelper:
         region = ScientaRegion()
         region.region_id = region_id
 
-        begin_region = False
-        begin_info = False
-        begin_data = False
+        bool_variables = {
+            "in_region": False,
+            "in_info": False,
+            "in_run_mode_info": False,
+            "in_ui_info": False,
+            "in_manipulator": False,
+            "in_data": False,
+        }
 
         energies: List[float] = []
         intensities: List[float] = []
 
+        line_start_patterns = {
+            "in_region": f"[Region {region_id}",
+            "in_info": f"[Info {region_id}",
+            "in_run_mode_info": f"[Run Mode Information {region_id}",
+            "in_ui_info": f"[User Interface Information {region_id}",
+            "in_manipulator": f"[Manipulator {region_id}",
+            "in_data": f"[Data {region_id}",
+        }
+
         for line in self.lines:
-            if line.startswith(f"[Region {region_id}"):
-                begin_region = True
-            if line.startswith(f"[Info {region_id}"):
-                begin_info = True
-            if line.startswith(f"[Data {region_id}"):
-                begin_data = True
-                continue
+            for bool_key, line_start in line_start_patterns.items():
+                if line.startswith(line_start):
+                    bool_variables[bool_key] = True
+                if line.startswith("\n"):
+                    bool_variables[bool_key] = False
 
-            if line.startswith("\n"):
-                begin_region = False
-                begin_info = False
-                begin_data = False
-
-            if begin_region:
+            if bool_variables["in_region"]:
                 # Read region meta data.
                 key, value = self._get_key_value_pair(line)
                 if "dimension" in key:
                     key_part = f"dimension_{key.rsplit('_')[-1]}"
-                    key = self._re_map_keys(key_part)
+                    key = _re_map_single_key(key_part, KEY_MAP)
 
-                    value = self._re_map_values(key, value)
+                    value = _re_map_single_value(key, value, VALUE_MAP)
                 if self._check_valid_value(value):
                     setattr(region, key, value)
 
-            if begin_info:
+            if bool_variables["in_info"] or bool_variables["in_run_mode_info"]:
                 # Read instrument meta data for this region.
                 key, value = self._get_key_value_pair(line)
                 if self._check_valid_value(value):
                     setattr(region, key, value)
 
-            if begin_data:
-                # Read XY data for this region.
-                [energy, intensity] = [float(s) for s in line.split(" ") if s != ""]
+            if bool_variables["in_ui_info"]:
+                key, value = self._get_key_value_pair(line)
+                if self._check_valid_value(value):
+                    if bool_variables["in_manipulator"]:
+                        key = f"manipulator_{key}"
+                        value = _re_map_single_value(key, value, VALUE_MAP)
+                    setattr(region, key, value)
 
-                energies.append(energy)
-                intensities.append(intensity)
+            if bool_variables["in_data"]:
+                # Read XY data for this region.
+                try:
+                    [energy, intensity] = [float(s) for s in line.split(" ") if s != ""]
+                    energies.append(energy)
+                    intensities.append(intensity)
+                except ValueError:
+                    # First line
+                    pass
 
         region.data = {"energy": np.array(energies), "intensity": np.array(intensities)}
 
@@ -460,107 +585,10 @@ class ScientaTxtHelper:
         try:
             [key, value] = line.split("=")
             key = convert_pascal_to_snake(key)
-            key = self._re_map_keys(key)
-            value = self._re_map_values(key, value)
+            key = _re_map_single_key(key, KEY_MAP)
+            value = _re_map_single_value(key, value, VALUE_MAP)
 
         except ValueError:
             key, value = "", ""
 
         return key, value
-
-    def _re_map_keys(self, key: str):
-        """
-        Map the keys returned from the file to the preferred keys for
-        the parser output.
-
-        """
-        if key in KEY_MAP:
-            return KEY_MAP[key]
-        return key
-
-    def _re_map_values(self, input_key: str, value: str):
-        """
-        Map the values returned from the file to the preferred format for
-        the parser output.
-
-        """
-        try:
-            value = value.rstrip("\n")
-        except AttributeError:
-            pass
-
-        value_map = {
-            "no_of_regions": int,
-            "energy_size": int,
-            "pass_energy": float,
-            "no_of_scans": int,
-            "excitation_energy": float,
-            "center_energy": float,
-            "start_energy": float,
-            "stop_energy": float,
-            "step_size": float,
-            "dwell_time": float,
-            "detector_first_x_channel": int,
-            "detector_last_x_channel": int,
-            "detector_first_y_channel": int,
-            "detector_last_y_channel": int,
-            "time_per_spectrum_channel": float,
-            "energy_units": _extract_energy_units,
-            "energy_axis": _separate_dimension_scale,
-            "energy_scale": convert_energy_type,
-            "energy_scale_2": convert_energy_type,
-            "acquisition_mode": convert_energy_scan_mode,
-            "time_per_spectrum_channel": float,
-        }
-
-        keys = list(value_map.keys())
-
-        for k in keys:
-            if k in input_key:
-                map_method = value_map[k]
-                value = map_method(value)  # type: ignore[operator]
-        return value
-
-
-def _extract_energy_units(energy_units: str):
-    """
-    Extract energy units from the strings for energy_units.
-    Binding Energy [eV] -> eV
-
-    """
-    return re.search(r"\[(.*?)\]", energy_units).group(1)
-
-
-def _separate_dimension_scale(scale: str):
-    """
-    Seperate the str of the dimension scale into a numpy array
-
-    Parameters
-    ----------
-    scale : str
-        Str of the form "600 599.5 599 598.5 5".
-
-    Returns
-    -------
-    np.ndarray
-        Dimension scale as a numpy array.
-
-    """
-    return np.array([float(s) for s in scale.split(" ")])
-
-
-def _construct_date_time(date: str, time: str):
-    """
-    Convert the native time format to the datetime string
-    in the ISO 8601 format: '%Y-%b-%dT%H:%M:%S.%fZ'.
-
-    """
-    date_time = datetime.combine(
-        datetime.strptime(date, "%Y-%m-%d"),
-        datetime.strptime(time, "%H:%M:%S").time(),
-    )
-
-    localtz = pytz.timezone("Europe/Berlin")
-    date_time = localtz.localize(date_time)
-
-    return date_time.isoformat()

@@ -5,6 +5,7 @@ Created on Thu Apr 18 11:57:41 2024
 @author: pielsticker
 """
 
+import re
 from typing import Dict, Any
 
 ENERGY_TYPE_MAP = {

@@ -89,6 +89,7 @@ class XpsDataFileParser:
         """
         for file in self.files:
             file_ext = file.rsplit(".")[-1]
+
             if file_ext in XpsDataFileParser.__prmt_file_ext__:
                 vendor = XpsDataFileParser.check_for_vendors(file)
                 try:
@@ -147,5 +148,9 @@ class XpsDataFileParser:
             vendor_options = [vendor, vendor.upper(), vendor.capitalize()]
 
             if any(vendor_opt in contents for vendor_opt in vendor_options):
+                return vendor
+            if contents[:6] == "[Info]":
+                # This is for picking the Scienta reader is "scienta"
+                # is not in the file
                 return vendor
         return "unknown"

@@ -36,14 +36,12 @@ from pynxtools_xps.reader_utils import (
     convert_pascal_to_snake,
     _re_map_single_key,
     _re_map_single_value,
+    _check_valid_value,
 )
-from pynxtools_xps.value_mappers import (
-    convert_energy_type,
-    convert_energy_scan_mode,
-    get_units_for_key,
-)
+from pynxtools_xps.value_mappers import get_units_for_key
 
 from pynxtools_xps.scienta.scienta_txt_data_model import ScientaHeader, ScientaRegion
+from pynxtools_xps.scienta.scienta_mappings import UNITS, KEY_MAP, VALUE_MAP
 
 
 def _extract_energy_units(energy_units: str):
@@ -109,75 +107,6 @@ def _construct_date_time(date_string: str, time_string: str) -> Optional[str]:
         raise ValueError(
             "Date and time could not be converted to ISO 8601 format."
         ) from e
-
-
-KEY_MAP: Dict[str, str] = {
-    "number_of_regions": "no_of_regions",
-    "version": "software_version",
-    "dimension_name": "energy_units",
-    "dimension_size": "energy_size",
-    "dimension_scale": "energy_axis",
-    "number_of_sweeps": "no_of_scans",
-    "energy_unit": "energy_scale_2",
-    "low_energy": "start_energy",
-    "high_energy": "stop_energy",
-    "energy_step": "step_size",
-    "step_time": "dwell_time",
-    "detector_first_x-_channel": "detector_first_x_channel",
-    "detector_last_x-_channel": "detector_last_x_channel",
-    "detector_first_y-_channel": "detector_first_y_channel",
-    "detector_last_y-_channel": "detector_last_y_channel",
-    "file": "data_file",
-    "sequence": "sequence_file",
-    "spectrum_name": "spectrum_type",
-    "instrument": "instrument_name",
-    "location": "vendor",
-    "user": "user_name",
-    "sample": "sample_name",
-    "comments": "spectrum_comment",
-    "date": "start_date",
-    "time": "start_time",
-    "transmission": "fixed analyzer transmission",
-}
-
-VALUE_MAP = {
-    "no_of_regions": int,
-    "energy_size": int,
-    "pass_energy": float,
-    "no_of_scans": int,
-    "excitation_energy": float,
-    "center_energy": float,
-    "start_energy": float,
-    "stop_energy": float,
-    "step_size": float,
-    "dwell_time": float,
-    "detector_first_x_channel": int,
-    "detector_last_x_channel": int,
-    "detector_first_y_channel": int,
-    "detector_last_y_channel": int,
-    "time_per_spectrum_channel": float,
-    "energy_units": _extract_energy_units,
-    "energy_axis": _separate_dimension_scale,
-    "energy_scale": convert_energy_type,
-    "energy_scale_2": convert_energy_type,
-    "acquisition_mode": convert_energy_scan_mode,
-    "time_per_spectrum_channel": float,
-    "manipulator_r1": float,
-    "manipulator_r2": float,
-}
-
-UNITS: dict = {
-    # "energy": "eV",
-    "energydispersion/pass_energy": "eV",
-    "beam_xray/excitation_energy": "eV",
-    "region/energy_axis": "eV",
-    "region/center_energy": "eV",
-    "region/start_energy": "eV",
-    "region/stop_energy": "eV",
-    "region/step_size": "eV",
-    "detector/dwell_time": "eV",
-    "region/time_per_spectrum_channel": "s",
-}
 
 
 class TxtMapperScienta(XPSMapper):
@@ -310,7 +239,7 @@ class TxtMapperScienta(XPSMapper):
                 mpes_key = spectrum_key.rsplit(" ", 1)[0]
                 try:
                     self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
-                except KeyError as e:
+                except KeyError:
                     pass
 
                 unit_key = f"{grouping}/{spectrum_key}"
@@ -494,18 +423,18 @@ class ScientaTxtParser:
                     key = _re_map_single_key(key_part, KEY_MAP)
 
                     value = _re_map_single_value(key, value, VALUE_MAP)
-                if self._check_valid_value(value):
+                if _check_valid_value(value):
                     setattr(region, key, value)
 
             if bool_variables["in_info"] or bool_variables["in_run_mode_info"]:
                 # Read instrument meta data for this region.
                 key, value = self._get_key_value_pair(line)
-                if self._check_valid_value(value):
+                if _check_valid_value(value):
                     setattr(region, key, value)
 
             if bool_variables["in_ui_info"]:
                 key, value = self._get_key_value_pair(line)
-                if self._check_valid_value(value):
+                if _check_valid_value(value):
                     if bool_variables["in_manipulator"]:
                         key = f"manipulator_{key}"
                         value = _re_map_single_value(key, value, VALUE_MAP)
@@ -536,30 +465,6 @@ class ScientaTxtParser:
                 region_dict[new_key] = region_dict.pop(key)
 
         self.spectra.append(region_dict)
-
-    def _check_valid_value(self, value: Union[str, int, float, bool, np.ndarray]):
-        """
-        Check if a string or an array is empty.
-
-        Parameters
-        ----------
-        value : obj
-            For testing, this can be a str or a np.ndarray.
-
-        Returns
-        -------
-        bool
-            True if the string or np.ndarray is not empty.
-
-        """
-        for datatype in [str, int, float]:
-            if isinstance(value, datatype) and value:
-                return True
-        if isinstance(value, bool):
-            return True
-        if isinstance(value, np.ndarray) and value.size != 0:
-            return True
-        return False
 
     def _get_key_value_pair(self, line: str):
         """

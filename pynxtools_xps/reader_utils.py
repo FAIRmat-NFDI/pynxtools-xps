@@ -361,6 +361,31 @@ def _re_map_single_value(input_key: str, value: str, map_functions: Dict[str, An
     return value
 
 
+def _check_valid_value(value: Union[str, int, float, bool, np.ndarray]):
+    """
+    Check if a string or an array is empty.
+
+    Parameters
+    ----------
+    value : obj
+        For testing, this can be a str or a np.ndarray.
+
+    Returns
+    -------
+    bool
+        True if the string or np.ndarray is not empty.
+
+    """
+    for datatype in [str, int, float]:
+        if isinstance(value, datatype) and value:
+            return True
+    if isinstance(value, bool):
+        return True
+    if isinstance(value, np.ndarray) and value.size != 0:
+        return True
+    return False
+
+
 def drop_unused_keys(dictionary: Dict[str, Any], keys_to_drop: List[str]):
     """
     Remove any keys parsed from sle that are not needed

@@ -18,13 +18,9 @@ Class for reading XPS files from TXT export of Scienta.
 # limitations under the License.
 #
 
-# pylint: disable=too-many-lines
-
-import re
 import copy
-import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Union, Optional
+from typing import Any, Dict, List, Union
 import xarray as xr
 import numpy as np
 
@@ -33,7 +29,6 @@ from pynxtools_xps.reader_utils import (
     construct_entry_name,
     construct_data_key,
     construct_detector_data_key,
-    _re_map_single_key,
     _re_map_single_value,
     _check_valid_value,
 )
@@ -42,75 +37,10 @@ from pynxtools_xps.value_mappers import get_units_for_key
 from pynxtools_xps.scienta.scienta_data_model import ScientaHeader, ScientaRegion
 from pynxtools_xps.scienta.scienta_mappings import (
     UNITS,
-    KEY_MAP,
     VALUE_MAP,
     _get_key_value_pair,
+    _construct_date_time,
 )
-
-
-def _extract_energy_units(energy_units: str):
-    """
-    Extract energy units from the strings for energy_units.
-    Binding Energy [eV] -> eV
-
-    """
-    return re.search(r"\[(.*?)\]", energy_units).group(1)
-
-
-def _separate_dimension_scale(scale: str):
-    """
-    Seperate the str of the dimension scale into a numpy array
-
-    Parameters
-    ----------
-    scale : str
-        Str of the form "600 599.5 599 598.5 5".
-
-    Returns
-    -------
-    np.ndarray
-        Dimension scale as a numpy array.
-
-    """
-    return np.array([float(s) for s in scale.split(" ")])
-
-
-def _construct_date_time(date_string: str, time_string: str) -> Optional[str]:
-    """
-    Convert the native time format to the datetime string
-    in the ISO 8601 format: '%Y-%b-%dT%H:%M:%S.%fZ'.
-
-    """
-
-    def _parse_date(date_string: str) -> datetime.datetime:
-        possible_date_formats = ["%Y-%m-%d", "%m/%d/%Y"]
-        for date_fmt in possible_date_formats:
-            try:
-                return datetime.datetime.strptime(date_string, date_fmt)
-            except ValueError:
-                pass
-        raise ValueError("Date format not recognized")
-
-    def _parse_time(time_string: str) -> datetime.time:
-        possible_time_formats = ["%H:%M:%S", "%I:%M:%S %p"]
-        for time_fmt in possible_time_formats:
-            try:
-                return datetime.datetime.strptime(time_string, time_fmt).time()
-            except ValueError:
-                pass
-        raise ValueError("Time format not recognized")
-
-    try:
-        date = _parse_date(date_string)
-        time = _parse_time(time_string)
-        datetime_obj = datetime.datetime.combine(date, time)
-
-        return datetime_obj.astimezone().isoformat()
-
-    except ValueError as e:
-        raise ValueError(
-            "Date and time could not be converted to ISO 8601 format."
-        ) from e
 
 
 class TxtMapperScienta(XPSMapper):
@@ -306,7 +236,7 @@ class ScientaTxtParser:
     def __init__(self):
         self.lines: List[str] = []
         self.header = ScientaHeader()
-        self.spectra: Dict[str, Any] = []
+        self.spectra: List[Dict[str, Any]] = []
 
     def parse_file(self, file: Union[str, Path]):
         """
@@ -369,14 +299,13 @@ class ScientaTxtParser:
         for line in headerlines:
             key, value = _get_key_value_pair(line)
             if key:
-                value = _re_map_single_value(key, value, VALUE_MAP)
                 setattr(self.header, key, value)
         self.header.validate_types()
 
     def _parse_region(self, region_id):
         """
         Parse data from one region (i.e., one measured spectrum)
-        into a dictioanry and append to all spectra.
+        into a dictionary and append to all spectra.
 
         Parameters
         ----------

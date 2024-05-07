@@ -1,5 +1,5 @@
 """
-Data model for Vamas ISO standard.
+Data model for data from Scienta instruments.
 """
 # Copyright The NOMAD Authors.
 #

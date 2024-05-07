@@ -7,8 +7,14 @@ Created on Tue May  7 11:54:24 2024
 
 import re
 import datetime
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 import numpy as np
+
+from pynxtools_xps.reader_utils import (
+    convert_pascal_to_snake,
+    _re_map_single_key,
+    _re_map_single_value,
+)
 
 from pynxtools_xps.value_mappers import (
     convert_energy_type,
@@ -147,3 +153,41 @@ UNITS: dict = {
     "detector/dwell_time": "eV",
     "region/time_per_spectrum_channel": "s",
 }
+
+
+def _get_key_value_pair(line: str) -> Tuple[str, object]:
+    """
+    Split the line at the '=' sign and return a
+    key-value pair. The values are mapped according
+    to the desired format.
+
+    Parameters
+    ----------
+    line : str
+        One line from the input file.
+
+    Returns
+    -------
+    Tuple[str, object]
+        A tuple containing:
+        - key : str
+            Anything before the '=' sign, mapped to the desired
+            key format.
+        - value : object
+            Anything after the '=' sign, mapped to the desired
+            value format and type.
+
+    """
+    try:
+        key, value = line.split("=")
+        key = convert_pascal_to_snake(key)
+        key = _re_map_single_key(key, KEY_MAP)
+        if "dimension" in key:
+            key_part = f"dimension_{key.rsplit('_')[-1]}"
+            key = _re_map_single_key(key_part, KEY_MAP)
+        value = _re_map_single_value(key, value, VALUE_MAP)
+
+    except ValueError:
+        key, value = "", ""
+
+    return key, value

@@ -33,15 +33,19 @@ from pynxtools_xps.reader_utils import (
     construct_entry_name,
     construct_data_key,
     construct_detector_data_key,
-    convert_pascal_to_snake,
     _re_map_single_key,
     _re_map_single_value,
     _check_valid_value,
 )
 from pynxtools_xps.value_mappers import get_units_for_key
 
-from pynxtools_xps.scienta.scienta_txt_data_model import ScientaHeader, ScientaRegion
-from pynxtools_xps.scienta.scienta_mappings import UNITS, KEY_MAP, VALUE_MAP
+from pynxtools_xps.scienta.scienta_data_model import ScientaHeader, ScientaRegion
+from pynxtools_xps.scienta.scienta_mappings import (
+    UNITS,
+    KEY_MAP,
+    VALUE_MAP,
+    _get_key_value_pair,
+)
 
 
 def _extract_energy_units(energy_units: str):
@@ -363,7 +367,7 @@ class ScientaTxtParser:
         self.lines = self.lines[n_headerlines:]
 
         for line in headerlines:
-            key, value = self._get_key_value_pair(line)
+            key, value = _get_key_value_pair(line)
             if key:
                 value = _re_map_single_value(key, value, VALUE_MAP)
                 setattr(self.header, key, value)
@@ -389,7 +393,7 @@ class ScientaTxtParser:
 
         bool_variables = {
             "in_region": False,
-            "in_info": False,
+            "in_region_info": False,
             "in_run_mode_info": False,
             "in_ui_info": False,
             "in_manipulator": False,
@@ -401,7 +405,7 @@ class ScientaTxtParser:
 
         line_start_patterns = {
             "in_region": f"[Region {region_id}",
-            "in_info": f"[Info {region_id}",
+            "in_region_info": f"[Info {region_id}",
             "in_run_mode_info": f"[Run Mode Information {region_id}",
             "in_ui_info": f"[User Interface Information {region_id}",
             "in_manipulator": f"[Manipulator {region_id}",
@@ -415,25 +419,20 @@ class ScientaTxtParser:
                 if line.startswith("\n"):
                     bool_variables[bool_key] = False
 
-            if bool_variables["in_region"]:
-                # Read region meta data.
-                key, value = self._get_key_value_pair(line)
-                if "dimension" in key:
-                    key_part = f"dimension_{key.rsplit('_')[-1]}"
-                    key = _re_map_single_key(key_part, KEY_MAP)
-
-                    value = _re_map_single_value(key, value, VALUE_MAP)
-                if _check_valid_value(value):
-                    setattr(region, key, value)
-
-            if bool_variables["in_info"] or bool_variables["in_run_mode_info"]:
+            if any(
+                [
+                    bool_variables["in_region"],
+                    bool_variables["in_region_info"],
+                    bool_variables["in_run_mode_info"],
+                ]
+            ):
                 # Read instrument meta data for this region.
-                key, value = self._get_key_value_pair(line)
+                key, value = _get_key_value_pair(line)
                 if _check_valid_value(value):
                     setattr(region, key, value)
 
             if bool_variables["in_ui_info"]:
-                key, value = self._get_key_value_pair(line)
+                key, value = _get_key_value_pair(line)
                 if _check_valid_value(value):
                     if bool_variables["in_manipulator"]:
                         key = f"manipulator_{key}"
@@ -465,35 +464,3 @@ class ScientaTxtParser:
                 region_dict[new_key] = region_dict.pop(key)
 
         self.spectra.append(region_dict)
-
-    def _get_key_value_pair(self, line: str):
-        """
-        Split the line at the '=' sign and return a
-        key-value pair. The values are mapped according
-        to the desired format.
-
-        Parameters
-        ----------
-        line : str
-            One line from the input file.
-
-        Returns
-        -------
-        key : str
-            Anything before the '=' sign, mapped to the desired
-            key format.
-        value : obj
-            Anything after the '=' sign, mapped to the desired
-            value format and type.
-
-        """
-        try:
-            [key, value] = line.split("=")
-            key = convert_pascal_to_snake(key)
-            key = _re_map_single_key(key, KEY_MAP)
-            value = _re_map_single_value(key, value, VALUE_MAP)
-
-        except ValueError:
-            key, value = "", ""
-
-        return key, value

@@ -113,17 +113,6 @@ KEY_MAP: Dict[str, str] = {
     "comments": "spectrum_comment",
     "date": "start_date",
     "time": "start_time",
-    # These are different in .ibw files
-    "mode": "acquisition_mode",
-    "energy": "energy_size",
-    "sweeps": "no_of_scans",
-    "scale": "energy_axis",
-    "step": "step_size",
-    "x-_channel": "detector_no_of_x_channels",
-    "y-_channel": "detector_no_of_y_channels",
-    "detector_first_y-_channel": "detector_first_y_channel",
-    "detector_last_y-_channel": "detector_last_y_channel",
-    "channel": "time_per_spectrum_channel",
 }
 
 VALUE_MAP = {

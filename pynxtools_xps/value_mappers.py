@@ -45,7 +45,11 @@ BOOL_MAP = {
     "No": False,
 }
 
-INTENSITY_UNIT_MAP = {"counts/s": "counts per second", "CPS": "counts per second"}
+INTENSITY_UNIT_MAP = {
+    "Counts": "counts",
+    "counts/s": "counts per second",
+    "CPS": "counts per second",
+}
 
 
 def _replace_from_map(value: Any, value_map: Dict[str, Any]):

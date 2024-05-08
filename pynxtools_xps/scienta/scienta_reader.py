@@ -1,5 +1,5 @@
 """
-Class for reading XPS files from TXT export of Scienta.
+Class for reading XPS files from Scienta spectrometers.
 """
 # Copyright The NOMAD Authors.
 #
@@ -18,11 +18,13 @@ Class for reading XPS files from TXT export of Scienta.
 # limitations under the License.
 #
 
+import re
 import copy
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Tuple
 import xarray as xr
 import numpy as np
+from igor2 import binarywave
 
 from pynxtools_xps.reader_utils import (
     XPSMapper,
@@ -32,7 +34,7 @@ from pynxtools_xps.reader_utils import (
     _re_map_single_value,
     _check_valid_value,
 )
-from pynxtools_xps.value_mappers import get_units_for_key
+from pynxtools_xps.value_mappers import get_units_for_key, convert_intensity_units
 
 from pynxtools_xps.scienta.scienta_data_model import ScientaHeader, ScientaRegion
 from pynxtools_xps.scienta.scienta_mappings import (
@@ -43,29 +45,44 @@ from pynxtools_xps.scienta.scienta_mappings import (
 )
 
 
-class TxtMapperScienta(XPSMapper):
+class MapperScienta(XPSMapper):
     """
-    Class for restructuring .txt data file from
-    Scienta TXT export into python dictionary.
+    Class for restructuring data from
+    Scienta spectrometers into a structured python
+    dictionaries.
     """
 
-    config_file = "config_scienta_txt.json"
+    config_file = "config_scienta.json"
+
+    __prmt_file_ext__ = [
+        "ibw",
+        "txt",
+    ]
+
+    __file_err_msg__ = (
+        "The Scienta reader currently only allows files with "
+        "the following extensions: "
+        f"{__prmt_file_ext__}."
+    )
 
     def _select_parser(self):
         """
-        Select Scienta TXT parser.
-        Currently, there is only one parser.
+        Select Scienta parser based on the file extension.
 
         Returns
         -------
-        ScientaTxtParser
-            Parser for reading .txt file exported by Scienta.
+        ScientaParser
+            Parser for reading .txt or .ibw files exported by Scienta.
 
         """
-        return ScientaTxtParser()
+        if str(self.file).endswith(".txt"):
+            return ScientaTxtParser()
+        elif str(self.file).endswith(".ibw"):
+            return ScientaIgorParser()
+        raise ValueError(MapperScienta.__file_err_msg__)
 
     def construct_data(self):
-        """Map TXT format to NXmpes-ready dict."""
+        """Map Parser data to NXmpes-ready dict."""
         # pylint: disable=duplicate-code
         spectra = copy.deepcopy(self.raw_data)
 
@@ -120,6 +137,7 @@ class TxtMapperScienta(XPSMapper):
                 "step_size",
                 "stop_energy",
                 "time_stamp",
+                "intensity/@units",
             ],
             # 'unused': [
             #     'energy_unit',
@@ -211,10 +229,12 @@ class TxtMapperScienta(XPSMapper):
             # on first scan in cycle
             averaged_scans = intensity
 
-        self._xps_dict["data"][entry][scan_key.split("_")[0]] = xr.DataArray(
-            data=averaged_scans,
-            coords={"energy": energy},
-        )
+        # =============================================================================
+        #         self._xps_dict["data"][entry][scan_key.split("_")[0]] = xr.DataArray(
+        #             data=averaged_scans,
+        #             coords={"energy": energy},
+        #         )
+        # =============================================================================
 
         # Write scan data to 'data'.
         self._xps_dict["data"][entry][scan_key] = xr.DataArray(
@@ -302,7 +322,7 @@ class ScientaTxtParser:
                 setattr(self.header, key, value)
         self.header.validate_types()
 
-    def _parse_region(self, region_id):
+    def _parse_region(self, region_id: int):
         """
         Parse data from one region (i.e., one measured spectrum)
         into a dictionary and append to all spectra.
@@ -317,8 +337,7 @@ class ScientaTxtParser:
         None.
 
         """
-        region = ScientaRegion()
-        region.region_id = region_id
+        region = ScientaRegion(region_id=region_id)
 
         bool_variables = {
             "in_region": False,
@@ -386,10 +405,210 @@ class ScientaTxtParser:
         region.validate_types()
 
         region_dict = {**self.header.dict(), **region.dict()}
-
-        for key in region_dict.copy().keys():
-            if "_units" in key:
-                new_key = key.replace("_units", "/@units")
-                region_dict[new_key] = region_dict.pop(key)
+        region_dict["intensity/@units"] = "counts"
 
         self.spectra.append(region_dict)
+
+
+class ScientaIgorParser:
+    """Parser for Scienta TXT exports."""
+
+    # pylint: disable=too-few-public-methods
+
+    def __init__(self):
+        self.lines: List[str] = []
+        self.spectra: List[Dict[str, Any]] = []
+
+    def parse_file(self, file: Union[str, Path]):
+        """
+        Reads the igor binarywave files and returns a list of
+        dictionary containing the wave data.
+
+        Parameters
+        ----------
+        file : str
+            Filepath of the TXT file to be read.
+
+        Returns
+        -------
+        self.spectra
+            Flat list of dictionaries containing one spectrum each.
+
+        """
+        ibw = binarywave.load(file)
+        ibw_version, wave = ibw["version"], ibw["wave"]
+
+        notes = self._parse_note(wave["note"])
+
+        data_unit_label, data_unit = self._parse_unit(wave["data_units"])
+        dimension_unit_label, dimension_unit = self._parse_unit(wave["dimension_units"])
+
+        print(data_unit_label, data_unit)
+        print(dimension_unit_label, dimension_unit)
+
+        wave_header = wave["wave_header"]
+        data = wave["wData"]
+
+        # Not needed at the moment
+        # formula = wave["formula"]
+        # labels = wave["labels"]
+        # spectrum_indices = wave["sIndices"]
+        # bin_header = wave["bin_header"]
+
+        if len(data.shape) == 1:
+            self.no_of_regions = 1
+        else:
+            self.no_of_regions = self.data.shape[0]
+
+        for region_id in range(0, self.no_of_regions):
+            region = ScientaRegion(region_id=region_id)
+            region_fields = list(region.__dataclass_fields__.keys())
+            overwritten_fields = ["region_id", "time_stamp", "data"]
+            unused_notes_keys = []
+
+            for key, note in notes.items():
+                if _check_valid_value(note):
+                    if key in region_fields:
+                        setattr(region, key, note)
+                        overwritten_fields += [key]
+                    else:
+                        unused_notes_keys += [key]
+
+            energies = self.axis_for_dim(wave_header, dim=region_id)
+            axs_unit = self.axis_units_for_dim(wave_header, dim=region_id)
+
+            if data.ndim == 1:
+                intensities = data
+            else:
+                intensities = data[region_id]
+
+            # Convert date and time to ISO8601 date time.
+            region.time_stamp = _construct_date_time(
+                region.start_date, region.start_time
+            )
+
+            region.energy_size = len(energies)
+            region.energy_axis = energies
+
+            region.data = {
+                "energy": np.array(energies),
+                "intensity": np.array(intensities),
+            }
+
+            region.validate_types()
+
+            spectrum_dict = region.dict()
+
+            for key in unused_notes_keys:
+                spectrum_dict[key] = notes[key]
+
+            spectrum_dict["igor_binary_wave_format_version"] = ibw_version
+            spectrum_dict["intensity/@units"] = convert_intensity_units(data_unit_label)
+
+            self.spectra.append(spectrum_dict)
+
+        return self.spectra
+
+    def _parse_note(self, bnote: bytes) -> Dict[str, Any]:
+        """
+        Parses the note field of the igor binarywave file.
+        It assumes that the note field contains key-value pairs
+        of the form 'key=value' separated by newlines.
+
+        Parameters
+        ----------
+        bnote : bytes
+            The bytes of the binarywave note field.
+
+        Returns
+        -------
+        Dict[str, Any]
+            The dictionary of the parsed note field.
+
+        """
+        note = bnote.decode("utf-8").replace("\r", "\n")
+
+        notes = {}
+
+        for line in note.split("\n"):
+            key, value = _get_key_value_pair(line)
+            if key:
+                notes[key] = value
+
+        return notes
+
+    def _parse_unit(self, bunit: bytes) -> Tuple[str, object]:
+        """
+        Extracts the label and unit from a string containing a label
+        followed by a unit enclosed in square brackets.
+
+        Parameters
+        ----------
+        bunit: bytes
+            The input string containing the label and unit.
+
+        Returns
+        -------
+        tuple
+            A tuple containing:
+            - unit_label : str
+                The extracted label.
+            - unit : str
+                The extracted unit.
+        """
+        unit = bunit.decode("utf-8").replace("\r", "\n")
+
+        pattern = r"([\w\s]+)\s*\[([\w\s.]+)\]"
+        matches = re.match(pattern, unit)
+        if matches:
+            label = matches.group(1).strip()
+            unit = matches.group(2).strip()
+            return label, unit
+        return "", ""
+
+    def axis_for_dim(self, wave_header: Dict[str, Any], dim: int) -> np.ndarray:
+        """
+        Returns the axis values for a given dimension from the wave header.
+
+        Parameters
+        ----------
+        wave_header : Dict[str, Any]
+            The wave_header of the ibw file.
+        dim : int
+            The dimension to return the axis for..
+
+        Returns
+        -------
+        np.ndarray
+            Axis values for a given dimension.
+
+        """
+        return (
+            wave_header["sfA"][dim] * np.arange(wave_header["nDim"][dim])
+            + wave_header["sfB"][dim]
+        )
+
+    def axis_units_for_dim(self, wave_header: Dict[str, Any], dim: int) -> str:
+        """
+        Returns the unit for a given dimension from the wave header.
+
+        Parameters
+        ----------
+        wave_header : Dict[str, Any]
+            The wave_header of the ibw file.
+        dim : int
+            The dimension to return the axis for..
+
+        Returns
+        -------
+        str:
+            The axis units.
+
+        """
+        unit_arr = wave_header["dimUnits"][dim]
+
+        unit = ""
+        for elem in unit_arr:
+            unit += elem.decode("utf-8")
+
+        return unit

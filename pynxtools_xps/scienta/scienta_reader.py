@@ -443,9 +443,6 @@ class ScientaIgorParser:
         data_unit_label, data_unit = self._parse_unit(wave["data_units"])
         dimension_unit_label, dimension_unit = self._parse_unit(wave["dimension_units"])
 
-        print(data_unit_label, data_unit)
-        print(dimension_unit_label, dimension_unit)
-
         wave_header = wave["wave_header"]
         data = wave["wData"]
 
@@ -458,7 +455,7 @@ class ScientaIgorParser:
         if len(data.shape) == 1:
             self.no_of_regions = 1
         else:
-            self.no_of_regions = self.data.shape[0]
+            self.no_of_regions = data.shape[0]
 
         for region_id in range(0, self.no_of_regions):
             region = ScientaRegion(region_id=region_id)

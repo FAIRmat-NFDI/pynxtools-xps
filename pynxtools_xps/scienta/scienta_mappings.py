@@ -154,7 +154,7 @@ UNITS: dict = {
 }
 
 
-def _get_key_value_pair(line: str) -> Tuple[str, object]:
+def _get_key_value_pair(line: str):
     """
     Split the line at the '=' sign and return a
     key-value pair. The values are mapped according

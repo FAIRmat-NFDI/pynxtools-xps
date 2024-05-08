@@ -35,7 +35,6 @@ class ScientaHeader(XpsDataclass):
 class ScientaRegion(XpsDataclass):
     region_id: int = 0
     region_name: str = ""
-    dim_energy_type: str = ""
     energy_size: int = 0
     energy_scale: str = ""
     energy_scale_2: str = ""

@@ -47,8 +47,8 @@ BOOL_MAP = {
 
 INTENSITY_UNIT_MAP = {
     "Counts": "counts",
-    "counts/s": "counts per second",
-    "CPS": "counts per second",
+    "counts/s": "counts_per_second",
+    "CPS": "counts_per_second",
 }
 
 

@@ -24,7 +24,7 @@ classifiers = [
 dependencies = [
     "h5py>=3.6.0",
     "xarray>=0.20.2",
-    "pynxtools>=0.0.10"
+    "pynxtools>=0.2.1",
 ]
 
 [project.entry-points."pynxtools.reader"]
@@ -48,15 +48,15 @@ dev = [
     "pip-tools",
     "pre-commit"
 ]
-consistency_with_pynxtools = [
-    "pynxtools>=0.1.1",
-]
 docs = [
     "mkdocs",
     "mkdocs-material",
     "mkdocs-material-extensions",
     "mkdocs-macros-plugin",
 ]
+
+[tool.setuptools.packages.find]
+include = ["pynxtools_xps*"]
 
 [tool.setuptools.package-data]
 pynxtools_xps = ["*.json"]

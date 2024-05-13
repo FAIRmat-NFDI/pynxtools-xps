@@ -5,6 +5,7 @@ Created on Thu Apr 18 11:57:41 2024
 @author: pielsticker
 """
 
+import re
 from typing import Dict, Any
 
 ENERGY_TYPE_MAP = {
@@ -92,3 +93,25 @@ def convert_bool(bool_like: str):
 def convert_intensity_units(y_units: str):
     """Map y_units to shortened values."""
     return _replace_from_map(y_units, INTENSITY_UNIT_MAP)
+
+
+def get_units_for_key(unit_key: str, unit_map: Dict[str, str]) -> str:
+    """
+    Get correct units for a given key from a dictionary with unit map.
+
+    Parameters
+    ----------
+    unit_key : str
+       Key of type <mapping>:<spectrum_key>, e.g.
+       detector/detector_voltage
+
+    Returns
+    -------
+    str
+        Unit for that unit_key.
+
+    """
+    regex_match = re.search(r"\[([A-Za-z0-9_]+)\]", unit_key)
+    if regex_match is None:
+        return unit_map.get(unit_key, None)
+    return regex_match.group(1)

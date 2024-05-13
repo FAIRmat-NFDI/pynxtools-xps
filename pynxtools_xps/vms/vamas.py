@@ -56,6 +56,7 @@ from pynxtools_xps.value_mappers import (
     convert_measurement_method,
     convert_energy_type,
     convert_energy_scan_mode,
+    get_units_for_key,
 )
 
 EXP_MODES = [
@@ -286,8 +287,8 @@ class VamasMapper(XPSMapper):
                     pass
 
                 unit_key = f"{grouping}/{spectrum_key}"
-                units = self._get_units_for_key(unit_key)
-                if units:
+                units = get_units_for_key(unit_key, UNITS)
+                if units is not None:
                     self._xps_dict[f"{root}/{mpes_key}/@units"] = units
                 used_keys += [spectrum_key]
 
@@ -359,30 +360,6 @@ class VamasMapper(XPSMapper):
         for spectrum_key, value in spectrum.items():
             if spectrum_key not in used_keys:
                 self._xps_dict[f"{region_parent}/{spectrum_key}"] = value
-
-    def _get_units_for_key(self, unit_key: str):
-        """
-        Get correct units for a given key.
-
-        Parameters
-        ----------
-        unit_key : str
-           Key of type <mapping>:<spectrum_key>, e.g.
-           detector/detector_voltage
-
-        Returns
-        -------
-        str
-            Unit for that unit_key.
-
-        """
-        try:
-            return re.search(r"\[([A-Za-z0-9_]+)\]", unit_key).group(1)
-        except AttributeError:
-            try:
-                return UNITS[unit_key]
-            except KeyError:
-                return ""
 
 
 KEY_MAP = {

@@ -24,12 +24,12 @@ An example script to run the XPS reader in `pynxtools`:
 ```sh
  ! dataconverter \
 --reader xps \
---nxdl NXmpes \
+--nxdl NXxps \
 --input-file $<xps-file path> \
 --input-file $<eln-file path> \
 --output <output-file path>.nxs
 ```
-Note that none of the supported file format have data/values for all required and recommended fields and attributes in NXmpes. In order for the validation step of the XPS reader to pass, you need to provide an ELN file that contains the missing values. Example raw and converted data can be found in  [*pynxtools_xps/examples*](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples).
+Note that none of the supported file format have data/values for all required and recommended fields and attributes in NXxps. In order for the validation step of the XPS reader to pass, you need to provide an ELN file that contains the missing values. Example raw and converted data can be found in  [*pynxtools_xps/examples*](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples).
 
 TODO: add more steps! <!--[The Jupyter notebook is available here](https://github.com/FAIRmat-NFDI/pynxtools-em/blob/main/examples/HowToUseTutorial.ipynb) TODO!-->
 

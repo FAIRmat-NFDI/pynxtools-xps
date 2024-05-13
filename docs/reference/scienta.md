@@ -13,7 +13,7 @@ Example data for the Scienta .txt reader is available [here](https://github.com/
 The example conversion for the .txt exports can be run with the following command.
 
 ```console
-user@box:~$ dataconverter Cu-HHTP_*.txt eln_data_scienta_txt.yaml --reader xps --nxdl NXmpes --output Cu-HHTP.txt.nxs
+user@box:~$ dataconverter Cu-HHTP_*.txt eln_data.yaml --reader xps --nxdl NXxps --output Cu-HHTP.txt.nxs
 ```
 
 ## .ibw data
@@ -25,7 +25,7 @@ Example data for the Scienta .ibw reader is available [here](https://github.com/
 The example conversion for the .ibw (Igor binary wave format) data can be run with the following command.
 
 ```console
-user@box:~$ dataconverter Cu-HHTP_*.ibw eln_data_scienta_ibw.yaml --reader xps --nxdl NXmpes --output Cu-HHTP.ibw.nxs
+user@box:~$ dataconverter Cu-HHTP_*.ibw eln_data.yaml --reader xps --nxdl NXxps --output Cu-HHTP.ibw.nxs
 ```
 
 ## Acknowledgments

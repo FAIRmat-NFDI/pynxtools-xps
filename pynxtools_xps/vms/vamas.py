@@ -288,7 +288,7 @@ class VamasMapper(XPSMapper):
 
                 unit_key = f"{grouping}/{spectrum_key}"
                 units = get_units_for_key(unit_key, UNITS)
-                if units:
+                if units is not None:
                     self._xps_dict[f"{root}/{mpes_key}/@units"] = units
                 used_keys += [spectrum_key]
 

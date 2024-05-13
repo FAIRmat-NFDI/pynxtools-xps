@@ -17,5 +17,3 @@ user@box:~$ dataconverter Cu-HHTP_*.ibw eln_data.yaml --reader xps --nxdl NXmpes
 
 ## Contact person in FAIRmat for this example
 Lukas Pielsticker
-  
-  

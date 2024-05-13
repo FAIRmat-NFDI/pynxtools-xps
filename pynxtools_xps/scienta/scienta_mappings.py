@@ -12,7 +12,6 @@ import numpy as np
 
 from pynxtools_xps.reader_utils import (
     convert_pascal_to_snake,
-    _re_map_single_key,
     _re_map_single_value,
 )
 
@@ -180,10 +179,10 @@ def _get_key_value_pair(line: str):
     try:
         key, value = line.split("=")
         key = convert_pascal_to_snake(key)
-        key = _re_map_single_key(key, KEY_MAP)
+        key = KEY_MAP.get(key, key)
         if "dimension" in key:
             key_part = f"dimension_{key.rsplit('_')[-1]}"
-            key = _re_map_single_key(key_part, KEY_MAP)
+            key = KEY_MAP.get(key_part, key_part)
         value = _re_map_single_value(key, value, VALUE_MAP)
 
     except ValueError:

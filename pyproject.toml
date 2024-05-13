@@ -56,6 +56,9 @@ docs = [
     "mkdocs-macros-plugin",
 ]
 
+[tool.setuptools.packages.find]
+include = ["pynxtools_xps*"]
+
 [tool.setuptools.package-data]
 pynxtools_xps = ["*.json"]
 

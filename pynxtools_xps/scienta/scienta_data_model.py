@@ -1,5 +1,5 @@
 """
-Data model for Vamas ISO standard.
+Data model for data from Scienta instruments.
 """
 # Copyright The NOMAD Authors.
 #
@@ -35,7 +35,6 @@ class ScientaHeader(XpsDataclass):
 class ScientaRegion(XpsDataclass):
     region_id: int = 0
     region_name: str = ""
-    dim_energy_type: str = ""
     energy_size: int = 0
     energy_scale: str = ""
     energy_scale_2: str = ""
@@ -66,6 +65,7 @@ class ScientaRegion(XpsDataclass):
     spectrum_comment: str = ""
     start_date: str = ""
     start_time: str = ""
+    time_stamp: str = ""
     time_per_spectrum_channel: float = 0.0
     detector_mode: str = ""
     data: dict = field(default_factory=dict)

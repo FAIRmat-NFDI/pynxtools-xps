@@ -17,6 +17,10 @@ function update_phi_examples {
 function update_scienta_examples {
   echo "Update scienta examples"
   cd scienta/
+  cd ibw/
+  echo "Update .ibw example"
+  dataconverter Cu-HHTP_*.ibw eln_data.yaml --reader $READER --nxdl $NXDL --output Cu-HHTP.ibw.nxs
+  cd ../txt
   echo "Update .txt example"
   dataconverter Cu-HHTP_*.txt eln_data.yaml --reader $READER --nxdl $NXDL --output Cu-HHTP.txt.nxs
   cd ..

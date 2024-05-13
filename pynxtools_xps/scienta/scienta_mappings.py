@@ -21,16 +21,17 @@ from pynxtools_xps.value_mappers import (
 )
 
 
-def _extract_energy_units(energy_units: str):
+def _extract_energy_units(energy_units: str) -> str:
     """
     Extract energy units from the strings for energy_units.
     Binding Energy [eV] -> eV
 
     """
-    return re.search(r"\[(.*?)\]", energy_units).group(1)
+    units = re.search(r"\[(.*?)\]", energy_units)
+    return units.group(1) if units is not None else "eV"
 
 
-def _separate_dimension_scale(scale: str):
+def _separate_dimension_scale(scale: str) -> np.typing.ArrayLike:
     """
     Seperate the str of the dimension scale into a numpy array
 

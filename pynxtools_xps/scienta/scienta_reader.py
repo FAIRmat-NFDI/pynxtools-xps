@@ -444,7 +444,9 @@ class ScientaIgorParser:
         wave_header = wave["wave_header"]
         data = wave["wData"]
 
-        # Not needed at the moment
+        # Not needed at the moment.
+        # TODO: Add support for formulas if they are written by the
+        # measurement software.
         # formula = wave["formula"]
         # labels = wave["labels"]
         # spectrum_indices = wave["sIndices"]
@@ -555,7 +557,7 @@ class ScientaIgorParser:
 
         pattern = r"([\w\s]+)\s*\[([\w\s.]+)\]"
         matches = re.match(pattern, unit)
-        if matches:
+        if matches is not None:
             label = matches.group(1).strip()
             unit = matches.group(2).strip()
             return label, unit

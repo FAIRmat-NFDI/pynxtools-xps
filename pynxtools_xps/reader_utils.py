@@ -367,9 +367,8 @@ def _check_valid_value(value: Union[str, int, float, bool, np.ndarray]):
         True if the string or np.ndarray is not empty.
 
     """
-    for datatype in [str, int, float]:
-        if isinstance(value, datatype) and value:
-            return True
+    if isinstance(value, (str, int, float)) and value is not None:
+        return True
     if isinstance(value, bool):
         return True
     if isinstance(value, np.ndarray) and value.size != 0:

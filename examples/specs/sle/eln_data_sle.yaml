@@ -13,8 +13,10 @@ user:
   name: Lukas Pielsticker
   affiliation: Max Planck Institute for Chemical Energy Conversion
   address: Lukas Pielsticker
-  orcid: 0000-0001-9361-8333
   email: lukas.pielsticker@cec.mpg.de
+  orcid:
+    service: orcid
+    identifier: 0000-0001-9361-8333  
 instrument:
   device_information:
     vendor: SPECS GmbH

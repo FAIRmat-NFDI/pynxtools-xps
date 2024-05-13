@@ -20,8 +20,11 @@
     "name":"@eln",
     "affiliation":"@eln",
     "address":"@eln",
-    "orcid":"@eln",
-    "email":"@eln"
+    "email":"@eln",
+    "IDENTIFIER[orcid]":{
+      "service":"@eln",
+      "identifier":"@eln"
+    }
   },
   "/ENTRY[entry]/INSTRUMENT[instrument]":{
     "@default": "electronanalyser",

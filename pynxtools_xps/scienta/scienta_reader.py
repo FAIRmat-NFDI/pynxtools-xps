@@ -229,12 +229,10 @@ class MapperScienta(XPSMapper):
             # on first scan in cycle
             averaged_scans = intensity
 
-        # =============================================================================
-        #         self._xps_dict["data"][entry][scan_key.split("_")[0]] = xr.DataArray(
-        #             data=averaged_scans,
-        #             coords={"energy": energy},
-        #         )
-        # =============================================================================
+        self._xps_dict["data"][entry][scan_key.split("_")[0]] = xr.DataArray(
+            data=averaged_scans,
+            coords={"energy": energy},
+        )
 
         # Write scan data to 'data'.
         self._xps_dict["data"][entry][scan_key] = xr.DataArray(

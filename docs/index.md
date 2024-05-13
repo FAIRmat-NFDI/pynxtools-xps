@@ -6,7 +6,7 @@ hide: toc
 
 pynxtools-xps is a free, and open-source data software for harmonizing X-ray photolectron spectroscopy data and metadata for research data management using [NeXus](https://www.nexusformat.org/), implemented with the goal to make scientific research data FAIR (findable, accessible, interoperable and reusable).
 
-pynxtools-xps, which is a plugin for [pynxtools](https://github.com/FAIRmat-NFDI/pynxtools), provides a tool for reading data from various propietary and open data formats from technology partners and the wider XPS community and standardizing it such that it is compliant with the NeXus application definitions [`NXmpes`](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXmpes.html) and [`NXxps`](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXxps.html), which is an extension of `NXmpes`. pynxtools-xps is devloped both as a standalone reader and as a tool within [NOMAD](https://nomad-lab.eu/), which is the open-source data management platform for materials science we are developing with [FAIRmat](https://www.fairmat-nfdi.eu/fairmat/).
+pynxtools-xps, which is a plugin for [pynxtools](https://github.com/FAIRmat-NFDI/pynxtools), provides a tool for reading data from various propietary and open data formats from technology partners and the wider XPS community and standardizing it such that it is compliant with the NeXus application definition [`NXmpes`](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXmpes.html) and <!--[`NXxps`](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXxps.html), which is an extension of `NXmpes` -->. pynxtools-xps is developed both as a standalone reader and as a tool within [NOMAD](https://nomad-lab.eu/), which is the open-source data management platform for materials science we are developing with [FAIRmat](https://www.fairmat-nfdi.eu/fairmat/).
 
 pynxtools-xps solves the challenge of using heterogeneous and unfindable data formats which is common in X-ray Photoelectron Spectroscopy. In addition, it provides an interface for writing readers for different file formats to be mapped to NeXus.
 
@@ -42,7 +42,7 @@ How-to guides provide step-by-step instructions for a wide range of tasks, with 
 The explanation section provides background knowledge on the implementation design, how the data is structured, how data processing can be incorporated, how the integration works in NOMAD, and more.
 
 - [Design principles and implementation](explanation/implementation.md)
-- [NXmpes and NXxps](explanation/appdefs.md)
+- [NXmpes](explanation/appdefs.md) <!-- - [NXmpes and NXxps](explanation/appdefs.md) -->
 - [How to map pieces of information to NeXus](explanation/contextualization.md)
 <!-- - [Data processing](explanation/data_processing.md) -->
 <!-- - - [NOMAD integration](explanation/nomad_integration.md) -->

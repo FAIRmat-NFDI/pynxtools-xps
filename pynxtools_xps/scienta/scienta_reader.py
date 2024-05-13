@@ -1,5 +1,5 @@
 """
-Class for reading XPS files from TXT export of Scienta.
+Class for reading XPS files from Scienta spectrometers.
 """
 # Copyright The NOMAD Authors.
 #
@@ -18,190 +18,71 @@ Class for reading XPS files from TXT export of Scienta.
 # limitations under the License.
 #
 
-# pylint: disable=too-many-lines
-
 import re
 import copy
-import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Union, Optional
+from typing import Any, Dict, List, Union, Tuple
 import xarray as xr
 import numpy as np
+from igor2 import binarywave
 
 from pynxtools_xps.reader_utils import (
     XPSMapper,
     construct_entry_name,
     construct_data_key,
     construct_detector_data_key,
-    convert_pascal_to_snake,
     _re_map_single_value,
+    _check_valid_value,
 )
-from pynxtools_xps.value_mappers import (
-    convert_energy_type,
-    convert_energy_scan_mode,
-    get_units_for_key,
+from pynxtools_xps.value_mappers import get_units_for_key, convert_intensity_units
+
+from pynxtools_xps.scienta.scienta_data_model import ScientaHeader, ScientaRegion
+from pynxtools_xps.scienta.scienta_mappings import (
+    UNITS,
+    VALUE_MAP,
+    _get_key_value_pair,
+    _construct_date_time,
 )
 
-from pynxtools_xps.scienta.scienta_txt_data_model import ScientaHeader, ScientaRegion
 
-
-def _extract_energy_units(energy_units: str):
+class MapperScienta(XPSMapper):
     """
-    Extract energy units from the strings for energy_units.
-    Binding Energy [eV] -> eV
-
-    """
-    return re.search(r"\[(.*?)\]", energy_units).group(1)
-
-
-def _separate_dimension_scale(scale: str):
-    """
-    Seperate the str of the dimension scale into a numpy array
-
-    Parameters
-    ----------
-    scale : str
-        Str of the form "600 599.5 599 598.5 5".
-
-    Returns
-    -------
-    np.ndarray
-        Dimension scale as a numpy array.
-
-    """
-    return np.array([float(s) for s in scale.split(" ")])
-
-
-def _construct_date_time(date_string: str, time_string: str) -> Optional[str]:
-    """
-    Convert the native time format to the datetime string
-    in the ISO 8601 format: '%Y-%b-%dT%H:%M:%S.%fZ'.
-
+    Class for restructuring data from
+    Scienta spectrometers into a structured python
+    dictionaries.
     """
 
-    def _parse_date(date_string: str) -> datetime.datetime:
-        possible_date_formats = ["%Y-%m-%d", "%m/%d/%Y"]
-        for date_fmt in possible_date_formats:
-            try:
-                return datetime.datetime.strptime(date_string, date_fmt)
-            except ValueError as err:
-                raise ValueError("Date format not recognized") from err
-        raise ValueError("Date format not recognized")
+    config_file = "config_scienta.json"
 
-    def _parse_time(time_string: str) -> datetime.time:
-        possible_time_formats = ["%H:%M:%S", "%I:%M:%S %p"]
-        for time_fmt in possible_time_formats:
-            try:
-                return datetime.datetime.strptime(time_string, time_fmt).time()
-            except ValueError as err:
-                raise ValueError("Time format not recognized") from err
-        raise ValueError("Time format not recognized")
+    __prmt_file_ext__ = [
+        "ibw",
+        "txt",
+    ]
 
-    try:
-        date = _parse_date(date_string)
-        time = _parse_time(time_string)
-        datetime_obj = datetime.datetime.combine(date, time)
-
-        return datetime_obj.astimezone().isoformat()
-
-    except ValueError as err:
-        raise ValueError(
-            "Date and time could not be converted to ISO 8601 format."
-        ) from err
-
-
-KEY_MAP: Dict[str, str] = {
-    "number_of_regions": "no_of_regions",
-    "version": "software_version",
-    "dimension_name": "energy_units",
-    "dimension_size": "energy_size",
-    "dimension_scale": "energy_axis",
-    "number_of_sweeps": "no_of_scans",
-    "energy_unit": "energy_scale_2",
-    "low_energy": "start_energy",
-    "high_energy": "stop_energy",
-    "energy_step": "step_size",
-    "step_time": "dwell_time",
-    "detector_first_x-_channel": "detector_first_x_channel",
-    "detector_last_x-_channel": "detector_last_x_channel",
-    "detector_first_y-_channel": "detector_first_y_channel",
-    "detector_last_y-_channel": "detector_last_y_channel",
-    "file": "data_file",
-    "sequence": "sequence_file",
-    "spectrum_name": "spectrum_type",
-    "instrument": "instrument_name",
-    "location": "vendor",
-    "user": "user_name",
-    "sample": "sample_name",
-    "comments": "spectrum_comment",
-    "date": "start_date",
-    "time": "start_time",
-    "transmission": "fixed analyzer transmission",
-}
-
-VALUE_MAP = {
-    "no_of_regions": int,
-    "energy_size": int,
-    "pass_energy": float,
-    "no_of_scans": int,
-    "excitation_energy": float,
-    "center_energy": float,
-    "start_energy": float,
-    "stop_energy": float,
-    "step_size": float,
-    "dwell_time": float,
-    "detector_first_x_channel": int,
-    "detector_last_x_channel": int,
-    "detector_first_y_channel": int,
-    "detector_last_y_channel": int,
-    "time_per_spectrum_channel": float,
-    "energy_units": _extract_energy_units,
-    "energy_axis": _separate_dimension_scale,
-    "energy_scale": convert_energy_type,
-    "energy_scale_2": convert_energy_type,
-    "acquisition_mode": convert_energy_scan_mode,
-    "time_per_spectrum_channel": float,
-    "manipulator_r1": float,
-    "manipulator_r2": float,
-}
-
-UNITS: dict = {
-    # "energy": "eV",
-    "energydispersion/pass_energy": "eV",
-    "beam_xray/excitation_energy": "eV",
-    "region/energy_axis": "eV",
-    "region/center_energy": "eV",
-    "region/start_energy": "eV",
-    "region/stop_energy": "eV",
-    "region/step_size": "eV",
-    "detector/dwell_time": "eV",
-    "region/time_per_spectrum_channel": "s",
-}
-
-
-class TxtMapperScienta(XPSMapper):
-    """
-    Class for restructuring .txt data file from
-    Scienta TXT export into python dictionary.
-    """
-
-    config_file = "config_scienta_txt.json"
+    __file_err_msg__ = (
+        "The Scienta reader currently only allows files with "
+        "the following extensions: "
+        f"{__prmt_file_ext__}."
+    )
 
     def _select_parser(self):
         """
-        Select Scienta TXT parser.
-        Currently, there is only one parser.
+        Select Scienta parser based on the file extension.
 
         Returns
         -------
-        ScientaTxtParser
-            Parser for reading .txt file exported by Scienta.
+        ScientaParser
+            Parser for reading .txt or .ibw files exported by Scienta.
 
         """
-        return ScientaTxtParser()
+        if str(self.file).endswith(".txt"):
+            return ScientaTxtParser()
+        elif str(self.file).endswith(".ibw"):
+            return ScientaIgorParser()
+        raise ValueError(MapperScienta.__file_err_msg__)
 
     def construct_data(self):
-        """Map TXT format to NXmpes-ready dict."""
+        """Map Parser data to NXmpes-ready dict."""
         # pylint: disable=duplicate-code
         spectra = copy.deepcopy(self.raw_data)
 
@@ -256,6 +137,7 @@ class TxtMapperScienta(XPSMapper):
                 "step_size",
                 "stop_energy",
                 "time_stamp",
+                "intensity/@units",
             ],
             # 'unused': [
             #     'energy_unit',
@@ -309,7 +191,7 @@ class TxtMapperScienta(XPSMapper):
                 mpes_key = spectrum_key.rsplit(" ", 1)[0]
                 try:
                     self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
-                except KeyError as e:
+                except KeyError:
                     pass
 
                 unit_key = f"{grouping}/{spectrum_key}"
@@ -372,7 +254,7 @@ class ScientaTxtParser:
     def __init__(self):
         self.lines: List[str] = []
         self.header = ScientaHeader()
-        self.spectra: Dict[str, Any] = []
+        self.spectra: List[Dict[str, Any]] = []
 
     def parse_file(self, file: Union[str, Path]):
         """
@@ -433,16 +315,15 @@ class ScientaTxtParser:
         self.lines = self.lines[n_headerlines:]
 
         for line in headerlines:
-            key, value = self._get_key_value_pair(line)
+            key, value = _get_key_value_pair(line)
             if key:
-                value = _re_map_single_value(key, value, VALUE_MAP)
                 setattr(self.header, key, value)
         self.header.validate_types()
 
-    def _parse_region(self, region_id):
+    def _parse_region(self, region_id: int):
         """
         Parse data from one region (i.e., one measured spectrum)
-        into a dictioanry and append to all spectra.
+        into a dictionary and append to all spectra.
 
         Parameters
         ----------
@@ -454,12 +335,11 @@ class ScientaTxtParser:
         None.
 
         """
-        region = ScientaRegion()
-        region.region_id = region_id
+        region = ScientaRegion(region_id=region_id)
 
         bool_variables = {
             "in_region": False,
-            "in_info": False,
+            "in_region_info": False,
             "in_run_mode_info": False,
             "in_ui_info": False,
             "in_manipulator": False,
@@ -471,7 +351,7 @@ class ScientaTxtParser:
 
         line_start_patterns = {
             "in_region": f"[Region {region_id}",
-            "in_info": f"[Info {region_id}",
+            "in_region_info": f"[Info {region_id}",
             "in_run_mode_info": f"[Run Mode Information {region_id}",
             "in_ui_info": f"[User Interface Information {region_id}",
             "in_manipulator": f"[Manipulator {region_id}",
@@ -485,26 +365,21 @@ class ScientaTxtParser:
                 if line.startswith("\n"):
                     bool_variables[bool_key] = False
 
-            if bool_variables["in_region"]:
-                # Read region meta data.
-                key, value = self._get_key_value_pair(line)
-                if "dimension" in key:
-                    key_part = f"dimension_{key.rsplit('_')[-1]}"
-                    key = KEY_MAP.get(key_part, key_part)
-
-                    value = _re_map_single_value(key, value, VALUE_MAP)
-                if self._check_valid_value(value):
-                    setattr(region, key, value)
-
-            if bool_variables["in_info"] or bool_variables["in_run_mode_info"]:
+            if any(
+                [
+                    bool_variables["in_region"],
+                    bool_variables["in_region_info"],
+                    bool_variables["in_run_mode_info"],
+                ]
+            ):
                 # Read instrument meta data for this region.
-                key, value = self._get_key_value_pair(line)
-                if self._check_valid_value(value):
+                key, value = _get_key_value_pair(line)
+                if _check_valid_value(value):
                     setattr(region, key, value)
 
             if bool_variables["in_ui_info"]:
-                key, value = self._get_key_value_pair(line)
-                if self._check_valid_value(value):
+                key, value = _get_key_value_pair(line)
+                if _check_valid_value(value):
                     if bool_variables["in_manipulator"]:
                         key = f"manipulator_{key}"
                         value = _re_map_single_value(key, value, VALUE_MAP)
@@ -528,67 +403,209 @@ class ScientaTxtParser:
         region.validate_types()
 
         region_dict = {**self.header.dict(), **region.dict()}
-
-        for key in region_dict.copy().keys():
-            if "_units" in key:
-                new_key = key.replace("_units", "/@units")
-                region_dict[new_key] = region_dict.pop(key)
+        region_dict["intensity/@units"] = "counts"
 
         self.spectra.append(region_dict)
 
-    def _check_valid_value(self, value: Union[str, int, float, bool, np.ndarray]):
+
+class ScientaIgorParser:
+    """Parser for Scienta TXT exports."""
+
+    # pylint: disable=too-few-public-methods
+
+    def __init__(self):
+        self.lines: List[str] = []
+        self.spectra: List[Dict[str, Any]] = []
+
+    def parse_file(self, file: Union[str, Path]):
         """
-        Check if a string or an array is empty.
+        Reads the igor binarywave files and returns a list of
+        dictionary containing the wave data.
 
         Parameters
         ----------
-        value : obj
-            For testing, this can be a str or a np.ndarray.
+        file : str
+            Filepath of the TXT file to be read.
 
         Returns
         -------
-        bool
-            True if the string or np.ndarray is not empty.
+        self.spectra
+            Flat list of dictionaries containing one spectrum each.
 
         """
-        for datatype in [str, int, float]:
-            if isinstance(value, datatype) and value:
-                return True
-        if isinstance(value, bool):
-            return True
-        if isinstance(value, np.ndarray) and value.size != 0:
-            return True
-        return False
+        ibw = binarywave.load(file)
+        ibw_version, wave = ibw["version"], ibw["wave"]
 
-    def _get_key_value_pair(self, line: str):
+        notes = self._parse_note(wave["note"])
+
+        data_unit_label, data_unit = self._parse_unit(wave["data_units"])
+        dimension_unit_label, dimension_unit = self._parse_unit(wave["dimension_units"])
+
+        wave_header = wave["wave_header"]
+        data = wave["wData"]
+
+        # Not needed at the moment.
+        # TODO: Add support for formulas if they are written by the
+        # measurement software.
+        # formula = wave["formula"]
+        # labels = wave["labels"]
+        # spectrum_indices = wave["sIndices"]
+        # bin_header = wave["bin_header"]
+
+        if len(data.shape) == 1:
+            self.no_of_regions = 1
+        else:
+            self.no_of_regions = data.shape[0]
+
+        for region_id in range(0, self.no_of_regions):
+            region = ScientaRegion(region_id=region_id)
+            region_fields = list(region.__dataclass_fields__.keys())
+            overwritten_fields = ["region_id", "time_stamp", "data"]
+            unused_notes_keys = []
+
+            for key, note in notes.items():
+                if _check_valid_value(note):
+                    if key in region_fields:
+                        setattr(region, key, note)
+                        overwritten_fields += [key]
+                    else:
+                        unused_notes_keys += [key]
+
+            energies = self.axis_for_dim(wave_header, dim=region_id)
+            axs_unit = self.axis_units_for_dim(wave_header, dim=region_id)
+
+            if data.ndim == 1:
+                intensities = data
+            else:
+                intensities = data[region_id]
+
+            # Convert date and time to ISO8601 date time.
+            region.time_stamp = _construct_date_time(
+                region.start_date, region.start_time
+            )
+
+            region.energy_size = len(energies)
+            region.energy_axis = energies
+
+            region.data = {
+                "energy": np.array(energies),
+                "intensity": np.array(intensities),
+            }
+
+            region.validate_types()
+
+            spectrum_dict = region.dict()
+
+            for key in unused_notes_keys:
+                spectrum_dict[key] = notes[key]
+
+            spectrum_dict["igor_binary_wave_format_version"] = ibw_version
+            spectrum_dict["intensity/@units"] = convert_intensity_units(data_unit_label)
+
+            self.spectra.append(spectrum_dict)
+
+        return self.spectra
+
+    def _parse_note(self, bnote: bytes) -> Dict[str, Any]:
         """
-        Split the line at the '=' sign and return a
-        key-value pair. The values are mapped according
-        to the desired format.
+        Parses the note field of the igor binarywave file.
+        It assumes that the note field contains key-value pairs
+        of the form 'key=value' separated by newlines.
 
         Parameters
         ----------
-        line : str
-            One line from the input file.
+        bnote : bytes
+            The bytes of the binarywave note field.
 
         Returns
         -------
-        key : str
-            Anything before the '=' sign, mapped to the desired
-            key format.
-        value : obj
-            Anything after the '=' sign, mapped to the desired
-            value format and type.
+        Dict[str, Any]
+            The dictionary of the parsed note field.
 
         """
-        try:
-            [key, value] = line.split("=")
-            key = convert_pascal_to_snake(key)
+        note = bnote.decode("utf-8").replace("\r", "\n")
 
-            key = KEY_MAP.get(key, key)
-            value = _re_map_single_value(key, value, VALUE_MAP)
+        notes = {}
 
-        except ValueError:
-            key, value = "", ""
+        for line in note.split("\n"):
+            key, value = _get_key_value_pair(line)
+            if key:
+                notes[key] = value
 
-        return key, value
+        return notes
+
+    def _parse_unit(self, bunit: bytes) -> Tuple[str, object]:
+        """
+        Extracts the label and unit from a string containing a label
+        followed by a unit enclosed in square brackets.
+
+        Parameters
+        ----------
+        bunit: bytes
+            The input string containing the label and unit.
+
+        Returns
+        -------
+        tuple
+            A tuple containing:
+            - unit_label : str
+                The extracted label.
+            - unit : str
+                The extracted unit.
+        """
+        unit = bunit.decode("utf-8").replace("\r", "\n")
+
+        pattern = r"([\w\s]+)\s*\[([\w\s.]+)\]"
+        matches = re.match(pattern, unit)
+        if matches is not None:
+            label = matches.group(1).strip()
+            unit = matches.group(2).strip()
+            return label, unit
+        return "", ""
+
+    def axis_for_dim(self, wave_header: Dict[str, Any], dim: int) -> np.ndarray:
+        """
+        Returns the axis values for a given dimension from the wave header.
+
+        Parameters
+        ----------
+        wave_header : Dict[str, Any]
+            The wave_header of the ibw file.
+        dim : int
+            The dimension to return the axis for..
+
+        Returns
+        -------
+        np.ndarray
+            Axis values for a given dimension.
+
+        """
+        return (
+            wave_header["sfA"][dim] * np.arange(wave_header["nDim"][dim])
+            + wave_header["sfB"][dim]
+        )
+
+    def axis_units_for_dim(self, wave_header: Dict[str, Any], dim: int) -> str:
+        """
+        Returns the unit for a given dimension from the wave header.
+
+        Parameters
+        ----------
+        wave_header : Dict[str, Any]
+            The wave_header of the ibw file.
+        dim : int
+            The dimension to return the axis for..
+
+        Returns
+        -------
+        str:
+            The axis units.
+
+        """
+        unit_arr = wave_header["dimUnits"][dim]
+
+        unit = ""
+        for elem in unit_arr:
+            unit += elem.decode("utf-8")
+
+        return unit

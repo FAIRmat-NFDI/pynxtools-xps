@@ -45,7 +45,11 @@ BOOL_MAP = {
     "No": False,
 }
 
-INTENSITY_UNIT_MAP = {"counts/s": "counts per second", "CPS": "counts per second"}
+INTENSITY_UNIT_MAP = {
+    "Counts": "counts",
+    "counts/s": "counts_per_second",
+    "CPS": "counts_per_second",
+}
 
 
 def _replace_from_map(value: Any, value_map: Dict[str, Any]):
@@ -98,18 +102,15 @@ def convert_intensity_units(y_units: str):
 def get_units_for_key(unit_key: str, unit_map: Dict[str, str]) -> str:
     """
     Get correct units for a given key from a dictionary with unit map.
-
     Parameters
     ----------
     unit_key : str
        Key of type <mapping>:<spectrum_key>, e.g.
        detector/detector_voltage
-
     Returns
     -------
     str
         Unit for that unit_key.
-
     """
     regex_match = re.search(r"\[([A-Za-z0-9_]+)\]", unit_key)
     if regex_match is None:

@@ -265,7 +265,7 @@
       "energy"
     ],
     "data":"@data:cycle",
-    "data/@units":"counts_per_second",
+    "data/@units":"@xps_token:region/intensity/@units",
     "energy":"@data:energy",
     "energy/@units":"@xps_token:region/energy_axis/@units",
     "energy/@type":"@xps_token:region/energy_scale",

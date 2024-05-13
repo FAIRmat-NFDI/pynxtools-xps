@@ -22,7 +22,7 @@ Example data is available [here](https://github.com/FAIRmat-NFDI/pynxtools-xps/t
 The example conversion for the REGULAR VAMAS file can be run with the following command:
 
 ```console
-user@box:~$ dataconverter regular.vms eln_data_vms.yaml --reader xps --nxdl NXmpes --output regular.vms.nxs 
+user@box:~$ dataconverter regular.vms eln_data_vms.yaml --reader xps --nxdl NXxps --output regular.vms.nxs 
 ```
 
 ### IRREGULAR file format
@@ -32,7 +32,7 @@ user@box:~$ dataconverter regular.vms eln_data_vms.yaml --reader xps --nxdl NXmp
 The example conversion for the IRREGULAR VAMAS file can be run with the following command:
 
 ```console
-user@box:~$ dataconverter irregular.vms eln_data_vms.yaml --reader xps --nxdl NXmpes --output irregular.vms.nxs
+user@box:~$ dataconverter irregular.vms eln_data_vms.yaml --reader xps --nxdl NXxps --output irregular.vms.nxs
 ```
 
 ### TXT export from CasaXPS
@@ -40,7 +40,7 @@ user@box:~$ dataconverter irregular.vms eln_data_vms.yaml --reader xps --nxdl NX
 ```pynxtools-xps``` also supports data exported from VAMAS by the [CasaXPS data analysis software](http://www.casaxps.com/) as TXT file. The example conversion for the .txt export file can be run with the following command:
 
 ```console
-user@box:~$ dataconverter vms_txt_export.txt eln_data_vms_txt_export.yaml --reader xps --nxdl NXmpes --output vms_txt_export.nxs
+user@box:~$ dataconverter vms_txt_export.txt eln_data_vms_txt_export.yaml --reader xps --nxdl NXxps --output vms_txt_export.nxs
 ```
 
 <!-- ## Data analysis in CasaXPS -->

@@ -57,5 +57,5 @@ function update_vms_examples {
 
 update_phi_examples
 update_scienta_examples
-update_sle_examples
+update_specs_examples
 update_vms_examples

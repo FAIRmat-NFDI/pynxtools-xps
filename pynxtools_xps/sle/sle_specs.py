@@ -241,7 +241,7 @@ class SleMapperSpecs(XPSMapper):
 
                 unit_key = f"{grouping}/{spectrum_key}"
                 units = get_units_for_key(unit_key, UNITS)
-                if units:
+                if units is not None:
                     self._xps_dict[f"{root}/{mpes_key}/@units"] = units
 
         self._xps_dict[f'{path_map["analyser"]}/name'] = spectrum["devices"][0]
@@ -307,9 +307,10 @@ class SleMapperSpecs(XPSMapper):
 
         # Add unit for detector data
         detector_data_unit_key = f"{path_map['detector']}/raw_data/raw/@units"
-        self._xps_dict[detector_data_unit_key] = get_units_for_key(
-            "detector/raw_data/raw", UNITS
-        )
+
+        detector_data_units = get_units_for_key("detector/raw_data/raw", UNITS)
+        if detector_data_units is not None:
+            self._xps_dict[detector_data_unit_key] = detector_data_units
 
 
 class SleProdigyParser(ABC):

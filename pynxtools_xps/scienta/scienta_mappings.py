@@ -60,8 +60,8 @@ def _construct_date_time(date_string: str, time_string: str) -> Optional[str]:
         for date_fmt in possible_date_formats:
             try:
                 return datetime.datetime.strptime(date_string, date_fmt)
-            except ValueError:
-                pass
+            except ValueError as err:
+                raise ValueError("Date format not recognized") from err
         raise ValueError("Date format not recognized")
 
     def _parse_time(time_string: str) -> datetime.time:
@@ -69,8 +69,8 @@ def _construct_date_time(date_string: str, time_string: str) -> Optional[str]:
         for time_fmt in possible_time_formats:
             try:
                 return datetime.datetime.strptime(time_string, time_fmt).time()
-            except ValueError:
-                pass
+            except ValueError as err:
+                raise ValueError("Time format not recognized") from err
         raise ValueError("Time format not recognized")
 
     try:
@@ -80,10 +80,10 @@ def _construct_date_time(date_string: str, time_string: str) -> Optional[str]:
 
         return datetime_obj.astimezone().isoformat()
 
-    except ValueError as e:
+    except ValueError as err:
         raise ValueError(
             "Date and time could not be converted to ISO 8601 format."
-        ) from e
+        ) from err
 
 
 KEY_MAP: Dict[str, str] = {

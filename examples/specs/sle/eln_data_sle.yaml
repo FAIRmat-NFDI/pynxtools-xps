@@ -68,7 +68,7 @@ instrument:
     device_information:
       vendor: SPECS GmbH
       model: 5-axis manipulator
-      identifier: null
+      identifier: v1.0
     temperature_sensor:
       name: type K thermocouple
       measurement: temperature

@@ -18,17 +18,25 @@ function update_scienta_examples {
   echo "Update scienta examples"
   cd scienta/
   echo "Update .txt example"
-  dataconverter Cu-HHTP_*.txt eln_data.yaml --reader $READER --nxdl $NXDL --output Cu-HHTP.nxs
+  dataconverter Cu-HHTP_*.txt eln_data.yaml --reader $READER --nxdl $NXDL --output Cu-HHTP.txt.nxs
   cd ..
   echo
 }
 
-function update_sle_examples {
+function update_specs_examples {
   echo "Update SPECS examples"
+  cd specs/
   cd sle/
   echo "Update .sle example"
   dataconverter --params-file params.yaml
-  cd ..
+  cd ../xml
+  echo "Update .xml example"
+  dataconverter In-situ_PBTTT_XPS_SPECS.xml eln_data.yaml --reader $READER --nxdl $NXDL --output In-situ_PBTTT.nxs
+  dataconverter --params-file params.yaml
+  cd ../xy
+  echo "Update .xy example"
+  dataconverter MgFe2O4.xy eln_data.yaml --reader $READER --nxdl $NXDL --output MgFe2O4.nxs
+  cd ../..
   echo
 }
 
@@ -36,10 +44,12 @@ function update_vms_examples {
   echo "Update VAMAS examples"
   cd vms/
   echo "Update REGULAR file conversion example"
-  dataconverter regular.vms eln_data_vms.yaml --reader $READER --nxdl $NXDL --output vms_regular_example.nxs
+  dataconverter regular.vms eln_data_vms.yaml --reader $READER --nxdl $NXDL --output regular.vms.nxs
   echo
   echo "Update REGULAR file conversion example"
-  dataconverter irregular.vms eln_data_vms.yaml --reader $READER --nxdl $NXDL --output vms_irregular_example.nxs
+  dataconverter irregular.vms eln_data_vms.yaml --reader $READER --nxdl $NXDL --output irregular.vms.nxs
+  echo "Update REGULAR file conversion example"
+  dataconverter irregular.vms eln_data_vms_txt_export.yaml --reader $READER --nxdl $NXDL --output vms_txt_export.nxs
   cd ..
   echo
 }
@@ -47,4 +57,5 @@ function update_vms_examples {
 
 update_phi_examples
 update_scienta_examples
-update_sle_examples
+update_specs_examples
+update_vms_examples

@@ -281,7 +281,7 @@ class MapperPhi(XPSMapper):
 
         self._xps_dict["data"]: dict = {}
 
-        key_map: Dict[str, List[str]] = {
+        template_key_map: Dict[str, List[str]] = {
             "user": [
                 "user_name",
             ],
@@ -683,7 +683,7 @@ class MapperPhi(XPSMapper):
         }
 
         for spectrum in spectra:
-            self._update_xps_dict_with_spectrum(spectrum, key_map)
+            self._update_xps_dict_with_spectrum(spectrum, template_key_map)
 
     def _update_xps_dict_with_spectrum(
         self, spectrum: Dict[str, Any], key_map: Dict[str, List[str]]

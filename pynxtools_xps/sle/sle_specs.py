@@ -47,7 +47,25 @@ from pynxtools_xps.value_mappers import (
     convert_energy_type,
     convert_energy_scan_mode,
     convert_measurement_method,
+    get_units_for_key,
 )
+
+UNITS: Dict[str, str] = {
+    "analyser/work_function": "eV",
+    "beam/excitation_energy": "eV",
+    "collectioncolumn/iris_diameter": "mm",
+    "data/step_size": "eV",
+    "detector/detector_voltage": "V",
+    "detector/dwell_time": "s",
+    "detector/raw_data/raw": "counts_per_second ",
+    "instrument/polar_angle": "degree ",
+    "instrument/azimuth_angle": "degree",
+    "energydispersion/pass_energy": "eV",
+    "region/start_energy": "eV",
+    "source/emission_current": "A",
+    "source/source_voltage": "V",
+    "transmission_function/kinetic_energy": "eV",
+}
 
 
 class SleMapperSpecs(XPSMapper):
@@ -72,22 +90,6 @@ class SleMapperSpecs(XPSMapper):
 
         self.sql_connection = None
 
-        self.units = {
-            "analyser/work_function": "eV",
-            "beam/excitation_energy": "eV",
-            "collectioncolumn/iris_diameter": "mm",
-            "data/step_size": "eV",
-            "detector/detector_voltage": "V",
-            "detector/dwell_time": "s",
-            "detector/raw_data/raw": "counts_per_second ",
-            "instrument/polar_angle": "degree ",
-            "instrument/azimuth_angle": "degree",
-            "energydispersion/pass_energy": "eV",
-            "region/start_energy": "eV",
-            "source/emission_current": "A",
-            "source/source_voltage": "V",
-            "transmission_function/kinetic_energy": "eV",
-        }
         super().__init__()
 
     def _select_parser(self):
@@ -238,8 +240,8 @@ class SleMapperSpecs(XPSMapper):
                 self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
 
                 unit_key = f"{grouping}/{spectrum_key}"
-                units = self._get_units_for_key(unit_key)
-                if units:
+                units = get_units_for_key(unit_key, UNITS)
+                if units is not None:
                     self._xps_dict[f"{root}/{mpes_key}/@units"] = units
 
         self._xps_dict[f'{path_map["analyser"]}/name'] = spectrum["devices"][0]
@@ -305,33 +307,10 @@ class SleMapperSpecs(XPSMapper):
 
         # Add unit for detector data
         detector_data_unit_key = f"{path_map['detector']}/raw_data/raw/@units"
-        self._xps_dict[detector_data_unit_key] = self._get_units_for_key(
-            "detector/raw_data/raw"
-        )
 
-    def _get_units_for_key(self, unit_key):
-        """
-        Get correct units for a given key.
-
-        Parameters
-        ----------
-        unit_key : str
-           Key of type <mapping>:<spectrum_key>, e.g.
-           detector/detector_voltage
-
-        Returns
-        -------
-        str
-            Unit for that unit_key.
-
-        """
-        try:
-            return re.search(r"\[([A-Za-z0-9_]+)\]", unit_key).group(1)
-        except AttributeError:
-            try:
-                return self.units[unit_key]
-            except KeyError:
-                return ""
+        detector_data_units = get_units_for_key("detector/raw_data/raw", UNITS)
+        if detector_data_units is not None:
+            self._xps_dict[detector_data_unit_key] = detector_data_units
 
 
 class SleProdigyParser(ABC):

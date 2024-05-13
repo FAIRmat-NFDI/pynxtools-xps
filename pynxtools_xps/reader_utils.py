@@ -20,7 +20,7 @@ Helper functions for populating NXmpes template
 #
 import re
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Optional
 from pathlib import Path
 from scipy.interpolate import interp1d
 import numpy as np
@@ -291,9 +291,10 @@ def re_map_keys(dictionary: Dict[str, Any], key_map: Dict[str, str]):
         Dictionary with changed keys.
 
     """
-    for k in key_map.keys():
-        if k in dictionary:
-            dictionary[key_map[k]] = dictionary.pop(k)
+    for key in key_map:
+        if key in dictionary:
+            map_key = key_map.get(key, key)
+            dictionary[map_key] = dictionary.pop(key)
     return dictionary
 
 
@@ -329,6 +330,26 @@ def re_map_values(dictionary: Dict[str, Any], map_functions: Dict[str, Any]):
         if key in dictionary:
             dictionary[key] = map_fn(dictionary[key])
     return dictionary
+
+
+def _re_map_single_value(
+    input_key: str,
+    value: Optional[Union[str, int, float, bool, np.ndarray]],
+    map_functions: Dict[str, Any],
+):
+    """
+    Map the values returned from the file to the preferred format for
+    the parser output.
+
+    """
+    if isinstance(value, str) and value is not None:
+        value = value.rstrip("\n")
+
+    for key in map_functions:
+        if key in input_key:
+            map_method = map_functions[key]
+            value = map_method(value)  # type: ignore[operator]
+    return value
 
 
 def drop_unused_keys(dictionary: Dict[str, Any], keys_to_drop: List[str]):

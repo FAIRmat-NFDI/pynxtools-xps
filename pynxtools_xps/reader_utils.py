@@ -20,7 +20,7 @@ Helper functions for populating NXmpes template
 #
 import re
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Optional
 from pathlib import Path
 from scipy.interpolate import interp1d
 import numpy as np
@@ -293,20 +293,9 @@ def re_map_keys(dictionary: Dict[str, Any], key_map: Dict[str, str]):
     """
     for key in key_map:
         if key in dictionary:
-            map_key = _re_map_single_key(key, key_map)
+            map_key = key_map.get(key, key)
             dictionary[map_key] = dictionary.pop(key)
     return dictionary
-
-
-def _re_map_single_key(key: str, key_map: Dict[str, str]):
-    """
-    Map a single keys from a file to the preferred keys for
-    the parser output.
-
-    """
-    if key in key_map:
-        return key_map[key]
-    return key
 
 
 def re_map_values(dictionary: Dict[str, Any], map_functions: Dict[str, Any]):
@@ -343,16 +332,18 @@ def re_map_values(dictionary: Dict[str, Any], map_functions: Dict[str, Any]):
     return dictionary
 
 
-def _re_map_single_value(input_key: str, value: str, map_functions: Dict[str, Any]):
+def _re_map_single_value(
+    input_key: str,
+    value: Optional[Union[str, int, float, bool, np.ndarray]],
+    map_functions: Dict[str, Any],
+):
     """
     Map the values returned from the file to the preferred format for
     the parser output.
 
     """
-    try:
+    if isinstance(value, str) and value is not None:
         value = value.rstrip("\n")
-    except AttributeError:
-        pass
 
     for key in map_functions:
         if key in input_key:

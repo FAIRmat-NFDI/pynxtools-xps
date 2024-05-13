@@ -34,7 +34,6 @@ from pynxtools_xps.reader_utils import (
     construct_data_key,
     construct_detector_data_key,
     convert_pascal_to_snake,
-    _re_map_single_key,
     _re_map_single_value,
 )
 from pynxtools_xps.value_mappers import (
@@ -85,18 +84,16 @@ def _construct_date_time(date_string: str, time_string: str) -> Optional[str]:
         for date_fmt in possible_date_formats:
             try:
                 return datetime.datetime.strptime(date_string, date_fmt)
-            except ValueError:
-                pass
-        raise ValueError("Date format not recognized")
+            except ValueError as err:
+                raise ValueError("Date format not recognized") from err
 
     def _parse_time(time_string: str) -> datetime.time:
         possible_time_formats = ["%H:%M:%S", "%I:%M:%S %p"]
         for time_fmt in possible_time_formats:
             try:
                 return datetime.datetime.strptime(time_string, time_fmt).time()
-            except ValueError:
-                pass
-        raise ValueError("Time format not recognized")
+            except ValueError as err:
+                raise ValueError("Time format not recognized") from err
 
     try:
         date = _parse_date(date_string)
@@ -105,10 +102,10 @@ def _construct_date_time(date_string: str, time_string: str) -> Optional[str]:
 
         return datetime_obj.astimezone().isoformat()
 
-    except ValueError as e:
+    except ValueError as err:
         raise ValueError(
             "Date and time could not be converted to ISO 8601 format."
-        ) from e
+        ) from err
 
 
 KEY_MAP: Dict[str, str] = {
@@ -315,7 +312,7 @@ class TxtMapperScienta(XPSMapper):
 
                 unit_key = f"{grouping}/{spectrum_key}"
                 units = get_units_for_key(unit_key, UNITS)
-                if units:
+                if units is not None:
                     self._xps_dict[f"{root}/{mpes_key}/@units"] = units
 
         # Create keys for writing to data and detector
@@ -491,7 +488,7 @@ class ScientaTxtParser:
                 key, value = self._get_key_value_pair(line)
                 if "dimension" in key:
                     key_part = f"dimension_{key.rsplit('_')[-1]}"
-                    key = _re_map_single_key(key_part, KEY_MAP)
+                    key = KEY_MAP.get(key_part, key_part)
 
                     value = _re_map_single_value(key, value, VALUE_MAP)
                 if self._check_valid_value(value):
@@ -585,7 +582,8 @@ class ScientaTxtParser:
         try:
             [key, value] = line.split("=")
             key = convert_pascal_to_snake(key)
-            key = _re_map_single_key(key, KEY_MAP)
+
+            key = KEY_MAP.get(key, key)
             value = _re_map_single_value(key, value, VALUE_MAP)
 
         except ValueError:

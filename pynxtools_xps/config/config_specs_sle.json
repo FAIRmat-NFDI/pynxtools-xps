@@ -23,7 +23,8 @@
     "email":"@eln",
     "IDENTIFIER[orcid]":{
       "service":"@eln",
-      "identifier":"@eln"
+      "identifier":"@eln",
+      "is_persistent":"@eln"
     }
   },
   "/ENTRY[entry]/INSTRUMENT[instrument]":{

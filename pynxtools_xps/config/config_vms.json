@@ -144,7 +144,7 @@
          "detector_voltage/@units":"V",
          "count_time":"@xps_token:detector/dwell_time",
          "count_time/@units":"@xps_token:detector/dwell_time/@units",
-         "signal_mode":"@xps_token:detector/signal_mode",
+         "acquisition_mode":"@xps_token:detector/signal_mode",
          "device_information":{
            "vendor":"@eln",
            "model":"@eln",

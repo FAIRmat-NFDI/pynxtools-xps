@@ -36,7 +36,7 @@ from pynxtools_xps.reader_utils import (
     construct_data_key,
     construct_detector_data_key,
 )
-from pynxtools_xps.value_mappers import get_units_for_key, convert_intensity_units
+from pynxtools_xps.value_mappers import get_units_for_key, convert_units
 
 UNITS: dict = {
     "data/step_size": "eV",
@@ -394,7 +394,7 @@ class TextParserRows(TextParser):
                 "group_name": group_name,
                 "spectrum_type": region,
                 "energy_type": "binding",
-                "y_units": convert_intensity_units(spec_header.split(":")[3]),
+                "y_units": convert_units(spec_header.split(":")[3]),
             }
             settings += [spectrum_settings]
 

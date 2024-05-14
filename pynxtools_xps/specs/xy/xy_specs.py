@@ -46,7 +46,7 @@ from pynxtools_xps.reader_utils import (
 from pynxtools_xps.value_mappers import (
     convert_measurement_method,
     convert_energy_scan_mode,
-    convert_intensity_units,
+    convert_units,
 )
 
 SETTINGS_MAP: Dict[str, str] = {
@@ -681,12 +681,12 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
                     if not self.export_settings["Transmission Function"]:
                         x_units, y_units = val.split(" ")
                         scan_settings["x_units"] = x_units
-                        scan_settings["y_units"] = convert_intensity_units(y_units)
+                        scan_settings["y_units"] = convert_units(y_units)
 
                     else:
                         x_units, y_units, tf_units = val.split(" ")
                         scan_settings["x_units"] = x_units
-                        scan_settings["y_units"] = convert_intensity_units(y_units)
+                        scan_settings["y_units"] = convert_units(y_units)
                         scan_settings["tf_units"] = tf_units
 
             if not line.startswith(self.prefix) and line.strip("\n"):

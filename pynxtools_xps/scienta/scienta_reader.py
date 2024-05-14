@@ -34,7 +34,7 @@ from pynxtools_xps.reader_utils import (
     _re_map_single_value,
     _check_valid_value,
 )
-from pynxtools_xps.value_mappers import get_units_for_key, convert_intensity_units
+from pynxtools_xps.value_mappers import get_units_for_key, convert_units
 
 from pynxtools_xps.scienta.scienta_data_model import ScientaHeader, ScientaRegion
 from pynxtools_xps.scienta.scienta_mappings import (
@@ -500,7 +500,7 @@ class ScientaIgorParser:
                 spectrum_dict[key] = notes[key]
 
             spectrum_dict["igor_binary_wave_format_version"] = ibw_version
-            spectrum_dict["intensity/@units"] = convert_intensity_units(data_unit_label)
+            spectrum_dict["intensity/@units"] = convert_units(data_unit_label)
 
             self.spectra.append(spectrum_dict)
 

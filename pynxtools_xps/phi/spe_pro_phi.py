@@ -238,23 +238,23 @@ UNIT_MISSING: Dict[str, str] = {
     "neutral_objective_lens_voltage": "V",
     "stage_current_rotation_speed": "degree/s",
     "neutral_bend_voltage": "V",
-    "defect_positioner_u": "mm",
-    "defect_positioner_v": "mm",
-    "defect_positioner_x": "mm",
-    "defect_positioner_y": "mm",
-    "defect_positioner_z": "mm",
+    "defect_positioner_u": "milli-m",
+    "defect_positioner_v": "milli-m",
+    "defect_positioner_x": "milli-m",
+    "defect_positioner_y": "milli-m",
+    "defect_positioner_z": "milli-m",
     "defect_positioner_tilt": "degree",
     "defect_positioner_rotation": "degree",
     "flood_gun_pulse_frequency": "1/s",
-    "flood_gun_x_steering": "mm",
-    "flood_gun_y_steering": "mm",
+    "flood_gun_x_steering": "milli-m",
+    "flood_gun_y_steering": "milli-m",
     "profiling_sputter_delay": "s",
-    "scan_deflection_span_x": "mm",
-    "scan_deflection_span_y": "mm",
-    "scan_deflection_offset_x": "mm",
-    "scan_deflection_offset_y": "mm",
-    "xray_stigmator_x": "mm",
-    "xray_stigmator_y": "mm",
+    "scan_deflection_span_x": "milli-m",
+    "scan_deflection_span_y": "milli-m",
+    "scan_deflection_offset_x": "milli-m",
+    "scan_deflection_offset_y": "milli-m",
+    "xray_stigmator_x": "milli-m",
+    "xray_stigmator_y": "milli-m",
 }
 
 
@@ -338,7 +338,7 @@ class MapperPhi(XPSMapper):
                 "xray_stigmator_x",
                 "xray_stigmator_x/@units",
                 "xray_stigmator_y",
-                "xray_stigmator_x/@units",
+                "xray_stigmator_y/@units",
             ],
             "beam": [
                 "xray_beam_diameter",
@@ -925,6 +925,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         channel_count = 1
         datacls_fields = list(self.metadata.__dataclass_fields__.keys())
+        datacls_fields = [field for field in datacls_fields if "_units" not in field]
 
         for line in header:
             try:
@@ -1471,7 +1472,7 @@ def _convert_xray_source_settings(value: str):
     """Map all items in xray_source_settings to a dictionary."""
     (xray_settings) = re.split(r"(\d+)", value)
 
-    unit_map = {"u": "micro-m", "KV": "kV"}
+    unit_map = {"u": "micro-m", "KV": "kilo-V"}
 
     for i, setting in enumerate(xray_settings):
         if setting in unit_map:
@@ -1493,11 +1494,11 @@ def _convert_stage_positions(value: str):
 
     return {
         "x": float(x),
-        "x_units": "mm",
+        "x_units": "milli-m",
         "y": float(y),
-        "y_units": "mm",
+        "y_units": "milli-m",
         "z": float(z),
-        "z_units": "mm",
+        "z_units": "milli-m",
         "azimuth": float(azimuth),
         "azimuth_units": "degree",
         "polar": float(polar),

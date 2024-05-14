@@ -138,7 +138,7 @@
       "energy":"@xps_token:flood_gun/flood_gun_energy",
       "energy/@units":"@xps_token:flood_gun/flood_gun_energy/@units",
       "filament_current":"@xps_token:flood_gun/flood_gun_filament_current",
-      "filament_currentrrent/@units":"@xps_token:flood_gun/flood_gun_filament_current/@units",
+      "filament_current/@units":"@xps_token:flood_gun/flood_gun_filament_current/@units",
       "gain":"@xps_token:flood_gun/flood_gun_gain",
       "flood_gun_mode":"@xps_token:flood_gun/flood_gun_mode",
       "frequency":"@xps_token:flood_gun/pulse_frequency",
@@ -327,9 +327,9 @@
       },
       "energy_resolution":{
         "physical_quantity":"energy",
-        "type":"estimated",
-        "resolution":"@xps_token:data/step_size",
-        "resolution/@units":"@xps_token:data/step_size/@units"
+        "type":"@eln",
+        "resolution":"@eln",
+        "resolution/@units":"@eln"
       },
       "transmission_function":{
         "@signal":"relative_intensity",

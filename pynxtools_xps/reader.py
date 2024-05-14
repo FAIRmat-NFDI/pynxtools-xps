@@ -248,6 +248,7 @@ def fill_detector_group(key, entries_values, config_dict, xps_data_dict, templat
                     detector_num = data_var.split(chan_count)[-1]
                     detector_nm = f"detector{detector_num}"
                     detector_scans[detector_nm] += [xr_data[data_var].data]
+
                     cycle_scan_num = data_var.split(chan_count)[0]
                     detector_key = modified_key.replace(
                         "/DETECTOR[detector]/", f"/DETECTOR[{detector_nm}]/"
@@ -276,10 +277,10 @@ def fill_detector_group(key, entries_values, config_dict, xps_data_dict, templat
 
         # Add multi-dimensional `raw` array for each detector
         for detector_nm, value in detector_scans.items():
-            modified_key = modified_key.replace(
+            raw_key = modified_key.replace(
                 "/DETECTOR[detector]/", f"/DETECTOR[{detector_nm}]/"
             )
-            template[modified_key] = np.array(value)
+            template[raw_key] = np.array(value)
 
 
 def fill_template_with_value(key, value, template):

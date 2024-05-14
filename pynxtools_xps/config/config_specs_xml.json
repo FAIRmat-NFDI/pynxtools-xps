@@ -52,7 +52,7 @@
       "beamTYPE[beam_xray]":{
         "distance":"@eln",
         "distance/@units":"@eln",
-        "incident_energy":"@xps_token:beam/excitation_energy",
+        "incident_energy":"@xps_token:region/excitation_energy",
         "incident_energy/@units":"eV",
         "incident_energy_spread":"None",
         "incident_energy_spread/@units":"None",

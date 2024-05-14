@@ -8,12 +8,13 @@ experiment_institution: BESSY II
 program_name: SpecsLab 2
 user:
   name: Lukas Pielsticker
+  affiliation: Max Planck Institute for Chemical Energy Conversion
   email: lukas.pielsticker@cec.mpg.de
 instrument:
   device_information:
     vendor: SPECS GmbH
     model: XPS setup
-    identifier: null
+    identifier: v1.0
   energy_resolution:
     type: calibrated
     resolution:
@@ -29,7 +30,7 @@ instrument:
   beam_xray:
     distance:
       value: 0.0
-      unit: mm
+      unit: milli-m
   analyser:
     description: hemispherical
     name: PHOIBOS 150
@@ -48,7 +49,7 @@ instrument:
       entrance_slit: unknown
       energy_scan_mode: fixed_analyser_transmission
       diameter:
-        unit: mm
+        unit: milli-m
         value: 150
       device_information:
         vendor: null
@@ -61,7 +62,7 @@ instrument:
     device_information:
       vendor: SPECS GmbH
       model: 5-axis manipulator
-      identifier: null
+      identifier: v1.0
     temperature_sensor:
       name: type K thermocouple
       measurement: temperature
@@ -116,7 +117,7 @@ instrument:
     type: hot-filament ionization gauge
     value:
       value: 0.000000001
-      unit: mbar
+      unit: milli-bar
     value_log:
       value:
         value: null

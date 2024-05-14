@@ -37,7 +37,7 @@ instrument:
   beam_xray:
     distance:
       value: 0.0
-      unit: mm
+      unit: milli-m
   analyser:
     description: hemispherical
     device_information:
@@ -53,7 +53,7 @@ instrument:
     energydispersion:
       scheme: hemispherical
       diameter:
-        unit: mm
+        unit: milli-m
         value: 150
       device_information:
         vendor: SPECS GmbH
@@ -102,7 +102,7 @@ instrument:
       type: wire
       value:
         value: 0.1
-        unit: nA
+        unit: nano-A
     sample_bias_voltmeter:
       name: XPS sample voltmeter
       measurement: voltage
@@ -125,7 +125,7 @@ instrument:
     type: hot-filament ionization gauge
     value:
       value: 0.000000001
-      unit: mbar
+      unit: milli-bar
     value_log:
       value:
         value: null

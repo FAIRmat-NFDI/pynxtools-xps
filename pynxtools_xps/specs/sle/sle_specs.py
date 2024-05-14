@@ -53,7 +53,7 @@ from pynxtools_xps.value_mappers import (
 UNITS: Dict[str, str] = {
     "analyser/work_function": "eV",
     "beam/excitation_energy": "eV",
-    "collectioncolumn/iris_diameter": "mm",
+    "collectioncolumn/iris_diameter": "milli-m",
     "data/step_size": "eV",
     "detector/detector_voltage": "V",
     "detector/dwell_time": "s",

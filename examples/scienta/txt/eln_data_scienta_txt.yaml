@@ -26,13 +26,13 @@ instrument:
     device_information:
       vendor: Helmholtz-Zentrum Berlin
       model: BESSY II
-      identifier: null
+      identifier: "2.0"
     current:
       value: 298
-      unit: mA
+      unit: milli-A
   beam_xray:
     distance:
-      unit: mm
+      unit: milli-m
       value: 0.0
     current:
       value: 30
@@ -63,13 +63,15 @@ instrument:
         shape: curved slit
         size:
           value: 0.4
-          unit: mm
+          unit: milli-m
     detector:
       amplifier_type: channeltron
       detector_type: Multi-anode
   manipulator:
     device_information:
       vendor: Scienta Omicron
+      model: 5-axis manipulator
+      identifier: v1.0
     temperature_sensor:
       name: type K thermocouple
       measurement: temperature
@@ -101,7 +103,7 @@ instrument:
       type: wire
       value:
         value: 0.1
-        unit: nA
+        unit: nano-A
     sample_bias_voltmeter:
       name: XPS sample voltmeter
       measurement: voltage
@@ -121,15 +123,15 @@ instrument:
     POSITIONER[positioner_x]:
       value:
         value: 15.5
-        unit: cm
+        unit: centi-m
     POSITIONER[positioner_y]:
       value:
         value: 11
-        unit: cm
+        unit: centi-m
     POSITIONER[positioner_z]:
       value:
         value: 36
-        unit: cm
+        unit: centi-m
     POSITIONER[positioner_phi]:
       value:
         value: 45
@@ -140,7 +142,7 @@ instrument:
     type: hot-filament ionization gauge
     value:
       value: 0.000000001
-      unit: mbar
+      unit: milli-bar
     value_log:
       value:
         value: null

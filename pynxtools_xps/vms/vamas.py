@@ -19,7 +19,6 @@ Class for reading XPS files from raw VMS data.
 #
 # pylint: disable=too-many-lines
 
-import re
 from copy import deepcopy
 import datetime
 from pathlib import Path
@@ -443,7 +442,7 @@ class VamasParser:
         setattr(datacls, attr, field_type(value))
 
     def _parse_header(self):
-        """Parse the vama header into a VamasHeader object.
+        """Parse the Vamas header into a VamasHeader object.
 
         The common_header_attr are the header attributes that are common
         to all types of Vamas experiment modes.
@@ -604,7 +603,7 @@ class VamasParser:
                 delattr(block, attr)
 
         block.source_analyser_angle = float(self.data.pop(0).strip())
-        block.source_azimuth = self.data.pop(0).strip()
+        block.source_azimuth = float(self.data.pop(0).strip())
         block.analyser_mode = self.data.pop(0).strip()
         block.resolution = float(self.data.pop(0).strip())
 

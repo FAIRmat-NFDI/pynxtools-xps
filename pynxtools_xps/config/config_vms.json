@@ -95,10 +95,6 @@
        "work_function/@units":"eV",
        "fast_axes":"None",
        "slow_axes":"energy",
-       "analysis_width_x":"@xps_token:analyser/analysis_width_x",
-       "analysis_width_x/@units":"mm",
-       "analysis_width_y":"@xps_token:analyser/analysis_width_y",
-       "analysis_width_y/@units":"mm",
        "target_bias":"@xps_token:analyser/target_bias",
        "target_bias/@units":"V",
        "device_information":{

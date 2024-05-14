@@ -37,7 +37,7 @@
       "energy_resolution":{
         "physical_quantity":"energy",
         "type":"@eln",
-        "resolution":"@xps_token:data/step_size",
+        "resolution":"@eln",
         "resolution/@units":"@eln"
       },
       "sourceTYPE[source_xray]":{
@@ -54,8 +54,8 @@
       "beamTYPE[beam_xray]":{
         "distance":"@eln",
         "distance/@units":"@eln",
-        "incident_energy":"@xps_token:beam/excitation_energy",
-        "incident_energy/@units":"@xps_token:beam/excitation_energy/units",
+        "incident_energy":"@xps_token:beam_xray/excitation_energy",
+        "incident_energy/@units":"@xps_token:beam_xray/excitation_energy/@units",
         "incident_energy_spread":"None",
         "incident_energy_spread/@units":"None",
         "incident_polarization":"None",
@@ -80,7 +80,7 @@
             "physical_quantity":"energy",
             "type":"@eln",
             "resolution":"@xps_token:data/step_size",
-            "resolution/@units":"@eln"
+            "resolution/@units":"@xps_token:data/step_size/@units"
         },
         "transmission_function":"None",
         "COLLECTIONCOLUMN[collectioncolumn]":{
@@ -102,7 +102,6 @@
           "pass_energy":"@eln",
           "pass_energy/@units":"@eln",
           "energy_scan_mode":"@eln",
-          "entrance_slit":"@eln",
           "exit_slit":"@eln",
           "device_information":{
             "vendor":"@eln",
@@ -115,7 +114,7 @@
           "amplifier_type":"@eln",
           "detector_type":"@eln",
           "count_time":"@xps_token:detector/dwell_time",
-          "count_time/@units":"@xps_token:detector/dwell_time/units",
+          "count_time/@units":"@xps_token:detector/dwell_time/@units",
           "device_information":{
             "vendor":"@eln",
             "model":"@eln",
@@ -139,53 +138,63 @@
           "measurement":"@eln",
           "type":"@eln",
           "attached_to":"@eln",
-          "value":"@eln"
+          "value":"@eln",
+          "value/@units":"@eln"
         },
         "sample_heater":{
           "name":"@eln",
           "physical_quantity":"@eln",
           "type":"@eln",
           "heater_power":"@eln",
-          "PID[pid]/setpoint":"@eln"
+          "PID[pid]/setpoint":"@eln",
+          "PID[pid]/setpoint/@units":"@eln"
         },
         "cryostat":{
           "name":"None",
           "physical_quantity":"None",
           "type":"None",
-          "PID[pid]/setpoint":"None"
+          "PID[pid]/setpoint":"None",
+          "PID[pid]/setpoint/@units":"@eln"
         },
         "drain_current_amperemeter":{
           "name":"@eln",
           "measurement":"@eln",
           "type":"@eln",
-          "value":"@eln"
+          "value":"@eln",
+          "value/@units":"@eln"
         },
         "sample_bias_voltmeter":{
           "name":"@eln",
           "measurement":"@eln",
           "type":"@eln",
-          "value":"@eln"
+          "value":"@eln",
+          "value/@units":"@eln"
         },
         "sample_bias_potentiostat":{
           "name":"@eln",
           "physical_quantity":"@eln",
           "type":"@eln",
-          "PID[pid]/setpoint":"@eln"
+          "PID[pid]/setpoint":"@eln",
+          "PID[pid]/setpoint/@units":"@eln"
         }
-      },
-      "pressure_gauge":{
+       },
+       "pressure_gauge":{
         "name":"@eln",
         "measurement":"@eln",
         "type":"@eln",
         "value":"@eln",
-        "value_log/value":"@eln"
+        "value/@units":"@eln",
+        "value_log/value":"@eln",
+        "value_log/value/@units":"@eln"
       },
       "flood_gun":{
         "name":"@eln",
         "physical_quantity":"@eln",
         "type":"@eln",
         "current":"@eln",
-        "current_log/value":"@eln"
+        "current/@units":"@eln",
+        "current_log/value":"@eln",
+        "current_log/value/@units":"@eln"
       }
     },
     "/ENTRY[entry]/PROCESS_MPES[process]":{
@@ -252,7 +261,7 @@
       "data":"@data:cycle",
       "data/@units":"@xps_token:data/y_units",
       "energy":"@link:/entry/process/energy_calibration/calibrated_axis",
-      "energy/@type":"@xps_token:data/x_units",
+      "energy/@type":"@xps_token:data/energy_type",
       "energy/@units":"eV",
       "@energy_indices":"None",
       "@energy_depends":"None"

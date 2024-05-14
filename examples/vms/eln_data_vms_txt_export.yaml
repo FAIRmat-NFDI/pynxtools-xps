@@ -7,6 +7,7 @@ end_time: 2022-04-08T12:32:06.0200Z
 program_name: SpecsLab 2
 user:
   name: Lukas Pielsticker
+  affiliation: Max Planck Institute for Chemical Energy Conversion
   email: lukas.pielsticker@cec.mpg.de
 instrument:
   device_information:
@@ -44,7 +45,6 @@ instrument:
         identifier: null
     energydispersion:
       scheme: hemispherical
-      entrance_slit: unknown
       energy_scan_mode: fixed_analyser_transmission
       diameter:
         unit: mm
@@ -132,9 +132,10 @@ instrument:
         value: null
         unit: null
 sample:
-  description: A polymer material called PBTTT with chemical name  poly[2,5-bis(3-dodecylthiophen-2-yl)thieno[3,2-b]thiophene].
+  name: Ni foil
+  description: Ni foil
   substance:
-    molecular_formula_hill: (C42H62S4)n
+    molecular_formula_hill: Fe
   situation: vacuum
   history:
     sample_preparation:

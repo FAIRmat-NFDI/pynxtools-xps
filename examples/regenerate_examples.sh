@@ -19,11 +19,11 @@ function update_scienta_examples {
   cd scienta/
   cd ibw/
   echo "Update .ibw example"
-  dataconverter Cu-HHTP_*.ibw eln_data.yaml --reader $READER --nxdl $NXDL --output Cu-HHTP.ibw.nxs
+  dataconverter Cu-HHTP_*.ibw eln_data_scienta_ibw.yaml --reader $READER --nxdl $NXDL --output Cu-HHTP.ibw.nxs
   cd ../txt
   echo "Update .txt example"
-  dataconverter Cu-HHTP_*.txt eln_data.yaml --reader $READER --nxdl $NXDL --output Cu-HHTP.txt.nxs
-  cd ..
+  dataconverter Cu-HHTP_*.txt eln_data_scienta_txt.yaml --reader $READER --nxdl $NXDL --output Cu-HHTP.txt.nxs
+  cd ../..
   echo
 }
 
@@ -35,11 +35,10 @@ function update_specs_examples {
   dataconverter --params-file params.yaml
   cd ../xml
   echo "Update .xml example"
-  dataconverter In-situ_PBTTT_XPS_SPECS.xml eln_data.yaml --reader $READER --nxdl $NXDL --output In-situ_PBTTT.nxs
-  dataconverter --params-file params.yaml
+  dataconverter In-situ_PBTTT_XPS_SPECS.xml eln_data_xml.yaml --reader $READER --nxdl $NXDL --output In-situ_PBTTT.nxs
   cd ../xy
   echo "Update .xy example"
-  dataconverter MgFe2O4.xy eln_data.yaml --reader $READER --nxdl $NXDL --output MgFe2O4.nxs
+  dataconverter MgFe2O4.xy eln_data_xy.yaml --reader $READER --nxdl $NXDL --output MgFe2O4.nxs
   cd ../..
   echo
 }
@@ -52,8 +51,8 @@ function update_vms_examples {
   echo
   echo "Update REGULAR file conversion example"
   dataconverter irregular.vms eln_data_vms.yaml --reader $READER --nxdl $NXDL --output irregular.vms.nxs
-  echo "Update REGULAR file conversion example"
-  dataconverter irregular.vms eln_data_vms_txt_export.yaml --reader $READER --nxdl $NXDL --output vms_txt_export.nxs
+  echo "Update txt export example"
+  dataconverter vms_txt_export.txt eln_data_vms_txt_export.yaml --reader xps --nxdl NXmpes --output vms_txt_export.nxs
   cd ..
   echo
 }

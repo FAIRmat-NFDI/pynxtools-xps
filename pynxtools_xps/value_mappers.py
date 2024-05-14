@@ -94,7 +94,7 @@ def convert_bool(bool_like: str):
     return _replace_from_map(bool_like, BOOL_MAP)
 
 
-def convert_units(y_units: str):
+def convert_units(units: str):
     """Map y_units to shortened values."""
     return _replace_from_map(units, UNIT_MAP)
 

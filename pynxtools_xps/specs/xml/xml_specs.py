@@ -130,7 +130,7 @@ class XmlMapperSpecs(XPSMapper):
                     starting_eng_pnts[ind], ending_eng_pnts[ind], values_per_scan
                 )
 
-            channeltron_eng_axes = np.round_(channeltron_eng_axes, decimals=8)
+            channeltron_eng_axes = np.round(channeltron_eng_axes, decimals=8)
             # construct ultimate or incorporated energy axis from
             # lower to higher energy
             scans = list(raw_data["scans"].keys())

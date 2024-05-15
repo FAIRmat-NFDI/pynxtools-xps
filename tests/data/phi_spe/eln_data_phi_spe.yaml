@@ -1,0 +1,170 @@
+definition:
+  value: NXmpes
+  version: 1.0
+title: SnO2_10nnm
+experiment_institution: Justus-Liebig-Universität Gießen
+experiment_facility: AG Spektroskopie und Optik
+experiment_laboratory: XPS Lab
+user:
+  name: Sebastian Benz
+  affiliation: Justus-Liebig-Universität Gießen, AG Spektroskopie und Optik
+  orcid: null
+  email: null
+instrument:
+  energy_resolution:
+    type: calibrated
+    resolution:
+      value: 0.1
+      unit: eV
+  source_xray:
+    type: Fixed Tube X-ray
+    probe: photon
+    device_information:
+      vendor: PHI Electronics
+      model: VersaProbe 4 X-ray Source
+      identifier: v1.0
+  beam_xray:
+    distance:
+      value: 0.0
+      unit: milli-m
+  sourceTYPE[source_gas_cluster_ion_beam]:
+    type_other: argon gas cluster ion beam gun
+    description: argon cluster GCIB
+  sourceTYPE[source_neutral_ion_gun]:
+    type_other: monoatomic neutral ion beam gun
+    description: monoatomic ion source
+  sourceTYPE[source_sputter_gun]:
+    type_other: ion sputter gun
+    description: sputter gun
+  analyser:
+    description: hemispherical
+    device_information:
+      vendor: PHI Electronics
+      model: VersaProbe 4 Hemispherical Analyser
+      identifier: null
+    energy_resolution:
+      type: calibrated
+      resolution:
+        value: 0.1
+        unit: eV
+    collectioncolumn:
+      scheme: angular dispersive
+      device_information:
+        vendor: PHI Electronics
+        model: VersaProbe 4
+        identifier: null
+    energydispersion:
+      scheme: hemispherical
+      diameter:
+        unit: milli-m
+        value: 150
+      device_information:
+        vendor: PHI Electronics
+        model: VersaProbe 4 Hemispherical Analyser
+        identifier: null
+    detector:
+      amplifier_type: channeltron
+      detector_type: Multi-anode
+      device_information:
+        vendor: PHI Electronics
+        model: 1D-DLD detector
+        identifier: null
+  manipulator:
+    device_information:
+      vendor: PHI Electronics
+      model: 5-axis manipulator
+      identifier: null
+    temperature_sensor:
+      name: type K thermocouple
+      measurement: temperature
+      attached_to: sample
+      type: type K thermocouple
+      value:
+        value: 298.0
+        unit: K
+    sample_heater:
+      name: Sample heater
+      physical_quantity: temperature
+      type: IR diode laser
+      heater_power:
+        value: 0.0
+        unit: W
+      pid:
+        setpoint:
+          value: 298.0
+          unit: K
+    cryostat:
+      name: null
+      physical_quantity: null
+      type: null
+      pid:
+        setpoint: null
+    drain_current_amperemeter:
+      name: Amperemeter 1.0
+      measurement: current
+      type: wire
+      value:
+        value: 0.1
+        unit: nano-A
+    sample_bias_voltmeter:
+      name: XPS sample voltmeter
+      measurement: voltage
+      attached_to: sample
+      type: oscilloscope
+      value:
+        value: 0.0
+        unit: V
+    sample_bias_potentiostat:
+      name: XPS sample potentiostat
+      physical_quantity: voltage
+      type: potentiostat
+      pid:
+        setpoint:
+          value: 0.0
+          unit: V
+  pressure_gauge:
+    name: Pirani
+    measurement: pressure
+    type: pirani gauge
+    value:
+      value: 0.000000001
+      unit: milli-bar
+    value_log:
+      value:
+        value: null
+        unit: null
+  flood_gun:
+    name: VersaProbe 4 flood gun
+    physical_quantity: current
+    type: low energy electron source
+    current:
+      value: 0.0
+      unit: A
+    current_log:
+      value:
+        value: null
+        unit: null
+sample:
+  name: SnO2 10nnm
+  sample_id: 1
+  atom_types: Sn, O
+  physical_form: pellet
+  situation: vacuum
+  substance:
+    name: SnO2
+    molecular_mass:
+      value: 150.71
+      unit: g/mol
+    cas_number: 18282-10-5
+    molecular_formula_hill: SnO2
+  history:
+    sample_preparation:
+      start_time: 2022-01-22T12:48:00.200Z
+      end_time: 2022-01-22T13:18:00.200Z
+      description: sputter cleaned with Ar ions for 20 min
+      method: Ar sputtering
+    PHYSICAL_PROCESS[sample_loading]:
+      start_time: 2022-01-22T12:30:00.200Z
+      end_time: 2022-01-22T12:31:00.200Z
+      description: loaded into the VersaProbe 4
+      method: vacuum transfer

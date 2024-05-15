@@ -19,28 +19,44 @@ from pynxtools_xps.reader import XPSReader
     "sub_reader_data_dir",
     [
         pytest.param(
-            "spe",
+            "phi_pro",
+            id="Phi .pro reader",
+        ),
+        pytest.param(
+            "phi_spe",
             id="Phi .spe reader",
         ),
         pytest.param(
-            "pro",
-            id="Phi .pro reader",
+            "scienta_ibw",
+            id="Scienta .ibw reader",
         ),
         pytest.param(
             "scienta_txt",
             id="Scienta txt export reader",
         ),
         pytest.param(
-            "vms_regular",
-            id="Regular VAMAS reader",
+            "specs_sle",
+            id="Specs SLE reader",
+        ),
+        pytest.param(
+            "specs_xml",
+            id="Specs XML reader",
+        ),
+        pytest.param(
+            "specs_xy",
+            id="Specs XY reader",
         ),
         pytest.param(
             "vms_irregular",
             id="Irregular VAMAS reader",
         ),
         pytest.param(
-            "xml",
-            id="Specs XML reader",
+            "vms_regular",
+            id="Regular VAMAS reader",
+        ),
+        pytest.param(
+            "vms_txt_export",
+            id="Vamas txt export reader",
         ),
     ],
 )

@@ -191,13 +191,13 @@
          "value":"@eln",
          "value/@units":"@eln"
        },
-      "sample_heater":{
-        "name":"@eln",
-        "physical_quantity":"@eln",
-        "type":"@eln",
-        "heater_power":"@eln",
-        "PID[pid]/setpoint":"@eln",
-        "PID[pid]/setpoint/@units":"@eln"
+       "sample_heater":{
+         "name":"@eln",
+         "physical_quantity":"@eln",
+         "type":"@eln",
+         "heater_power":"@eln",
+         "PID[pid]/setpoint":"@eln",
+         "PID[pid]/setpoint/@units":"@eln"
        },
        "cryostat":{
          "name":"None",

@@ -7,10 +7,8 @@ import xml.etree.ElementTree as ET
 from glob import glob
 import pytest
 
-from pynxtools.dataconverter.helpers import (
-    generate_template_from_nxdl,
-    validate_dict_against,
-)
+from pynxtools.dataconverter.helpers import generate_template_from_nxdl
+from pynxtools.dataconverter.validation import validate_dict_against
 from pynxtools.dataconverter.template import Template
 from pynxtools.definitions.dev_tools.utils.nxdl_utils import get_nexus_definitions_path
 

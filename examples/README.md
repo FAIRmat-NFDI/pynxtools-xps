@@ -1,4 +1,4 @@
-# Examples for the XPS
+# Examples for the XPS reader
 
 Here, you can find working examples of XPS-to-NeXus conversion using the latest [NXmpes](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXmpes.html#nxmpes) application definition and the latest development version of [pynxtools-xps](https://github.com/FAIRmat-NFDI/pynxtools-xps).
 

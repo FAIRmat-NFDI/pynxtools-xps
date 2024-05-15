@@ -1,4 +1,7 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 508bd1d (update test files)
 # Created by:        SpecsLab Prodigy, Version 4.100.1-r111001 
 #
 # XY-Serializer Export Settings:
@@ -1481,6 +1484,7 @@
 698  3999.8656
 697  3674.1844
 696  3704.7463
+<<<<<<< HEAD
 =======
 # Created by:        SpecsLab Prodigy, Version 4.100.1-r111001 
 #
@@ -2965,4 +2969,6 @@
 697  3674.1844
 696  3704.7463
 >>>>>>> 78a7447 (regenerate nxs refs, add .ibw and .xy test data)
+=======
+>>>>>>> 508bd1d (update test files)
 695  4013.8297

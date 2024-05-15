@@ -26,7 +26,7 @@ instrument:
   beam_xray:
     distance:
       value: 0.0
-      unit: mm
+      unit: milli-m
   analyser:
     description: hemispherical
     name: PHOIBOS 150
@@ -44,7 +44,7 @@ instrument:
       scheme: hemispherical
       energy_scan_mode: fixed_analyser_transmission
       diameter:
-        unit: mm
+        unit: milli-m
         value: 150
       device_information:
         vendor: null
@@ -112,7 +112,7 @@ instrument:
     type: hot-filament ionization gauge
     value:
       value: 0.000000001
-      unit: mbar
+      unit: milli-bar
     value_log:
       value:
         value: null

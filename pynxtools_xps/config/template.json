@@ -121,38 +121,44 @@
           "name":"None",
           "measurement":"None",
           "type":"None",
-          "value":"None"
+          "value":"None",
+          "value/@units":"None"
         },
         "sample_heater":{
           "name":"None",
           "physical_quantity":"None",
           "type":"None",
           "heater_power":"None",
-          "PID[pid]/setpoint":"None"
+          "PID[pid]/setpoint":"None",
+          "PID[pid]/setpoint/@units":"None"
         },
         "cryostat":{
           "name":"None",
           "physical_quantity":"None",
           "type":"None",
-          "PID[pid]/setpoint":"None"
+          "PID[pid]/setpoint":"None",
+          "PID[pid]/setpoint/@units":"None"
         },
         "drain_current_amperemeter":{
           "name":"None",
           "measurement":"None",
           "type":"None",
-          "value":"None"
+          "value":"None",
+          "value/@units":"None"
         },
         "sample_bias_voltmeter":{
           "name":"@eln",
           "measurement":"@eln",
           "type":"@eln",
-          "value":"@eln"
+          "value":"@eln",
+          "value/@units":"None"
         },
         "sample_bias_potentiostat":{
           "name":"None",
           "physical_quantity":"None",
           "type":"None",
-          "PID[pid]/setpoint":"None"
+          "PID[pid]/setpoint":"None",
+          "PID[pid]/setpoint/@units":"None"
         }
       },
       "pressure_gauge":{
@@ -160,7 +166,9 @@
         "measurement":"None",
         "type":"None",
         "value":"None",
-        "value_log/value":"None"
+        "value/@units":"None",
+        "value_log/value":"None",
+        "value_log/value/@units":"None"
       },
       "flood_gun":{
         "name":"None",

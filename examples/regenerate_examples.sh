@@ -52,7 +52,7 @@ function update_vms_examples {
   echo "Update REGULAR file conversion example"
   dataconverter irregular.vms eln_data_vms.yaml --reader $READER --nxdl $NXDL --output irregular.vms.nxs
   echo "Update txt export example"
-  dataconverter vms_txt_export.txt eln_data_vms_txt_export.yaml --reader xps --nxdl NXmpes --output vms_txt_export.nxs
+  dataconverter vms_txt_export.txt eln_data_vms_txt_export.yaml $READER --nxdl $NXDL --output vms_txt_export.nxs
   cd ..
   echo
 }

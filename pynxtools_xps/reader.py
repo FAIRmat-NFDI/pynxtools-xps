@@ -88,7 +88,6 @@ def find_entry_and_value(xps_data_dict, key_part, dt_typ):
                 entries_values[entry] = val
 
     elif dt_typ in (XPS_DATA_TOKEN, XPS_DETECTOR_TOKEN):
-        # entries_values = entry:{cycle0_scan0_chan0:xr.data}
         entries_values = xps_data_dict["data"]
 
     return entries_values

@@ -27,6 +27,7 @@ import re
 import struct
 import copy
 from typing import Dict, Any
+import warnings
 from datetime import datetime
 import sqlite3
 import xml.etree.ElementTree as ET
@@ -268,7 +269,10 @@ class SleMapperSpecs(XPSMapper):
             for key, value in self._xps_dict["data"][entry].items()
             if scan_key.split("_")[0] in key
         ]
-        averaged_scans = np.mean(all_scan_data, axis=0)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            averaged_scans = np.mean(all_scan_data, axis=0)
+
         if averaged_scans.size == 1:
             # on first scan in cycle
             averaged_scans = spectrum["data"]["cps_calib"]

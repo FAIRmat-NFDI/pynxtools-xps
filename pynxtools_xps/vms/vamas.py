@@ -23,7 +23,7 @@ from copy import deepcopy
 import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Union
-
+import warnings
 from itertools import groupby
 import xarray as xr
 import numpy as np
@@ -332,9 +332,10 @@ class VamasMapper(XPSMapper):
             for key, value in self._xps_dict["data"][entry].items()
             if scan_key.split("_")[0] in key
         ]
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            averaged_scans = np.mean(all_scan_data, axis=0)
 
-        # Write averaged cycle data to 'data'.
-        averaged_scans = np.mean(all_scan_data, axis=0)
         if averaged_scans.size == 1:
             # on first scan in cycle
             averaged_scans = intensity_cps

@@ -22,7 +22,8 @@ Classes for reading XPS files from TXT export of CasaXPS.
 import itertools
 import operator
 import copy
-from typing import Any, Dict, List, Union
+import warnings
+from typing import Any, Dict, List
 from abc import ABC, abstractmethod
 import xarray as xr
 import numpy as np
@@ -193,7 +194,10 @@ class TxtMapperVamasExport(XPSMapper):
             for key, value in self._xps_dict["data"][entry].items()
             if scan_key.split("_")[0] in key
         ]
-        averaged_scans = np.mean(all_scan_data, axis=0)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            averaged_scans = np.mean(all_scan_data, axis=0)
+
         if averaged_scans.size == 1:
             # on first scan in cycle
             averaged_scans = intensity

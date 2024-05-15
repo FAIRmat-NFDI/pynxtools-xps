@@ -23,6 +23,7 @@ mpes nxdl (NeXus Definition Language) template.
 # pylint: disable=too-many-lines,too-many-instance-attributes
 
 import re
+import warnings
 import copy
 import datetime
 import struct
@@ -745,7 +746,9 @@ class MapperPhi(XPSMapper):
         all_scan_data = np.array(
             [np.array(value) for key, value in spectrum["data"].items()]
         )
-        averaged_scans = np.mean(all_scan_data, axis=0)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            averaged_scans = np.mean(all_scan_data, axis=0)
 
         self._xps_dict["data"][entry][cycle_key] = xr.DataArray(
             data=averaged_scans,

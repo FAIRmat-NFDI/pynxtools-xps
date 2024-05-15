@@ -20,6 +20,7 @@ Class for reading XPS files from Scienta spectrometers.
 
 import re
 import copy
+import warnings
 from pathlib import Path
 from typing import Any, Dict, List, Union, Tuple
 import xarray as xr
@@ -224,7 +225,10 @@ class MapperScienta(XPSMapper):
             for key, value in self._xps_dict["data"][entry].items()
             if scan_key.split("_")[0] in key
         ]
-        averaged_scans = np.mean(all_scan_data, axis=0)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            averaged_scans = np.mean(all_scan_data, axis=0)
+
         if averaged_scans.size == 1:
             # on first scan in cycle
             averaged_scans = intensity

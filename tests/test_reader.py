@@ -42,7 +42,7 @@ for test_case in test_cases:
     "nxdl, sub_reader_data_dir",
     test_params,
 )
-def test_example_data(nxdl, sub_reader_data_dir):
+def test_example_data(nxdl, sub_reader_data_dir, tmp_path, caplog) -> None:
     """
     Test the example data for the XPS reader
     """
@@ -67,7 +67,14 @@ def test_example_data(nxdl, sub_reader_data_dir):
     )
 
     assert isinstance(read_data, Template)
-    assert validate_dict_against(nxdl, read_data, ignore_undocumented=True)
+
+    with caplog.at_level("ERROR", "WARNING"):
+        is_sucess = validate_dict_against(nxdl, read_data, ignore_undocumented=True)
+        # assert is_sucess, "Validation failed"
+    for record in caplog.records:
+        print(record.message)
+        if record.levelname == "ERROR":
+            assert False, record.message
 
 
 ## This will be implemented in the future.

@@ -2,8 +2,6 @@
     "/@default":"None",
     "/ENTRY[entry]":{
       "@default":"data",
-      "definition":"None",
-      "definition/@version":"None",
       "title":"None",
       "start_time":"None",
       "end_time":"None",

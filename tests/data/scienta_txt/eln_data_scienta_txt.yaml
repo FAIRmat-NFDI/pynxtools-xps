@@ -1,8 +1,5 @@
 title: Ag foil
-definition:
-  value: NXmpes
-  version: "1.0"
-method: XPS
+method: X-ray Photoelectron Spectroscopy (XPS)
 start_time: 2022-04-08T11:47:02.0200Z
 experiment_institution: Helmholtz-Zentrum Berlin
 experiment_facility: BESSY II

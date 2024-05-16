@@ -2,8 +2,6 @@
   "/@default":"None",
   "/ENTRY[entry]":{
     "@default":"data",
-    "definition":"@eln",
-    "definition/@version":"@eln",
     "title":"@eln",
     "start_time":"@xps_token:file_info/acquisition_file_date",
     "end_time":"@eln",

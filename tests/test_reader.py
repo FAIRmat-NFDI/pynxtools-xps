@@ -9,7 +9,7 @@ import pytest
 
 from pynxtools.dataconverter.convert import get_reader
 from pynxtools.dataconverter.helpers import generate_template_from_nxdl
-from pynxtools.dataconverter.validation import validate_dict_against
+from pynxtools.dataconverter.validation import validate_data_dict, validate_dict_against
 from pynxtools.dataconverter.template import Template
 from pynxtools.definitions.dev_tools.utils.nxdl_utils import get_nexus_definitions_path
 
@@ -66,8 +66,8 @@ def test_example_data(nxdl, sub_reader_data_dir):
     )
 
     assert isinstance(read_data, Template)
-    # assert validate_data_dict(template, read_data, root)
-    assert validate_dict_against(nxdl, read_data, ignore_undocumented=True)
+    assert validate_data_dict(template, read_data, root)
+    # assert validate_dict_against(nxdl, read_data, ignore_undocumented=True)
 
 
 ## This will be implemented in the future.

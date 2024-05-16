@@ -35,7 +35,7 @@ jobs:
           pip install ".[dev]"
       - name: Test with pytest
         run: |
-          coverage run -m pytest -sv --show-capture=both tests
+          coverage run -m pytest -sv --show-capture=no tests
       - name: Submit to coveralls
         continue-on-error: true
         env:

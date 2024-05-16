@@ -76,8 +76,7 @@ def test_example_data(nxdl, sub_reader_data_dir, tmp_path, caplog) -> None:
     assert isinstance(read_data, Template)
 
     with caplog.at_level("ERROR", "WARNING"):
-        is_sucess = validate_dict_against(nxdl, read_data, ignore_undocumented=True)
-        # assert is_sucess, "Validation failed"
+        assert validate_dict_against(nxdl, read_data, ignore_undocumented=True)
     for record in caplog.records:
         for level in ["ERROR", "WARNING"]:
             if record.levelname == level:

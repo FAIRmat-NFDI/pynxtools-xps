@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 from glob import glob
 import pytest
 
+from pynxtools.dataconverter.convert import get_reader
 from pynxtools.dataconverter.helpers import generate_template_from_nxdl
 from pynxtools.dataconverter.validation import validate_dict_against
 from pynxtools.dataconverter.template import Template
@@ -15,52 +16,32 @@ from pynxtools.definitions.dev_tools.utils.nxdl_utils import get_nexus_definitio
 from pynxtools_xps.reader import XPSReader
 
 
+READER = get_reader("xps")
+
+test_cases = [
+    # ("phi_spe", "Phi .spe reader"),
+    # ("phi_pro", "Phi .pro reader"),
+    ("specs_sle", "SPECS .sle reader"),
+    ("specs_xml", "SPECS .xml reader"),
+    ("specs_xy", "SPECS .xy reader"),
+    # ("scienta_ibw", "Scienta .ibw reader"),
+    # ("scienta_txt", "Scienta .txt export reader"),
+    # ("vms_irregular", "Irregular VAMAS reader"),
+    # ("vms_regular", "Regular VAMAS reader"),
+]
+
+test_params = []
+
+for test_case in test_cases:
+    for nxdl in READER.supported_nxdls:
+        test_params += [pytest.param(nxdl, test_case[0], id=f"{test_case[1]}, {nxdl}")]
+
+
 @pytest.mark.parametrize(
-    "sub_reader_data_dir",
-    [
-        pytest.param(
-            "phi_pro",
-            id="Phi .pro reader",
-        ),
-        pytest.param(
-            "phi_spe",
-            id="Phi .spe reader",
-        ),
-        pytest.param(
-            "scienta_ibw",
-            id="Scienta .ibw reader",
-        ),
-        pytest.param(
-            "scienta_txt",
-            id="Scienta txt export reader",
-        ),
-        pytest.param(
-            "specs_sle",
-            id="Specs SLE reader",
-        ),
-        pytest.param(
-            "specs_xml",
-            id="Specs XML reader",
-        ),
-        pytest.param(
-            "specs_xy",
-            id="Specs XY reader",
-        ),
-        pytest.param(
-            "vms_irregular",
-            id="Irregular VAMAS reader",
-        ),
-        pytest.param(
-            "vms_regular",
-            id="Regular VAMAS reader",
-        ),
-        pytest.param(
-            "vms_txt_export",
-            id="Vamas txt export reader",
-        ),
-    ],
+    "nxdl, sub_reader_data_dir",
+    test_params,
 )
-def test_example_data(sub_reader_data_dir):
+def test_example_data(nxdl, sub_reader_data_dir):
     """
     Test the example data for the XPS reader
     """
@@ -74,24 +55,19 @@ def test_example_data(sub_reader_data_dir):
 
     input_files = sorted(glob(os.path.join(reader_dir, "*")))
 
-    for supported_nxdl in reader.supported_nxdls:
-        nxdl_file = os.path.join(
-            def_dir, "contributed_definitions", f"{supported_nxdl}.nxdl.xml"
-        )
+    nxdl_file = os.path.join(def_dir, "contributed_definitions", f"{nxdl}.nxdl.xml")
 
-        root = ET.parse(nxdl_file).getroot()
-        template = Template()
-        generate_template_from_nxdl(root, template)
+    root = ET.parse(nxdl_file).getroot()
+    template = Template()
+    generate_template_from_nxdl(root, template)
 
-        read_data = reader().read(
-            template=Template(template), file_paths=tuple(input_files)
-        )
+    read_data = reader().read(
+        template=Template(template), file_paths=tuple(input_files)
+    )
 
-        assert isinstance(read_data, Template)
-        # assert validate_data_dict(template, read_data, root)
-        assert validate_dict_against(
-            supported_nxdl, read_data, ignore_undocumented=True
-        )
+    assert isinstance(read_data, Template)
+    # assert validate_data_dict(template, read_data, root)
+    assert validate_dict_against(nxdl, read_data, ignore_undocumented=True)
 
 
 ## This will be implemented in the future.

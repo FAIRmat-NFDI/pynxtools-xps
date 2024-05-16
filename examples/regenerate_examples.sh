@@ -32,7 +32,7 @@ function update_specs_examples {
   cd specs/
   cd sle/
   echo "Update .sle example"
-  dataconverter --params-file params.yaml
+  dataconverter EX439_S718_Au.sle eln_data_sle.yaml --reader $READER --nxdl $NXDL --output Au_25_mbar_O2_no_align.nxs
   cd ../xml
   echo "Update .xml example"
   dataconverter In-situ_PBTTT_XPS_SPECS.xml eln_data_xml.yaml --reader $READER --nxdl $NXDL --output In-situ_PBTTT.nxs

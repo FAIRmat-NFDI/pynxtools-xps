@@ -65,7 +65,8 @@ UNITS: Dict[str, str] = {
     "region/start_energy": "eV",
     "source/emission_current": "A",
     "source/source_voltage": "V",
-    "transmission_function/kinetic_energy": "eV",
+    "collectioncolumn/transmission_function/kinetic_energy": "eV",
+    "process/transmission_correction/transmission_function/kinetic_energy": "eV",
 }
 
 
@@ -159,6 +160,7 @@ class SleMapperSpecs(XPSMapper):
                 "focus_displacement_current [nU]",
                 "iris_diameter",
                 "lens_mode",
+                "transmission_function/kinetic_energy",
                 "transmission_function/relative_intensity",
                 "transmission_function/file",
             ],
@@ -269,6 +271,7 @@ class SleMapperSpecs(XPSMapper):
             for key, value in self._xps_dict["data"][entry].items()
             if scan_key.split("_")[0] in key
         ]
+
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
             averaged_scans = np.mean(all_scan_data, axis=0)

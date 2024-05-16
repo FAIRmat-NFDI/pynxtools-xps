@@ -8,7 +8,10 @@ from glob import glob
 import pytest
 
 from pynxtools.dataconverter.convert import get_reader
-from pynxtools.dataconverter.helpers import generate_template_from_nxdl
+from pynxtools.dataconverter.helpers import (
+    generate_template_from_nxdl,
+    write_nexus_def_to_entry,
+)
 from pynxtools.dataconverter.validation import validate_dict_against
 from pynxtools.dataconverter.template import Template
 from pynxtools.definitions.dev_tools.utils.nxdl_utils import get_nexus_definitions_path
@@ -65,6 +68,10 @@ def test_example_data(nxdl, sub_reader_data_dir, tmp_path, caplog) -> None:
     read_data = reader().read(
         template=Template(template), file_paths=tuple(input_files)
     )
+
+    entry_names = read_data.get_all_entry_names()
+    for entry_name in entry_names:
+        write_nexus_def_to_entry(read_data, entry_name, nxdl)
 
     assert isinstance(read_data, Template)
 

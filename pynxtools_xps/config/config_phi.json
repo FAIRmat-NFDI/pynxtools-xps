@@ -331,13 +331,7 @@
         "resolution":"@eln",
         "resolution/@units":"@eln"
       },
-      "transmission_function":{
-        "@signal":"relative_intensity",
-        "@axes":["kinetic_energy"],
-        "kinetic_energy":"@xps_token:transmission_function/kinetic_energy",
-        "kinetic_energy/@units":"@xps_token:transmission_function/kinetic_energy/@units",
-        "relative_intensity":"@xps_token:collectioncolumn/transmission_function/relative_intensity"
-      },
+      "transmission_function":"None",
       "COLLECTIONCOLUMN[collectioncolumn]":{
         "scheme":"@eln",
         "lens_mode":"@xps_token:collectioncolumn/lens_mode",

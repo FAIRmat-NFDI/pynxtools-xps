@@ -79,9 +79,9 @@ def test_example_data(nxdl, sub_reader_data_dir, tmp_path, caplog) -> None:
         is_sucess = validate_dict_against(nxdl, read_data, ignore_undocumented=True)
         # assert is_sucess, "Validation failed"
     for record in caplog.records:
-        print(record.message)
-        if record.levelname == "ERROR":
-            assert False, record.message
+        for level in ["ERROR", "WARNING"]:
+            if record.levelname == level:
+                assert False, record.message
 
 
 ## This will be implemented in the future.

@@ -28,6 +28,7 @@ test_cases = [
     # ("scienta_txt", "Scienta .txt export reader"),
     # ("vms_irregular", "Irregular VAMAS reader"),
     # ("vms_regular", "Regular VAMAS reader"),
+    # ("vms_txt_export, "Vamas txt export"),
 ]
 
 test_params = []

@@ -145,6 +145,7 @@
           "physical_quantity":"@eln",
           "type":"@eln",
           "heater_power":"@eln",
+          "heater_power/@units":"@eln",
           "PID[pid]/setpoint":"@eln",
           "PID[pid]/setpoint/@units":"@eln"
         },

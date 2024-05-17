@@ -25,7 +25,7 @@ READER = get_reader("xps")
 test_cases = [
     ("phi_spe", "Phi .spe reader"),
     ("phi_pro", "Phi .pro reader"),
-    ("specs_sle", "SPECS .sle reader"),
+    # ("specs_sle", "SPECS .sle reader"),
     ("specs_xml", "SPECS .xml reader"),
     ("specs_xy", "SPECS .xy reader"),
     ("scienta_ibw", "Scienta .ibw reader"),

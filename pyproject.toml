@@ -25,8 +25,7 @@ dependencies = [
     "h5py>=3.6.0",
     "igor2",
     "xarray>=0.20.2",
-    # "pynxtools>=0.2.1",
-    "pynxtools@git+https://github.com/FAIRmat-NFDI/pynxtools@appdef-graph-tests",
+    "pynxtools>=0.3.0",
 ]
 
 [project.entry-points."pynxtools.reader"]

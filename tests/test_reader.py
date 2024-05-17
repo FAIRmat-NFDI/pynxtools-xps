@@ -3,6 +3,7 @@ Basic example based test for the XPS reader
 """
 
 import os
+import logging
 import xml.etree.ElementTree as ET
 from glob import glob
 import pytest
@@ -75,12 +76,13 @@ def test_example_data(nxdl, sub_reader_data_dir, tmp_path, caplog) -> None:
 
     assert isinstance(read_data, Template)
 
-    with caplog.at_level("ERROR", "WARNING"):
+    with caplog.at_level(logging.ERROR, logging.WARNING):
         assert validate_dict_against(nxdl, read_data, ignore_undocumented=True)
-    for record in caplog.records:
-        for level in ["ERROR", "WARNING"]:
-            if record.levelname == level:
-                assert False, record.message
+    assert caplog.text == ""
+    # for record in caplog.records:
+    #     for level in ["ERROR", "WARNING"]:
+    #         if record.levelname == level:
+    #             assert False, record.message
 
 
 ## This will be implemented in the future.

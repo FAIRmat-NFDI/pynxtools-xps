@@ -1,5 +1,5 @@
 title: Ag foil
-method: X-ray Photoelectron Spectroscopy (XPS)
+method: X-ray Photoelectron Spectroscopy (XPS)git p
 start_time: 2022-04-08T11:47:02.0200Z
 experiment_institution: Helmholtz-Zentrum Berlin
 experiment_facility: BESSY II
@@ -33,7 +33,7 @@ instrument:
       value: 0.0
     current:
       value: 30
-      unit: "pA"
+      unit: pico-A
   analyser:
     name: Hemispherical Analyser dummy
     description: hemispherical

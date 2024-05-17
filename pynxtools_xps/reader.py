@@ -433,7 +433,7 @@ class XPSReader(BaseReader):
     def read(
         self,
         template: dict = None,
-        file_paths: Tuple[str] = None,
+        file_paths: tuple[str, ...] = None,
         objects: Tuple[Any] = None,
         **kwargs,
     ) -> dict:

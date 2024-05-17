@@ -93,8 +93,11 @@ class XpsDataFileParser:
                 try:
                     parser_class = XpsDataFileParser.__prmt_vndr_cls[file_ext][vendor]
                     parser_obj = parser_class()
+
                     parser_obj.parse_file(file, **kwargs)
                     self.config_file = parser_obj.config_file
+                    print(parser_obj)
+                    print(parser_obj.data_dict)
                     return parser_obj.data_dict
 
                 except ValueError as val_err:

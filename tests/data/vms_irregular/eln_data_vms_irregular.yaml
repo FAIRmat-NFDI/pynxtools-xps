@@ -1,12 +1,10 @@
-definition:
-  value: NXmpes
-  version: 1.0
 title: XPS Experiment
 start_time: 2022-04-08T11:47:02.0200Z
 end_time: 2022-04-08T12:32:06.0200Z
 program_name: SpecsLab 2
 user:
   name: Lukas Pielsticker
+  affiliation: Max Planck Institute for Chemical Energy Conversion
   email: lukas.pielsticker@cec.mpg.de
 instrument:
   device_information:
@@ -28,7 +26,7 @@ instrument:
   beam_xray:
     distance:
       value: 0.0
-      unit: mm
+      unit: milli-m
   analyser:
     description: hemispherical
     name: PHOIBOS 150
@@ -44,10 +42,9 @@ instrument:
         identifier: null
     energydispersion:
       scheme: hemispherical
-      entrance_slit: unknown
       energy_scan_mode: fixed_analyser_transmission
       diameter:
-        unit: mm
+        unit: milli-m
         value: 150
       device_information:
         vendor: null
@@ -115,7 +112,7 @@ instrument:
     type: hot-filament ionization gauge
     value:
       value: 0.000000001
-      unit: mbar
+      unit: milli-bar
     value_log:
       value:
         value: null
@@ -132,9 +129,9 @@ instrument:
         value: null
         unit: null
 sample:
-  description: A polymer material called PBTTT with chemical name  poly[2,5-bis(3-dodecylthiophen-2-yl)thieno[3,2-b]thiophene].
+  description: CoO powder
   substance:
-    molecular_formula_hill: (C42H62S4)n
+    molecular_formula_hill: CoO
   situation: vacuum
   history:
     sample_preparation:

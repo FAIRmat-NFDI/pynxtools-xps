@@ -19,12 +19,11 @@ Class for reading XPS files from raw VMS data.
 #
 # pylint: disable=too-many-lines
 
-import re
 from copy import deepcopy
 import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Union
-
+import warnings
 from itertools import groupby
 import xarray as xr
 import numpy as np
@@ -333,9 +332,10 @@ class VamasMapper(XPSMapper):
             for key, value in self._xps_dict["data"][entry].items()
             if scan_key.split("_")[0] in key
         ]
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            averaged_scans = np.mean(all_scan_data, axis=0)
 
-        # Write averaged cycle data to 'data'.
-        averaged_scans = np.mean(all_scan_data, axis=0)
         if averaged_scans.size == 1:
             # on first scan in cycle
             averaged_scans = intensity_cps
@@ -443,7 +443,7 @@ class VamasParser:
         setattr(datacls, attr, field_type(value))
 
     def _parse_header(self):
-        """Parse the vama header into a VamasHeader object.
+        """Parse the Vamas header into a VamasHeader object.
 
         The common_header_attr are the header attributes that are common
         to all types of Vamas experiment modes.
@@ -604,7 +604,7 @@ class VamasParser:
                 delattr(block, attr)
 
         block.source_analyser_angle = float(self.data.pop(0).strip())
-        block.source_azimuth = self.data.pop(0).strip()
+        block.source_azimuth = float(self.data.pop(0).strip())
         block.analyser_mode = self.data.pop(0).strip()
         block.resolution = float(self.data.pop(0).strip())
 

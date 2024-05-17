@@ -2,8 +2,6 @@
   "/@default":"None",
   "/ENTRY[entry]":{
     "@default":"data",
-    "definition":"@eln",
-    "definition/@version":"@eln",
     "title":"@eln",
     "start_time":"@eln",
     "end_time":"@eln",
@@ -20,8 +18,12 @@
     "name":"@eln",
     "affiliation":"@eln",
     "address":"@eln",
-    "orcid":"@eln",
-    "email":"@eln"
+    "email":"@eln",
+    "IDENTIFIER[orcid]":{
+      "service":"@eln",
+      "identifier":"@eln",
+      "is_persistent":"@eln"
+    }
   },
   "/ENTRY[entry]/INSTRUMENT[instrument]":{
     "@default": "electronanalyser",
@@ -187,38 +189,45 @@
         "measurement":"@eln",
         "type":"@eln",
         "attached_to":"@eln",
-        "value":"@eln"
+        "value":"@eln",
+        "value/@units":"@eln"
       },
       "sample_heater":{
         "name":"@eln",
         "physical_quantity":"@eln",
         "type":"@eln",
         "heater_power":"@eln",
-        "PID[pid]/setpoint":"@eln"
+        "heater_power/@units":"@eln",
+        "PID[pid]/setpoint":"@eln",
+        "PID[pid]/setpoint/@units":"@eln"
       },
       "cryostat":{
         "name":"None",
         "physical_quantity":"None",
         "type":"None",
-        "PID[pid]/setpoint":"None"
+        "PID[pid]/setpoint":"None",
+        "PID[pid]/setpoint/@units":"None"
       },
       "drain_current_amperemeter":{
         "name":"@eln",
         "measurement":"@eln",
         "type":"@eln",
-        "value":"@eln"
+        "value":"@eln",
+        "value/@units":"@eln"
       },
       "sample_bias_voltmeter":{
         "name":"@eln",
         "measurement":"@eln",
         "type":"@eln",
-        "value":"@eln"
+        "value":"@eln",
+        "value/@units":"@eln"
       },
       "sample_bias_potentiostat":{
         "name":"@eln",
         "physical_quantity":"@eln",
         "type":"@eln",
-        "PID[pid]/setpoint":"@eln"
+        "PID[pid]/setpoint":"@eln",
+        "PID[pid]/setpoint/@units":"@eln"
       }
     },
     "pressure_gauge":{
@@ -226,14 +235,18 @@
       "measurement":"@eln",
       "type":"@eln",
       "value":"@eln",
-      "value_log/value":"@eln"
+      "value/@units":"@eln",
+      "value_log/value":"@eln",
+      "value_log/value/@units":"@eln"
     },
     "flood_gun":{
       "name":"@eln",
       "physical_quantity":"@eln",
       "type":"@eln",
       "current":"@eln",
-      "current_log/value":"@eln"
+      "current/@units":"@eln",
+      "current_log/value":"@eln",
+      "current_log/value/@units":"@eln"
     }
   },
   "/ENTRY[entry]/PROCESS_MPES[process]":{
@@ -269,6 +282,7 @@
     "SUBSTANCE[substance]":{
       "name":"@eln",
       "molecular_mass":"@eln",
+      "molecular_mass/@units":"@eln",
       "cas_number":"@eln",
       "molecular_formula_hill":"@eln"
     },

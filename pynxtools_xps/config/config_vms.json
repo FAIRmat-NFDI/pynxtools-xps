@@ -2,8 +2,6 @@
    "/@default":"None",
    "/ENTRY[entry]":{
      "@default":"data",
-     "definition":"@eln",
-     "definition/@version":"@eln",
      "title":"@eln",
      "start_time":"@xps_token:region/time_stamp",
      "end_time":"@eln",
@@ -35,8 +33,12 @@
      "name":"@eln",
      "affiliation":"@eln",
      "address":"@eln",
-     "orcid":"@eln",
-     "email":"@eln"
+     "email":"@eln",
+     "IDENTIFIER[orcid]":{
+       "service":"@eln",
+       "identifier":"@eln",
+       "is_persistent":"@eln"
+     }  
    },
    "/ENTRY[entry]/INSTRUMENT[instrument]":{
      "@default":"electronanalyser",
@@ -91,10 +93,6 @@
        "work_function/@units":"eV",
        "fast_axes":"None",
        "slow_axes":"energy",
-       "analysis_width_x":"@xps_token:analyser/analysis_width_x",
-       "analysis_width_x/@units":"mm",
-       "analysis_width_y":"@xps_token:analyser/analysis_width_y",
-       "analysis_width_y/@units":"mm",
        "target_bias":"@xps_token:analyser/target_bias",
        "target_bias/@units":"V",
        "device_information":{
@@ -129,7 +127,6 @@
          "pass_energy":"@xps_token:energydispersion/pass_energy",
          "pass_energy/@units":"@xps_token:energydispersion/pass_energy/@units",
          "energy_scan_mode":"@xps_token:energydispersion/scan_mode",
-         "entrance_slit":"@eln",
          "exit_slit":"@eln",
          "device_information":{
            "vendor":"@eln",
@@ -145,7 +142,7 @@
          "detector_voltage/@units":"V",
          "count_time":"@xps_token:detector/dwell_time",
          "count_time/@units":"@xps_token:detector/dwell_time/@units",
-         "signal_mode":"@xps_token:detector/signal_mode",
+         "acquisition_mode":"@xps_token:detector/signal_mode",
          "device_information":{
            "vendor":"@eln",
            "model":"@eln",
@@ -189,39 +186,45 @@
          "measurement":"@eln",
          "type":"@eln",
          "attached_to":"@eln",
-         "value":"@eln"
+         "value":"@eln",
+         "value/@units":"@eln"
        },
        "sample_heater":{
          "name":"@eln",
          "physical_quantity":"@eln",
          "type":"@eln",
          "heater_power":"@eln",
-         "PID[pid]/setpoint":"@eln"
+          "heater_power/@units":"@eln",
+         "PID[pid]/setpoint":"@eln",
+         "PID[pid]/setpoint/@units":"@eln"
        },
        "cryostat":{
          "name":"None",
          "physical_quantity":"None",
          "type":"None",
-         "PID[pid]/setpoint":"None"
+         "PID[pid]/setpoint":"None",
+         "PID[pid]/setpoint/@units":"@eln"
        },
        "drain_current_amperemeter":{
          "name":"@eln",
          "measurement":"@eln",
          "type":"@eln",
-         "value":"@eln"
+         "value":"@eln",
+         "value/@units":"@eln"
        },
        "sample_bias_voltmeter":{
          "name":"@eln",
          "measurement":"@eln",
          "type":"@eln",
          "value":"@eln",
-         "value/@units":"V"
+         "value/@units":"@eln"
        },
        "sample_bias_potentiostat":{
          "name":"@eln",
          "physical_quantity":"@eln",
          "type":"@eln",
-         "PID[pid]/setpoint":"@eln"
+         "PID[pid]/setpoint":"@eln",
+         "PID[pid]/setpoint/@units":"@eln"
        }
      },
      "pressure_gauge":{
@@ -229,14 +232,18 @@
        "measurement":"@eln",
        "type":"@eln",
        "value":"@eln",
-       "value_log/value":"@eln"
+       "value/@units":"@eln",
+       "value_log/value":"@eln",
+       "value_log/value/@units":"@eln"
      },
      "flood_gun":{
        "name":"@eln",
        "physical_quantity":"@eln",
        "type":"@eln",
        "current":"@eln",
-       "current_log/value":"@eln"
+       "current/@units":"@eln",
+       "current_log/value":"@eln",
+       "current_log/value/@units":"@eln"
      }
    },
    "/ENTRY[entry]/PROCESS_MPES[process]":{
@@ -310,7 +317,7 @@
        "AXISNAME[sample_rotation]":"@xps_token:sample/sample_rotation",
        "AXISNAME[sample_rotation]/@depends_on":"sample_tilt_azimuth",
        "AXISNAME[sample_rotation]/@transformation_type": "rotation",
-       "AXISNAME[sample_rotation]/@units":"@xps_token:sample/sample_rotation_angle/@units",
+       "AXISNAME[sample_rotation]/@units":"@xps_token:sample/sample_rotation/@units",
        "AXISNAME[sample_rotation]/@vector": [1, 0, 0],
 
        "AXISNAME[sample_tilt_azimuth]":"@xps_token:sample/sample_tilt_azimuth",

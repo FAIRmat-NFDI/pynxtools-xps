@@ -2,8 +2,6 @@
   "/@default":"None",
   "/ENTRY[entry]":{
     "@default":"data",
-    "definition":"@eln",
-    "definition/@version":"@eln",
     "title":"@eln",
     "start_time":"@xps_token:file_info/acquisition_file_date",
     "end_time":"@eln",
@@ -21,8 +19,12 @@
     "name":"@xps_token:user/user_name",
     "affiliation":"@eln",
     "address":"@eln",
-    "orcid":"@eln",
-    "email":"@eln"
+    "email":"@eln",
+    "IDENTIFIER[orcid]":{
+      "service":"@eln",
+      "identifier":"@eln",
+      "is_persistent":"@eln"
+    }
   },
   "/ENTRY[entry]/INSTRUMENT[instrument]":{
     "@default": "electronanalyser",
@@ -36,18 +38,6 @@
       "type":"@eln",
       "resolution":"@eln",
       "resolution/@units":"@eln"
-    },
-    "depends_on": "/entry/instrument/source_xray/transformations/source_analyser_angle",
-    "TRANSFORMATIONS[transformations]": {
-      "AXISNAME[source_analyser_angle]/@depends_on":".",
-      "AXISNAME[source_analyser_angle]":"@xps_token/source_analyser_angle",
-      "AXISNAME[source_analyser_angle]/@transformation_type": "rotation",
-      "AXISNAME[source_analyser_angle]/@units":"@xps_token/source_analyser_angle/@units",
-      "AXISNAME[source_analyser_angle]/@vector": [
-        0,
-        0,
-        1
-      ]
     },
     "sourceTYPE[source_xray]":{
       "type":"@eln",
@@ -112,6 +102,18 @@
         "offset_x/@units":"@xps_token:xray_source/xray_stigmator_x/@units",
         "offset_y":"@xps_token:xray_source/xray_stigmator_y",
         "offset_y/@units":"@xps_token:xray_source/xray_stigmator_y/@units"
+      },
+      "depends_on": "/entry/instrument/source_xray/transformations/source_analyser_angle",
+      "TRANSFORMATIONS[transformations]": {
+        "AXISNAME[source_analyser_angle]/@depends_on":".",
+        "AXISNAME[source_analyser_angle]":"@xps_token:source_analyser_angle",
+        "AXISNAME[source_analyser_angle]/@transformation_type": "rotation",
+        "AXISNAME[source_analyser_angle]/@units":"@xps_token:source_analyser_angle/@units",
+        "AXISNAME[source_analyser_angle]/@vector": [
+          0,
+          0,
+          1
+        ]
       }
     },
     "beamTYPE[beam_xray]":{
@@ -134,7 +136,7 @@
       "energy":"@xps_token:flood_gun/flood_gun_energy",
       "energy/@units":"@xps_token:flood_gun/flood_gun_energy/@units",
       "filament_current":"@xps_token:flood_gun/flood_gun_filament_current",
-      "filament_currentrrent/@units":"@xps_token:flood_gun/flood_gun_filament_current/@units",
+      "filament_current/@units":"@xps_token:flood_gun/flood_gun_filament_current/@units",
       "gain":"@xps_token:flood_gun/flood_gun_gain",
       "flood_gun_mode":"@xps_token:flood_gun/flood_gun_mode",
       "frequency":"@xps_token:flood_gun/pulse_frequency",
@@ -323,17 +325,11 @@
       },
       "energy_resolution":{
         "physical_quantity":"energy",
-        "type":"estimated",
-        "resolution":"@xps_token:data/step_size",
-        "resolution/@units":"@xps_token:data/step_size/@units"
+        "type":"@eln",
+        "resolution":"@eln",
+        "resolution/@units":"@eln"
       },
-      "transmission_function":{
-        "@signal":"relative_intensity",
-        "@axes":["kinetic_energy"],
-        "kinetic_energy":"@xps_token:transmission_function/kinetic_energy",
-        "kinetic_energy/@units":"@xps_token:transmission_function/kinetic_energy/@units",
-        "relative_intensity":"@xps_token:collectioncolumn/transmission_function/relative_intensity"
-      },
+      "transmission_function":"None",
       "COLLECTIONCOLUMN[collectioncolumn]":{
         "scheme":"@eln",
         "lens_mode":"@xps_token:collectioncolumn/lens_mode",
@@ -427,38 +423,45 @@
         "measurement":"@eln",
         "type":"@eln",
         "attached_to":"@eln",
-        "value":"@eln"
+        "value":"@eln",
+        "value/@units":"@eln"
       },
       "sample_heater":{
         "name":"@eln",
         "physical_quantity":"@eln",
         "type":"@eln",
         "heater_power":"@eln",
-        "PID[pid]/setpoint":"@eln"
+        "heater_power/@units":"@eln",
+        "PID[pid]/setpoint":"@eln",
+        "PID[pid]/setpoint/@units":"@eln"
       },
       "cryostat":{
         "name":"None",
         "physical_quantity":"None",
         "type":"None",
-        "PID[pid]/setpoint":"None"
+        "PID[pid]/setpoint":"None",
+        "PID[pid]/setpoint/@units":"@eln"
       },
       "drain_current_amperemeter":{
         "name":"@eln",
         "measurement":"@eln",
         "type":"@eln",
-        "value":"@eln"
+        "value":"@eln",
+        "value/@units":"@eln"
       },
       "sample_bias_voltmeter":{
         "name":"@eln",
         "measurement":"@eln",
         "type":"@eln",
-        "value":"@eln"
+        "value":"@eln",
+        "value/@units":"@eln"
       },
       "sample_bias_potentiostat":{
         "name":"@eln",
         "physical_quantity":"@eln",
         "type":"@eln",
-        "PID[pid]/setpoint":"@eln"
+        "PID[pid]/setpoint":"@eln",
+        "PID[pid]/setpoint/@units":"@eln"
       },
       "POSITIONER[stage_x]":{
         "value": "@xps_token:manipulator/stage_x",
@@ -515,7 +518,9 @@
       "measurement":"@eln",
       "type":"@eln",
       "value":"@eln",
-      "value_log/value":"@eln"
+      "value/@units":"@eln",
+      "value_log/value":"@eln",
+      "value_log/value/@units":"@eln"
     },
     "flood_gun":{
       "name":"@eln",
@@ -548,6 +553,7 @@
     "SUBSTANCE[substance]":{
       "name":"@eln",
       "molecular_mass":"@eln",
+      "molecular_mass/@units":"@eln",
       "cas_number":"@eln",
       "molecular_formula_hill":"@eln"
     },

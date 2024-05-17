@@ -22,6 +22,8 @@ Classes for reading XPS files from TXT export of CasaXPS.
 import itertools
 import operator
 import copy
+import warnings
+from typing import Any, Dict, List
 from abc import ABC, abstractmethod
 import xarray as xr
 import numpy as np
@@ -35,6 +37,11 @@ from pynxtools_xps.reader_utils import (
     construct_data_key,
     construct_detector_data_key,
 )
+from pynxtools_xps.value_mappers import get_units_for_key, convert_units
+
+UNITS: dict = {
+    "data/step_size": "eV",
+}
 
 
 class TxtMapperVamasExport(XPSMapper):
@@ -90,41 +97,42 @@ class TxtMapperVamasExport(XPSMapper):
         # pylint: disable=duplicate-code
         spectra = copy.deepcopy(self.raw_data)
 
-        self._xps_dict["data"]: dict = {}
+        self._xps_dict["data"]: Dict[str, Any] = {}
 
-        key_map = {
+        template_key_map = {
             "file_info": [],
             "user": [],
             "instrument": [],
-            "source": [],
-            "beam": [
+            "source_xray": [],
+            "beam_xray": [
                 "excitation_energy",
-                "excitation_energy/units",
+                "excitation_energy/@units",
             ],
             "analyser": [],
             "collectioncolumn": [],
             "energydispersion": [],
             "detector": [
                 "dwell_time",
-                "dwell_time/units",
+                "dwell_time/@units",
             ],
             "manipulator": [],
             "calibration": [],
             "sample": [],
             "data": [
-                "dwell_time",
-                "x_units" "y_units",
+                "energy_type",
+                "y_units",
                 "start_energy",
                 "stop_energy",
                 "step_size",
             ],
-            "region": ["region_name"],
         }
 
         for spectrum in spectra:
-            self._update_xps_dict_with_spectrum(spectrum, key_map)
+            self._update_xps_dict_with_spectrum(spectrum, template_key_map)
 
-    def _update_xps_dict_with_spectrum(self, spectrum, key_map):
+    def _update_xps_dict_with_spectrum(
+        self, spectrum: Dict[str, Any], template_key_map: Dict[str, str]
+    ):
         """
         Map one spectrum from raw data to NXmpes-ready dict.
 
@@ -140,8 +148,8 @@ class TxtMapperVamasExport(XPSMapper):
             "file_info": f"{file_parent}",
             "user": f"{region_parent}/user",
             "instrument": f"{instrument_parent}",
-            "source": f"{instrument_parent}/source",
-            "beam": f"{instrument_parent}/beam",
+            "source_xray": f"{instrument_parent}/source_xray",
+            "beam_xray": f"{instrument_parent}/beam_xray",
             "analyser": f"{analyser_parent}",
             "collectioncolumn": f"{analyser_parent}/collectioncolumn",
             "energydispersion": f"{analyser_parent}/energydispersion",
@@ -150,10 +158,9 @@ class TxtMapperVamasExport(XPSMapper):
             "calibration": f"{instrument_parent}/calibration",
             "sample": f"{region_parent}/sample",
             "data": f"{region_parent}/data",
-            "region": f"{region_parent}",
         }
 
-        for grouping, spectrum_keys in key_map.items():
+        for grouping, spectrum_keys in template_key_map.items():
             root = path_map[str(grouping)]
             for spectrum_key in spectrum_keys:
                 try:
@@ -161,6 +168,11 @@ class TxtMapperVamasExport(XPSMapper):
                     self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
                 except KeyError:
                     pass
+
+                unit_key = f"{grouping}/{spectrum_key}"
+                units = get_units_for_key(unit_key, UNITS)
+                if units is not None:
+                    self._xps_dict[f"{root}/{mpes_key}/@units"] = units
 
         # Create keys for writing to data and detector
         entry = construct_entry_name(region_parent)
@@ -182,7 +194,10 @@ class TxtMapperVamasExport(XPSMapper):
             for key, value in self._xps_dict["data"][entry].items()
             if scan_key.split("_")[0] in key
         ]
-        averaged_scans = np.mean(all_scan_data, axis=0)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            averaged_scans = np.mean(all_scan_data, axis=0)
+
         if averaged_scans.size == 1:
             # on first scan in cycle
             averaged_scans = intensity
@@ -205,10 +220,9 @@ class TextParser(ABC):  # pylint: disable=too-few-public-methods
     """
 
     def __init__(self):
-        self.lines = []
-        self.data_dict = []
-        self.n_headerlines = 7
-        self.uniform_energy_steps = True
+        self.lines: List[str] = []
+        self.n_headerlines: int = 7
+        self.uniform_energy_steps: bool = True
 
     def parse_file(self, file, uniform_energy_steps=True, **kwargs):
         """
@@ -383,8 +397,8 @@ class TextParserRows(TextParser):
             spectrum_settings = {
                 "group_name": group_name,
                 "spectrum_type": region,
-                "x_units": "binding",
-                "y_units": spec_header.split(":")[3],
+                "energy_type": "binding",
+                "y_units": convert_units(spec_header.split(":")[3]),
             }
             settings += [spectrum_settings]
 
@@ -435,8 +449,8 @@ class TextParserRows(TextParser):
                 },
                 "start_energy": x_bin[0],
                 "stop_energy": x_bin[-1],
-                "x_units": "binding",
-                "y_units": "CPS",
+                "energy_type": "binding",
+                "y_units": "counts_per_second",
             }
 
             if check_uniform_step_width(x_bin):
@@ -495,7 +509,7 @@ class TextParserColumns(TextParser):
         settings = {
             "group_name": group_name,
             "spectrum_type": region,
-            "excitation_energy": header[1].split("\t")[2],
+            "excitation_energy": float(header[1].split("\t")[2]),
             "excitation_energy/@units": header[1].split("\t")[1].split(" ")[-1],
             "dwell_time": float(header[1].split("\t")[4].strip()),
             "dwell_time/@units": header[1].split("\t")[3].split(" ")[-1],
@@ -561,6 +575,8 @@ class TextParserColumns(TextParser):
                 {
                     "start_energy": kinetic_energy[0],
                     "stop_energy": kinetic_energy[-1],
+                    "energy_type": "binding",
+                    "y_units": "counts_per_second",
                 }
             )
             if check_uniform_step_width(kinetic_energy):

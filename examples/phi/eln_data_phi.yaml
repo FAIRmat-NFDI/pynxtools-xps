@@ -1,6 +1,3 @@
-definition:
-  value: NXmpes
-  version: 1.0
 title: SnO2_10nnm
 experiment_institution: Justus-Liebig-Universität Gießen
 experiment_facility: AG Spektroskopie und Optik
@@ -22,11 +19,11 @@ instrument:
     device_information:
       vendor: PHI Electronics
       model: VersaProbe 4 X-ray Source
-      identifier: null
+      identifier: v1.0
   beam_xray:
     distance:
       value: 0.0
-      unit: mm
+      unit: milli-m
   sourceTYPE[source_gas_cluster_ion_beam]:
     type_other: argon gas cluster ion beam gun
     description: argon cluster GCIB
@@ -42,6 +39,11 @@ instrument:
       vendor: PHI Electronics
       model: VersaProbe 4 Hemispherical Analyser
       identifier: null
+    energy_resolution:
+      type: calibrated
+      resolution:
+        value: 0.1
+        unit: eV
     collectioncolumn:
       scheme: angular dispersive
       device_information:
@@ -51,7 +53,7 @@ instrument:
     energydispersion:
       scheme: hemispherical
       diameter:
-        unit: mm
+        unit: milli-m
         value: 150
       device_information:
         vendor: PHI Electronics
@@ -100,7 +102,7 @@ instrument:
       type: wire
       value:
         value: 0.1
-        unit: nA
+        unit: nano-A
     sample_bias_voltmeter:
       name: XPS sample voltmeter
       measurement: voltage
@@ -123,7 +125,7 @@ instrument:
     type: pirani gauge
     value:
       value: 0.000000001
-      unit: mbar
+      unit: milli-bar
     value_log:
       value:
         value: null

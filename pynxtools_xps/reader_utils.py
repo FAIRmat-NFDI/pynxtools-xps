@@ -457,6 +457,7 @@ def align_name_part(name_part: str):
         " ": "_",
         ",": "",
         ".": "_",
+        "-": "_",
     }
 
     for key, val in replacements.items():

@@ -93,7 +93,7 @@ class VamasBlock(XpsDataclass):
     last_linescan_x_end: float = 0.0
     last_linescan_y_end: float = 0.0
     source_analyser_angle: float = 0.0
-    source_azimuth: str = "180"
+    source_azimuth: float = 180.0
     analyser_mode: str = ""
     resolution: float = 0.0
     differential_width_aes: float = 0.0

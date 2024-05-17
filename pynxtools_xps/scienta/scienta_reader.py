@@ -20,6 +20,7 @@ Class for reading XPS files from Scienta spectrometers.
 
 import re
 import copy
+import warnings
 from pathlib import Path
 from typing import Any, Dict, List, Union, Tuple
 import xarray as xr
@@ -34,7 +35,7 @@ from pynxtools_xps.reader_utils import (
     _re_map_single_value,
     _check_valid_value,
 )
-from pynxtools_xps.value_mappers import get_units_for_key, convert_intensity_units
+from pynxtools_xps.value_mappers import get_units_for_key, convert_units
 
 from pynxtools_xps.scienta.scienta_data_model import ScientaHeader, ScientaRegion
 from pynxtools_xps.scienta.scienta_mappings import (
@@ -224,7 +225,10 @@ class MapperScienta(XPSMapper):
             for key, value in self._xps_dict["data"][entry].items()
             if scan_key.split("_")[0] in key
         ]
-        averaged_scans = np.mean(all_scan_data, axis=0)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            averaged_scans = np.mean(all_scan_data, axis=0)
+
         if averaged_scans.size == 1:
             # on first scan in cycle
             averaged_scans = intensity
@@ -500,7 +504,7 @@ class ScientaIgorParser:
                 spectrum_dict[key] = notes[key]
 
             spectrum_dict["igor_binary_wave_format_version"] = ibw_version
-            spectrum_dict["intensity/@units"] = convert_intensity_units(data_unit_label)
+            spectrum_dict["intensity/@units"] = convert_units(data_unit_label)
 
             self.spectra.append(spectrum_dict)
 

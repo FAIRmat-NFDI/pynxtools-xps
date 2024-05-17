@@ -45,7 +45,7 @@ BOOL_MAP = {
     "No": False,
 }
 
-INTENSITY_UNIT_MAP = {
+UNIT_MAP = {
     "Counts": "counts",
     "counts/s": "counts_per_second",
     "CPS": "counts_per_second",
@@ -94,9 +94,9 @@ def convert_bool(bool_like: str):
     return _replace_from_map(bool_like, BOOL_MAP)
 
 
-def convert_intensity_units(y_units: str):
+def convert_units(units: str):
     """Map y_units to shortened values."""
-    return _replace_from_map(y_units, INTENSITY_UNIT_MAP)
+    return _replace_from_map(units, UNIT_MAP)
 
 
 def get_units_for_key(unit_key: str, unit_map: Dict[str, str]) -> str:

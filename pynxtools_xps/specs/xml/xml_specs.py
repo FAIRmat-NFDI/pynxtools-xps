@@ -20,6 +20,7 @@ Specs Lab Prodigy XML export, to be passed to mpes nxdl
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import re
 import xml.etree.ElementTree as EmtT
 from typing import Tuple, List, Any
 import copy
@@ -129,7 +130,7 @@ class XmlMapperSpecs(XPSMapper):
                     starting_eng_pnts[ind], ending_eng_pnts[ind], values_per_scan
                 )
 
-            channeltron_eng_axes = np.round_(channeltron_eng_axes, decimals=8)
+            channeltron_eng_axes = np.round(channeltron_eng_axes, decimals=8)
             # construct ultimate or incorporated energy axis from
             # lower to higher energy
             scans = list(raw_data["scans"].keys())
@@ -150,7 +151,7 @@ class XmlMapperSpecs(XPSMapper):
                 # "scan" in individual CountsSeq
                 scan_counts = raw_data["scans"][scan_nm]
 
-                if scan_mode == "FixedAnalyzerTransmission":
+                if scan_mode == "fixed_analyser_transmission":
                     for row in np.arange(mcd_num):
                         count_on_row = scan_counts[row::mcd_num]
                         # Reverse counts from lower to higher
@@ -161,7 +162,7 @@ class XmlMapperSpecs(XPSMapper):
                         channel_counts[0, :] += count_on_row
 
                         # Storing detector's raw counts
-                        self._xps_dict["data"][entry][f"{scan_nm}_chan_{row}"] = (
+                        self._xps_dict["data"][entry][f"{scan_nm}_chan{row}"] = (
                             xr.DataArray(
                                 data=channel_counts[row + 1, :],
                                 coords={"energy": binding_energy},
@@ -198,6 +199,34 @@ class XmlMapperSpecs(XPSMapper):
                                 data=channel_counts[0, :],
                                 coords={"energy": binding_energy},
                             )
+
+            # Write averaged cycle data to 'data'.
+            averaged_scans = {
+                key: value
+                for key, value in self._xps_dict["data"][entry].items()
+                if "_chan" not in key
+            }
+
+            average_cycles = {}
+
+            for key, value in averaged_scans.items():
+                cycle_number = re.findall(r"cycle(\d+)_", key)[0]
+                cycle_key = f"cycle{cycle_number}"
+                if cycle_number not in average_cycles:
+                    average_cycles[cycle_key] = value
+                else:
+                    average_cycles[cycle_key] += value
+
+            for cycle, value in average_cycles.items():
+                average_cycles[cycle] = value / len(
+                    [k for k in averaged_scans.keys() if cycle in k]
+                )
+
+            for cycle, value in average_cycles.items():
+                self._xps_dict["data"][entry][cycle] = xr.DataArray(
+                    data=value,
+                    coords={"energy": binding_energy},
+                )
 
 
 class XmlParserSpecs:
@@ -332,7 +361,7 @@ class XmlParserSpecs:
         for unit in units:
             if f"_[{unit}]" in section_nm_reslvr:
                 section_nm_reslvr, _ = section_nm_reslvr.split("_")
-                self.metadata_dict[f"{parent_path}/" f"{section_nm_reslvr}/@unit"] = (
+                self.metadata_dict[f"{parent_path}/" f"{section_nm_reslvr}/@units"] = (
                     unit
                 )
 

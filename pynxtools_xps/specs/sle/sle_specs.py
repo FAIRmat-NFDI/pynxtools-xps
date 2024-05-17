@@ -27,6 +27,7 @@ import re
 import struct
 import copy
 from typing import Dict, Any
+import warnings
 from datetime import datetime
 import sqlite3
 import xml.etree.ElementTree as ET
@@ -53,7 +54,7 @@ from pynxtools_xps.value_mappers import (
 UNITS: Dict[str, str] = {
     "analyser/work_function": "eV",
     "beam/excitation_energy": "eV",
-    "collectioncolumn/iris_diameter": "mm",
+    "collectioncolumn/iris_diameter": "milli-m",
     "data/step_size": "eV",
     "detector/detector_voltage": "V",
     "detector/dwell_time": "s",
@@ -64,7 +65,8 @@ UNITS: Dict[str, str] = {
     "region/start_energy": "eV",
     "source/emission_current": "A",
     "source/source_voltage": "V",
-    "transmission_function/kinetic_energy": "eV",
+    "collectioncolumn/transmission_function/kinetic_energy": "eV",
+    "process/transmission_correction/transmission_function/kinetic_energy": "eV",
 }
 
 
@@ -158,6 +160,7 @@ class SleMapperSpecs(XPSMapper):
                 "focus_displacement_current [nU]",
                 "iris_diameter",
                 "lens_mode",
+                "transmission_function/kinetic_energy",
                 "transmission_function/relative_intensity",
                 "transmission_function/file",
             ],
@@ -253,9 +256,6 @@ class SleMapperSpecs(XPSMapper):
         detector_data_key_child = construct_detector_data_key(spectrum)
 
         energy = np.array(spectrum["data"]["x"])
-        # Add energy axis to energy_calibration
-        calib_energy_key = f'{path_map["process/energy_calibration"]}/energy'
-        self._xps_dict[calib_energy_key] = energy
 
         # If multiple spectra exist to entry, only create a new
         # xr.Dataset if the entry occurs for the first time.
@@ -268,49 +268,55 @@ class SleMapperSpecs(XPSMapper):
             for key, value in self._xps_dict["data"][entry].items()
             if scan_key.split("_")[0] in key
         ]
-        averaged_scans = np.mean(all_scan_data, axis=0)
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            averaged_scans = np.mean(all_scan_data, axis=0)
+
         if averaged_scans.size == 1:
             # on first scan in cycle
             averaged_scans = spectrum["data"]["cps_calib"]
 
-        try:
+        if averaged_scans.shape == energy.shape:
+            # TODO: fix this hotfix so that all data can be written
+
+            # Add energy axis to energy_calibration
+            calib_energy_key = f'{path_map["process/energy_calibration"]}/energy'
+            self._xps_dict[calib_energy_key] = energy
+
             self._xps_dict["data"][entry][scan_key.split("_")[0]] = xr.DataArray(
                 data=averaged_scans,
                 coords={"energy": energy},
             )
-        # This error occurs if twice the same region is scanned with
-        # different step sizes.
-        except ValueError:
-            pass
 
-        # Write scan data to 'data'.
-        self._xps_dict["data"][entry][scan_key] = xr.DataArray(
-            data=spectrum["data"]["cps_calib"], coords={"energy": energy}
-        )
-
-        channels = [key for key in spectrum["data"] if "cps_ch_" in key]
-        for channel in channels:
-            ch_no = channel.rsplit("_")[-1]
-            channel_key = f"{scan_key}_chan{ch_no}"
-            detector_data_key = (
-                f"{path_map['detector']}/{detector_data_key_child}"
-                f"_channels_Channel_{ch_no}/counts"
-            )
-            cps = np.array(spectrum["data"][channel])
-
-            # Write raw data to detector.
-            self._xps_dict[detector_data_key] = spectrum["data"]["cps_calib"]
-            # Write channel data to 'data'.
-            self._xps_dict["data"][entry][channel_key] = xr.DataArray(
-                data=cps, coords={"energy": energy}
+            # Write scan data to 'data'.
+            self._xps_dict["data"][entry][scan_key] = xr.DataArray(
+                data=spectrum["data"]["cps_calib"], coords={"energy": energy}
             )
 
-        # Add unit for detector data
-        detector_data_unit_key = f"{path_map['detector']}/raw_data/raw/@units"
+            channels = [key for key in spectrum["data"] if "cps_ch_" in key]
+            for channel in channels:
+                ch_no = channel.rsplit("_")[-1]
+                channel_key = f"{scan_key}_chan{ch_no}"
+                detector_data_key = (
+                    f"{path_map['detector']}/{detector_data_key_child}"
+                    f"_channels_Channel_{ch_no}/counts"
+                )
+                cps = np.array(spectrum["data"][channel])
 
-        detector_data_units = get_units_for_key("detector/raw_data/raw", UNITS)
-        if detector_data_units is not None:
-            self._xps_dict[detector_data_unit_key] = detector_data_units
+                # Write raw data to detector.
+                self._xps_dict[detector_data_key] = spectrum["data"]["cps_calib"]
+                # Write channel data to 'data'.
+                self._xps_dict["data"][entry][channel_key] = xr.DataArray(
+                    data=cps, coords={"energy": energy}
+                )
+
+            # Add unit for detector data
+            detector_data_unit_key = f"{path_map['detector']}/raw_data/raw/@units"
+
+            detector_data_units = get_units_for_key("detector/raw_data/raw", UNITS)
+            if detector_data_units is not None:
+                self._xps_dict[detector_data_unit_key] = detector_data_units
 
 
 class SleProdigyParser(ABC):

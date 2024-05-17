@@ -25,6 +25,7 @@ Specs Lab Prodigy XY exports, to be passed to mpes nxdl
 
 import re
 from typing import List, Dict, Any, Union
+import warnings
 import itertools
 from collections import OrderedDict
 import copy
@@ -46,7 +47,7 @@ from pynxtools_xps.reader_utils import (
 from pynxtools_xps.value_mappers import (
     convert_measurement_method,
     convert_energy_scan_mode,
-    convert_intensity_units,
+    convert_units,
 )
 
 SETTINGS_MAP: Dict[str, str] = {
@@ -261,7 +262,9 @@ class XyMapperSpecs(XPSMapper):
                 for key, value in self._xps_dict.items()
                 if detector_data_key.split("Channel_")[0] in key
             ]
-            averaged_channels = np.mean(all_channel_data, axis=0)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=RuntimeWarning)
+                averaged_channels = np.mean(all_channel_data, axis=0)
 
         if not self.parser.export_settings["Separate Scan Data"]:
             averaged_scans = intensity
@@ -271,7 +274,9 @@ class XyMapperSpecs(XPSMapper):
                 for key, value in self._xps_dict.items()
                 if detector_data_key.split("Scan_")[0] in key
             ]
-            averaged_scans = np.mean(all_scan_data, axis=0)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=RuntimeWarning)
+                averaged_scans = np.mean(all_scan_data, axis=0)
 
         # Write to data in order: scan, cycle, channel
 
@@ -681,12 +686,12 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
                     if not self.export_settings["Transmission Function"]:
                         x_units, y_units = val.split(" ")
                         scan_settings["x_units"] = x_units
-                        scan_settings["y_units"] = convert_intensity_units(y_units)
+                        scan_settings["y_units"] = convert_units(y_units)
 
                     else:
                         x_units, y_units, tf_units = val.split(" ")
                         scan_settings["x_units"] = x_units
-                        scan_settings["y_units"] = convert_intensity_units(y_units)
+                        scan_settings["y_units"] = convert_units(y_units)
                         scan_settings["tf_units"] = tf_units
 
             if not line.startswith(self.prefix) and line.strip("\n"):

@@ -77,7 +77,11 @@ def test_example_data(nxdl, sub_reader_data_dir, tmp_path, caplog) -> None:
     assert isinstance(read_data, Template)
 
     with caplog.at_level(logging.WARNING):
-        assert validate_dict_against(nxdl, read_data, ignore_undocumented=True)
+        is_success = validate_dict_against(nxdl, read_data, ignore_undocumented=True)
+        import sys
+
+        sys.stdout.write(caplog.text)
+        assert is_success
     assert caplog.text == ""
     # for record in caplog.records:
     #     for level in ["ERROR", "WARNING"]:

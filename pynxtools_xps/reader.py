@@ -442,6 +442,9 @@ class XPSReader(BaseReader):
 
         reader_dir = Path(__file__).parent
 
+        ENTRY_SET: Set[str] = set()
+        DETECTOR_SET: Set[str] = set()
+
         xps_data_dict: Dict[str, Any] = {}
         eln_data_dict: Dict[str, Any] = {}
         config_file: Path = reader_dir.joinpath("config", "template.json")

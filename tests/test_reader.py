@@ -72,7 +72,7 @@ def test_example_data(nxdl, sub_reader_data_dir, tmp_path, caplog) -> None:
         template=Template(template), file_paths=tuple(input_files)
     )
 
-    entry_names = read_data.get_all_entry_names()
+    entry_names = read_data.get_all_entry_names()  # type: ignore[attr-defined]
     for entry_name in entry_names:
         write_nexus_def_to_entry(read_data, entry_name, nxdl)
 

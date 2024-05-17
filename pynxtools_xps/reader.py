@@ -488,8 +488,6 @@ class XPSReader(BaseReader):
 
         config_dict = parse_flatten_json(config_file)
 
-        print(xps_data_dict["data"])
-
         get_entries_and_detectors(config_dict, xps_data_dict)
         fill_template_with_xps_data(config_dict, xps_data_dict, template)
 

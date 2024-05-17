@@ -96,8 +96,6 @@ class XpsDataFileParser:
 
                     parser_obj.parse_file(file, **kwargs)
                     self.config_file = parser_obj.config_file
-                    print(parser_obj)
-                    print(parser_obj.data_dict)
                     return parser_obj.data_dict
 
                 except ValueError as val_err:

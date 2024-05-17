@@ -442,8 +442,8 @@ class XPSReader(BaseReader):
 
         reader_dir = Path(__file__).parent
 
-        ENTRY_SET: Set[str] = set()
-        DETECTOR_SET: Set[str] = set()
+        ENTRY_SET.clear()
+        DETECTOR_SET.clear()
 
         xps_data_dict: Dict[str, Any] = {}
         eln_data_dict: Dict[str, Any] = {}

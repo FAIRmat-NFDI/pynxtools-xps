@@ -87,10 +87,10 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
         tmp_path=tmp_path,
         caplog=caplog,
     )
-    test.convert_to_nexus()
+    test.convert_to_nexus(ignore_undocumented=True)
+    test.check_reproducibility_of_nexus()
 
 
-# =============================================================================
 # @pytest.mark.parametrize(
 #     "nxdl, sub_reader_data_dir",
 #     test_params,
@@ -98,7 +98,7 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
 # def test_reproducibility_of_nexus(nxdl, sub_reader_data_dir, tmp_path, caplog):
 #     """
 #     Test reproducibility of the NeXus writing.
-#
+
 #     Parameters
 #     ----------
 #     nxdl : str
@@ -114,16 +114,16 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
 #     caplog : _pytest.logging.LogCaptureFixture
 #         Pytest fixture variable, used to capture the log messages during the
 #         test.
-#
+
 #     Returns
 #     -------
 #     None.
-#
+
 #     """
 #     files_or_dir = os.path.join(
 #         *[os.path.dirname(__file__), "data", sub_reader_data_dir]
 #     )
-#
+
 #     test = ReaderTest(
 #         nxdl=nxdl,
 #         reader=READER,
@@ -132,7 +132,8 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
 #         caplog=caplog,
 #     )
 #     test.check_reproducibility_of_nexus()
-#
+
+
 ## This will be implemented in the future.
 # =============================================================================
 # def test_vms_mapper():

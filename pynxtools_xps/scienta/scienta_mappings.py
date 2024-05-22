@@ -62,7 +62,7 @@ def _construct_date_time(date_string: str, time_string: str) -> Optional[str]:
             try:
                 return datetime.datetime.strptime(date_string, date_fmt)
             except ValueError as err:
-                raise ValueError("Date format not recognized") from err
+                continue
         raise ValueError("Date format not recognized")
 
     def _parse_time(time_string: str) -> datetime.time:
@@ -71,7 +71,7 @@ def _construct_date_time(date_string: str, time_string: str) -> Optional[str]:
             try:
                 return datetime.datetime.strptime(time_string, time_fmt).time()
             except ValueError as err:
-                raise ValueError("Time format not recognized") from err
+                continue
         raise ValueError("Time format not recognized")
 
     try:

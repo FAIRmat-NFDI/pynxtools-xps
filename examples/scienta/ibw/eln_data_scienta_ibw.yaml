@@ -33,7 +33,7 @@ instrument:
       value: 0.0
     current:
       value: 30
-      unit: pico-A
+      unit: pA
   analyser:
     name: Hemispherical Analyser dummy
     description: hemispherical

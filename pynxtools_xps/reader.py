@@ -37,7 +37,8 @@ from pynxtools.dataconverter.readers.utils import (
 )
 from pynxtools.dataconverter.template import Template
 from pynxtools_xps.file_parser import XpsDataFileParser
-from pynxtools_xps.reader_utils import construct_entry_name
+from pynxtools_xps.reader_utils import construct_entry_name, check_units
+
 
 np.set_printoptions(threshold=sys.maxsize)
 
@@ -503,6 +504,8 @@ class XPSReader(BaseReader):
         final_template = Template()
         for key, val in template.items():
             if ("/ENTRY[entry]" not in key) and (val is not None):
+                if "@units" in key:
+                    check_units(key, val)
                 final_template[key] = val
 
         return final_template

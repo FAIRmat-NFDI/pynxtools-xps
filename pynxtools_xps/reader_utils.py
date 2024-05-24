@@ -24,6 +24,7 @@ from typing import Any, Dict, List, Union, Optional
 from pathlib import Path
 from scipy.interpolate import interp1d
 import numpy as np
+import pint
 
 from dataclasses import dataclass
 
@@ -352,7 +353,7 @@ def _re_map_single_value(
     return value
 
 
-def _check_valid_value(value: Union[str, int, float, bool, np.ndarray]):
+def _check_valid_value(value: Union[str, int, float, bool, np.ndarray]) -> bool:
     """
     Check if a string or an array is empty.
 
@@ -402,7 +403,7 @@ def update_dict_without_overwrite(d1: Dict[str, Any], d2: Dict[str, Any]):
     d1.update({k: v for k, v in d2.items() if k not in d1})
 
 
-def construct_data_key(spectrum: Dict[str, Any]):
+def construct_data_key(spectrum: Dict[str, Any]) -> str:
     """
     Construct a key for the 'data' field of the xps_dict.
     Output example: cycle0_scan0.
@@ -421,7 +422,7 @@ def construct_data_key(spectrum: Dict[str, Any]):
     return f"{cycle_key}_{scan_key}"
 
 
-def construct_detector_data_key(spectrum: Dict[str, Any]):
+def construct_detector_data_key(spectrum: Dict[str, Any]) -> str:
     """
     Construct a key for the detector data fields of the xps_dict.
     Output example: 'cycles/Cycle_0/scans/Scan_0'
@@ -451,7 +452,7 @@ KEY_PATTERNS = [
 ]
 
 
-def align_name_part(name_part: str):
+def align_name_part(name_part: str) -> str:
     """Make one part of the entry name compliant with NeXus standards."""
     replacements = {
         " ": "_",
@@ -466,7 +467,7 @@ def align_name_part(name_part: str):
     return name_part
 
 
-def construct_entry_name(key: str):
+def construct_entry_name(key: str) -> str:
     """Construct entry name."""
     name_parts = []
 
@@ -476,3 +477,34 @@ def construct_entry_name(key: str):
             name_part = align_name_part(match.group(1))
             name_parts.append(name_part)
     return "__".join(name_parts)
+
+
+ureg = pint.UnitRegistry()
+
+
+def check_units(template_path: str, unit: str) -> None:
+    """
+    Check that the unit is a valid pint unit.
+
+    Parameters
+    ----------
+    template_path : str
+        Path of a Template object.
+    unit : str
+        String representation of a unit.
+
+    Returns
+    -------
+    None.
+
+    """
+    error_txt = f"Invalid unit '{unit}' at path: {template_path}"
+
+    if unit is not None:
+        try:
+            ureg.Unit(unit)
+        except pint.errors.UndefinedUnitError as pint_err:
+            error_txt = f"Invalid unit '{unit}' at path: {template_path}"
+            raise pint.errors.UndefinedUnitError(error_txt) from pint_err
+        except TypeError as type_err:
+            raise TypeError(error_txt) from type_err

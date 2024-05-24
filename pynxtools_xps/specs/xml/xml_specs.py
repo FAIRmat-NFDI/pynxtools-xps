@@ -350,7 +350,7 @@ class XmlParserSpecs:
         """Struct representing parameter with first child (fc) 'name'
         and second child(sc) 'value'."""
         section_nm_reslvr = ""
-        units = ["mV", "deg", "W", "kV", "ns"]
+        units = ["mV", "degree", "W", "kV", "ns"]
 
         section_nm_reslvr = self.restructure_value(first_child.text, first_child.tag)
         section_nm_reslvr = self.check_for_siblings_with_same_name(

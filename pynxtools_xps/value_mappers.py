@@ -49,6 +49,13 @@ UNIT_MAP = {
     "Counts": "counts",
     "counts/s": "counts_per_second",
     "CPS": "counts_per_second",
+    "u": "um",
+    "KV": "kV",
+    "seconds": "s",
+    "(min)": "min",
+    "Percent": "",  # should be changed back to percent once pint is updated
+    "atom": "dimensionless",
+    "eV/atom": "eV",
 }
 
 

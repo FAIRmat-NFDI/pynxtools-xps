@@ -250,9 +250,9 @@ class CasaRegion(XpsDataclass):
     av_width: float = 0.0
     av_width_units: str = "eV"
     start_offset: float = 0.0
-    start_offset_units: str = "CPS"
+    start_offset_units: str = "counts_per_second"
     end_offset: float = 0.0
-    end_offset_units: str = "CPS"
+    end_offset_units: str = "counts_per_second"
     cross_section: list = field(default_factory=list)
     tag: str = ""
     unknown_0: float = 0.0

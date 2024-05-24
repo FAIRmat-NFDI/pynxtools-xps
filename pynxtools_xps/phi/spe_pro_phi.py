@@ -44,6 +44,7 @@ from pynxtools_xps.value_mappers import (
     convert_energy_scan_mode,
     convert_measurement_method,
     convert_bool,
+    convert_units,
 )
 
 from pynxtools_xps.phi.phi_data_model import (
@@ -239,23 +240,23 @@ UNIT_MISSING: Dict[str, str] = {
     "neutral_objective_lens_voltage": "V",
     "stage_current_rotation_speed": "degree/s",
     "neutral_bend_voltage": "V",
-    "defect_positioner_u": "milli-m",
-    "defect_positioner_v": "milli-m",
-    "defect_positioner_x": "milli-m",
-    "defect_positioner_y": "milli-m",
-    "defect_positioner_z": "milli-m",
+    "defect_positioner_u": "mm",
+    "defect_positioner_v": "mm",
+    "defect_positioner_x": "mm",
+    "defect_positioner_y": "mm",
+    "defect_positioner_z": "mm",
     "defect_positioner_tilt": "degree",
     "defect_positioner_rotation": "degree",
     "flood_gun_pulse_frequency": "1/s",
-    "flood_gun_x_steering": "milli-m",
-    "flood_gun_y_steering": "milli-m",
+    "flood_gun_x_steering": "mm",
+    "flood_gun_y_steering": "mm",
     "profiling_sputter_delay": "s",
-    "scan_deflection_span_x": "milli-m",
-    "scan_deflection_span_y": "milli-m",
-    "scan_deflection_offset_x": "milli-m",
-    "scan_deflection_offset_y": "milli-m",
-    "xray_stigmator_x": "milli-m",
-    "xray_stigmator_y": "milli-m",
+    "scan_deflection_span_x": "mm",
+    "scan_deflection_span_y": "mm",
+    "scan_deflection_offset_x": "mm",
+    "scan_deflection_offset_y": "mm",
+    "xray_stigmator_x": "mm",
+    "xray_stigmator_y": "mm",
 }
 
 
@@ -1238,13 +1239,10 @@ class PhiParser:  # pylint: disable=too-few-public-methods
             Associated unit.
 
         """
-        unit_map = {"seconds": "s", "uA": "micro-A", "(min)": "min"}
         special_cases = {
             "survey_dwell_time": "s",
-            "xray_offset": "micro-m",
+            "xray_offset": "um",
             "xray_rotation": "degree",
-            "Percent": "%",
-            "eV/atom": "eV",
         }
 
         try:
@@ -1252,8 +1250,8 @@ class PhiParser:  # pylint: disable=too-few-public-methods
         except ValueError:
             unit = ""
 
-        if unit in unit_map:
-            unit = unit_map[unit]
+        unit = convert_units(unit)
+
         if key in special_cases:
             unit = special_cases[key]
         if key in UNIT_MISSING:
@@ -1475,11 +1473,8 @@ def _convert_xray_source_settings(value: str):
     """Map all items in xray_source_settings to a dictionary."""
     (xray_settings) = re.split(r"(\d+)", value)
 
-    unit_map = {"u": "micro-m", "KV": "kilo-V"}
-
     for i, setting in enumerate(xray_settings):
-        if setting in unit_map:
-            xray_settings[i] = unit_map[setting]
+        xray_settings[i] = convert_units(setting)
 
     return {
         "spot_size": float(xray_settings[1]),
@@ -1497,11 +1492,11 @@ def _convert_stage_positions(value: str):
 
     return {
         "x": float(x),
-        "x_units": "milli-m",
+        "x_units": "mm",
         "y": float(y),
-        "y_units": "milli-m",
+        "y_units": "mm",
         "z": float(z),
-        "z_units": "milli-m",
+        "z_units": "mm",
         "azimuth": float(azimuth),
         "azimuth_units": "degree",
         "polar": float(polar),

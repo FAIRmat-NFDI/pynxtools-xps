@@ -24,6 +24,7 @@ from typing import Any, Dict, List, Union, Optional
 from pathlib import Path
 from scipy.interpolate import interp1d
 import numpy as np
+import pint
 
 from dataclasses import dataclass
 
@@ -476,3 +477,21 @@ def construct_entry_name(key: str):
             name_part = align_name_part(match.group(1))
             name_parts.append(name_part)
     return "__".join(name_parts)
+
+
+ureg = pint.UnitRegistry()
+
+
+def check_units(path: str, unit: str):
+    """Check that a given unit is a valid pint unit."""
+
+    error_txt = f"Invalid unit '{unit}' at path: {path}"
+
+    if unit is not None:
+        try:
+            ureg.Unit(unit)
+        except pint.errors.UndefinedUnitError as pint_err:
+            error_txt = f"Invalid unit '{unit}' at path: {path}"
+            raise pint.errors.UndefinedUnitError(error_txt) from pint_err
+        except TypeError as type_err:
+            raise TypeError(error_txt) from type_err

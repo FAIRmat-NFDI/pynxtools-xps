@@ -26,10 +26,10 @@ instrument:
       identifier: "2.0"
     current:
       value: 298
-      unit: milli-A
+      unit: mA
   beam_xray:
     distance:
-      unit: milli-m
+      unit: mm
       value: 0.0
     current:
       value: 30
@@ -60,7 +60,7 @@ instrument:
         shape: curved slit
         size:
           value: 0.4
-          unit: milli-m
+          unit: mm
     detector:
       amplifier_type: channeltron
       detector_type: Multi-anode
@@ -100,7 +100,7 @@ instrument:
       type: wire
       value:
         value: 0.1
-        unit: nano-A
+        unit: nA
     sample_bias_voltmeter:
       name: XPS sample voltmeter
       measurement: voltage
@@ -120,15 +120,15 @@ instrument:
     POSITIONER[positioner_x]:
       value:
         value: 15.5
-        unit: centi-m
+        unit: cm
     POSITIONER[positioner_y]:
       value:
         value: 11
-        unit: centi-m
+        unit: cm
     POSITIONER[positioner_z]:
       value:
         value: 36
-        unit: centi-m
+        unit: cm
     POSITIONER[positioner_phi]:
       value:
         value: 45
@@ -139,7 +139,7 @@ instrument:
     type: hot-filament ionization gauge
     value:
       value: 0.000000001
-      unit: milli-bar
+      unit: mbar
     value_log:
       value:
         value: null

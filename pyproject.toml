@@ -26,7 +26,8 @@ dependencies = [
     "igor2",
     "xarray>=0.20.2",
     "pint==0.17",
-    "pynxtools>=0.3.1",
+    # "pynxtools>=0.3.1",
+    "pynxtools @ git+https://github.com/FAIRmat-NFDI/pynxtools.git@appdef-graph-tests"
 ]
 
 [project.entry-points."pynxtools.reader"]

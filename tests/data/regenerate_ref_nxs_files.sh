@@ -6,7 +6,7 @@ NXDL=NXmpes
 function update_phi_pro_ref {
   cd phi_pro/
   echo "Update .pro (PHI depth_profiling) NeXus reference"
-  dataconverter.exe SnO2_10nm_1.pro eln_data_phi_pro.yaml --reader $READER --nxdl $NXDL --ignore-undocumented --output phi_pro_ref.nxs  
+  dataconverter SnO2_10nm_1.pro eln_data_phi_pro.yaml --reader $READER --nxdl $NXDL --ignore-undocumented --output phi_pro_ref.nxs  
   cd ..
   echo
 }

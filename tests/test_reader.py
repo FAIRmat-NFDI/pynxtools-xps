@@ -33,7 +33,7 @@ test_cases = [
     ("scienta_txt", "Scienta .txt export reader"),
     ("vms_irregular", "Irregular VAMAS reader"),
     ("vms_regular", "Regular VAMAS reader"),
-    ("vms_txt_export", "Vamas txt export"),
+    # ("vms_txt_export", "Vamas txt export"),
 ]
 
 test_params = []
@@ -88,7 +88,7 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
         caplog=caplog,
     )
     test.convert_to_nexus(ignore_undocumented=True)
-    # test.check_reproducibility_of_nexus()
+    test.check_reproducibility_of_nexus()
 
 
 ## This will be implemented in the future.

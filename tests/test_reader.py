@@ -3,21 +3,9 @@ Basic example based test for the XPS reader
 """
 
 import os
-import sys
-import logging
-from glob import glob
-import xml.etree.ElementTree as ET
 import pytest
-from glob import glob
 
 from pynxtools.dataconverter.convert import get_reader
-from pynxtools.dataconverter.helpers import (
-    generate_template_from_nxdl,
-    write_nexus_def_to_entry,
-)
-from pynxtools.dataconverter.validation import validate_dict_against
-from pynxtools.dataconverter.template import Template
-from pynxtools.definitions.dev_tools.utils.nxdl_utils import get_nexus_definitions_path
 from pynxtools.testing.nexus_conversion import ReaderTest
 
 

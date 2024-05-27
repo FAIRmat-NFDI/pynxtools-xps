@@ -403,7 +403,7 @@ def update_dict_without_overwrite(d1: Dict[str, Any], d2: Dict[str, Any]):
     d1.update({k: v for k, v in d2.items() if k not in d1})
 
 
-def construct_data_key(spectrum: Dict[str, Any]):
+def construct_data_key(spectrum: Dict[str, Any]) -> str:
     """
     Construct a key for the 'data' field of the xps_dict.
     Output example: cycle0_scan0.
@@ -452,6 +452,7 @@ def align_name_part(name_part: str):
         " ": "_",
         ",": "",
         ".": "_",
+        "-": "_",
     }
 
     for key, val in replacements.items():
@@ -464,21 +465,6 @@ KEY_PATTERNS = [
     re.compile(rf"{key_part}(.*?)(?=\/|$)")
     for key_part in ["Group_", "Region_", "RegionData_"]
 ]
-
-
-def align_name_part(name_part: str) -> str:
-    """Make one part of the entry name compliant with NeXus standards."""
-    replacements = {
-        " ": "_",
-        ",": "",
-        ".": "_",
-        "-": "_",
-    }
-
-    for key, val in replacements.items():
-        name_part = name_part.replace(key, val)
-
-    return name_part
 
 
 def construct_entry_name(key: str) -> str:

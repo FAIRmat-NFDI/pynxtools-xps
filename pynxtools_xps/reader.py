@@ -312,14 +312,17 @@ def fill_template_with_value(key, value, template):
 
     # Do for all entry names
     for entry in ENTRY_SET:
+        modified_key = key.replace("/ENTRY[entry]/", f"/ENTRY[{entry}]/")
+        modified_value = value
+
         if isinstance(value, dict) and LINK_TOKEN in value:
             # Reset link to original
-            value[LINK_TOKEN] = initial_link_text.replace("/entry/", f"/{entry}/")
+            modified_value[LINK_TOKEN] = initial_link_text.replace(
+                "/entry/", f"/{entry}/"
+            )
 
         if isinstance(value, str) and "/entry/" in value:
-            value = value.replace("/entry/", f"/{entry}/")
-
-        modified_key = key.replace("/ENTRY[entry]/", f"/ENTRY[{entry}]/")
+            modified_value = value.replace("/entry/", f"/{entry}/")
 
         # Do for all detectors
         if "[detector]" in key:
@@ -327,7 +330,7 @@ def fill_template_with_value(key, value, template):
                 detr_key = modified_key.replace(
                     "/DETECTOR[detector]/", f"/DETECTOR[{detector}]/"
                 )
-                template[detr_key] = value
+                template[detr_key] = modified_value
 
                 if isinstance(value, dict) and LINK_TOKEN in value:
                     link_text = value[LINK_TOKEN]
@@ -335,14 +338,14 @@ def fill_template_with_value(key, value, template):
                         # Only replace if generic detector is given in
                         # link.
                         link_text = link_text.replace("/detector/", f"/{detector}/")
-                        value = {LINK_TOKEN: link_text}
+                        modified_value = {LINK_TOKEN: link_text}
 
                 if isinstance(value, str) and "/detector/" in value:
                     value = value.replace("/detector/", f"/{detector}/")
-                template[detr_key] = value
+                template[detr_key] = modified_value
 
         else:
-            template[modified_key] = value
+            template[modified_key] = modified_value
 
         if atom_types:
             modified_key = modified_key.replace("chemical_formula", "atom_types")

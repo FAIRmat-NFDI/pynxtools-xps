@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pynxtools_versions: ["generic_test_in_ci_cd"] # to be replaced by "master" branch
+        pynxtools_versions: ["appdef-graph-tests"] # to be replaced by "master" branch
     steps:
       - uses: actions/checkout@v2
         with:
@@ -31,7 +31,7 @@ jobs:
           pip install .[dev]
       - name: Install pynxtools version ${{ matrix.pynxtools_versions }}
         run: |
-         if [ "${{ matrix.pynxtools_versions }}" == "generic_test_in_ci_cd" ]; then
+         if [ "${{ matrix.pynxtools_versions }}" == "appdef-graph-tests" ]; then
            pip install pynxtools@git+https://github.com/FAIRmat-NFDI/pynxtools@${{ matrix.pynxtools_versions }}
          else
           pip install pynxtools==${{ matrix.pynxtools_versions }}

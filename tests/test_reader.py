@@ -71,7 +71,7 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
 
     test = ReaderTest(
         nxdl=nxdl,
-        reader=READER_NAME,
+        reader_name=READER_NAME,
         files_or_dir=files_or_dir,
         tmp_path=tmp_path,
         caplog=caplog,

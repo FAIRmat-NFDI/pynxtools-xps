@@ -31,7 +31,7 @@ jobs:
           pip install .[dev]
       - name: Install pynxtools version ${{ matrix.pynxtools_versions }}
         run: |
-         if [ "${{ matrix.pynxtools_versions }}" == "appdef-graph-tests" ]; then
+         if [ "${{ matrix.pynxtools_versions }}" == "small-test-fixes" ]; then
            pip install pynxtools@git+https://github.com/FAIRmat-NFDI/pynxtools@${{ matrix.pynxtools_versions }}
          else
           pip install pynxtools==${{ matrix.pynxtools_versions }}

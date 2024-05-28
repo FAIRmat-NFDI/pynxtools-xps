@@ -9,7 +9,8 @@ from pynxtools.dataconverter.convert import get_reader
 from pynxtools.testing.nexus_conversion import ReaderTest
 
 
-READER = get_reader("xps")
+READER_NAME = "xps"
+READER_CLASS = get_reader(READER_NAME)
 
 test_cases = [
     ("phi_spe", "Phi .spe reader"),
@@ -27,7 +28,7 @@ test_cases = [
 test_params = []
 
 for test_case in test_cases:
-    for nxdl in READER.supported_nxdls:
+    for nxdl in READER_CLASS.supported_nxdls:
         test_params += [pytest.param(nxdl, test_case[0], id=f"{test_case[1]}, {nxdl}")]
 
 
@@ -61,7 +62,7 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
 
     """
     caplog.clear()
-    reader = READER
+    reader = READER_CLASS
     assert callable(reader.read)
 
     files_or_dir = os.path.join(
@@ -70,7 +71,7 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
 
     test = ReaderTest(
         nxdl=nxdl,
-        reader=READER,
+        reader=READER_NAME,
         files_or_dir=files_or_dir,
         tmp_path=tmp_path,
         caplog=caplog,

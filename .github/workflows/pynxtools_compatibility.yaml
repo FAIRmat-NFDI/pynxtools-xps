@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pynxtools_versions: ["appdef-graph-tests"] # to be replaced by "master" branch
+        pynxtools_versions: ["small-test-fixes"] # to be replaced by "master" branch
     steps:
       - uses: actions/checkout@v2
         with:

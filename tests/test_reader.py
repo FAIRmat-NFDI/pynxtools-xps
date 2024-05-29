@@ -76,7 +76,7 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
         tmp_path=tmp_path,
         caplog=caplog,
     )
-    test.convert_to_nexus(log_level="WARNING", ignore_undocumented=True)
+    test.convert_to_nexus(caplog_level="WARNING", ignore_undocumented=True)
     test.check_reproducibility_of_nexus()
 
 

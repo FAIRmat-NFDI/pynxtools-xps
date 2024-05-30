@@ -446,13 +446,7 @@ def construct_detector_data_key(spectrum: Dict[str, Any]) -> str:
     return key
 
 
-KEY_PATTERNS = [
-    re.compile(rf"{key_part}(.*?)(?=\/|$)")
-    for key_part in ["Group_", "Region_", "RegionData_"]
-]
-
-
-def align_name_part(name_part: str) -> str:
+def align_name_part(name_part: str):
     """Make one part of the entry name compliant with NeXus standards."""
     replacements = {
         " ": "_",
@@ -465,6 +459,12 @@ def align_name_part(name_part: str) -> str:
         name_part = name_part.replace(key, val)
 
     return name_part
+
+
+KEY_PATTERNS = [
+    re.compile(rf"{key_part}(.*?)(?=\/|$)")
+    for key_part in ["Group_", "Region_", "RegionData_"]
+]
 
 
 def construct_entry_name(key: str) -> str:

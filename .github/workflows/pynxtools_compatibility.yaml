@@ -1,0 +1,41 @@
+name: Compatibility with pynxtools master branch
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  pynx_compatibility:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        pynxtools_versions: ["master"] # to be replaced by "master" branch
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          submodules: recursive
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install coverage coveralls
+      - name: Install pynxtools-xps
+        run: |
+          pip install .[dev]
+      - name: Install pynxtools version ${{ matrix.pynxtools_versions }}
+        run: |
+         if [ "${{ matrix.pynxtools_versions }}" == "master" ]; then
+           pip install pynxtools@git+https://github.com/FAIRmat-NFDI/pynxtools@${{ matrix.pynxtools_versions }}
+         else
+          pip install pynxtools==${{ matrix.pynxtools_versions }}
+         fi
+      - name: Run tests
+        run: |
+          pytest tests/.

@@ -3,25 +3,14 @@ Basic example based test for the XPS reader
 """
 
 import os
-import sys
-import logging
-import xml.etree.ElementTree as ET
-from glob import glob
 import pytest
 
 from pynxtools.dataconverter.convert import get_reader
-from pynxtools.dataconverter.helpers import (
-    generate_template_from_nxdl,
-    write_nexus_def_to_entry,
-)
-from pynxtools.dataconverter.validation import validate_dict_against
-from pynxtools.dataconverter.template import Template
-from pynxtools.definitions.dev_tools.utils.nxdl_utils import get_nexus_definitions_path
-
-from pynxtools_xps.reader import XPSReader
+from pynxtools.testing.nexus_conversion import ReaderTest
 
 
-READER = get_reader("xps")
+READER_NAME = "xps"
+READER_CLASS = get_reader(READER_NAME)
 
 test_cases = [
     ("phi_spe", "Phi .spe reader"),
@@ -33,13 +22,13 @@ test_cases = [
     ("scienta_txt", "Scienta .txt export reader"),
     ("vms_irregular", "Irregular VAMAS reader"),
     ("vms_regular", "Regular VAMAS reader"),
-    # ("vms_txt_export", "Vamas txt export"),
+    ("vms_txt_export", "Vamas txt export"),
 ]
 
 test_params = []
 
 for test_case in test_cases:
-    for nxdl in READER.supported_nxdls:
+    for nxdl in READER_CLASS.supported_nxdls:
         test_params += [pytest.param(nxdl, test_case[0], id=f"{test_case[1]}, {nxdl}")]
 
 
@@ -47,42 +36,48 @@ for test_case in test_cases:
     "nxdl, sub_reader_data_dir",
     test_params,
 )
-def test_example_data(nxdl, sub_reader_data_dir, tmp_path, caplog) -> None:
+def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
     """
-    Test the example data for the XPS reader
+    Test XPS reader
+
+    Parameters
+    ----------
+    nxdl : str
+        Name of the NXDL application definition that is to be tested by
+        this reader plugin (e.g. NXsts, NXmpes, etc)..
+    sub_reader_data_dir : str
+        Test data directory that contains all the files required for running the data
+        conversion through one of the sub-readers. All of these data dirs
+        are placed within tests/data/...
+    tmp_path : pathlib.PosixPath
+        Pytest fixture variable, used to clean up the files generated during
+        the test.
+    caplog : _pytest.logging.LogCaptureFixture
+        Pytest fixture variable, used to capture the log messages during the
+        test.
+
+    Returns
+    -------
+    None.
+
     """
     caplog.clear()
-    reader = XPSReader
+    reader = READER_CLASS
     assert callable(reader.read)
 
-    def_dir = get_nexus_definitions_path()
-
-    data_dir = os.path.join(os.path.dirname(__file__), "data")
-    reader_dir = os.path.join(data_dir, sub_reader_data_dir)
-
-    input_files = sorted(glob(os.path.join(reader_dir, "*")))
-
-    nxdl_file = os.path.join(def_dir, "contributed_definitions", f"{nxdl}.nxdl.xml")
-
-    root = ET.parse(nxdl_file).getroot()
-    template = Template()
-    generate_template_from_nxdl(root, template)
-
-    read_data = reader().read(
-        template=Template(template), file_paths=tuple(input_files)
+    files_or_dir = os.path.join(
+        *[os.path.dirname(__file__), "data", sub_reader_data_dir]
     )
 
-    entry_names = read_data.get_all_entry_names()  # type: ignore[attr-defined]
-    for entry_name in entry_names:
-        write_nexus_def_to_entry(read_data, entry_name, nxdl)
-
-    assert isinstance(read_data, Template)
-
-    with caplog.at_level(logging.WARNING):
-        is_success = validate_dict_against(nxdl, read_data, ignore_undocumented=True)
-        sys.stdout.write(caplog.text)
-        assert is_success
-    assert caplog.text == ""
+    test = ReaderTest(
+        nxdl=nxdl,
+        reader_name=READER_NAME,
+        files_or_dir=files_or_dir,
+        tmp_path=tmp_path,
+        caplog=caplog,
+    )
+    test.convert_to_nexus(caplog_level="WARNING", ignore_undocumented=True)
+    test.check_reproducibility_of_nexus()
 
 
 ## This will be implemented in the future.

@@ -1,6 +1,6 @@
 dataconverter:
   reader: xps
-  nxdl: NXmpes
+  nxdl: NXxps
   input-file:
     - EX439_S718_Au.sle
     - eln_data_sle.yaml

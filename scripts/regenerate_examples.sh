@@ -1,6 +1,6 @@
 #!/bin/bash
 READER=xps
-NXDL=NXmpes
+NXDL=NXxps
 
 function update_cs_example {
   echo "Update coordinate system example"

@@ -35,11 +35,12 @@ from pynxtools_xps.vms.vamas import VamasMapper
 class XpsDataFileParser:
     """Class intended for receiving any type of XPS data file."""
 
-    __prmt_file_ext__ = ["ibw", "pro", "spe", "sle", "txt", "vms", "xml", "xy"]
+    __prmt_file_ext__ = ["ibw", "npl", "pro", "spe", "sle", "txt", "vms", "xml", "xy"]
     __prmt_metadata_file_ext__ = ["slh"]
     __vendors__ = ["kratos", "phi", "scienta", "specs", "unkwown"]
     __prmt_vndr_cls: Dict[str, Dict] = {
         "ibw": {"scienta": MapperScienta},
+        "npl": {"unkwown": VamasMapper},
         "pro": {"phi": MapperPhi},
         "spe": {"phi": MapperPhi},
         "sle": {"specs": SleMapperSpecs},

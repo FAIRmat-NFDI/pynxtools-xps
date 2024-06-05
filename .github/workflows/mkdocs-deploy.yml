@@ -3,7 +3,7 @@ name: build_and_deploy_mkdocs
 on:
   push:
     branches:
-      - docs-structure  # Triggers deployment on push to the main branch
+      - main  # Triggers deployment on push to the main branch
 permissions:
    contents: write
 jobs:

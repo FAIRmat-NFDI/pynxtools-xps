@@ -82,3 +82,5 @@ You can find more information regarding the readers for data from different tech
 - [NOMAD code guidelines](reference/code_guidelines.md) 
 
 Any questions or suggestions? [Get in touch!](https://www.fair-di.eu/fairmat/about-fairmat/team-fairmat)
+
+[https://gepris.dfg.de/gepris/projekt/460197019?language=en](The work is funded by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) – 460197019 (FAIRmat).)

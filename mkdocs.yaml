@@ -1,7 +1,10 @@
-site_name: pynxtools-xps
+site_name: pynxtools-xps documentation
 site_description: |
-  The documentation for the pynxtools-xps plugin
-site_author: The FAIRmat authors
+  The documentation for the pynxtools-xps plugin.
+site_author: The NOMAD Authors
+repo_url: https://github.com/FAIRmat-NFDI/pynxtools-xps
+edit_uri: ""
+
 nav:
   - Home: index.md
   - Tutorials:
@@ -9,9 +12,9 @@ nav:
     - tutorial/standalone.md
     - tutorial/nexusio.md
     - tutorial/nomad.md
-  - How-tos:
+  - How-To Guides:
     - how-tos/build_a_reader.md
-  - Learn:
+  - Explanation:
     - explanation/implementation.md
     - explanation/appdefs.md
     - explanation/contextualization.md
@@ -22,11 +25,24 @@ nav:
     - reference/scienta.md
     - reference/phi.md
     - reference/vms.md
+plugins:
+  - search
+  - macros:
+    module_name: docs/macros
 theme:
   name: material
+  palette:
+    primary: '#2A4CDF'
+    accent: '#008A67'
+  font:
+    text: 'Titillium Web'
+  logo: assets/nomad-logo.png
+  favicon: assets/favicon.png
   features:
+    - navigation.instant
     - content.code.copy
     - content.code.annotate
+  custom_dir: docs/theme
 markdown_extensions:
   - attr_list
   - md_in_html
@@ -41,16 +57,20 @@ markdown_extensions:
   - pymdownx.arithmatex:
       generic: true
   - pymdownx.emoji
+  - mkdocs-click
   - pymdownx.extra
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
+extra:
+  generator: false
+  homepage: https://nomad-lab.eu
 use_directory_urls: false
-plugins:
-    - search
-    - macros:
-        module_name: docs/macros
 extra_css:
   - stylesheets/extra.css
+extra_javascript:
+  - javascript.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js

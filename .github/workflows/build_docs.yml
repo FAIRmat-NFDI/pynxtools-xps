@@ -1,27 +1,54 @@
-name: build_docs
+# name: build_and_deploy_mkdocs
+# permissions:
+#   contents: write
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#       - name: Configure Git Credentials
+#         run: |
+#           git config user.name github-actions[bot]
+#           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+#       - uses: actions/setup-python@v4
+#         with:
+#           python-version: 3.x
+#       - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
+#       - uses: actions/cache@v3
+#         with:
+#           key: mkdocs-material-${{ env.cache_id }}
+#           path: .cache
+#           restore-keys: |
+#             mkdocs-material-
+#       - run: pip install ".[docs]"
+#       - run: mkdocs gh-deploy --force
+
+
+name: build_and_deploy_mkdocs
+
 on:
   push:
-    branches: [main]
-permissions:
-  contents: write
+    branches:
+      - docs-structure  # Triggers deployment on push to the main branch
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Configure Git Credentials
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Dependencies
         run: |
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-      - uses: actions/setup-python@v4
-        with:
-          python-version: 3.x
-      - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
-      - uses: actions/cache@v3
-        with:
-          key: mkdocs-material-${{ env.cache_id }}
-          path: .cache
-          restore-keys: |
-            mkdocs-material-
-      - run: pip install ".[docs]"
-      - run: mkdocs gh-deploy --force
+          python -m pip install --upgrade pip
+          pip install mkdocs mkdocs-material==8.1.1 pymdown-extensions mkdocs-click
+
+      - name: Build and Deploy
+        run: |
+          mkdocs gh-deploy --force --remote-branch gh-pages

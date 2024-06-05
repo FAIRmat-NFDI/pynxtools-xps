@@ -92,8 +92,8 @@ UNITS: dict = {
     "beam_xray/particle_charge": "C",
     "beam_xray/source_beam_width_x": "um",
     "beam_xray/source_beam_width_y": "um",
-    "beam_xray/source_analyser_angle": "degree",
-    "source_xray/source_azimuth": "degree",
+    "beam_xray/source_polar_angle": "degree",
+    "beam_xray/source_azimuth_angle": "degree",
     "source_xray/source_power": "W",
     "source_sputter/sputter_ion_charge": "C",
     "source_sputter/sputter_source_energy": "eV",
@@ -102,8 +102,8 @@ UNITS: dict = {
     "source_sputter/sputter_source_width_y": "um",
     "source_sputter/sputter_source_incidence_polar_angle": "degree",
     "source_sputter/sputter_source_azimuth_angle": "degree",
-    "analyser/analyser_take_off_azimuth": "degree",
-    "analyser/analyser_take_off_polar": "degree",
+    "analyser/analyser_take_off_polar_angle": "degree",
+    "analyser/analyser_take_off_azimuth_angle": "degree",
     "analyser/analysis_width_x": "m",
     "analyser/analysis_width_y": "m",
     "analyser/target_bias": "V",
@@ -113,8 +113,8 @@ UNITS: dict = {
     "energydispersion/pass_energy": "eV",
     "energydispersion/differential_width_aes": "eV",
     "detector/dwell_time": "s",
-    "sample/sample_tilt_normal_polar": "degree ",
-    "sample/sample_tilt_azimuth": "degree",
+    "sample/sample_normal_polar_angle_of_tilt": "degree ",
+    "sample/sample_normal_tilt_azimuth": "degree",
     "sample/sample_rotation": "degree",
     "data/start_energy": "eV",
     "data/step_size": "eV",
@@ -156,11 +156,11 @@ class VamasMapper(XPSMapper):
                 "excitation_energy",
                 "extent",
                 "particle_charge",
-                "source_analyser_angle",
+                "source_polar_angle",
+                "source_azimuth_angle",
             ],
             "source_xray": [
                 "source_label",
-                "source_azimuth",
                 "source_power",
                 "field_of_view_x",
                 "field_of_view_y",
@@ -177,8 +177,8 @@ class VamasMapper(XPSMapper):
                 "sputter_source_azimuth_angle",
             ],
             "analyser": [
-                "analyser_take_off_azimuth",
-                "analyser_take_off_polar",
+                "analyser_take_off_polar_angle",
+                "analyser_take_off_azimuth_angle",
                 "analysis_width_x",
                 "analysis_width_y",
                 "target_bias",
@@ -201,8 +201,8 @@ class VamasMapper(XPSMapper):
             "manipulator": [],
             "sample": [
                 "sample_name",
-                "sample_tilt_normal_polar",
-                "sample_tilt_azimuth",
+                "sample_normal_polar_angle_of_tilt",
+                "sample_normal_tilt_azimuth",
                 "sample_rotation",
             ],
             "data": [
@@ -598,8 +598,8 @@ class VamasParser:
             else:
                 delattr(block, attr)
 
-        block.source_analyser_angle = float(self.data.pop(0).strip())
-        block.source_azimuth = float(self.data.pop(0).strip())
+        block.source_polar_angle = float(self.data.pop(0).strip())
+        block.source_azimuth_angle = float(self.data.pop(0).strip())
         block.analyser_mode = self.data.pop(0).strip()
         block.resolution = float(self.data.pop(0).strip())
 
@@ -613,8 +613,8 @@ class VamasParser:
         block.target_bias = float(self.data.pop(0).strip())
         block.analysis_width_x = float(self.data.pop(0).strip())
         block.analysis_width_y = float(self.data.pop(0).strip())
-        block.analyser_take_off_polar = float(self.data.pop(0).strip())
-        block.analyser_take_off_azimuth = float(self.data.pop(0).strip())
+        block.analyser_take_off_polar_angle = float(self.data.pop(0).strip())
+        block.analyser_take_off_azimuth_angle = float(self.data.pop(0).strip())
         block.species_label = self.data.pop(0).strip()
         block.transition_label = self.data.pop(0).strip()
         block.particle_charge = int(self.data.pop(0).strip())
@@ -674,8 +674,8 @@ class VamasParser:
             else:
                 delattr(block, attr)
 
-        block.sample_tilt_normal_polar = float(self.data.pop(0).strip())
-        block.sample_tilt_azimuth = float(self.data.pop(0).strip())
+        block.sample_normal_polar_angle_of_tilt = float(self.data.pop(0).strip())
+        block.sample_normal_tilt_azimuth = float(self.data.pop(0).strip())
         block.sample_rotation = float(self.data.pop(0).strip())
         block.no_additional_params = int(self.data.pop(0).strip())
 

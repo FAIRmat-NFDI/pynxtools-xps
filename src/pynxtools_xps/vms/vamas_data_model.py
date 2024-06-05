@@ -137,8 +137,8 @@ class VamasBlock(XpsDataclass):
     sample_normal_polar_angle_of_tilt: float = 0.0
     # degrees clockwise from the y-direction towards the
     # operator, defined by the sample stage
-    sample_normal_tilt_azimuth: float = 0.0
-    sample_rotation: float = 0.0
+    sample_normal_tilt_azimuth_angle: float = 0.0
+    sample_rotation_angle: float = 0.0
     no_additional_params: int = 2
     num_ord_values: int = 0
     future_upgrade_block_entries: list = field(default_factory=list)

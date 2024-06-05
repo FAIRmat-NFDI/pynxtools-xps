@@ -1,6 +1,3 @@
-#     steps:
-
-
 name: build_and_deploy_mkdocs
 
 on:
@@ -42,4 +39,5 @@ jobs:
 
       - name: Build and Deploy
         run: |
+          echo current working dir: "$PWD" 
           mkdocs gh-deploy --force --remote-branch gh-pages

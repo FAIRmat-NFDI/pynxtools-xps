@@ -1,4 +1,4 @@
-site_name: pynxtools-xps documentation
+site_name: Documentation
 site_description: |
   The documentation for the pynxtools-xps plugin.
 site_author: The NOMAD Authors
@@ -29,7 +29,7 @@ nav:
 plugins:
   - search
   - macros:
-      module_name: docs.macros
+      module_name: pynxtools_xps/mkdocs
 
 theme:
   name: material

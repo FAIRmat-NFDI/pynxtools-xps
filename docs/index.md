@@ -79,8 +79,8 @@ You can find more information regarding the readers for data from different tech
 
 <h2>Project and community</h2>
 
-- [NOMAD code guidelines](reference/code_guidelines.md) 
+- [NOMAD code guidelines](https://nomad-lab.eu/prod/v1/staging/docs/reference/code_guidelines.html) 
 
 Any questions or suggestions? [Get in touch!](https://www.fair-di.eu/fairmat/about-fairmat/team-fairmat)
 
-[https://gepris.dfg.de/gepris/projekt/460197019?language=en](The work is funded by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) – 460197019 (FAIRmat).)
+[The work is funded by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) - 460197019 (FAIRmat).](https://gepris.dfg.de/gepris/projekt/460197019?language=en)

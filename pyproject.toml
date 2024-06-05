@@ -55,6 +55,8 @@ docs = [
     "mkdocs-material",
     "mkdocs-material-extensions",
     "mkdocs-macros-plugin",
+    "pymdown-extensions",
+    "mkdocs-click"
 ]
 
 [tool.setuptools.packages.find]

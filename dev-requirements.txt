@@ -4,8 +4,6 @@
 #
 #    pip-compile --extra=dev --extra=docs --output-file=dev-requirements.txt pyproject.toml
 #
-annotated-types==0.6.0
-    # via pydantic
 anytree==2.12.1
     # via pynxtools
 ase==3.22.1
@@ -24,6 +22,7 @@ click==8.1.7
     # via
     #   click-default-group
     #   mkdocs
+    #   mkdocs-click
     #   pip-tools
     #   pynxtools
 click-default-group==1.2.4
@@ -84,6 +83,7 @@ lxml==4.9.3
 markdown==3.6
     # via
     #   mkdocs
+    #   mkdocs-click
     #   mkdocs-material
     #   pymdown-extensions
 markupsafe==2.1.3
@@ -102,6 +102,8 @@ mkdocs==1.6.0
     #   mkdocs-macros-plugin
     #   mkdocs-material
     #   pynxtools-xps (pyproject.toml)
+mkdocs-click==0.8.1
+    # via pynxtools-xps (pyproject.toml)
 mkdocs-get-deps==0.2.0
     # via mkdocs
 mkdocs-macros-plugin==1.0.5
@@ -159,15 +161,13 @@ pluggy==1.3.0
     # via pytest
 pre-commit==3.5.0
     # via pynxtools-xps (pyproject.toml)
-pydantic==2.7.1
-    # via pynxtools
-pydantic-core==2.18.2
-    # via pydantic
 pygments==2.17.2
     # via mkdocs-material
 pymdown-extensions==10.8.1
-    # via mkdocs-material
-pynxtools==0.3.0
+    # via
+    #   mkdocs-material
+    #   pynxtools-xps (pyproject.toml)
+pynxtools==0.3.2
     # via pynxtools-xps (pyproject.toml)
 pyparsing==3.1.1
     # via matplotlib
@@ -232,10 +232,7 @@ types-pyyaml==6.0.12.12
 types-requests==2.31.0.10
     # via pynxtools-xps (pyproject.toml)
 typing-extensions==4.8.0
-    # via
-    #   mypy
-    #   pydantic
-    #   pydantic-core
+    # via mypy
 tzdata==2023.3
     # via pandas
 urllib3==2.1.0

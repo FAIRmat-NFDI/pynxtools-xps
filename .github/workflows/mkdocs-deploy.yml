@@ -39,5 +39,4 @@ jobs:
 
       - name: Build and Deploy
         run: |
-          echo current working dir: "$PWD" 
           mkdocs gh-deploy --force --remote-branch gh-pages

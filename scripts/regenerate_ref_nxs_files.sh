@@ -84,6 +84,9 @@ function update_vms_txt_export_ref {
   echo
 }
 
+project_dir=$(dirname $(dirname $(realpath $0)))
+cd $project_dir/tests/data
+
 update_phi_pro_ref
 update_phi_spe_ref
 update_scienta_ibw_ref

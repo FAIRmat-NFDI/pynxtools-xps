@@ -60,7 +60,9 @@ docs = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["src/*"]
+where = [
+    "src",
+]
 
 [tool.setuptools.package-data]
 pynxtools_xps = ["*.json"]

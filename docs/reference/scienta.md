@@ -2,7 +2,7 @@
 
 The reader supports reading data exported as .txt from Scienta Omicron [Scienta Omicron](https://www.scientaomicron.com/en/) instruments, both as .txt as well as [Igor Binary Wave Format](https://www.wavemetrics.com/) files.
 
-The reader for the Scienta data can be found [here](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/pynxtools_xps/scienta).
+The reader for the Scienta data can be found [here](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/src/pynxtools_xps/scienta).
 
 ## .txt data
 

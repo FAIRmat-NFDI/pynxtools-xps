@@ -29,7 +29,7 @@ nav:
 plugins:
   - search
   - macros:
-      module_name: pynxtools_xps/mkdocs
+      module_name: src/pynxtools_xps/mkdocs
 
 theme:
   name: material

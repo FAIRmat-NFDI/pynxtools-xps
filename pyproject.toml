@@ -60,7 +60,9 @@ docs = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["pynxtools_xps*"]
+where = [
+    "src",
+]
 
 [tool.setuptools.package-data]
 pynxtools_xps = ["*.json"]
@@ -70,7 +72,7 @@ version_scheme = "no-guess-dev"
 local_scheme = "node-and-date"
 
 [tool.ruff]
-include = ["pynxtools_xps/*.py", "tests/*.py"]
+include = ["src/*.py", "tests/*.py"]
 line-length = 88
 indent-width = 4
 

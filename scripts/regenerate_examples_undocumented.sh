@@ -57,6 +57,8 @@ function update_vms_examples {
   echo
 }
 
+project_dir=$(dirname $(dirname $(realpath $0)))
+cd $project_dir/examples
 
 update_phi_examples
 update_scienta_examples

@@ -4,7 +4,7 @@ The reader supports [Phi MultiPak](https://www.phi.com/surface-analysis-equipmen
 
 <!-- How is this data structured -->
 
-The reader for the Phi data can be found [here](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/pynxtools_xps/phi).
+The reader for the Phi data can be found [here](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/src/pynxtools_xps/phi).
 
 ## .spe data (single spectrum):
 

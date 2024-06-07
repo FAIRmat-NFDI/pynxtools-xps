@@ -6,7 +6,7 @@ The reader supports [SpecsLabProdigy](https://www.specs-group.com/nc/specs/produ
 - .xml: SpecsLab 2files, XML format from SPECS GmbH (software version: v4.63 tested, other versions also work)
 - .xy: SpecsLabProdigy export format in XY format (including all export settings)
 
-The readers for the SPECS data can be found [here](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/pynxtools_xps/specs).
+The readers for the SPECS data can be found [here](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/src/pynxtools_xps/specs).
 
 ## .sle data
 

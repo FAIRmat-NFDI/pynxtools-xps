@@ -196,7 +196,9 @@ ruff==0.3.4
 scipy==1.9.1
     # via ase
 setuptools==70.0.0
-    # via nodeenv
+    # via
+    #   pynxtools-xps (pyproject.toml)
+    #   nodeenv
 six==1.16.0
     # via
     #   anytree

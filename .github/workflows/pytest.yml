@@ -29,10 +29,10 @@ jobs:
       - name: Install dependencies
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
-          uv pip install coverage coveralls
+          uv pip install --system coverage coveralls
       - name: Install package
         run: |
-          uv pip install ".[dev]"
+          uv pip install --system ".[dev]"
       - name: Test with pytest
         run: |
           coverage run -m pytest -sv --show-capture=no tests

@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
-          uv pip install build
+          uv pip install --system build
       - name: Build package
         run: python -m build
       - name: Publish package

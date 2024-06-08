@@ -3,8 +3,9 @@ A generic reader for loading XPS (X-ray Photoelectron Spectroscopy) data
 file into mpes nxdl (NeXus Definition Language) template.
 """
 
-import datetime
 import sys
+import datetime
+import copy
 
 # Copyright The NOMAD Authors.
 #
@@ -313,10 +314,9 @@ def fill_template_with_value(key, value, template):
     # Do for all entry names
     for entry in ENTRY_SET:
         modified_key = key.replace("/ENTRY[entry]/", f"/ENTRY[{entry}]/")
-        modified_value = value
+        modified_value = copy.deepcopy(value)
 
         if isinstance(value, dict) and LINK_TOKEN in value:
-            # Reset link to original
             modified_value[LINK_TOKEN] = initial_link_text.replace(
                 "/entry/", f"/{entry}/"
             )

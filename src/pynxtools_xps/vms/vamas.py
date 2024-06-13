@@ -423,7 +423,7 @@ class VamasParser:
         """Read in vamas text file."""
         with open(file, "rb") as vms_file:
             for line in vms_file:
-                if line.endswith(b"\r\n"):
+                if line.endswith((b"\r\n", b"\n")):
                     self.data += [line.decode("utf-8", errors="ignore").strip()]
 
     def _extract_n_lines_to_list(self, number_of_lines):

@@ -43,6 +43,8 @@ BOOL_MAP = {
     "Yes": True,
     "no": False,
     "No": False,
+    "On": True,
+    "Off": False,
 }
 
 UNIT_MAP = {

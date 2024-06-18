@@ -35,8 +35,7 @@ from pynxtools_xps.vms.vamas_data_model import (
     VamasAdditionalParam,
     OrdinateValue,
 )
-from pynxtools_xps.vms.casa_data_model import CasaProcess
-from pynxtools_xps.phi.spe_pro_phi import PhiParser
+from pynxtools_xps.vms.vamas_comment_handler import handle_comments
 
 from pynxtools_xps.reader_utils import (
     XPSMapper,
@@ -828,118 +827,6 @@ class VamasParser:
 
         return flattened_spectra
 
-    def handle_header_comments(self, comment_list: List[str]):
-        """Handle comments (incl. Casa info) for the header."""
-        comments = {}
-
-        special_keys = {
-            "Casa Info Follows": self._handle_casa_header,
-            "SpecsLab Prodigy": self._handle_prodigy_header,
-            "SOFH": self._handle_phi_header,
-        }
-
-        for keyword, handle_func in special_keys.items():
-            # if any(keyword in line for line in comment_list):
-            indices = [i for i, line in enumerate(comment_list) if keyword in line]
-
-            if indices:
-                index = indices[0]
-                if keyword == "Casa Info Follows":
-                    special_comments = comment_list[index]
-                    comment_list = comment_list[index + 1 :]
-
-                if keyword == "SpecsLab Prodigy":
-                    special_comments = comment_list[index]
-                    comment_list = comment_list[index + 1 :]
-
-                if keyword == "SOFH":
-                    end_index = [
-                        i for i, line in enumerate(comment_list) if "EOFH" in line
-                    ][0]
-                    special_comments = comment_list[index : end_index + 1]  # type: ignore[assignment]
-                    del comment_list[index : end_index + 1]
-
-                comments.update(handle_func(special_comments))  # type: ignore[operator]
-
-        # Handle non-special comments.
-        for line in comment_list:
-            for sep in ("=", ":"):
-                try:
-                    key, value = [part.strip(" ") for part in line.split(sep, 1)]
-                    comments[convert_pascal_to_snake(key)] = value
-                except ValueError:
-                    continue
-
-        return comments
-
-    def _handle_casa_header(self, comment_line: str):
-        """Get information about CasaXPS version."""
-        return {
-            "casa_version": comment_line.split("Casa Info Follows CasaXPS Version")[
-                1
-            ].strip()
-        }
-
-    def _handle_prodigy_header(self, comment_line: str):
-        """Get information about SpecsLab Prodigy version."""
-        return {"prodigy_version": comment_line.split("Version")[1].strip()}
-
-    def _handle_phi_header(self, comment_list: List[str]):
-        """Get metadta from Phi system."""
-        phi_parser = PhiParser()
-        phi_parser.parse_header_into_metadata(comment_list)
-
-        phi_comments = phi_parser.metadata.dict()
-
-        regions = phi_parser.parse_spectral_regions(comment_list)
-        areas = phi_parser.parse_spatial_areas(comment_list)
-
-        for region in regions:
-            for area in areas:
-                concatenated = {**region.dict(), **area.dict()}
-
-            phi_comments.update(concatenated)
-
-        return phi_comments
-
-    def handle_block_comments(self, comment_list: List[str]):
-        """Handle comments (incl. Casa fitting) for each block."""
-        comments = {}
-
-        if "Casa Info Follows" in comment_list[0]:
-            # Get all processing and fitting data from Casa comments.
-            casa = CasaProcess()
-            casa_data = casa.process_comments(comment_list)
-
-            comments.update(casa_data)
-
-            no_of_casa_lines = 1
-
-            for number in (
-                "n_alignments",
-                "n_unknown_processes",
-                "n_regions",
-                "n_components",
-            ):
-                occurence = getattr(casa, number)
-                no_of_casa_lines += 1
-                if occurence >= 1:
-                    no_of_casa_lines += occurence
-
-            non_casa_comments = comment_list[no_of_casa_lines:]
-
-        else:
-            non_casa_comments = comment_list
-
-        for line in non_casa_comments:
-            for sep in ("=", ":"):
-                try:
-                    key, value = [part.strip(" ") for part in line.split("=", 1)]
-                    comments[convert_pascal_to_snake(key)] = value
-                except ValueError:
-                    continue
-        return comments
-
     def build_list(self):
         """
         Construct a list of dictionaries from the Vamas objects
@@ -960,7 +847,9 @@ class VamasParser:
         }
         del header_dict["comment_lines"]
 
-        header_comments = self.handle_header_comments(self.header.comment_lines)
+        header_comments = handle_comments(
+            self.header.comment_lines, comment_type="header"
+        )
 
         update_dict_without_overwrite(header_dict, header_comments)
 
@@ -986,7 +875,8 @@ class VamasParser:
             re_map_keys(settings, KEY_MAP)
             re_map_values(settings, VALUE_MAP)
 
-            comment_dict = self.handle_block_comments(block.comment_lines)
+            comment_dict = handle_comments(block.comment_lines, comment_type="block")
+
             re_map_keys(comment_dict, KEY_MAP)
             re_map_values(comment_dict, VALUE_MAP)
 

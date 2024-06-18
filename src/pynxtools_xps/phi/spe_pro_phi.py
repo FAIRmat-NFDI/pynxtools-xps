@@ -796,9 +796,9 @@ class PhiParser:  # pylint: disable=too-few-public-methods
         self.binary_header: np.ndarray = None
         self.spectra_header: np.ndarray = None
 
-    def parse_file(self, file, **kwargs):
+    def parse_file(self, file: Union[str, Path], **kwargs):
         """
-        Parse the .xy file into a list of dictionaries.
+        Parse the .spe, .pro file into a list of dictionaries.
 
         Parsed data is stored in the attribute 'self.data'.
         Each dictionary in the data list is a grouping of related
@@ -809,12 +809,6 @@ class PhiParser:  # pylint: disable=too-few-public-methods
         ----------
         file : str
             XPS data filepath.
-
-        **kwargs : dict
-            commentprefix : str
-                Prefix for comments in xy file. The default is "#".
-            n_headerlines: int
-                number of header_lines in each data block.
 
         Returns
         -------
@@ -1327,13 +1321,13 @@ class PhiParser:  # pylint: disable=too-few-public-methods
         Add flattened dict with PhiMetadata fields to each spectrum.
 
         """
-        flattened_metadata = self._flatten_dict(self.metadata.dict())
+        flattened_metadata = self.flatten_metadata()
 
         for spectrum in self.spectra:
             spectrum.update(flattened_metadata)
             spectrum["intensity/@units"] = UNIT_MISSING["intensity"]
 
-    def _flatten_dict(self, metadata_dict: Dict[str, Any]):
+    def flatten_metadata(self):
         """
         Flatten metadata dict so that key-value pairs of nested
         dictionaries are at the top level.
@@ -1363,7 +1357,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         flattened_dict = {}
 
-        for key, value in metadata_dict.items():
+        for key, value in self.metadata.dict().items():
             if isinstance(value, dict):
                 for subkey, subvalue in value.items():
                     supkey = shorten_supkey(key)

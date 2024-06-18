@@ -20,7 +20,7 @@ Data model for CasaXPS.
 # pylint: disable=too-many-instance-attributes
 
 import re
-from typing import List, Dict, Any
+from typing import List, Any
 from dataclasses import dataclass, field
 
 from pynxtools_xps.reader_utils import XpsDataclass

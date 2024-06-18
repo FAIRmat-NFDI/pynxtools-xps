@@ -19,7 +19,7 @@ Comment handler for .vms files.
 #
 # pylint: disable=too-many-instance-attributes
 
-from typing import List, Literal, Any, Dict
+from typing import List, Literal, Any, Dict, Tuple
 
 from pynxtools_xps.vms.casa_data_model import CasaProcess
 from pynxtools_xps.phi.spe_pro_phi import PhiParser
@@ -50,15 +50,18 @@ def handle_comments(
             index = indices[0]
             if keyword == "Casa Info Follows":
                 if comment_type == "header":
-                    special_comments = list(comment_list[index])
-                    comment_list = comment_list[index + 1 :]
+                    special_comments = [comment_list[index]]
                 if comment_type == "block":
-                    special_comments = list(comment_list[index:])
+                    special_comments = comment_list[index:]
                     # TODO: only extract casa comments
-                comments.update(_handle_casa_comments(special_comments, comment_type))
+                casa_comments, no_of_casa_lines = _handle_casa_comments(
+                    special_comments, comment_type
+                )
+                comments.update(casa_comments)
+                del comment_list[index:no_of_casa_lines]
 
             if keyword == "SpecsLab Prodigy":
-                special_comments = list(comment_list[index])
+                special_comments = [comment_list[index]]
                 comment_list = comment_list[index + 1 :]
                 comments.update(_handle_prodigy_header_comments(special_comments))
 
@@ -86,7 +89,7 @@ def handle_comments(
 
 def _handle_casa_comments(
     comment_list: List[str], comment_type: Literal["header", "block"]
-):
+) -> Tuple[Dict[str, Any], int]:
     """Handle comments from CasaXPS, depending on their location."""
     handle_functions = {
         "header": _handle_casa_header_comments,
@@ -96,17 +99,21 @@ def _handle_casa_comments(
     return handle_functions[comment_type](comment_list)
 
 
-def _handle_casa_header_comments(comment_list: List[str]):
+def _handle_casa_header_comments(comment_list: List[str]) -> Tuple[Dict[str, Any], int]:
     """Get information about CasaXPS version."""
     comment_line = comment_list[0]
-    return {
+
+    comments = {
         "casa_version": comment_line.split("Casa Info Follows CasaXPS Version")[
             1
         ].strip()
     }
+    no_of_casa_lines = 1
+
+    return comments, no_of_casa_lines
 
 
-def _handle_casa_block_comments(comment_list: List[str]) -> Dict[str, Any]:
+def _handle_casa_block_comments(comment_list: List[str]) -> Tuple[Dict[str, Any], int]:
     """Get all processing and fitting data from CasaXPS comments."""
     comments = {}
 
@@ -130,7 +137,7 @@ def _handle_casa_block_comments(comment_list: List[str]) -> Dict[str, Any]:
             if occurence >= 1:
                 no_of_casa_lines += occurence
 
-    return comments
+    return comments, no_of_casa_lines
 
 
 def _handle_prodigy_header_comments(comment_list: List[str]) -> Dict[str, str]:

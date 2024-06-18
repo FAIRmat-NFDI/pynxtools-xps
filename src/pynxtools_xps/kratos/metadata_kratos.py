@@ -258,8 +258,6 @@ class KratosParser:
             if key in KEYS_WITH_UNITS and f"{key}/@units" not in flattened_dict:
                 flattened_dict[f"{key}/@units"] = UNIT_MISSING[key]
 
-        print(flattened_dict)
-
         return flattened_dict
 
 

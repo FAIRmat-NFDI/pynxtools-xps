@@ -29,13 +29,13 @@ from pynxtools_xps.reader_utils import XpsDataclass
 class KratosMetadata(XpsDataclass):
     """An object to store the Kratos metadata."""
 
-    platform: str = ""
+    created_by: str = ""
     date_created: str = ""
     computer: str = ""
     location_id: str = ""
     sample: str = ""
     description: dict = field(default_factory=dict)
-    tilt: str = ""
+    sample_tilt: str = ""
     charge_neutraliser: str = ""
     filament_current: float = 0.0
     filament_current_units: str = ""
@@ -47,14 +47,14 @@ class KratosMetadata(XpsDataclass):
     tuning: str = ""
     emission_current: float = 0.0
     emission_current_units: str = ""
-    anode_library: str = ""
+    anode_material: str = ""
     collimation: str = ""
-    lens: str = ""  # lens_mode
+    lens_mode: str = ""
     resolution: float = 0.0
     resolution_units: str = "eV"
     deflection: dict = field(default_factory=dict)
 
-    energy_start: float = 0.0  # start_energy
+    energy_start: float = 0.0
     energy_start_units: str = "eV"
     energy_end: float = 0.0
     energy_end_units: str = "eV"

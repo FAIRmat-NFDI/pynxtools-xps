@@ -170,9 +170,7 @@ def _handle_kratos_block_comments(comment_list: List[str]) -> Dict[str, Any]:
     kratos_parser = KratosParser()
     kratos_parser.parse_header_into_metadata(comment_list)
 
-    kratos_parser.flatten_metadata()
-
-    return kratos_parser.metadata.dict()
+    return kratos_parser.flatten_metadata()
 
 
 def _handle_misc_comments(comment_list: List[str]) -> Dict[str, str]:

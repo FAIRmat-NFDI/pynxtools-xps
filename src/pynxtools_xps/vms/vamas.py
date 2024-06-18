@@ -270,7 +270,7 @@ class VamasMapper(XPSMapper):
             "energy_referencing": f"{region_parent}/calibrations/energy_referencing",
             "peak_fitting": f"{region_parent}/peak_fitting",
             "profiling": f"{region_parent}/profiling",
-            "region": f"{region_parent}",
+            "region": f"{region_parent}/region",
         }
 
         used_keys = []
@@ -358,7 +358,7 @@ class VamasMapper(XPSMapper):
         # Write additional keys to region parent.
         for spectrum_key, value in spectrum.items():
             if spectrum_key not in used_keys:
-                self._xps_dict[f"{region_parent}/{spectrum_key}"] = value
+                self._xps_dict[f"{region_parent}/misc/{spectrum_key}"] = value
 
 
 KEY_MAP = {

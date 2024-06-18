@@ -64,8 +64,8 @@ The reader decides which data parser to use based on the file extension of the f
 - .vms: VAMAS files, ISO standard data transfer format ([ISO 14976](https://www.iso.org/standard/24269.html)), both in regular and irregular format
 - .xy: SpecsLabProdigy export format in XY format (including all export settings)
 - .txt:
-  - exported by [Scienta Omicron](https://scientaomicron.com/en) instruments
-  - exported by [CasaXPS](https://www.casaxps.com/) analysis software
+    - exported by [Scienta Omicron](https://scientaomicron.com/en) instruments
+    - exported by [CasaXPS](https://www.casaxps.com/) analysis software
 
 You can find more information regarding the readers for data from different technology partners here:
 

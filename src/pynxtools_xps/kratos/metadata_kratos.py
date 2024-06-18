@@ -42,6 +42,7 @@ from pynxtools_xps.kratos.kratos_data_model import (
 )
 
 SETTINGS_MAP: Dict[str, str] = {
+    "location_i_d": "location_id",
     "tilt": "sample_tilt",
     "lens": "lens_mode",
     "anode_library": "anode_material",

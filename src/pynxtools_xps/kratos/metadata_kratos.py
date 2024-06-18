@@ -110,8 +110,9 @@ class KratosParser:
             Flat list of dictionaries containing one spectrum each.
 
         """
-        header, data = self._separate_header_and_data()
-        self.parse_header_into_metadata(header)
+        # TODO: write parser for actual Kratos data file
+        # header, data = self._separate_header_and_data()
+        # self.parse_header_into_metadata(header)
 
         return self.spectra
 

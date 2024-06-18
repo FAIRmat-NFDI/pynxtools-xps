@@ -50,15 +50,15 @@ def handle_comments(
             index = indices[0]
             if keyword == "Casa Info Follows":
                 if comment_type == "header":
-                    special_comments = comment_list[index]
+                    special_comments = list(comment_list[index])
                     comment_list = comment_list[index + 1 :]
                 if comment_type == "block":
-                    special_comments = comment_list[index:]
+                    special_comments = list(comment_list[index:])
                     # TODO: only extract casa comments
                 comments.update(_handle_casa_comments(special_comments, comment_type))
 
             if keyword == "SpecsLab Prodigy":
-                special_comments = comment_list[index]
+                special_comments = list(comment_list[index])
                 comment_list = comment_list[index + 1 :]
                 comments.update(_handle_prodigy_header_comments(special_comments))
 
@@ -84,7 +84,9 @@ def handle_comments(
     return comments
 
 
-def _handle_casa_comments(comment_list: str, comment_type: Literal["header", "block"]):
+def _handle_casa_comments(
+    comment_list: List[str], comment_type: Literal["header", "block"]
+):
     """Handle comments from CasaXPS, depending on their location."""
     handle_functions = {
         "header": _handle_casa_header_comments,
@@ -94,8 +96,9 @@ def _handle_casa_comments(comment_list: str, comment_type: Literal["header", "bl
     return handle_functions[comment_type](comment_list)
 
 
-def _handle_casa_header_comments(comment_line: str):
+def _handle_casa_header_comments(comment_list: List[str]):
     """Get information about CasaXPS version."""
+    comment_line = comment_list[0]
     return {
         "casa_version": comment_line.split("Casa Info Follows CasaXPS Version")[
             1
@@ -130,8 +133,9 @@ def _handle_casa_block_comments(comment_list: List[str]) -> Dict[str, Any]:
     return comments
 
 
-def _handle_prodigy_header_comments(comment_line: str) -> Dict[str, str]:
+def _handle_prodigy_header_comments(comment_list: List[str]) -> Dict[str, str]:
     """Get information about SpecsLab Prodigy version."""
+    comment_line = comment_list[0]
     return {"prodigy_version": comment_line.split("Version")[1].strip()}
 
 

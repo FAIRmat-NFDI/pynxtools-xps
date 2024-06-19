@@ -25,9 +25,12 @@ dependencies = [
     "h5py>=3.6.0",
     "igor2",
     "xarray>=0.20.2",
-    "pint==0.17",
     "pynxtools>=0.3.2",
-    "setuptools>=64.0.1"
+    "setuptools>=64.0.1",
+    "pint>=0.17,<0.24; python_version <= '3.9'",
+    "numpy<2.0.0; python_version <= '3.9'",
+    "pint>=0.24; python_version >= '3.10'",
+    "numpy>=1.21.2; python_version >= '3.10'"
 ]
 
 [project.entry-points."pynxtools.reader"]
@@ -40,7 +43,7 @@ xps = "pynxtools_xps.reader:XPSReader"
 [project.optional-dependencies]
 dev = [
     "mypy",
-    "ruff==0.3.4",
+    "ruff==0.4.8",
     "pytest",
     "pytest-cov",
     "pytest-timeout",
@@ -82,6 +85,7 @@ select = [
     "E", # pycodestyle
     "W", # pycodestyle
     "PL", # pylint
+    "NPY201",
 ]
 ignore = [
     "E501", # Line too long ({width} > {limit} characters)

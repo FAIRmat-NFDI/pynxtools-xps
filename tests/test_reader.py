@@ -4,6 +4,7 @@ Basic example based test for the XPS reader
 
 import os
 import pytest
+from typing import Literal
 
 from pynxtools.dataconverter.convert import get_reader
 from pynxtools.testing.nexus_conversion import ReaderTest
@@ -93,13 +94,13 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
         pytest.param("specs_block.vms", "block", id="SPECS header metadata"),
     ],
 )
-def test_vms_comment_handler(vms_file: str, comment_type: str):
-    file = os.path.join(os.path.dirname(__file__), "data", "vms_comments", vms_file)
+def test_vms_comment_handler(file: str, comment_type: Literal["header", "block"]):
+    filepath = os.path.join(os.path.dirname(__file__), "data", "vms_comments", file)
 
     no_of_comments = 0
     comment_lines = []
 
-    with open(file, "rb") as vms_file:
+    with open(filepath, "rb") as vms_file:
         for i, line in enumerate(vms_file):
             # if line.endswith((b"\r\n", b"\n")):
             if i == 0:

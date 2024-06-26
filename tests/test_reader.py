@@ -84,7 +84,7 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
 
 
 @pytest.mark.parametrize(
-    "vms_file, comment_type",
+    "file, comment_type",
     [
         pytest.param("kratos.vms", "block", id="Kratos metadata"),
         pytest.param("phi.vms", "block", id="PHI metadata"),
@@ -95,6 +95,7 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
     ],
 )
 def test_vms_comment_handler(file: str, comment_type: Literal["header", "block"]):
+    """Test for the comment handler in VAMAS files."""
     filepath = os.path.join(os.path.dirname(__file__), "data", "vms_comments", file)
 
     no_of_comments = 0

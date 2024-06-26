@@ -267,7 +267,7 @@ class VamasMapper(XPSMapper):
             "manipulator": f"{instrument_parent}/manipulator",
             "sample": f"{region_parent}/sample",
             "data": f"{region_parent}/data",
-            "energy_referencing": f"{region_parent}/calibrations/energy_referencing",
+            "process": f"{region_parent}/process",
             "peak_fitting": f"{region_parent}/peak_fitting",
             "profiling": f"{region_parent}/profiling",
             "region": f"{region_parent}/region",
@@ -292,7 +292,7 @@ class VamasMapper(XPSMapper):
 
         # Write process data
         process_key_map: Dict[str, List[str]] = {
-            "energy_referencing": ["alignments"],
+            "process": ["energy_calibrations", "intensity_calibrations", "smoothings"],
             "peak_fitting": ["regions", "components"],
         }
 

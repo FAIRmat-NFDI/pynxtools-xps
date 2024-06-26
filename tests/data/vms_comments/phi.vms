@@ -1,0 +1,253 @@
+252
+SOFH
+Platform: PC
+Technique: XPS
+TechniqueEx: XPS
+FileType: DEPTHPRO
+FileDesc: (1, SnO2_10nm)
+SoftwareVersion: SS 3.3.3.2
+InstrumentModel: VersaProbe 4
+AcqFilename: SnO2_10nm_1.pro
+FileDate: 2024 1 22
+AcqFileDate: 2024 1 22
+Institution: PHI
+Operator:
+ExperimentID: 20240122_Mark
+EnergyReference: none 0.0
+AnalyserWorkFcn: 4.506 eV
+AnalyserRetardGain: 1.001505
+RegisterImage: no
+RegImageInterval: 1
+RegImageMode: 1
+RegImageLast: 1
+PlatenID: SnO2_10nm_1
+PhotoFilename: Blank.pho
+SXIFilename:
+SourceAnalyserAngle: 45.0 d
+AnalyserSolidAngle: 0.38 sr
+IntensityRecal: no
+IntensityCalCoeff: 40.000 0.200
+EnergyRecal: no
+ScanDeflectionSpan: 80 60
+ScanDeflectionOffset: -5 0
+SCAMultiplierVoltage: 1820.0 V
+NarrowAcceptanceAngle: no
+RefreshPersistence: 1
+PeakToNoiseRatioState: yes
+DelayBeforeAcquire: 5 seconds
+C60IonGun: None
+BiasBoxMode: 0
+TFCParameters: 1, 2,15,42.17,20.3,9.967,4.894,2.447,64.78,31.19,15.31,7.519,3.76,108.1,52.04,25.55,12.55,6.273,0.9459,0.9834,1,0.9724,0.9572,0.7793,0.9908,1,0.9697,0.9834,0.6257,0.9036,1,0.9441,0.9003
+SemFieldOfView: 0.0000000
+ImageSizeXY: 0.0000 0.0000
+IonGunMode: Standby
+SputterIon: Ar+
+SputterCurrent: 0.000 uA
+SputterRate: 0.000 A/min
+SputterEnergy: 0.100 kV
+FloatVolt: 0.0 V
+FloatEnable: no
+GridVolt: 120.0
+CondensorVolt: 71.00
+ObjectiveVolt: 67.00
+BendVolt: 1.50
+SputterRaster: 5.00 5.00 mm
+SputterRasterOffset: 0.000 0.000 mm
+TargetSputterTime: 0.0 min
+SputterEmission: 0.00 mA
+DeflectionBias: 0.0 V
+IonGunGasPressure: 0.000 mPa
+NeutIon: Ar+
+NeutCurrent: 0.000 uA
+NeutRate: 0.000 A/min
+NeutEnergy: 0.110 kV
+NeutFloatVolt: -100.0 V
+NeutFloatEnable: yes
+NeutGridVolt: 120.0
+NeutCondensorVolt: 69.30
+NeutObjectiveVolt: 101.53
+NeutBendVolt: 1.10
+NeutRaster: 0.00 0.00 mm
+NeutRasterOffset: 0.800 0.000 mm
+NeutTargetTimedOnTime: 0.0 min
+NeutEmission: 7.00 mA
+NeutDeflectionBias: 70.0 V
+NeutIonGunGasPressure: 0.000 mPa
+XpsScanMode: scanned
+AnalyserMode: FAT
+SurvTimePerStep: 20.000000
+NoDPDataCyc: 21
+NoPreSputterCyc: 1
+ProfSputterDelay: 15.0
+ProfXrayOffDuringSputter: no
+ProfSourceBlankDuringSputter: no
+ProfZalarHighAccuracyInterval: 20
+SampleRotation: off
+DepthRecal: no
+SputterMode: Alternating
+NoDepthReg: 1
+DepthCalDef: 1 Layer3 1 0.0000 0.0000 Ar+ 10.00 0.50 20 '10kV30nA' 10.000 150.0 15.0 0.0 3.30 48.10 91.35 2.00 -219.00 2.0 2.0 -0.62 0.16 600.00 2000 2.50 GCIB
+NoSpectralRegFull: 4
+SpectralRegDefFull: 1 1 Su1s 111 1751 -0.8000 1400.0000 0.0000 1399.0000 1.0000 0.000000 224.00 AREA
+SpectralRegDef2Full: 1 1400.0 3 0 2 8000
+SpectralRegBackgroundFull: 1 0.0 700.0 0.0
+SpectralRegHeroFull: 1 700.0 0.0 0.0 0.00
+SpectralRegIRFull: 1 0 0.000 0.000 0.0
+SpectralRegDefFull: 2 1 C1s 6 101 -0.2000 298.0000 278.0000 297.0000 279.0000 0.000000 55.00 AREA
+SpectralRegDef2Full: 2 20.0 10 0 4 180
+SpectralRegBackgroundFull: 2 0.0 288.0 0.0
+SpectralRegHeroFull: 2 288.0 0.0 0.0 0.00
+SpectralRegIRFull: 2 0 0.000 0.000 0.0
+SpectralRegDefFull: 3 1 Si2p 14 101 -0.2000 114.0000 94.0000 113.0000 95.0000 0.000000 55.00 AREA
+SpectralRegDef2Full: 3 20.0 10 0 4 180
+SpectralRegBackgroundFull: 3 0.0 104.0 0.0
+SpectralRegHeroFull: 3 104.0 0.0 0.0 0.00
+SpectralRegIRFull: 3 0 0.000 0.000 0.0
+SpectralRegDefFull: 4 1 Sn3d5 50 101 -0.2000 500.0000 480.0000 499.0000 481.0000 0.000000 55.00 AREA
+SpectralRegDef2Full: 4 20.0 10 0 4 180
+SpectralRegBackgroundFull: 4 0.0 490.0 0.0
+SpectralRegHeroFull: 4 490.0 0.0 0.0 0.00
+SpectralRegIRFull: 4 0 0.000 0.000 0.0
+NoSpectralReg: 4
+SpectralRegDef: 1 1 Su1s 111 1751 -0.8000 1400.0000 0.0000 1399.0000 1.0000 0.120000 224.00 AREA
+SpectralRegDef2: 1 1400.0 3 0 2 8000
+SpectralRegBackground: 1 0.0 700.0 0.0
+SpectralRegHero: 1 700.0 0.0 0.0 0.00
+SpectralRegIR: 1 1 0.000 0.000 0.0
+SpectralRegDef: 2 2 C1s 6 101 -0.2000 298.0000 278.0000 297.0000 279.0000 0.800000 55.00 AREA
+SpectralRegDef2: 2 20.0 10 0 4 180
+SpectralRegBackground: 2 0.0 288.0 0.0
+SpectralRegHero: 2 288.0 0.0 0.0 0.00
+SpectralRegIR: 2 1 0.000 0.000 0.0
+SpectralRegDef: 3 3 Si2p 14 101 -0.2000 114.0000 94.0000 113.0000 95.0000 0.800000 55.00 AREA
+SpectralRegDef2: 3 20.0 10 0 4 180
+SpectralRegBackground: 3 0.0 104.0 0.0
+SpectralRegHero: 3 104.0 0.0 0.0 0.00
+SpectralRegIR: 3 1 0.000 0.000 0.0
+SpectralRegDef: 4 4 Sn3d5 50 101 -0.2000 500.0000 480.0000 499.0000 481.0000 0.800000 55.00 AREA
+SpectralRegDef2: 4 20.0 10 0 4 180
+SpectralRegBackground: 4 0.0 490.0 0.0
+SpectralRegHero: 4 490.0 0.0 0.0 0.00
+SpectralRegIR: 4 1 0.000 0.000 0.0
+NoSpatialArea: 1
+SpatialAreaDef: 1 1 1 (-18981.7 -17428.2 16861.0 45.0 0.0)
+SpatialAreaDesc: 1
+SpatialHRPhotoCor: 1 (0.0 0.0)
+XraySource: Al 1486.6 mono
+XrayAnodePosition: 2
+XrayPower: 119.75 W
+XrayBeamDiameter: 200.0 um
+XRayBeamVoltage: 15000.0 V
+XRayCondenserLensVoltage: 8200.0 V
+XRayObjectiveCoilCurrent: 0.705 A
+XRayBlankingVoltage: 280.0 V
+XRayFilamentCurrent: 1.632 A
+XRayStigmator: 1.5 -0.5
+XRayOffsetInUm: -15 -40
+XRayMagFactor: 0.365 0.357
+XRayDelayFactor: 2000 1000
+XRayRotationInDeg: -21.50 V
+XRayHighPower: no
+XRayEmissionControl: yes
+XRayEmissionCurrent: 4.500 mA
+XRayStepDelayReadBeam: 5
+XRayStepsPerDiameter: 1.0
+XRayInterlaceInterval: 1
+XRayMaxFilamentCurrent: 1.650 A
+XRaySetting: 200u50W15KV
+EgunNeutMode: Neutralize
+NeutralizerCurrent: 5.0 uA
+NeutralizerEnergy: 1.00 V
+EgunNeutExtractor: 40.0 V
+EgunNeutXSteering: -0.1
+EgunNeutYSteering: -1.5
+EgunNeutFilament: 0.00 A
+EgunNeutPulseLength: 10.0 msec
+EgunNeutPulseFrequency: 2
+EgunNeutGain: 100
+EgunNeutTimePerStep: 100 msec
+EgunNeutRampRate: 0.45 A/s
+SxiPersistence: 1
+SxiSecPerDisplay: 1.0
+SxiAutoContrast: yes
+SxiAutoContrastLow: 0.30
+SxiAutoContrastHigh: 0.30
+SxiBindingEnergy: 550.0 eV
+SxiPassEnergy: 112 eV
+SxiLens2: -250 V
+SxiLens3: -250 V
+SxiLens4: -357 V
+SxiLens5: -357 V
+SxiRotator: 0.00 A
+SxiLensBias: 0 V
+SxiShutterBias: yes
+SxiShutterBiasVoltage: 190.0 V
+SxiDisplayMode: 2
+Detector Acq Time: 20.0 (min)
+Number Of Channels: 32
+Channel Info: 1 1 1.004
+Channel Info: 2 1 0.858
+Channel Info: 3 1 0.831
+Channel Info: 4 1 0.829
+Channel Info: 5 1 0.770
+Channel Info: 6 1 0.766
+Channel Info: 7 1 0.766
+Channel Info: 8 1 0.753
+Channel Info: 9 1 0.778
+Channel Info: 10 1 0.792
+Channel Info: 11 1 0.810
+Channel Info: 12 1 0.801
+Channel Info: 13 1 0.819
+Channel Info: 14 1 0.874
+Channel Info: 15 1 0.875
+Channel Info: 16 1 0.902
+Channel Info: 17 1 1.015
+Channel Info: 18 1 1.149
+Channel Info: 19 1 1.102
+Channel Info: 20 1 1.137
+Channel Info: 21 1 1.109
+Channel Info: 22 1 1.147
+Channel Info: 23 1 1.156
+Channel Info: 24 1 1.252
+Channel Info: 25 1 1.287
+Channel Info: 26 1 1.345
+Channel Info: 27 1 1.345
+Channel Info: 28 1 1.439
+Channel Info: 29 1 1.476
+Channel Info: 30 1 1.561
+Channel Info: 31 1 1.628
+Channel Info: 32 1 1.753
+StagePosition: -19.7313 18.0137 16.8606 45.0031 -0.0500
+StageCurrentRotationSpeed: 1.0000
+DefectPosID: 1
+DefectPosComment:
+DefectPosU: -18.9982
+DefectPosV: 17.4101
+DefectPosX: -19.7322
+DefectPosY: 18.0137
+DefectPosZ: 16.8606
+DefectPosTilt: 45.0031
+DefectPosRotation: -0.0500
+DefectPosAligment: None
+DefectPosReferenceImage: Blank.pho
+GCIBSputterRate: 0.0 A/min
+GCIBBeam: 10.000 kV
+GCIBIonization: 150.0 V
+GCIBExtractor: 3.30 kV
+GCIBRasterSize: 2.0 2.0 mm
+GCIBRasterOffset: -0.6 0.2 mm
+GCIBWien: 2.00 V
+GCIBBend: -219.00 V
+GCIBEmission: 15.00 mA
+GCIBMagnet: 0.0 A
+GCIBObjective: 48.10 Percent
+GCIBFocus: 91.35 Percent
+GCIBGasPressure: 600.00 kPa
+GCIBClusterSize: 2000 atom
+GCIBEnergyPerAtom: 2.50 eV/atom
+Deconvolution: no
+DeconvolutionPassEnergy: 6.50 eV
+AutoEGunNeut: yes
+AutoIonNeut: yes
+Presputter: no
+EOFH

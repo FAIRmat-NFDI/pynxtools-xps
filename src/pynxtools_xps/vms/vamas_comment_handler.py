@@ -117,27 +117,11 @@ def _handle_casa_block_comments(comment_list: List[str]) -> Tuple[Dict[str, Any]
     """Get all processing and fitting data from CasaXPS comments."""
     comments = {}
 
-    if "Casa Info Follows" in comment_list[0]:
-        #
-        casa = CasaProcess()
-        casa_data = casa.process_comments(comment_list)
+    casa = CasaProcess()
+    casa_data = casa.process_comments(comment_list)
+    comments.update(casa_data)
 
-        comments.update(casa_data)
-
-        no_of_casa_lines = 1
-
-        for number in (
-            "n_alignments",
-            "n_unknown_processes",
-            "n_regions",
-            "n_components",
-        ):
-            occurence = getattr(casa, number)
-            no_of_casa_lines += 1
-            if occurence >= 1:
-                no_of_casa_lines += occurence
-
-    return comments, no_of_casa_lines
+    return comments, casa.no_of_casa_lines
 
 
 def _handle_prodigy_header_comments(comment_list: List[str]) -> Dict[str, str]:

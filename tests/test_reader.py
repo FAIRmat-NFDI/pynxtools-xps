@@ -8,6 +8,8 @@ import pytest
 from pynxtools.dataconverter.convert import get_reader
 from pynxtools.testing.nexus_conversion import ReaderTest
 
+from pynxtools_xps.vms.vamas_comment_handler import handle_comments
+
 
 READER_NAME = "xps"
 READER_CLASS = get_reader(READER_NAME)
@@ -80,39 +82,31 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
     test.check_reproducibility_of_nexus()
 
 
-## This will be implemented in the future.
-# =============================================================================
-# def test_vms_mapper():
-#     mapper = VamasMapper
-#     data_dir = os.path.join(os.path.dirname(__file__), "data", "vms")
-#
-#     files_and_keys = {
-#         "regular": {
-#             "/ENTRY[entry]/Group_1 as-loaded/regions/Region_Survey/scan_mode": "REGULAR",
-#             "data['2 S1110, UHV, RT, Epass = 20 eV__MgKLL_1']['cycle0']": 1351,
-#         },
-#         "irregular": {
-#             "/ENTRY[entry]/Group_1 as-loaded/regions/Region_Survey/scan_mode": "IRREGULAR",
-#             "/ENTRY[entry]/Group_1 as-loaded/regions/Region_Fe2p/instrument/analyser/energydispersion/scan_mode": "FixedAnalyserTransmission",
-#             "data['2 S1110, UHV, RT, Epass = 20 eV__Fe3s-Si2p-Mg2s']['cycle0']": 761,
-#         },
-#     }
-#
-#     # (C["benz"], "20240122_SBenz_102_20240122_SBenz_SnO2_10nm.vms"),
-#     # (r"C:\Users\pielsticker\Lukas\MPI-CEC\Projects\deepxps\RUB MDI\example_spectra_Florian\Co", "Co 2p 0008751 M1.vms"),
-#     # (C["pielst"], C["EX889"], "vms", f"{C['EX889']}_regular.vms"),
-#     ((C["pielst"], C["EX889"], "vms", f"{C['EX889']}_irregular.vms"),)
-#     # (C["schu"], "CleanData-alphaII VOPO4 C2 BC4316.vms"),
-#     # (C["pielst"], C["EX889"], "vms", "d_reg.vms"),
-#     ((C["pielst"], C["EX889"], "vms", "d_irreg.vms"),)
-#
-#     for vms_file in os.listdir(data_dir):
-#         data = mapper.parse_file(file=file)
-#
-#
-# for k, v in d.items():
-#     if isinstance(v, str):
-#         # print(k)
-#         if "REG" in v:
-#             print(k)
-# =============================================================================
+@pytest.mark.parametrize(
+    "vms_file, comment_type",
+    [
+        pytest.param("kratos.vms", "block", id="Kratos metadata"),
+        pytest.param("phi.vms", "block", id="PHI metadata"),
+        pytest.param("casa_header.vms", "header", id="CasaXPS header"),
+        pytest.param("casa_process.vms", "block", id="CasaXPS processing"),
+        pytest.param("specs_header.vms", "header", id="SPECS header metadata"),
+        pytest.param("specs_block.vms", "block", id="SPECS header metadata"),
+    ],
+)
+def test_vms_comment_handler(vms_file: str, comment_type: str):
+    file = os.path.join(os.path.dirname(__file__), "data", "vms_comments", vms_file)
+
+    no_of_comments = 0
+    comment_lines = []
+
+    with open(file, "rb") as vms_file:
+        for i, line in enumerate(vms_file):
+            # if line.endswith((b"\r\n", b"\n")):
+            if i == 0:
+                no_of_comments = int(line)
+            else:
+                comment_lines += [line.decode("utf-8", errors="ignore").strip()]
+
+    assert no_of_comments == len(comment_lines)
+
+    comments = handle_comments(comment_lines, comment_type=comment_type)

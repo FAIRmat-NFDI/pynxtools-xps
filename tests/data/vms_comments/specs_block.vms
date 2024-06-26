@@ -1,0 +1,9 @@
+8
+File = EX889_S1110_MgFe2O4_spent.sle
+Group = 1 as-loaded
+First of group = 1
+Spectrum ID = 20
+Analyzer lens = LargeArea:1.5kV
+Analyzer slit = 4:7x20c\C:mesh
+Scan mode = FixedAnalyzerTransmission
+Kinetic energy start = 136.61

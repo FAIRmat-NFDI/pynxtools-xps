@@ -1,0 +1,40 @@
+39
+Creation
+Created by : user
+Date created : 01/01/2024 12:00
+Computer : XPS
+Location
+Location ID : Unknown
+Sample : Unknown
+Description : (1.2,0.25,-0.150)mm
+Tilt : 0.00
+Charge Neutraliser : On
+Filament Current : 0.1A
+Filament Bias : 2.0V
+Charge Balance : 1V
+Settings
+Excitation
+Mode : XPS - monochromatic
+Tuning : Spectroscopy
+Emission current : 1.00mA
+Anode library : Al
+ESCA modes
+Collimation : Slot
+Lens : Hybrid
+Resolution : 20.00
+Scan
+Deflection : (0.000, 0.000)mm
+C 1s : 1191.690-1214.690eV, Sweeps 1
+Start : 1191.690eV
+End : 1214.690eV
+Centre : 1203.190eV
+Width : 23.000eV
+Step size : 0.100eV
+Number Steps : 230
+Dwell time : 260ms
+Sweep time : 60s
+Sweeps : 1
+Target quality : 200
+Acquisition Conditions
+X-ray Power : 100.00W
+Quality : 190.25

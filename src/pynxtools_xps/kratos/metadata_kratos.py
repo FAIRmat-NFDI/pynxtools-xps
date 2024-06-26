@@ -214,6 +214,7 @@ class KratosParser:
         """
 
         value_function_map: Dict[str, Any] = {
+            "date_created": _parse_datetime,
             "description": _convert_description,
             "charge_neutraliser": convert_bool,
             "deflection": _convert_xray_deflection,
@@ -262,15 +263,16 @@ class KratosParser:
         return flattened_dict
 
 
-def _parse_datetime(value: str):
+def _parse_datetime(datetime_string: str) -> str:
     """
-    Parse datetime into a datetime.datetime object.
+    Convert the native time format to the datetime string
+    in the ISO 8601 format: '%Y-%b-%dT%H:%M:%S.%fZ'.
 
     Parameters
     ----------
     value : str
         String representation of the date in the format
-        "%m/%d/%y.
+        "%Y-%m-%d", "%m/%d/%Y" or "%H:%M:%S", "%I:%M:%S %p".
 
     Returns
     -------
@@ -278,12 +280,15 @@ def _parse_datetime(value: str):
         Datetime in ISO8601 format.
 
     """
-    year, month, day = value.strip().split(" ")
-    date_object = datetime.datetime(
-        year=int(year), month=int(month), day=int(day), tzinfo=pytz.timezone("UTC")
-    )
+    possible_date_formats = ["%d.%m.%Y %H:%M", "%d/%m/%Y %H:%M"]
+    for date_fmt in possible_date_formats:
+        try:
+            datetime_obj = datetime.datetime.strptime(datetime_string, date_fmt)
+            return datetime_obj.astimezone().isoformat()
 
-    return date_object.isoformat()
+        except ValueError:
+            continue
+    raise ValueError("Date and time could not be converted to ISO 8601 format.")
 
 
 def _convert_description(value: str):

@@ -9,6 +9,8 @@ import re
 from typing import Dict, Any
 
 ENERGY_TYPE_MAP = {
+    "BE": "binding",
+    "KE": "kinetic",
     "Binding": "binding",
     "Binding Energy": "binding",
     "binding energy": "binding",

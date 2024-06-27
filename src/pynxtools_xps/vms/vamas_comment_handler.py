@@ -35,7 +35,7 @@ def handle_comments(
 ) -> Dict[str, Any]:
     comments = {}
 
-    special_keys: Tuple[str] = (
+    special_keys: Tuple[str, ...] = (
         "Casa Info Follows",
         "SpecsLab Prodigy",
         "SOFH",

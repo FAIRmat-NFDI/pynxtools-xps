@@ -35,12 +35,12 @@ def handle_comments(
 ) -> Dict[str, Any]:
     comments = {}
 
-    special_keys: List[str] = [
+    special_keys: Tuple[str] = (
         "Casa Info Follows",
         "SpecsLab Prodigy",
         "SOFH",
         "Creation",
-    ]
+    )
 
     for keyword in special_keys:
         # if any(keyword in line for line in comment_list):

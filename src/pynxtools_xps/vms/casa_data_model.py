@@ -147,7 +147,7 @@ class CasaProcess:
         self.casa_data["intensity_calibrations"] += [intensity_calib]
 
     def process_smoothing(self, region_str: str):
-        ## Todo ##
+        # TODO: parse smoothing of data
         pass
 
     def process_region(self, region_str: str):
@@ -273,7 +273,7 @@ class CasaEnergyCalibration(XpsDataclass):
 class CasaIntensityCalibration(XpsDataclass):
     """An object to store one CasaXPS energy calibration."""
 
-    ## TODO ##
+    # TODO: enable more types of intensity calibrations
     power_law_coefficient: float = 0.0
     tf_function_ordinate_no: int = 0
 

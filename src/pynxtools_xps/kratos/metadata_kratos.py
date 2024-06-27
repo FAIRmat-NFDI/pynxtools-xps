@@ -24,7 +24,7 @@ mpes nxdl (NeXus Definition Language) template.
 
 import re
 import datetime
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Tuple
 from pathlib import Path
 import pytz
 
@@ -89,7 +89,14 @@ class KratosParser:
 
         self.metadata = KratosMetadata()
 
-    def parse_file(self, file: Union[str, Path], **kwargs):
+        self.value_function_map: Dict[str, Any] = {
+            "date_created": _parse_datetime,
+            "description": _convert_description,
+            "charge_neutraliser": convert_bool,
+            "deflection": _convert_xray_deflection,
+        }
+
+    def parse_file(self, file: Union[str, Path], **kwargs):  # -> List[str, Any]:
         """
         TODO: parse actual data, not just metadata!
 
@@ -102,12 +109,12 @@ class KratosParser:
 
         Parameters
         ----------
-        file : str
+        file : Union[str, Path]
             XPS data filepath.
 
         Returns
         -------
-        list
+        List[str, Any]
             Flat list of dictionaries containing one spectrum each.
 
         """
@@ -123,7 +130,7 @@ class KratosParser:
 
         Parameters
         ----------
-        header : str
+        header : List[str]
             Header data for one spectrum as a String.
 
         """
@@ -153,7 +160,7 @@ class KratosParser:
 
         self.metadata.validate_types()
 
-    def extract_unit(self, key: str, value):
+    def extract_unit(self, key: str, value: str) -> Tuple[Any, str]:
         """
         Extract units for the metadata containing unit information.
 
@@ -213,19 +220,12 @@ class KratosParser:
 
         """
 
-        value_function_map: Dict[str, Any] = {
-            "date_created": _parse_datetime,
-            "description": _convert_description,
-            "charge_neutraliser": convert_bool,
-            "deflection": _convert_xray_deflection,
-        }
-
-        if key in value_function_map:
-            map_fn = value_function_map[key]
+        if key in self.value_function_map:
+            map_fn = self.value_function_map[key]
             value = map_fn(value)
         return field_type(value)
 
-    def flatten_metadata(self):
+    def flatten_metadata(self) -> Dict[str, Any]:
         """
         Flatten metadata dict so that key-value pairs of nested
         dictionaries are at the top level.
@@ -242,7 +242,21 @@ class KratosParser:
 
         """
 
-        flattened_dict = {}
+        flattened_dict: Dict[str, Any] = {}
+
+        def setup_unit(flattened_dict: Dict[str, Any], unit_key: str):
+            """Sets up unit for in flattened_dict a given key ."""
+            if "_units" in unit_key:
+                new_key = unit_key.replace("_units", "/@units")
+                flattened_dict[new_key] = flattened_dict.pop(unit_key)
+
+            elif unit_key in KEYS_WITH_UNITS and not flattened_dict.get(
+                f"{unit_key}/@units", None
+            ):
+                try:
+                    flattened_dict[f"{unit_key}/@units"] = UNIT_MISSING[unit_key]
+                except KeyError:
+                    pass
 
         for key, value in self.metadata.dict().items():
             if isinstance(value, dict):
@@ -250,15 +264,7 @@ class KratosParser:
                     flattened_dict[f"{key}_{subkey}"] = subvalue
             else:
                 flattened_dict[key] = value
-
-        for key in flattened_dict.copy().keys():
-            if "_units" in key:
-                new_key = key.replace("_units", "/@units")
-                flattened_dict[new_key] = flattened_dict.pop(key)
-
-        for key in flattened_dict.copy().keys():
-            if key in KEYS_WITH_UNITS and f"{key}/@units" not in flattened_dict:
-                flattened_dict[f"{key}/@units"] = UNIT_MISSING[key]
+                setup_unit(flattened_dict, key)
 
         return flattened_dict
 
@@ -291,7 +297,7 @@ def _parse_datetime(datetime_string: str) -> str:
     raise ValueError("Date and time could not be converted to ISO 8601 format.")
 
 
-def _convert_description(value: str):
+def _convert_description(value: str) -> Dict[str, Any]:
     """Map all items in description to a dictionary."""
     pattern = re.compile(
         r"\(\s*([-+]?\d*\.?\d+)\s*,\s*([-+]?\d*\.?\d+)\s*,\s*([-+]?\d*\.?\d+)\s*\)\s*([a-zA-Z]+)"
@@ -312,7 +318,7 @@ def _convert_description(value: str):
         raise ValueError(f"Invalid input string '{value}' for description.")
 
 
-def _separate_val_and_unit(value: str):
+def _separate_val_and_unit(value: str) -> Tuple[Any, str]:
     """Map all items in energy_referencing to a dictionary."""
 
     pattern = re.compile(r"([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)([a-zA-Z]+)")
@@ -325,7 +331,7 @@ def _separate_val_and_unit(value: str):
         raise ValueError(f"Input string '{value}' does not contain a value and unit.")
 
 
-def _convert_xray_deflection(value: str):
+def _convert_xray_deflection(value: str) -> Dict[str, Any]:
     """Convert deflection like (0.000, 0.000)mm to dict."""
 
     pattern = re.compile(
@@ -343,8 +349,3 @@ def _convert_xray_deflection(value: str):
         }
     else:
         raise ValueError(f"Invalid input string: '{value}' for X-ray deflection.")
-
-
-def _convert_spectrum_type(key, value: str):
-    return value
-    # wide : 286.690-1491.690eV, Sweeps 3

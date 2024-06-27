@@ -66,10 +66,10 @@ class KratosMetadata(XpsDataclass):
     step_size_units: str = "eV"
     number_steps: int = 0
     dwell_time: float = 0.0
-    dwell_time_units: str = "eV"
+    dwell_time_units: str = "s"
     sweep_time: float = 0.0
-    sweep_time_units: str = "eV"
+    sweep_time_units: str = "s"
     sweeps: int = 0
 
     x_ray_power: float = 0.0
-    x_ray_power_units: str = "eV"
+    x_ray_power_units: str = "W"

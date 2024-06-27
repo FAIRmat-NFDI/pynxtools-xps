@@ -26,7 +26,6 @@ import re
 import datetime
 from typing import Any, Dict, List, Union, Tuple
 from pathlib import Path
-import pytz
 
 from pynxtools_xps.reader_utils import (
     convert_pascal_to_snake,

@@ -298,19 +298,16 @@ class VamasMapper(XPSMapper):
 
         for grouping, process_key_list in process_key_map.items():
             root = path_map[grouping]
+
             for spectrum_key in process_key_list:
-                try:
-                    processes = spectrum[spectrum_key]
-                    for i, process in enumerate(processes):
-                        process_key = (
-                            f"{root}/{spectrum_key}/{spectrum_key.rstrip('s')}{i}"
-                        )
-                        for key, value in process.dict().items():
-                            key = key.replace("_units", "/@units")
-                            self._xps_dict[f"{process_key}/{key}"] = value
-                    used_keys += [spectrum_key]
-                except KeyError:
-                    pass
+                process_keys = [key for key in spectrum if key.startswith(spectrum_key)]
+                for process_key in process_keys:
+                    try:
+                        process_key = process_key.replace("_units", "/@units")
+                        self._xps_dict[f"{root}/{process_key}"] = spectrum[process_key]
+                        used_keys += [process_key]
+                    except KeyError:
+                        pass
 
         # Create keys for writing to data and detector
         entry = construct_entry_name(region_parent)
@@ -368,7 +365,6 @@ KEY_MAP = {
     "source_energy": "excitation_energy",
     "analyser_mode": "scan_mode",
     "resolution": "pass_energy",
-    "analyser_azimuth": "analyser_take_off_azimuth",
     "transition_label": "transition",
     "abscissa_label": "energy_label",
     "abscissa_units": "energy_units",
@@ -618,7 +614,7 @@ class VamasParser:
         block.analysis_width_x = float(self.data.pop(0).strip())
         block.analysis_width_y = float(self.data.pop(0).strip())
         block.analyser_take_off_polar = float(self.data.pop(0).strip())
-        block.analyser_azimuth = float(self.data.pop(0).strip())
+        block.analyser_take_off_azimuth = float(self.data.pop(0).strip())
         block.species_label = self.data.pop(0).strip()
         block.transition_label = self.data.pop(0).strip()
         block.particle_charge = int(self.data.pop(0).strip())

@@ -118,7 +118,9 @@ def _handle_casa_block_comments(comment_list: List[str]) -> Tuple[Dict[str, Any]
     comments = {}
 
     casa = CasaProcess()
-    casa_data = casa.process_comments(comment_list)
+    casa.process_comments(comment_list)
+    casa_data = casa.flatten_metadata()
+
     comments.update(casa_data)
 
     return comments, casa.no_of_casa_lines

@@ -68,6 +68,26 @@ class CasaProcess:
 
         return self.casa_data
 
+    def flatten_metadata(self):
+        # Write process data
+        process_key_map: Dict[str, List[str]] = {
+            "process": ["energy_calibrations", "intensity_calibrations", "smoothings"],
+            "peak_fitting": ["regions", "components"],
+        }
+
+        flattened_dict: Dict[str, Any] = {}
+
+        for grouping, process_key_list in process_key_map.items():
+            for spectrum_key in process_key_list:
+                processes = self.casa_data[spectrum_key]
+                for i, process in enumerate(processes):
+                    process_key = f"{spectrum_key}/{spectrum_key.rstrip('s')}{i}"
+                    for key, value in process.dict().items():
+                        key = key.replace("_units", "/@units")
+                        flattened_dict[f"{process_key}/{key}"] = value
+
+        return flattened_dict
+
     def process_energy_calibration(self, calib_str: str):
         """
         Process one alignment.

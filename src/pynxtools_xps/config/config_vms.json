@@ -53,7 +53,7 @@
       "service":"@eln",
       "identifier":"@eln",
       "is_persistent":"@eln"
-    }  
+    }
   },
   "/ENTRY[entry]/INSTRUMENT[instrument]":{
     "@default":"electronanalyser",

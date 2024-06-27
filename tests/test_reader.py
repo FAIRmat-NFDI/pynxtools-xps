@@ -4,7 +4,9 @@ Basic example based test for the XPS reader
 
 import os
 import pytest
+import json
 from typing import Literal
+import numpy as np
 
 from pynxtools.dataconverter.convert import get_reader
 from pynxtools.testing.nexus_conversion import ReaderTest
@@ -83,6 +85,32 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
     test.check_reproducibility_of_nexus()
 
 
+def read_comment_file(filepath: str):
+    """Read comments from one vms comment test file."""
+
+    no_of_comments = 0
+    comment_lines = []
+
+    with open(filepath, "rb") as vms_file:
+        for i, line in enumerate(vms_file):
+            if i == 0:
+                no_of_comments = int(line)
+            else:
+                comment_lines += [line.decode("utf-8", errors="ignore").strip()]
+
+    return no_of_comments, comment_lines
+
+
+COMMENT_LENGHTS = {
+    "kratos.vms": 50,
+    "phi.vms": 312,
+    "casa_header.vms": 1,
+    "casa_process.vms": 144,
+    "specs_header.vms": 1,
+    "specs_block.vms": 8,
+}
+
+
 @pytest.mark.parametrize(
     "file, comment_type",
     [
@@ -97,18 +125,19 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
 def test_vms_comment_handler(file: str, comment_type: Literal["header", "block"]):
     """Test for the comment handler in VAMAS files."""
     filepath = os.path.join(os.path.dirname(__file__), "data", "vms_comments", file)
+    ref_json_filepath = filepath.replace(".vms", "_ref.json")
 
-    no_of_comments = 0
-    comment_lines = []
-
-    with open(filepath, "rb") as vms_file:
-        for i, line in enumerate(vms_file):
-            # if line.endswith((b"\r\n", b"\n")):
-            if i == 0:
-                no_of_comments = int(line)
-            else:
-                comment_lines += [line.decode("utf-8", errors="ignore").strip()]
-
+    no_of_comments, comment_lines = read_comment_file(filepath)
     assert no_of_comments == len(comment_lines)
 
     comments = handle_comments(comment_lines, comment_type=comment_type)
+
+    for key, val in comments.items():
+        if type(val) == np.ndarray:
+            comments[key] = val.tolist()
+
+    with open(ref_json_filepath, "r") as json_file:
+        ref_comments = json.load(json_file)
+
+    assert len(comments) == COMMENT_LENGHTS[file]
+    assert comments == ref_comments

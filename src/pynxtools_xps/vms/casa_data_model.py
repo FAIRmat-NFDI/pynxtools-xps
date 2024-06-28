@@ -24,52 +24,71 @@ from typing import List, Dict, Any
 from dataclasses import dataclass, field
 
 from pynxtools_xps.reader_utils import XpsDataclass
+from pynxtools_xps.value_mappers import convert_energy_type
 
 
 class CasaProcess:
     """Processing and fitting information from CasaXPS."""
 
     def __init__(self):
-        self.n_alignments: int = 0
-        self.n_unknown_processes: int = 0
-        self.n_regions: int = 0
-        self.n_components: int = 0
-
-        self.alignments: List[Any] = []
-        self.unknown_processes: List[Any] = []
-        self.regions: List[Any] = []
-        self.components: List[Any] = []
+        self.casa_data: Dict[str, List[Any]] = {
+            "energy_calibrations": [],
+            "intensity_calibrations": [],
+            "smoothings": [],
+            "regions": [],
+            "components": [],
+        }
 
     def process_comments(self, comment_list: List[str]):
         line_map = {
-            "Calib": self.process_alignment,
+            "Calib": self.process_energy_calibration,
+            "KECalib": self.process_intensity_calibration,
+            "TransmissionSet": self.process_intensity_calibration,
+            "InCalib": self.process_intensity_calibration,
+            "Sm": self.process_smoothing,
             "CASA region": self.process_region,
             "CASA comp": self.process_component,
         }
 
-        for line in comment_list:
+        n_processes, n_annotations, n_regions, n_components = [
+            int(element)
+            for element in comment_list
+            if isinstance(element, str) and element.isdigit()
+        ][:4]
+        n_annotations *= 2  # account for empty line
+
+        self.no_of_casa_lines = (
+            5 + n_processes + n_annotations + n_regions + n_components
+        )
+
+        for line in comment_list[: self.no_of_casa_lines]:
             for token, func in line_map.items():
                 if line.startswith(token):
                     func(line)
 
-        casa_data = {
-            "alignments": self.alignments,
-            "regions": self.regions,
-            "components": self.components,
+        return self.casa_data
+
+    def flatten_metadata(self):
+        # Write process data
+        process_key_map: Dict[str, List[str]] = {
+            "process": ["energy_calibrations", "intensity_calibrations", "smoothings"],
+            "peak_fitting": ["regions", "components"],
         }
 
-        self.count_occurences()
+        flattened_dict: Dict[str, Any] = {}
 
-        return casa_data
+        for grouping, process_key_list in process_key_map.items():
+            for spectrum_key in process_key_list:
+                processes = self.casa_data[spectrum_key]
+                for i, process in enumerate(processes):
+                    process_key = f"{spectrum_key}/{spectrum_key.rstrip('s')}{i}"
+                    for key, value in process.dict().items():
+                        key = key.replace("_units", "/@units")
+                        flattened_dict[f"{process_key}/{key}"] = value
 
-    def count_occurences(self):
-        """Count occurence of different process items."""
-        self.n_alignments = len(self.alignments)
-        self.n_unknown_process = len(self.unknown_processes)
-        self.n_regions = len(self.regions)
-        self.n_components = len(self.components)
+        return flattened_dict
 
-    def process_alignment(self, align_str: str):
+    def process_energy_calibration(self, calib_str: str):
         """
         Process one alignment.
 
@@ -86,25 +105,70 @@ class CasaProcess:
         None.
 
         """
-        split_line = self._split_line(align_str)
+        split_line = self._split_line(calib_str)
 
-        align = CasaAlignment()
+        energy_calib = CasaEnergyCalibration()
 
         measured_index = split_line.index("M")
         aligned_index = split_line.index("A")
-        align.measured_energy = float(split_line[measured_index + 2])
-        align.aligned_energy = float(split_line[aligned_index + 2])
+        try:
+            energy_calib.measured_energies = [float(split_line[measured_index + 2])]
+        except ValueError:
+            energies = [
+                float(energy) for energy in split_line[measured_index + 2].split(",")
+            ]
+            energy_calib.measured_energies = energies
+            energy_calib.range_calibration = True
+        energy_calib.aligned_energy = float(split_line[aligned_index + 2])
 
-        align.energy_type = map_energy_type(split_line[7])
-        align.operation = split_line[8]
+        energy_calib.energy_type = convert_energy_type(split_line[7])
+        energy_calib.operation = split_line[8]
 
-        if align.operation == "ADD":
-            align.energy_offset = align.measured_energy - align.aligned_energy
-            align.operation = "addition"
+        if energy_calib.operation == "ADD":
+            energy_calib.energy_offset = (
+                min(energy_calib.measured_energies) - energy_calib.aligned_energy
+            )
+            energy_calib.operation = "addition"
 
-        align.validate_types()
+        energy_calib.validate_types()
 
-        self.alignments += [align]
+        self.casa_data["energy_calibrations"] += [energy_calib]
+
+    def process_intensity_calibration(self, calib_str: str):
+        """Process different intensity calibrations."""
+
+        intensity_calib = CasaIntensityCalibration()
+
+        def get_power_law_coefficient(line: str):
+            intensity_calib.power_law_coefficient = float(line.split("KECalib ")[1])
+
+        def get_transmission_function_ordinate(line: str):
+            intensity_calib.tf_function_ordinate_no = int(
+                line.split("TransmissionSet 1.0 ")[1]
+            )
+
+        def get_both_calibrations(line: str):
+            split_line = line.split(" ")
+            intensity_calib.power_law_coefficient = float(split_line[1])
+            intensity_calib.tf_function_ordinate_no = int(split_line[2])
+
+        calib_map = {
+            "KECalib": get_power_law_coefficient,
+            "TransmissionSet": get_transmission_function_ordinate,
+            "InCalib": get_both_calibrations,
+        }
+
+        for token, func in calib_map.items():
+            if calib_str.startswith(token):
+                func(calib_str)
+
+        intensity_calib.validate_types()
+
+        self.casa_data["intensity_calibrations"] += [intensity_calib]
+
+    def process_smoothing(self, region_str: str):
+        # TODO: parse smoothing of data
+        pass
 
     def process_region(self, region_str: str):
         """
@@ -141,7 +205,7 @@ class CasaProcess:
 
         region.validate_types()
 
-        self.regions += [region]
+        self.casa_data["regions"] += [region]
 
     def process_component(self, component_str: str):
         """
@@ -200,7 +264,8 @@ class CasaProcess:
         component.uncorrected_rsf = float(split_line[uncorrected_rsf_index + 1])
 
         component.validate_types()
-        self.components += [component]
+
+        self.casa_data["components"] += [component]
 
     def _split_line(self, line):
         """Split line in Casa processing."""
@@ -209,31 +274,28 @@ class CasaProcess:
         return [re.sub(r"[\(*?\*)]", "", text) for text in result]
 
 
-def map_energy_type(energy_str):
-    """Map energy names to NXDL-compliant concepts."""
-    replacements = {
-        "BE": "binding",
-        "KE": "kinetic",
-        "binding energy": "binding",
-        "binding": "kinetic",
-        "Binding": "binding",
-        "Kinetic": "kinetic",
-    }
-    return replacements.get(energy_str)
-
-
 @dataclass
-class CasaAlignment(XpsDataclass):
-    """An object to store one CasaXPS alignment."""
+class CasaEnergyCalibration(XpsDataclass):
+    """An object to store one CasaXPS energy calibration."""
 
     energy_type: str = "binding"
     energy_offset: float = 0.0
     energy_offset_units: str = "eV"
-    measured_energy: float = 0.0
-    measured_energy_units: str = "eV"
+    measured_energies: list = field(default_factory=list)
+    measured_energies_units: str = "eV"
     aligned_energy: float = 0.0
     aligned_energy_units: str = "eV"
     operation: str = "eV"
+    range_calibration: bool = False
+
+
+@dataclass
+class CasaIntensityCalibration(XpsDataclass):
+    """An object to store one CasaXPS energy calibration."""
+
+    # TODO: enable more types of intensity calibrations
+    power_law_coefficient: float = 0.0
+    tf_function_ordinate_no: int = 0
 
 
 @dataclass

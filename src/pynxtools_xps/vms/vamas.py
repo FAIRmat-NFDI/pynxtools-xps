@@ -35,8 +35,7 @@ from pynxtools_xps.vms.vamas_data_model import (
     VamasAdditionalParam,
     OrdinateValue,
 )
-from pynxtools_xps.vms.casa_data_model import CasaProcess
-from pynxtools_xps.phi.spe_pro_phi import PhiParser
+from pynxtools_xps.vms.vamas_comment_handler import handle_comments
 
 from pynxtools_xps.reader_utils import (
     XPSMapper,
@@ -268,10 +267,10 @@ class VamasMapper(XPSMapper):
             "manipulator": f"{instrument_parent}/manipulator",
             "sample": f"{region_parent}/sample",
             "data": f"{region_parent}/data",
-            "energy_referencing": f"{region_parent}/calibrations/energy_referencing",
+            "process": f"{region_parent}/process",
             "peak_fitting": f"{region_parent}/peak_fitting",
             "profiling": f"{region_parent}/profiling",
-            "region": f"{region_parent}",
+            "region": f"{region_parent}/region",
         }
 
         used_keys = []
@@ -293,25 +292,22 @@ class VamasMapper(XPSMapper):
 
         # Write process data
         process_key_map: Dict[str, List[str]] = {
-            "energy_referencing": ["alignments"],
+            "process": ["energy_calibrations", "intensity_calibrations", "smoothings"],
             "peak_fitting": ["regions", "components"],
         }
 
         for grouping, process_key_list in process_key_map.items():
             root = path_map[grouping]
+
             for spectrum_key in process_key_list:
-                try:
-                    processes = spectrum[spectrum_key]
-                    for i, process in enumerate(processes):
-                        process_key = (
-                            f"{root}/{spectrum_key}/{spectrum_key.rstrip('s')}{i}"
-                        )
-                        for key, value in process.dict().items():
-                            key = key.replace("_units", "/@units")
-                            self._xps_dict[f"{process_key}/{key}"] = value
-                    used_keys += [spectrum_key]
-                except KeyError:
-                    pass
+                process_keys = [key for key in spectrum if key.startswith(spectrum_key)]
+                for process_key in process_keys:
+                    try:
+                        process_key = process_key.replace("_units", "/@units")
+                        self._xps_dict[f"{root}/{process_key}"] = spectrum[process_key]
+                        used_keys += [process_key]
+                    except KeyError:
+                        pass
 
         # Create keys for writing to data and detector
         entry = construct_entry_name(region_parent)
@@ -359,7 +355,7 @@ class VamasMapper(XPSMapper):
         # Write additional keys to region parent.
         for spectrum_key, value in spectrum.items():
             if spectrum_key not in used_keys:
-                self._xps_dict[f"{region_parent}/{spectrum_key}"] = value
+                self._xps_dict[f"{region_parent}/misc/{spectrum_key}"] = value
 
 
 KEY_MAP = {
@@ -369,7 +365,6 @@ KEY_MAP = {
     "source_energy": "excitation_energy",
     "analyser_mode": "scan_mode",
     "resolution": "pass_energy",
-    "analyser_azimuth": "analyser_take_off_azimuth",
     "transition_label": "transition",
     "abscissa_label": "energy_label",
     "abscissa_units": "energy_units",
@@ -423,7 +418,7 @@ class VamasParser:
         """Read in vamas text file."""
         with open(file, "rb") as vms_file:
             for line in vms_file:
-                if line.endswith(b"\r\n"):
+                if line.endswith((b"\r\n", b"\n")):
                     self.data += [line.decode("utf-8", errors="ignore").strip()]
 
     def _extract_n_lines_to_list(self, number_of_lines):
@@ -619,7 +614,7 @@ class VamasParser:
         block.analysis_width_x = float(self.data.pop(0).strip())
         block.analysis_width_y = float(self.data.pop(0).strip())
         block.analyser_take_off_polar = float(self.data.pop(0).strip())
-        block.analyser_azimuth = float(self.data.pop(0).strip())
+        block.analyser_take_off_azimuth = float(self.data.pop(0).strip())
         block.species_label = self.data.pop(0).strip()
         block.transition_label = self.data.pop(0).strip()
         block.particle_charge = int(self.data.pop(0).strip())
@@ -828,118 +823,6 @@ class VamasParser:
 
         return flattened_spectra
 
-    def handle_header_comments(self, comment_list: List[str]):
-        """Handle comments (incl. Casa info) for the header."""
-        comments = {}
-
-        special_keys = {
-            "Casa Info Follows": self._handle_casa_header,
-            "SpecsLab Prodigy": self._handle_prodigy_header,
-            "SOFH": self._handle_phi_header,
-        }
-
-        for keyword, handle_func in special_keys.items():
-            # if any(keyword in line for line in comment_list):
-            indices = [i for i, line in enumerate(comment_list) if keyword in line]
-
-            if indices:
-                index = indices[0]
-                if keyword == "Casa Info Follows":
-                    special_comments = comment_list[index]
-                    comment_list = comment_list[index + 1 :]
-
-                if keyword == "SpecsLab Prodigy":
-                    special_comments = comment_list[index]
-                    comment_list = comment_list[index + 1 :]
-
-                if keyword == "SOFH":
-                    end_index = [
-                        i for i, line in enumerate(comment_list) if "EOFH" in line
-                    ][0]
-                    special_comments = comment_list[index : end_index + 1]  # type: ignore[assignment]
-                    del comment_list[index : end_index + 1]
-
-                comments.update(handle_func(special_comments))  # type: ignore[operator]
-
-        # Handle non-special comments.
-        for line in comment_list:
-            for sep in ("=", ":"):
-                try:
-                    key, value = [part.strip(" ") for part in line.split(sep, 1)]
-                    comments[convert_pascal_to_snake(key)] = value
-                except ValueError:
-                    continue
-
-        return comments
-
-    def _handle_casa_header(self, comment_line: str):
-        """Get information about CasaXPS version."""
-        return {
-            "casa_version": comment_line.split("Casa Info Follows CasaXPS Version")[
-                1
-            ].strip()
-        }
-
-    def _handle_prodigy_header(self, comment_line: str):
-        """Get information about SpecsLab Prodigy version."""
-        return {"prodigy_version": comment_line.split("Version")[1].strip()}
-
-    def _handle_phi_header(self, comment_list: List[str]):
-        """Get metadta from Phi system."""
-        phi_parser = PhiParser()
-        phi_parser.parse_header_into_metadata(comment_list)
-
-        phi_comments = phi_parser.metadata.dict()
-
-        regions = phi_parser.parse_spectral_regions(comment_list)
-        areas = phi_parser.parse_spatial_areas(comment_list)
-
-        for region in regions:
-            for area in areas:
-                concatenated = {**region.dict(), **area.dict()}
-
-            phi_comments.update(concatenated)
-
-        return phi_comments
-
-    def handle_block_comments(self, comment_list: List[str]):
-        """Handle comments (incl. Casa fitting) for each block."""
-        comments = {}
-
-        if "Casa Info Follows" in comment_list[0]:
-            # Get all processing and fitting data from Casa comments.
-            casa = CasaProcess()
-            casa_data = casa.process_comments(comment_list)
-
-            comments.update(casa_data)
-
-            no_of_casa_lines = 1
-
-            for number in (
-                "n_alignments",
-                "n_unknown_processes",
-                "n_regions",
-                "n_components",
-            ):
-                occurence = getattr(casa, number)
-                no_of_casa_lines += 1
-                if occurence >= 1:
-                    no_of_casa_lines += occurence
-
-            non_casa_comments = comment_list[no_of_casa_lines:]
-
-        else:
-            non_casa_comments = comment_list
-
-        for line in non_casa_comments:
-            for sep in ("=", ":"):
-                try:
-                    key, value = [part.strip(" ") for part in line.split("=", 1)]
-                    comments[convert_pascal_to_snake(key)] = value
-                except ValueError:
-                    continue
-        return comments
-
     def build_list(self):
         """
         Construct a list of dictionaries from the Vamas objects
@@ -960,7 +843,9 @@ class VamasParser:
         }
         del header_dict["comment_lines"]
 
-        header_comments = self.handle_header_comments(self.header.comment_lines)
+        header_comments = handle_comments(
+            self.header.comment_lines, comment_type="header"
+        )
 
         update_dict_without_overwrite(header_dict, header_comments)
 
@@ -986,7 +871,8 @@ class VamasParser:
             re_map_keys(settings, KEY_MAP)
             re_map_values(settings, VALUE_MAP)
 
-            comment_dict = self.handle_block_comments(block.comment_lines)
+            comment_dict = handle_comments(block.comment_lines, comment_type="block")
+
             re_map_keys(comment_dict, KEY_MAP)
             re_map_values(comment_dict, VALUE_MAP)
 

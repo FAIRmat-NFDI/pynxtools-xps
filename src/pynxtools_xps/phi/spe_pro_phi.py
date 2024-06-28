@@ -796,9 +796,48 @@ class PhiParser:  # pylint: disable=too-few-public-methods
         self.binary_header: np.ndarray = None
         self.spectra_header: np.ndarray = None
 
-    def parse_file(self, file, **kwargs):
+        self.value_function_map = {
+            "technique": convert_measurement_method,
+            "technique_ex": convert_measurement_method,
+            "file_type": _map_file_type,
+            "file_date": _parse_datetime,
+            "acquisition_file_date": _parse_datetime,
+            "energy_reference": _convert_energy_referencing,
+            "intensity_calibration_coefficients": _map_to_list,
+            "energy_recalibration": convert_bool,
+            "scan_deflection_span": _map_to_xy,
+            "scan_deflection_offset": _map_to_xy,
+            "tfc_parameters": _map_to_list,
+            "image_size": _map_to_xy,
+            "float_enabled": convert_bool,
+            "sputter_raster": _map_to_xy_with_units,
+            "sputter_raster_offset": _map_to_xy_with_units,
+            "neutral_raster": _map_to_xy_with_units,
+            "neutral_raster_offset": _map_to_xy_with_units,
+            "profiling_xray_off_during_sputter": convert_bool,
+            "profiling_source_blank_during_sputter": convert_bool,
+            "profiling_depth_recalibration": convert_bool,
+            "energy_scan_mode": convert_energy_scan_mode,
+            "xray_source": _convert_xray_source_params,
+            "xray_stigmator": _map_to_xy,
+            "xray_magnification_factor": _map_to_xy,
+            "xray_delay_factor": _map_to_xy,
+            "xray_high_power": convert_bool,
+            "xray_emission_control": convert_bool,
+            "xray_settings": _convert_xray_source_settings,
+            "sxi_auto_contrast": convert_bool,
+            "sxi_shutter_bias": convert_bool,
+            "stage_positions": _convert_stage_positions,
+            "gcib_raster_size": _map_to_xy_with_units,
+            "gcib_raster_offset": _map_to_xy_with_units,
+            "auto_flood_gun": convert_bool,
+            "auto_neutral_ion_source": convert_bool,
+            "presputter": convert_bool,
+        }
+
+    def parse_file(self, file: Union[str, Path], **kwargs):
         """
-        Parse the .xy file into a list of dictionaries.
+        Parse the .spe, .pro file into a list of dictionaries.
 
         Parsed data is stored in the attribute 'self.data'.
         Each dictionary in the data list is a grouping of related
@@ -809,12 +848,6 @@ class PhiParser:  # pylint: disable=too-few-public-methods
         ----------
         file : str
             XPS data filepath.
-
-        **kwargs : dict
-            commentprefix : str
-                Prefix for comments in xy file. The default is "#".
-            n_headerlines: int
-                number of header_lines in each data block.
 
         Returns
         -------
@@ -1278,47 +1311,8 @@ class PhiParser:  # pylint: disable=too-few-public-methods
             Value of correct type and internal structure.
 
         """
-        value_function_map = {
-            "technique": convert_measurement_method,
-            "technique_ex": convert_measurement_method,
-            "file_type": _map_file_type,
-            "file_date": _parse_datetime,
-            "acquisition_file_date": _parse_datetime,
-            "energy_reference": _convert_energy_referencing,
-            "intensity_calibration_coefficients": _map_to_list,
-            "energy_recalibration": convert_bool,
-            "scan_deflection_span": _map_to_xy,
-            "scan_deflection_offset": _map_to_xy,
-            "tfc_parameters": _map_to_list,
-            "image_size": _map_to_xy,
-            "float_enabled": convert_bool,
-            "sputter_raster": _map_to_xy_with_units,
-            "sputter_raster_offset": _map_to_xy_with_units,
-            "neutral_raster": _map_to_xy_with_units,
-            "neutral_raster_offset": _map_to_xy_with_units,
-            "profiling_xray_off_during_sputter": convert_bool,
-            "profiling_source_blank_during_sputter": convert_bool,
-            "profiling_depth_recalibration": convert_bool,
-            "energy_scan_mode": convert_energy_scan_mode,
-            "xray_source": _convert_xray_source_params,
-            "xray_stigmator": _map_to_xy,
-            "xray_magnification_factor": _map_to_xy,
-            "xray_delay_factor": _map_to_xy,
-            "xray_high_power": convert_bool,
-            "xray_emission_control": convert_bool,
-            "xray_settings": _convert_xray_source_settings,
-            "sxi_auto_contrast": convert_bool,
-            "sxi_shutter_bias": convert_bool,
-            "stage_positions": _convert_stage_positions,
-            "gcib_raster_size": _map_to_xy_with_units,
-            "gcib_raster_offset": _map_to_xy_with_units,
-            "auto_flood_gun": convert_bool,
-            "auto_neutral_ion_source": convert_bool,
-            "presputter": convert_bool,
-        }
-
-        if key in value_function_map:
-            map_fn = value_function_map[key]
+        if key in self.value_function_map:
+            map_fn = self.value_function_map[key]
             value = map_fn(value)
         return field_type(value)
 
@@ -1327,13 +1321,13 @@ class PhiParser:  # pylint: disable=too-few-public-methods
         Add flattened dict with PhiMetadata fields to each spectrum.
 
         """
-        flattened_metadata = self._flatten_dict(self.metadata.dict())
+        flattened_metadata = self.flatten_metadata()
 
         for spectrum in self.spectra:
             spectrum.update(flattened_metadata)
             spectrum["intensity/@units"] = UNIT_MISSING["intensity"]
 
-    def _flatten_dict(self, metadata_dict: Dict[str, Any]):
+    def flatten_metadata(self):
         """
         Flatten metadata dict so that key-value pairs of nested
         dictionaries are at the top level.
@@ -1363,7 +1357,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         flattened_dict = {}
 
-        for key, value in metadata_dict.items():
+        for key, value in self.metadata.dict().items():
             if isinstance(value, dict):
                 for subkey, subvalue in value.items():
                     supkey = shorten_supkey(key)

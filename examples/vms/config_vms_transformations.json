@@ -1,29 +1,29 @@
 {
   "/ENTRY[entry]":{
     "depends_on": "/entry/sample_stage_cs_transformations/vamas_sample_stage_coordinate_system",
-    "TRANSFORMATIONS[sample_stage_cs_transformations]": {
-      "AXISNAME[vamas_sample_stage_coordinate_system]":null,
-      "AXISNAME[vamas_sample_stage_coordinate_system]/@direction":"X-axis points in sample stage x direction, Y-Axis points in sample stage y direction (towards the operator), Z-axis points upwards, forming a left-handed coordinate_system",
-      "AXISNAME[vamas_sample_stage_coordinate_system]/@matrix": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
-      "AXISNAME[vamas_sample_stage_coordinate_system]/@depends_on":"y_rotation",
-
-      "AXISNAME[y_rotation]":"@xps_token:beam_xray/source_polar_angle",
-      "AXISNAME[y_rotation]/@units":"@xps_token:beam_xray/source_polar_angle/@units",
-      "AXISNAME[y_rotation]/@transformation_type": "rotation",
-      "AXISNAME[y_rotation]/@vector": [0, -1, 0],
-      "AXISNAME[y_rotation]/@depends_on":"y_flip",
-
-      "AXISNAME[y_flip]":180,
-      "AXISNAME[y_flip]/@units":"degree",
-      "AXISNAME[y_flip]/@transformation_type": "rotation",
-      "AXISNAME[y_flip]/@vector": [0, 1, 0],
-      "AXISNAME[y_flip]/@depends_on":"z_rotation",
+    "TRANSFORMATIONS[coordinate_system_transformations]": {
+      "AXISNAME[sample_stage_coordinate_system]":null,
+      "AXISNAME[sample_stage_coordinate_system]/@direction":"X-axis points in sample stage x direction, Y-Axis points in sample stage y direction (towards the operator), Z-axis points upwards, forming a left-handed coordinate_system",
+      "AXISNAME[sample_stage_coordinate_system]/@matrix": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+      "AXISNAME[sample_stage_coordinate_system]/@depends_on":"z_rotation",
 
       "AXISNAME[z_rotation]":"@xps_token:beam_xray/source_azimuth_angle",
       "AXISNAME[z_rotation]/@units":"@xps_token:beam_xray/source_azimuth_angle/@units",
       "AXISNAME[z_rotation]/@transformation_type": "rotation",
       "AXISNAME[z_rotation]/@vector": [0, 0, 1],
-      "AXISNAME[z_rotation]/@depends_on":"base_change",
+      "AXISNAME[z_rotation]/@depends_on":"y_flip",
+
+      "AXISNAME[y_flip]":180,
+      "AXISNAME[y_flip]/@units":"degree",
+      "AXISNAME[y_flip]/@transformation_type": "rotation",
+      "AXISNAME[y_flip]/@vector": [0, 1, 0],
+      "AXISNAME[y_flip]/@depends_on":"y_rotation",
+
+      "AXISNAME[y_rotation]":"@xps_token:beam_xray/source_polar_angle",
+      "AXISNAME[y_rotation]/@units":"@xps_token:beam_xray/source_polar_angle/@units",
+      "AXISNAME[y_rotation]/@transformation_type": "rotation",
+      "AXISNAME[y_rotation]/@vector": [0, -1, 0],
+      "AXISNAME[y_rotation]/@depends_on":"base_change",
 
       "AXISNAME[base_change]":1,
       "AXISNAME[base_change]/@transformation_type": "base_change",
@@ -45,23 +45,22 @@
         "AXISNAME[beam_polar_angle_of_incidence]/@units":"@xps_token:beam_xray/source_polar_angle/@units",
         "AXISNAME[beam_polar_angle_of_incidence]/@transformation_type": "rotation",
         "AXISNAME[beam_polar_angle_of_incidence]/@vector": [1, 0, 0],
-        "AXISNAME[beam_polar_angle_of_incidence]/@depends_on":"/entry/sample_stage_cs_transformations/vamas_sample_stage_coordinate_system"
-      }
+        "AXISNAME[beam_polar_angle_of_incidence]/@depends_on":"/entry/coordinate_system_transformations/sample_stage_coordinate_system"
     },
     "ELECTRONANALYSER[electronanalyser]":{
-      "depends_on": "transformations/analyser_take_off_azimuth_angle",
+      "depends_on": "/entry/instrument/beam_xray/transformations/analyser_take_off_polar_angle",
       "TRANSFORMATIONS[transformations]": {
-        "AXISNAME[analyser_take_off_azimuth_angle]":"@xps_token:beam_xray/source_azimuth_angle",
-        "AXISNAME[analyser_take_off_azimuth_angle]/@units":"@xps_token:beam_xray/source_azimuth_angle/@units",
-        "AXISNAME[analyser_take_off_azimuth_angle]/@transformation_type": "rotation",
-        "AXISNAME[analyser_take_off_azimuth_angle]/@vector":[0, 0, -1],
-        "AXISNAME[analyser_take_off_azimuth_angle]/@depends_on":"analyser_take_off_polar_angle",
+        "AXISNAME[analyser_take_off_polar_angle]":"@xps_token:analyser/analyser_take_off_polar_angle",
+        "AXISNAME[analyser_take_off_polar_angle]/@units":"@xps_token:analyser/analyser_take_off_polar_angle/@units",
+        "AXISNAME[analyser_take_off_polar_angle]/@transformation_type":"rotation",
+        "AXISNAME[analyser_take_off_polar_angle]/@vector":[0, 1, 0],
+        "AXISNAME[analyser_take_off_polar_angle]/@depends_on":"analyser_take_off_azimuth_angle",
 
-        "AXISNAME[analyser_take_off_polar_angle]":"@xps_token:beam_xray/source_polar_angle",
-        "AXISNAME[analyser_take_off_polar_angle]/@units":"@xps_token:beam_xray/source_polar_angle/@units",
-        "AXISNAME[analyser_take_off_polar_angle]/@transformation_type": "rotation",
-        "AXISNAME[analyser_take_off_polar_angle]/@vector":[1, 0, 0],
-        "AXISNAME[analyser_take_off_polar_angle]/@depends_on":"/entry/sample_stage_cs_transformations/vamas_sample_stage_coordinate_system"
+        "AXISNAME[analyser_take_off_azimuth_angle]":"@xps_token:analyser/analyser_take_off_azimuth_angle",
+        "AXISNAME[analyser_take_off_azimuth_angle]/@units":"@xps_token:analyser/analyser_take_off_azimuth_angle/@units",
+        "AXISNAME[analyser_take_off_azimuth_angle]/@transformation_type":"rotation",
+        "AXISNAME[analyser_take_off_azimuth_angle]/@vector":[0, 0, -1],
+        "AXISNAME[analyser_take_off_azimuth_angle]/@depends_on":"/entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation"
       }
     }
   },
@@ -74,17 +73,17 @@
       "AXISNAME[sample_rotation_angle]/@vector":[0, 0, -1],
       "AXISNAME[sample_rotation_angle]/@depends_on":"sample_normal_tilt_azimuth_angle",
 
+      "AXISNAME[sample_normal_polar_angle_of_tilt]":"@xps_token:sample/sample_normal_polar_angle_of_tilt",
+      "AXISNAME[sample_normal_polar_angle_of_tilt]/@units":"@xps_token:sample/sample_normal_polar_angle_of_tilt/@units",
+      "AXISNAME[sample_normal_polar_angle_of_tilt]/@transformation_type": "rotation",
+      "AXISNAME[sample_normal_polar_angle_of_tilt]/@vector":[0, 1, 0],
+      "AXISNAME[sample_normal_polar_angle_of_tilt]/@depends_on":"sample_normal_tilt_azimuth_angle",
+
       "AXISNAME[sample_normal_tilt_azimuth_angle]":"@xps_token:sample/sample_normal_tilt_azimuth_angle",
       "AXISNAME[sample_normal_tilt_azimuth_angle]/@units":"@xps_token:sample/sample_normal_tilt_azimuth_angle/@units",
       "AXISNAME[sample_normal_tilt_azimuth_angle]/@transformation_type":"rotation",
       "AXISNAME[sample_normal_tilt_azimuth_angle]/@vector":[0, 0, -1],
-      "AXISNAME[sample_normal_tilt_azimuth_angle]/@depends_on":"sample_normal_polar_angle_of_tilt",
-
-      "AXISNAME[sample_normal_polar_angle_of_tilt]":"@xps_token:sample/sample_normal_polar_angle_of_tilt",
-      "AXISNAME[sample_normal_polar_angle_of_tilt]/@units":"@xps_token:sample/sample_normal_polar_angle_of_tilt/@units",
-      "AXISNAME[sample_normal_polar_angle_of_tilt]/@transformation_type": "rotation",
-      "AXISNAME[sample_normal_polar_angle_of_tilt]/@vector":[1, 0, 0],
-      "AXISNAME[sample_normal_polar_angle_of_tilt]/@depends_on":"/entry/sample_stage_cs_transformations/vamas_sample_stage_coordinate_system"
+      "AXISNAME[sample_normal_tilt_azimuth_angle]/@depends_on":"/entry/coordinate_system_transformations/sample_stage_coordinate_system"
     }
   }
 }

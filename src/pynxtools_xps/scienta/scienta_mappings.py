@@ -7,7 +7,7 @@ Created on Tue May  7 11:54:24 2024
 
 import re
 import datetime
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional
 import numpy as np
 
 from pynxtools_xps.reader_utils import (

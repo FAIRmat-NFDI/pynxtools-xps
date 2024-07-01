@@ -43,6 +43,7 @@ The explanation section provides background knowledge on the implementation desi
 
 - [Design principles and implementation](explanation/implementation.md)
 - [NXmpes](explanation/appdefs.md) <!-- - [NXmpes and NXxps](explanation/appdefs.md) -->
+- [The XPS coordinate system](explanation/coordinate_system.md)
 - [How to map pieces of information to NeXus](explanation/contextualization.md)
 <!-- - [Data processing](explanation/data_processing.md) -->
 <!-- - - [NOMAD integration](explanation/nomad_integration.md) -->

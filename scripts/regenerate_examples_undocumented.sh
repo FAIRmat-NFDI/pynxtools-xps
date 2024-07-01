@@ -48,7 +48,6 @@ function update_vms_examples {
   cd vms/
   echo "Update REGULAR file conversion example"
   dataconverter regular.vms eln_data_vms.yaml --reader $READER --nxdl $NXDL --output regular.vms.nxs --ignore-undocumented
-  echo
   echo "Update REGULAR file conversion example"
   dataconverter irregular.vms eln_data_vms.yaml --reader $READER --nxdl $NXDL --output irregular.vms.nxs --ignore-undocumented
   echo "Update txt export example"

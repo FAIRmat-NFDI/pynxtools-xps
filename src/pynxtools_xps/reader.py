@@ -270,7 +270,7 @@ def fill_detector_group(key, entries_values, config_dict, xps_data_dict, templat
                 # If there is no channel data, iterate over scans
                 if scan_count in data_var:
                     detector_scans["detector"] += [xr_data[data_var].data]
-                    scan_key = detector_key.replace(
+                    scan_key = modified_key.replace(
                         "raw_data/raw", f"raw_data/{data_var}"
                     )
 
@@ -434,7 +434,7 @@ class XPSReader(BaseReader):
 
     supported_nxdls = [
         "NXmpes",
-        "NXxps",
+        # "NXxps",
     ]
 
     def read(

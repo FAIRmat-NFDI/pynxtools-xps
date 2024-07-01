@@ -268,11 +268,8 @@ def fill_detector_group(key, entries_values, config_dict, xps_data_dict, templat
                         template[f"{cycle_scan_key}/@units"] = units
             else:
                 # If there is no channel data, iterate over scans
-                detector_key = modified_key.replace(
-                    "/DETECTOR[detector]/", "/DETECTOR[detector0]/"
-                )
                 if scan_count in data_var:
-                    detector_scans["detector0"] += [xr_data[data_var].data]
+                    detector_scans["detector"] += [xr_data[data_var].data]
                     scan_key = detector_key.replace(
                         "raw_data/raw", f"raw_data/{data_var}"
                     )

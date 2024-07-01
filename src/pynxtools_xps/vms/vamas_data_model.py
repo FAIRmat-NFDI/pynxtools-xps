@@ -92,8 +92,8 @@ class VamasBlock(XpsDataclass):
     first_linescan_y_end: float = 0.0
     last_linescan_x_end: float = 0.0
     last_linescan_y_end: float = 0.0
-    source_analyser_angle: float = 0.0
-    source_azimuth: float = 180.0
+    source_polar_angle: float = 0.0
+    source_azimuth_angle: float = 180.0
     analyser_mode: str = ""
     resolution: float = 0.0
     differential_width_aes: float = 0.0
@@ -106,8 +106,8 @@ class VamasBlock(XpsDataclass):
     analysis_width_y: float = 0.0
     # degrees from upward z-direction,
     # defined by the sample stage
-    analyser_take_off_polar: float = 0.0
-    analyser_azimuth: float = 0.0
+    analyser_take_off_polar_angle: float = 0.0
+    analyser_take_off_azimuth_angle: float = 0.0
     species_label: str = ""
     transition_label: str = ""
     particle_charge: int = -1
@@ -134,11 +134,11 @@ class VamasBlock(XpsDataclass):
 
     # degrees from upward z-direction,
     # defined by the sample stage
-    sample_tilt_normal_polar: float = 0.0
+    sample_normal_polar_angle_of_tilt: float = 0.0
     # degrees clockwise from the y-direction towards the
     # operator, defined by the sample stage
-    sample_tilt_azimuth: float = 0.0
-    sample_rotation: float = 0.0
+    sample_normal_tilt_azimuth_angle: float = 0.0
+    sample_rotation_angle: float = 0.0
     no_additional_params: int = 2
     num_ord_values: int = 0
     future_upgrade_block_entries: list = field(default_factory=list)

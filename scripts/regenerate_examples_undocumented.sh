@@ -2,6 +2,14 @@
 READER=xps
 NXDL=NXmpes
 
+function update_cs_example {
+  echo "Update coordinate system example"
+  cd coordinate_system/
+  dataconverter config_vms_cs_fixed.json --reader xps --nxdl NXmpes --output vms-cs-fixed.nxs --ignore-undocumented
+  cd ..
+  echo
+}
+
 function update_phi_examples {
   echo "Update Phi examples"
   cd phi/
@@ -48,7 +56,6 @@ function update_vms_examples {
   cd vms/
   echo "Update REGULAR file conversion example"
   dataconverter regular.vms eln_data_vms.yaml --reader $READER --nxdl $NXDL --output regular.vms.nxs --ignore-undocumented
-  echo
   echo "Update REGULAR file conversion example"
   dataconverter irregular.vms eln_data_vms.yaml --reader $READER --nxdl $NXDL --output irregular.vms.nxs --ignore-undocumented
   echo "Update txt export example"
@@ -60,6 +67,7 @@ function update_vms_examples {
 project_dir=$(dirname $(dirname $(realpath $0)))
 cd $project_dir/examples
 
+update_cs_example
 update_phi_examples
 update_scienta_examples
 update_specs_examples

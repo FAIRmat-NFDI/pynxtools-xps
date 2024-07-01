@@ -2,6 +2,14 @@
 READER=xps
 NXDL=NXmpes
 
+function update_cs_example {
+  echo "Update coordinate system example"
+  cd coordinate_system/
+  dataconverter dataconverter config_vms_cs_fixed.json --reader xps --nxdl NXmpes --output vms-cs-fixed.nxs
+  cd ..
+  echo
+}
+
 function update_phi_examples {
   echo "Update Phi examples"
   cd phi/

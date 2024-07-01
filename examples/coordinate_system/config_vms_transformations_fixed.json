@@ -1,35 +1,33 @@
 {
-  "/ENTRY[entry]":{
-    "depends_on": "/entry/sample_stage_cs_transformations/vamas_sample_stage_coordinate_system",
-    "TRANSFORMATIONS[coordinate_system_transformations]": {
-      "AXISNAME[sample_stage_coordinate_system]":null,
-      "AXISNAME[sample_stage_coordinate_system]/@direction":"X-axis points in sample stage x direction, Y-Axis points in sample stage y direction (towards the operator), Z-axis points upwards, forming a left-handed coordinate_system",
-      "AXISNAME[sample_stage_coordinate_system]/@matrix": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
-      "AXISNAME[sample_stage_coordinate_system]/@depends_on":"z_rotation",
+  "/ENTRY[entry]/depends_on": "/entry/sample_stage_cs_transformations/vamas_sample_stage_coordinate_system",
+  "/ENTRY[entry]/TRANSFORMATIONS[coordinate_system_transformations]": {
+    "AXISNAME[sample_stage_coordinate_system]":null,
+    "AXISNAME[sample_stage_coordinate_system]/@direction":"X-axis points in sample stage x direction, Y-Axis points in sample stage y direction (towards the operator), Z-axis points upwards, forming a left-handed coordinate_system",
+    "AXISNAME[sample_stage_coordinate_system]/@matrix": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+    "AXISNAME[sample_stage_coordinate_system]/@depends_on":"z_rotation",
 
-      "AXISNAME[z_rotation]":150.0,
-      "AXISNAME[z_rotation]/@units":"degree",
-      "AXISNAME[z_rotation]/@transformation_type": "rotation",
-      "AXISNAME[z_rotation]/@vector": [0, 0, 1],
-      "AXISNAME[z_rotation]/@depends_on":"y_flip",
+    "AXISNAME[z_rotation]":150.0,
+    "AXISNAME[z_rotation]/@units":"degree",
+    "AXISNAME[z_rotation]/@transformation_type": "rotation",
+    "AXISNAME[z_rotation]/@vector": [0, 0, 1],
+    "AXISNAME[z_rotation]/@depends_on":"y_flip",
 
-      "AXISNAME[y_flip]":180,
-      "AXISNAME[y_flip]/@units":"degree",
-      "AXISNAME[y_flip]/@transformation_type": "rotation",
-      "AXISNAME[y_flip]/@vector": [0, 1, 0],
-      "AXISNAME[y_flip]/@depends_on":"y_rotation",
+    "AXISNAME[y_flip]":180,
+    "AXISNAME[y_flip]/@units":"degree",
+    "AXISNAME[y_flip]/@transformation_type": "rotation",
+    "AXISNAME[y_flip]/@vector": [0, 1, 0],
+    "AXISNAME[y_flip]/@depends_on":"y_rotation",
 
-      "AXISNAME[y_rotation]":54.5,
-      "AXISNAME[y_rotation]/@units":"degree",
-      "AXISNAME[y_rotation]/@transformation_type": "rotation",
-      "AXISNAME[y_rotation]/@vector": [0, -1, 0],
-      "AXISNAME[y_rotation]/@depends_on":"base_change",
+    "AXISNAME[y_rotation]":54.5,
+    "AXISNAME[y_rotation]/@units":"degree",
+    "AXISNAME[y_rotation]/@transformation_type": "rotation",
+    "AXISNAME[y_rotation]/@vector": [0, -1, 0],
+    "AXISNAME[y_rotation]/@depends_on":"base_change",
 
-      "AXISNAME[base_change]":1,
-      "AXISNAME[base_change]/@transformation_type": "base_change",
-      "AXISNAME[base_change]/@matrix": [[-1, 0, 0], [0, 1, 0], [0, 0, 1]],
-      "AXISNAME[base_change]/@depends_on":"."
-    }
+    "AXISNAME[base_change]":1,
+    "AXISNAME[base_change]/@transformation_type": "base_change",
+    "AXISNAME[base_change]/@matrix": [[-1, 0, 0], [0, 1, 0], [0, 0, 1]],
+    "AXISNAME[base_change]/@depends_on":"."
   },
   "/ENTRY[entry]/INSTRUMENT[instrument]":{
     "beamTYPE[beam_xray]":{
@@ -46,6 +44,7 @@
         "AXISNAME[beam_azimuth_angle]/@transformation_type":"rotation",
         "AXISNAME[beam_azimuth_angle]/@vector": [0, 0, -1],
         "AXISNAME[beam_azimuth_angle]/@depends_on":"/entry/coordinate_system_transformations/sample_stage_coordinate_system"
+      }
     },
     "ELECTRONANALYSER[electronanalyser]":{
       "depends_on": "/entry/instrument/beam_xray/transformations/analyser_take_off_polar_angle",

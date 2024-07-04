@@ -1,0 +1,13 @@
+{
+    "instrument/beam_xray": {
+      "file": "shapes/beam.stl"
+    },
+    "sample": {
+      "file": "shapes/sample.stl"
+    },
+    "instrument/electronanalyser": {
+      "file": "shapes/analyser.stl",
+      "y":-1.0,
+      "x":1.0
+    }
+  }

@@ -1,4 +1,4 @@
-name: Compatibility with pynxtools master branch
+name: Compatibility with pynxtools
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pynxtools_versions: ["master"] # to be replaced by "master" branch
+        pynxtools_versions: ["master"]
     steps:
       - uses: actions/checkout@v2
         with:

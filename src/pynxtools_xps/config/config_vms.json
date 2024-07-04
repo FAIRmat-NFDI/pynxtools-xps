@@ -38,7 +38,7 @@
        "service":"@eln",
        "identifier":"@eln",
        "is_persistent":"@eln"
-     }  
+     }
    },
    "/ENTRY[entry]/INSTRUMENT[instrument]":{
      "@default":"electronanalyser",
@@ -157,7 +157,7 @@
        "depends_on": "transformations/analyser_take_off_azimuth",
        "TRANSFORMATIONS[transformations]": {
          "AXISNAME[analyser_take_off_azimuth]":"@xps_token:instrument/analyser/analyser_take_off_azimuth",
-         "AXISNAME[analyser_take_off_azimuth]/@depends_on":"analyser_take_off_polar",      
+         "AXISNAME[analyser_take_off_azimuth]/@depends_on":"analyser_take_off_polar",
          "AXISNAME[analyser_take_off_azimuth]/@transformation_type": "rotation",
          "AXISNAME[analyser_take_off_azimuth]/@units":"@xps_token:instrument/analyser/analyser_take_off_azimuth/@units",
          "AXISNAME[analyser_take_off_azimuth]/@vector": [0, 1, 0],

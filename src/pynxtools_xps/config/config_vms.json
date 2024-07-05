@@ -99,7 +99,7 @@
         "AXISNAME[beam_polar_angle_of_incidence]":"@xps_token:beam_xray/source_polar_angle",
         "AXISNAME[beam_polar_angle_of_incidence]/@units":"@xps_token:beam_xray/source_polar_angle/@units",
         "AXISNAME[beam_polar_angle_of_incidence]/@transformation_type": "rotation",
-        "AXISNAME[beam_polar_angle_of_incidence]/@vector": [0, 1, 0],
+        "AXISNAME[beam_polar_angle_of_incidence]/@vector": [0, -1, 0],
         "AXISNAME[beam_polar_angle_of_incidence]/@depends_on":"beam_azimuth_angle",
 
         "AXISNAME[beam_azimuth_angle]":"@xps_token:beam_xray/source_azimuth_angle",
@@ -183,7 +183,7 @@
         "AXISNAME[analyser_take_off_polar_angle]":"@xps_token:analyser/analyser_take_off_polar_angle",
         "AXISNAME[analyser_take_off_polar_angle]/@units":"@xps_token:analyser/analyser_take_off_polar_angle/@units",
         "AXISNAME[analyser_take_off_polar_angle]/@transformation_type":"rotation",
-        "AXISNAME[analyser_take_off_polar_angle]/@vector":[0, 1, 0],
+        "AXISNAME[analyser_take_off_polar_angle]/@vector":[0, -1, 0],
         "AXISNAME[analyser_take_off_polar_angle]/@depends_on":"analyser_take_off_azimuth_angle",
 
         "AXISNAME[analyser_take_off_azimuth_angle]":"@xps_token:analyser/analyser_take_off_azimuth_angle",
@@ -341,7 +341,7 @@
       "AXISNAME[sample_normal_polar_angle_of_tilt]":"@xps_token:sample/sample_normal_polar_angle_of_tilt",
       "AXISNAME[sample_normal_polar_angle_of_tilt]/@units":"@xps_token:sample/sample_normal_polar_angle_of_tilt/@units",
       "AXISNAME[sample_normal_polar_angle_of_tilt]/@transformation_type": "rotation",
-      "AXISNAME[sample_normal_polar_angle_of_tilt]/@vector":[0, 1, 0],
+      "AXISNAME[sample_normal_polar_angle_of_tilt]/@vector":[0, -1, 0],
       "AXISNAME[sample_normal_polar_angle_of_tilt]/@depends_on":"sample_normal_tilt_azimuth_angle",
 
       "AXISNAME[sample_normal_tilt_azimuth_angle]":"@xps_token:sample/sample_normal_tilt_azimuth_angle",

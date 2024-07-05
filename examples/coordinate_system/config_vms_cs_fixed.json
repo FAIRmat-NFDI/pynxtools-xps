@@ -36,7 +36,7 @@
         "AXISNAME[beam_polar_angle_of_incidence]":54.5,
         "AXISNAME[beam_polar_angle_of_incidence]/@units":"degree",
         "AXISNAME[beam_polar_angle_of_incidence]/@transformation_type":"rotation",
-        "AXISNAME[beam_polar_angle_of_incidence]/@vector":[0, 1, 0],
+        "AXISNAME[beam_polar_angle_of_incidence]/@vector":[0, -1, 0],
         "AXISNAME[beam_polar_angle_of_incidence]/@depends_on":"beam_azimuth_angle",
 
         "AXISNAME[beam_azimuth_angle]":150.0,
@@ -52,7 +52,7 @@
         "AXISNAME[analyser_take_off_polar_angle]":0.0,
         "AXISNAME[analyser_take_off_polar_angle]/@units":"degree",
         "AXISNAME[analyser_take_off_polar_angle]/@transformation_type":"rotation",
-        "AXISNAME[analyser_take_off_polar_angle]/@vector":[0, 1, 0],
+        "AXISNAME[analyser_take_off_polar_angle]/@vector":[0, -1, 0],
         "AXISNAME[analyser_take_off_polar_angle]/@depends_on":"analyser_take_off_azimuth_angle",
 
         "AXISNAME[analyser_take_off_azimuth_angle]":80.0,
@@ -75,7 +75,7 @@
       "AXISNAME[sample_normal_polar_angle_of_tilt]":80.0,
       "AXISNAME[sample_normal_polar_angle_of_tilt]/@units":"degree",
       "AXISNAME[sample_normal_polar_angle_of_tilt]/@transformation_type":"rotation",
-      "AXISNAME[sample_normal_polar_angle_of_tilt]/@vector":[0, 1, 0],
+      "AXISNAME[sample_normal_polar_angle_of_tilt]/@vector":[0, -1, 0],
       "AXISNAME[sample_normal_polar_angle_of_tilt]/@depends_on":"sample_normal_tilt_azimuth_angle",
 
       "AXISNAME[sample_normal_tilt_azimuth_angle]":240.0,

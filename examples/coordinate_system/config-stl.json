@@ -3,11 +3,12 @@
       "file": "shapes/beam.stl"
     },
     "sample": {
-      "file": "shapes/sample.stl"
+      "file": "shapes/sample.stl",
+      "y":1.0
     },
     "instrument/electronanalyser": {
       "file": "shapes/analyser.stl",
-      "y":-1.0,
-      "x":1.0
+      "x":-1.0,
+      "z":1.0
     }
   }

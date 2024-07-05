@@ -16,6 +16,6 @@ The file `vms-cs.glb` contains a 3D representation (in [gltf/glb](https://en.wik
 ```console
 user@box:~$ pip install nexus3d
 user@box:~$ python shapes/shapes.py
-user@box:~$ nexus3d vms-cs-fixed.nxs -fo vms-cs-test.glb --blender -c config-stl.json -s 1
+user@box:~$ nexus3d vms-cs-fixed.nxs -fo vms-cs.glb --blender -c config-stl.json -s 1
 ```
 

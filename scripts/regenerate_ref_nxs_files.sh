@@ -8,7 +8,6 @@ function update_phi_pro_ref {
   echo "Update .pro (PHI depth_profiling) NeXus reference"
   dataconverter SnO2_10nm_1.pro eln_data_phi_pro.yaml --reader $READER --nxdl $NXDL --ignore-undocumented --output phi_pro_ref.nxs  
   cd ..
-  echo
 }
 
 function update_phi_spe_ref {
@@ -16,7 +15,6 @@ function update_phi_spe_ref {
   echo "Update .spe (PHI single spectrum) NeXus reference"
   dataconverter SnO2_10nm.spe eln_data_phi_spe.yaml --reader $READER --nxdl $NXDL --ignore-undocumented --output phi_spe_ref.nxs
   cd ..
-  echo
 }
 
 function update_scienta_ibw_ref {
@@ -24,7 +22,6 @@ function update_scienta_ibw_ref {
   echo "Update scienta .ibw NeXus reference"
   dataconverter Ag_000*.ibw eln_data_scienta_ibw.yaml --reader $READER --nxdl $NXDL --ignore-undocumented --output scienta_ibw_ref.nxs
   cd ..
-  echo
 }
 
 function update_scienta_txt_ref {
@@ -32,7 +29,6 @@ function update_scienta_txt_ref {
   echo "Update scienta txt NeXus reference"
   dataconverter Ag_000*.txt eln_data_scienta_txt.yaml --reader $READER --nxdl $NXDL --ignore-undocumented --output scienta_txt_ref.nxs
   cd ..
-  echo
 }
 
 function update_specs_sle_ref {
@@ -41,7 +37,6 @@ function update_specs_sle_ref {
   echo "Update .sle example"
   dataconverter EX439_S718_Au.sle eln_data_specs_sle.yaml --reader $READER --nxdl $NXDL --ignore-undocumented --output specs_sle_ref.nxs
   cd ..
-  echo
 }
 
 function update_specs_xml_ref {
@@ -49,7 +44,6 @@ function update_specs_xml_ref {
   echo "Update SPECS XML NeXus reference"
   dataconverter In-situ_PBTTT_XPS_SPECS.xml eln_data_specs_xml.yaml --reader $READER --nxdl $NXDL --ignore-undocumented --output specs_xml_ref.nxs
   cd ..
-  echo
 }
 
 function update_specs_xy_ref {
@@ -57,7 +51,6 @@ function update_specs_xy_ref {
   echo "Update SPECS XY NeXus reference"
   dataconverter MgFe2O4_small.xy eln_data_specs_xy.yaml --reader $READER --nxdl $NXDL --ignore-undocumented --output specs_xy_ref.nxs
   cd ..
-  echo
 }
 
 function update_vms_irregular_ref {
@@ -65,7 +58,6 @@ function update_vms_irregular_ref {
   echo "Update irregular VAMAS NeXus reference"
   dataconverter irregular.vms eln_data_vms_irregular.yaml --reader $READER --nxdl $NXDL --ignore-undocumented --output vms_irregular_ref.nxs
   cd ..
-  echo
 }
 
 function update_vms_regular_ref {
@@ -73,7 +65,6 @@ function update_vms_regular_ref {
   echo "Update regular VAMAS NeXus reference"
   dataconverter regular.vms eln_data_vms_regular.yaml --reader $READER --nxdl $NXDL --ignore-undocumented --output vms_regular_ref.nxs
   cd ..
-  echo
 }
 
 function update_vms_txt_export_ref {
@@ -81,7 +72,6 @@ function update_vms_txt_export_ref {
   echo "Update Vamas text export reference"
   dataconverter vms_txt_export.txt eln_data_vms_txt_export.yaml --reader $READER --nxdl $NXDL --ignore-undocumented --output vms_txt_export_ref.nxs
   cd ..
-  echo
 }
 
 project_dir=$(dirname $(dirname $(realpath $0)))

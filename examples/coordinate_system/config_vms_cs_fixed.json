@@ -1,0 +1,88 @@
+{
+  "/ENTRY[entry]/geometries":{
+    "COORDINATE_SYSTEM[xps_coordinate_system]":{
+      "origin":"sample stage",
+      "handedness":"left_handed",
+      "z_direction":"sample stage normal",
+      "depends_on": "/entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation",
+      "x": [-1, 0 , 0],
+      "y": [0, 1, 0],
+      "z": [0, 0 , 1],
+      "TRANSFORMATIONS[coordinate_transformations]": {
+        "AXISNAME[z_rotation]":150.0,
+        "AXISNAME[z_rotation]/@units":"degree",
+        "AXISNAME[z_rotation]/@transformation_type": "rotation",
+        "AXISNAME[z_rotation]/@vector": [0, 0, 1],
+        "AXISNAME[z_rotation]/@depends_on":"y_flip",
+
+        "AXISNAME[y_flip]":180.0,
+        "AXISNAME[y_flip]/@units":"degree",
+        "AXISNAME[y_flip]/@transformation_type": "rotation",
+        "AXISNAME[y_flip]/@vector": [0, 1, 0],
+        "AXISNAME[y_flip]/@depends_on":"y_rotation",
+
+        "AXISNAME[y_rotation]":54.5,
+        "AXISNAME[y_rotation]/@units":"degree",
+        "AXISNAME[y_rotation]/@transformation_type": "rotation",
+        "AXISNAME[y_rotation]/@vector": [0, -1, 0],
+        "AXISNAME[y_rotation]/@depends_on":"."
+      }
+    }
+  },
+  "/ENTRY[entry]/INSTRUMENT[instrument]":{
+    "beamTYPE[beam_xray]":{
+      "depends_on": "/entry/instrument/beam_xray/transformations/beam_polar_angle_of_incidence",
+      "TRANSFORMATIONS[transformations]": {
+        "AXISNAME[beam_polar_angle_of_incidence]":54.5,
+        "AXISNAME[beam_polar_angle_of_incidence]/@units":"degree",
+        "AXISNAME[beam_polar_angle_of_incidence]/@transformation_type":"rotation",
+        "AXISNAME[beam_polar_angle_of_incidence]/@vector":[0, -1, 0],
+        "AXISNAME[beam_polar_angle_of_incidence]/@depends_on":"beam_azimuth_angle",
+
+        "AXISNAME[beam_azimuth_angle]":150.0,
+        "AXISNAME[beam_azimuth_angle]/@units":"degree",
+        "AXISNAME[beam_azimuth_angle]/@transformation_type":"rotation",
+        "AXISNAME[beam_azimuth_angle]/@vector": [0, 0, -1],
+        "AXISNAME[beam_azimuth_angle]/@depends_on":"/entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation"
+      }
+    },         
+    "ELECTRONANALYSER[electronanalyser]":{
+      "depends_on":"/entry/instrument/electronanalyser/transformations/analyser_take_off_polar_angle",
+      "TRANSFORMATIONS[transformations]": {
+        "AXISNAME[analyser_take_off_polar_angle]":0.0,
+        "AXISNAME[analyser_take_off_polar_angle]/@units":"degree",
+        "AXISNAME[analyser_take_off_polar_angle]/@transformation_type":"rotation",
+        "AXISNAME[analyser_take_off_polar_angle]/@vector":[0, -1, 0],
+        "AXISNAME[analyser_take_off_polar_angle]/@depends_on":"analyser_take_off_azimuth_angle",
+
+        "AXISNAME[analyser_take_off_azimuth_angle]":80.0,
+        "AXISNAME[analyser_take_off_azimuth_angle]/@units":"degree",
+        "AXISNAME[analyser_take_off_azimuth_angle]/@transformation_type":"rotation",
+        "AXISNAME[analyser_take_off_azimuth_angle]/@vector":[0, 0, -1],
+        "AXISNAME[analyser_take_off_azimuth_angle]/@depends_on":"/entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation"
+      }
+    }
+  }, 
+  "/ENTRY[entry]/SAMPLE[sample]":{
+    "depends_on":"/entry/sample/transformations/sample_rotation_angle",
+    "TRANSFORMATIONS[transformations]": {
+      "AXISNAME[sample_rotation_angle]":50.0,
+      "AXISNAME[sample_rotation_angle]/@units":"degree",
+      "AXISNAME[sample_rotation_angle]/@transformation_type": "rotation",
+      "AXISNAME[sample_rotation_angle]/@vector":[0, 0, -1],
+      "AXISNAME[sample_rotation_angle]/@depends_on":"sample_normal_tilt_azimuth_angle",
+
+      "AXISNAME[sample_normal_polar_angle_of_tilt]":80.0,
+      "AXISNAME[sample_normal_polar_angle_of_tilt]/@units":"degree",
+      "AXISNAME[sample_normal_polar_angle_of_tilt]/@transformation_type":"rotation",
+      "AXISNAME[sample_normal_polar_angle_of_tilt]/@vector":[0, -1, 0],
+      "AXISNAME[sample_normal_polar_angle_of_tilt]/@depends_on":"sample_normal_tilt_azimuth_angle",
+
+      "AXISNAME[sample_normal_tilt_azimuth_angle]":240.0,
+      "AXISNAME[sample_normal_tilt_azimuth_angle]/@units":"degree",
+      "AXISNAME[sample_normal_tilt_azimuth_angle]/@transformation_type":"rotation",
+      "AXISNAME[sample_normal_tilt_azimuth_angle]/@vector":[0, 0, -1],
+      "AXISNAME[sample_normal_tilt_azimuth_angle]/@depends_on":"/entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation"
+    }
+  }
+}

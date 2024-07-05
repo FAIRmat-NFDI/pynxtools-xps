@@ -90,7 +90,10 @@ def find_entry_and_value(xps_data_dict, key_part, dt_typ):
                 entries_values[entry] = val
 
     elif dt_typ in (XPS_DATA_TOKEN, XPS_DETECTOR_TOKEN):
-        entries_values = xps_data_dict["data"]
+        try:
+            entries_values = xps_data_dict["data"]
+        except KeyError:
+            pass
 
     return entries_values
 
@@ -118,6 +121,8 @@ def get_entries_and_detectors(config_dict, xps_data_dict):
                                 DETECTOR_SET.add(detector_nm)
             except AttributeError:
                 continue
+    if not ENTRY_SET:
+        ENTRY_SET.add("entry")
     if not DETECTOR_SET:
         DETECTOR_SET.add("detector0")
 
@@ -432,6 +437,7 @@ class XPSReader(BaseReader):
 
     supported_nxdls = [
         "NXmpes",
+        # "NXxps",
     ]
 
     def read(
@@ -499,14 +505,10 @@ class XPSReader(BaseReader):
             # Filling in ELN metadata and overwriting the common
             # paths by giving preference to the ELN metadata
             fill_template_with_eln_data(eln_data_dict, config_dict, template)
-        else:
-            raise ValueError(
-                "Eln file must be submited with some required fields and attributes."
-            )
 
         final_template = Template()
         for key, val in template.items():
-            if ("/ENTRY[entry]" not in key) and (val is not None):
+            if val is not None:
                 if "@units" in key:
                     check_units(key, val)
                 final_template[key] = val

@@ -2,6 +2,13 @@
 READER=xps
 NXDL=NXmpes
 
+function update_cs_example {
+  echo "Update coordinate system example"
+  cd coordinate_system/
+  dataconverter config_vms_cs_fixed.json --reader xps --nxdl NXxps --output vms-cs-fixed.nxs
+  cd ..
+}
+
 function update_phi_examples {
   echo "Update Phi examples"
   cd phi/
@@ -11,7 +18,6 @@ function update_phi_examples {
   echo "Update .pro (depth_profiling) example"
   dataconverter SnO2_10nm_1.pro eln_data_phi.yaml --reader $READER --nxdl $NXDL --output SnO2_10nm_1.pro.nxs
   cd ..
-  echo
 }
 
 function update_scienta_examples {
@@ -24,7 +30,6 @@ function update_scienta_examples {
   echo "Update .txt example"
   dataconverter Cu-HHTP_*.txt eln_data_scienta_txt.yaml --reader $READER --nxdl $NXDL --output Cu-HHTP.txt.nxs
   cd ../..
-  echo
 }
 
 function update_specs_examples {
@@ -40,7 +45,6 @@ function update_specs_examples {
   echo "Update .xy example"
   dataconverter MgFe2O4.xy eln_data_xy.yaml --reader $READER --nxdl $NXDL --output MgFe2O4.nxs
   cd ../..
-  echo
 }
 
 function update_vms_examples {
@@ -54,12 +58,12 @@ function update_vms_examples {
   echo "Update txt export example"
   dataconverter vms_txt_export.txt eln_data_vms_txt_export.yaml --reader $READER --nxdl $NXDL --output vms_txt_export.nxs
   cd ..
-  echo
 }
 
 project_dir=$(dirname $(dirname $(realpath $0)))
 cd $project_dir/examples
 
+update_cs_example
 update_phi_examples
 update_scienta_examples
 update_specs_examples

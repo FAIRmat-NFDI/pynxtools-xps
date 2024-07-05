@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pynxtools_versions: ["master"]
+        pynxtools_versions: ["update-definitions"]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -31,7 +31,7 @@ jobs:
           uv pip install --system .[dev]
       - name: Install pynxtools version ${{ matrix.pynxtools_versions }}
         run: |
-         if [ "${{ matrix.pynxtools_versions }}" == "master" ]; then
+         if [ "${{ matrix.pynxtools_versions }}" == "update-definitions" ]; then
            uv pip install --system pynxtools@git+https://github.com/FAIRmat-NFDI/pynxtools@${{ matrix.pynxtools_versions }}
          else
           uv pip install --system pynxtools==${{ matrix.pynxtools_versions }}

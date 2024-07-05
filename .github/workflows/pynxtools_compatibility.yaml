@@ -14,10 +14,15 @@ jobs:
       matrix:
         pynxtools_versions: ["update-definitions"]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
           submodules: recursive
+          lfs: true
+      - name: Install Git LFS
+        run: git lfs install
+      - name: Pull LFS files
+        run: git lfs pull
       - name: Set up Python 3.11
         uses: actions/setup-python@v2
         with:

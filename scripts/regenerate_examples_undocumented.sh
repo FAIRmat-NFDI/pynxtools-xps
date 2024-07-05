@@ -5,7 +5,7 @@ NXDL=NXmpes
 function update_cs_example {
   echo "Update coordinate system example"
   cd coordinate_system/
-  dataconverter dataconverter config_vms_cs_fixed.json --reader xps --nxdl NXmpes --output vms-cs-fixed.nxs
+  dataconverter config_vms_cs_fixed.json --reader xps --nxdl NXxps --ignore-undocumented --output vms-cs-fixed.nxs
   cd ..
 }
 

@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "/ENTRY":{
     "@default":"data",
     "title":"@eln",
@@ -27,6 +28,28 @@
       "vendor":"@eln",
       "model":"@eln",
       "identifier":{
+=======
+    "/@default":"None",
+    "/ENTRY[entry]":{
+      "@default":"data",
+      "title":"@eln",
+      "start_time":"@xps_token:time_stamp",
+      "end_time":"@eln",
+      "method":"@xps_token:analysis_method",
+      "experiment_institution":"@eln",
+      "experiment_facility":"@eln",
+      "experiment_laboratory":"@eln",
+      "entry_identifier":"@eln",
+      "data_file": "@xps_token:file_info/data_file",
+      "sequence_file": "@xps_token:file_info/sequence_file"
+    },
+    "/ENTRY[entry]/USER[user]":{
+      "name":"@eln",
+      "affiliation":"@eln",
+      "address":"@eln",
+      "email":"@eln",
+      "IDENTIFIER[orcid]":{
+>>>>>>> 5aa540f (use reference log files in tests)
         "service":"@eln",
         "identifier":"@eln",
         "is_persistent":"@eln"

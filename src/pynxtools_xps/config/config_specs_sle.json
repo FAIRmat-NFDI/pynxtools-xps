@@ -158,6 +158,7 @@
       },
       "ENERGYDISPERSION[energydispersion]":{
         "scheme":"@eln",
+<<<<<<< HEAD
         "pass_energy":"@attrs:energydispersion/pass_energy",
         "pass_energy/@units":"@attrs:energydispersion/pass_energy/@units",
         "energy_scan_mode":"@attrs:energydispersion/energy_scan_mode",
@@ -165,6 +166,13 @@
         "exit_slit/description":"@attrs:energydispersion/exit_slit",
         "radius":"@eln",
         "radius/@units":"@eln",
+=======
+        "pass_energy":"@xps_token:energydispersion/pass_energy",
+        "pass_energy/@units":"@xps_token:energydispersion/pass_energy/@units",
+        "energy_scan_mode":"@xps_token:energydispersion/energy_scan_mode",
+        "entrance_slit/description":"@xps_token:energydispersion/entrance_slit",
+        "exit_slit/description":"@xps_token:energydispersion/exit_slit",
+>>>>>>> 5aa540f (use reference log files in tests)
         "device_information":{
           "vendor":"@eln",
           "model":"@eln",

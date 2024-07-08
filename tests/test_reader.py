@@ -30,21 +30,13 @@ test_cases = [
     ("vms_txt_export", "Vamas txt export"),
 ]
 
-test_params = []
-
-for test_case in test_cases:
-    for nxdl in READER_CLASS.supported_nxdls:
-        ref_log_file = f"{test_case[0]}_{nxdl.lower()}_ref.log"
-        test_params += [
-            pytest.param(nxdl, test_case[0], ref_log_file, id=f"{test_case[1]}, {nxdl}")
-        ]
-
-
 @pytest.mark.parametrize(
-    "nxdl",
-    "sub_reader_data_dir",
-    "ref_log_file",
-    test_params,
+    "nxdl, sub_reader_data_dir, ref_log_file",
+    [
+        pytest.param(nxdl, test_case[0], f"{test_case[0]}_{nxdl.lower()}_ref.log", id=f"{test_case[1]}, {nxdl}")
+        for test_case in test_cases
+        for nxdl in READER_CLASS.supported_nxdls
+    ]
 )
 def test_nexus_conversion(nxdl, sub_reader_data_dir, ref_log_file, tmp_path, caplog):
     """
@@ -82,11 +74,13 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, ref_log_file, tmp_path, cap
         *[os.path.dirname(__file__), "data", sub_reader_data_dir]
     )
 
+    ref_log_filepath = os.path.join(files_or_dir, ref_log_file)
+
     test = ReaderTest(
         nxdl=nxdl,
         reader_name=READER_NAME,
         files_or_dir=files_or_dir,
-        ref_log_file=ref_log_file,
+        ref_log_file=ref_log_filepath,
         tmp_path=tmp_path,
         caplog=caplog,
     )

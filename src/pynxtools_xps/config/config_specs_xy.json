@@ -5,7 +5,7 @@
       "title":"@eln",
       "start_time":"@xps_token:time_stamp",
       "end_time":"@eln",
-      "method":"@xps_token:region/analysis_method",
+      "method":"@xps_token:analysis_method",
       "experiment_institution":"@eln",
       "experiment_facility":"@eln",
       "experiment_laboratory":"@eln",

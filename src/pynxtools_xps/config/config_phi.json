@@ -377,7 +377,7 @@
         "scheme":"@eln",
         "pass_energy":"@xps_token:energydispersion/pass_energy",
         "pass_energy/@units":"@xps_token:energydispersion/pass_energy/@units",
-        "energy_scan_mode":"@xps_token:energydispersion/scan_mode",
+        "energy_scan_mode":"@xps_token:energydispersion/energy_scan_mode",
         "xps_scan_mode":"@xps_token:energydispersion/xps_scan_mode",
         "device_information":{
           "vendor":"@eln",

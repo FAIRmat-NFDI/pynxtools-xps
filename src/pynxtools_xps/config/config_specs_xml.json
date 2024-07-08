@@ -63,8 +63,8 @@
         "@default": "detector0",
         "name":"@xps_token:analyzer_info/name",
         "description":"@eln",
-        "work_function":"@eln",
-        "work_function/@units":"@eln",
+        "work_function":"@xps_token:region/effective_workfunction",
+        "work_function/@units":"eV",
         "fast_axes":"None",
         "slow_axes":"energy",
         "device_information":{

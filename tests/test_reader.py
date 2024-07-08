@@ -127,6 +127,8 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, ref_log_file, ignore_sectio
         *[os.path.dirname(__file__), "data", sub_reader_data_dir]
     )
 
+    ref_log_filepath = os.path.join(files_or_dir, ref_log_file)
+
     test = ReaderTest(
         nxdl=nxdl,
         reader_name=READER_NAME,

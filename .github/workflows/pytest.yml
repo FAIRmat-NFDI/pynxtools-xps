@@ -22,7 +22,6 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
-          lfs: true
       - name: Set up Python ${{ matrix.python_version }}
         uses: actions/setup-python@v4
         with:

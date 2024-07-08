@@ -53,16 +53,26 @@ test_cases = [
 test_params = []
 
 for test_case in test_cases:
+<<<<<<< HEAD
     # ToDo: make tests for all supported appdefs possible
     for nxdl in NXDLS:
         test_params += [pytest.param(nxdl, test_case[0], id=f"{test_case[1]}-{nxdl}")]
+=======
+    for nxdl in READER_CLASS.supported_nxdls:
+        ref_log_file = f"{test_case[0]}_{nxdl.lower()}_ref.log"
+        test_params += [
+            pytest.param(nxdl, test_case[0], ref_log_file, id=f"{test_case[1]}, {nxdl}")
+        ]
+>>>>>>> a1cb7e9a (use reference log files in tests)
 
 
 @pytest.mark.parametrize(
-    "nxdl, sub_reader_data_dir",
+    "nxdl",
+    "sub_reader_data_dir",
+    "ref_log_file",
     test_params,
 )
-def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
+def test_nexus_conversion(nxdl, sub_reader_data_dir, ref_log_file, tmp_path, caplog):
     """
     Test XPS reader
 
@@ -75,6 +85,9 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
         Test data directory that contains all the files required for running the data
         conversion through one of the sub-readers. All of these data dirs
         are placed within tests/data/...
+    ref_log_file: str
+            Full path string to the reference log file generated from the same
+            set of input files.
     tmp_path : pathlib.PosixPath
         Pytest fixture variable, used to clean up the files generated during
         the test.
@@ -99,6 +112,7 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
         nxdl=nxdl,
         reader_name=READER_NAME,
         files_or_dir=files_or_dir,
+        ref_log_file=ref_log_file,
         tmp_path=tmp_path,
         caplog=caplog,
     )

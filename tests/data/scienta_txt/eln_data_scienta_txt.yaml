@@ -37,7 +37,11 @@ instrument:
     name: Hemispherical Analyzer dummy
     description: hemispherical
     work_function:
+<<<<<<< HEAD
       value: 4.01
+=======
+      value: 4.2
+>>>>>>> a1cb7e9a (use reference log files in tests)
       unit: eV
     device_information:
       vendor: Scienta Omicron

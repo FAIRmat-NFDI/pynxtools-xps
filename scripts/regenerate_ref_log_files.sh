@@ -1,17 +1,11 @@
 #!/bin/bash
 READER=xps
 
-#!/bin/bash
-
-# Function to generate the filename
-#!/bin/bash
-
-# Function to generate filename
+# Function to generate log filename
 function generate_filename {
   local NXDL="$2"
   local lowercase_NXDL=$(echo "$NXDL" | tr '[:upper:]' '[:lower:]')
   local filename="$1_${lowercase_NXDL}_ref.log"
-  echo "$filename"
 }
 
 # Function to update log
@@ -42,7 +36,6 @@ function update_log_file {
 }
 
 project_dir=$(dirname $(dirname $(realpath $0)))
-cd $project_dir/tests/data
 
 folders=(
   "phi_pro"
@@ -64,6 +57,7 @@ nxdls=(
 
 for folder in "${folders[@]}"; do
   for nxdl in "${nxdls[@]}"; do
+    cd $project_dir/tests/data
     update_log_file "$folder" "$nxdl"
   done
 done

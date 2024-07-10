@@ -29,7 +29,7 @@ Example data for the SPECS XML reader is available [here](https://github.com/FAI
 
 The example conversion can be run with the following command.
 ```console
-user@box:~$ dataconverter In-situ_PBTTT_XPS_SPECS.xml eln_data_xml.yaml --reader xps --nxdl NXmpes --output In-situ_PBTTT.nxs
+user@box:~$ dataconverter In-situ_PBTTT_XPS_SPECS.xml eln_data_xml.yaml --reader xps --nxdl NXxps --output In-situ_PBTTT.nxs
 ```
 
 ## .xy data
@@ -40,5 +40,5 @@ Example data for the SPECS XY reader is available [here](https://github.com/FAIR
 
 The example conversion can be run with the following command.
 ```console
-user@box:~$ dataconverter MgFe2O4.xy eln_data_xy.yaml --reader xps --nxdl NXmpes --output MgFe2O4.nxs
+user@box:~$ dataconverter MgFe2O4.xy eln_data_xy.yaml --reader xps --nxdl NXxps --output MgFe2O4.nxs
 ``` 

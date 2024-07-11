@@ -106,7 +106,7 @@ instrument:
         setpoint:
           value: 0.0
           unit: V
-  pressure_gauge:
+  pressure_gauge_chamber:
     name: Atmion
     measurement: pressure
     type: hot-filament ionization gauge

@@ -159,7 +159,7 @@
           "PID[pid]/setpoint/@units":"None"
         }
       },
-      "pressure_gauge":{
+      "pressure_gauge0":{
         "name":"None",
         "measurement":"None",
         "type":"None",
@@ -223,22 +223,22 @@
           "method":"None"
         }
       },
-      "temperature":{
+      "temperature_env":{
         "temperature_sensor": "None",
         "sample_heater":"None",
         "cryostat":"None"
       },
-      "gas_pressure":{
+      "gas_pressure_env":{
         "pressure_gauge":"None"
       },
-      "bias":{
+      "bias_env":{
         "potentiostat":"None",
         "voltmeter":"None"
       },
-      "drain_current":{
+      "drain_current_env":{
         "amperemeter":"None"
       },
-      "flood_gun_current":{
+      "flood_gun_current_env":{
         "flood_gun":"@None"
       }
     },

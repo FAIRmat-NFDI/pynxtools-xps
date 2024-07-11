@@ -119,7 +119,7 @@ instrument:
         setpoint:
           value: 0.0
           unit: V
-  pressure_gauge:
+  pressure_gauge_chamber:
     name: Pirani
     measurement: pressure
     type: pirani gauge

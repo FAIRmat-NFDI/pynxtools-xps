@@ -176,7 +176,7 @@
           "PID[pid]/setpoint/@units":"@eln"
         }
       },
-      "pressure_gauge":{
+      "pressure_gauge_chamber":{
         "name":"@eln",
         "measurement":"@eln",
         "type":"@eln",
@@ -229,22 +229,22 @@
           "method":"@eln"
         }
       },
-      "temperature":{
-        "temperature_sensor": "@link:/entry/instrument/manipulator/temperature_sensor",
+      "temperature_env":{
+        "temperature_sensor":"@link:/entry/instrument/manipulator/temperature_sensor",
         "sample_heater":"@link:/entry/instrument/manipulator/sample_heater",
         "cryostat":"None"
       },
-      "gas_pressure":{
-        "pressure_gauge":"@link:/entry/instrument/pressure_gauge"
+      "gas_pressure_env":{
+        "pressure_gauge":"@link:/entry/instrument/pressure_gauge_chamber"
       },
-      "bias":{
+      "bias_env":{
         "potentiostat":"@link:/entry/instrument/manipulator/sample_bias_potentiostat",
         "voltmeter":"@link:/entry/instrument/manipulator/sample_bias_voltmeter"
       },
-      "drain_current":{
+      "drain_current_env":{
         "amperemeter":"@link:/entry/instrument/manipulator/drain_current_amperemeter"
       },
-      "flood_gun_current":{
+      "flood_gun_current_env":{
         "flood_gun":"@link:/entry/instrument/flood_gun"
       }
     },

@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  UV_SYSTEM_PYTHON: true
+
 jobs:
   pynx_compatibility:
     runs-on: ubuntu-latest
@@ -14,27 +17,27 @@ jobs:
       matrix:
         pynxtools_versions: ["master"]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: recursive
       - name: Set up Python 3.11
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - name: Install dependencies
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
-          uv pip install --system coverage coveralls
+          uv pip install coverage coveralls
       - name: Install pynxtools-xps
         run: |
-          uv pip install --system .[dev]
+          uv pip install .[dev]
       - name: Install pynxtools version ${{ matrix.pynxtools_versions }}
         run: |
          if [ "${{ matrix.pynxtools_versions }}" == "master" ]; then
-           uv pip install --system pynxtools@git+https://github.com/FAIRmat-NFDI/pynxtools@${{ matrix.pynxtools_versions }}
+           uv pip install pynxtools@git+https://github.com/FAIRmat-NFDI/pynxtools@${{ matrix.pynxtools_versions }}
          else
-          uv pip install --system pynxtools==${{ matrix.pynxtools_versions }}
+          uv pip install pynxtools==${{ matrix.pynxtools_versions }}
          fi
       - name: Run tests
         run: |

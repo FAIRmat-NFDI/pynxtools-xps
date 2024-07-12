@@ -145,7 +145,7 @@
         "scheme":"@eln",
         "pass_energy":"@xps_token:energydispersion/pass_energy",
         "pass_energy/@units":"@xps_token:energydispersion/pass_energy/@units",
-        "energy_scan_mode":"@xps_token:energydispersion/scan_mode",
+        "energy_scan_mode":"@xps_token:energydispersion/energy_scan_mode",
         "entrance_slit/description":"@xps_token:energydispersion/entrance_slit",
         "exit_slit/description":"@xps_token:energydispersion/exit_slit",
         "device_information":{

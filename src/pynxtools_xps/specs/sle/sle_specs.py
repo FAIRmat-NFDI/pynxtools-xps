@@ -54,6 +54,7 @@ from pynxtools_xps.value_mappers import (
     convert_energy_scan_mode,
     convert_measurement_method,
     get_units_for_key,
+    MEASUREMENT_METHOD_MAP,
 )
 
 logger = logging.getLogger(__name__)
@@ -423,24 +424,6 @@ class SleProdigyParser(ABC):
         ]
 
         self.encoding = ["f", 4]
-
-        self.measurement_types = ["XPS", "UPS", "ElectronSpectroscopy"]
-
-        self.measurement_types_map = {
-            "XPS": "X-ray photoelectron spectroscopy (XPS)",
-            "UPS": "ultraviolet photoelectron spectroscopy (UPS)",
-            "ElectronSpectroscopy": "electron spectroscopy for chemical analysis (ESCA)",
-            "NAPXPS": "near ambient pressure X-ray photoelectron spectroscopy (NAPXPS)",
-            "ARXPS": "angle-resolved X-ray photoelectron spectroscopy (ARXPS)",
-        }
-
-        self.energy_scan_mode_map = {
-            "FixedAnalyzerTransmission": "fixed_analyser_transmission",
-            "FixedRetardationRatio": "fixed_retardation_ratio",
-            "FixedEnergies": "fixed_energy",
-            "Snapshot": "snapshot",
-            "SnapshotFAT": "snapshot",
-        }
 
     def initiate_file_connection(self, filepath):
         """Set the filename of the file to be opened."""
@@ -1506,7 +1489,7 @@ class SleProdigyParserV1(SleProdigyParser):
 
         """
         collect = []
-        for measurement_type in self.measurement_types:
+        for measurement_type in MEASUREMENT_METHOD_MAP:
             for group in xml.iter(measurement_type):
                 data = {}
                 data["analysis_method"] = convert_measurement_method(measurement_type)
@@ -1577,7 +1560,7 @@ class SleProdigyParserV1(SleProdigyParser):
         common_spectrum_settings = {}
         for setting in comm_settings.iter():
             if setting.tag == "ScanMode":
-                energy_scan_mode = self.energy_scan_mode_map[setting.attrib["Name"]]
+                energy_scan_mode = convert_energy_scan_mode[setting.attrib["Name"]]
                 common_spectrum_settings[setting.tag] = energy_scan_mode
             elif setting.tag == "SlitInfo":
                 for key, val in setting.attrib.items():
@@ -1685,7 +1668,7 @@ class SleProdigyParserV4(SleProdigyParser):
 
         """
         collect = []
-        for measurement_type in self.measurement_types:
+        for measurement_type in MEASUREMENT_METHOD_MAP:
             for group in xml.iter(measurement_type):
                 data = {}
                 data["analysis_method"] = convert_measurement_method(measurement_type)

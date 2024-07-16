@@ -133,7 +133,7 @@ instrument:
       value:
         value: 45
         unit: degree
-  pressure_gauge_chamber:
+  pressure_gauge:
     name: Atmion
     measurement: pressure
     type: hot-filament ionization gauge

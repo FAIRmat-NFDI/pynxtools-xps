@@ -250,7 +250,7 @@
       "energy":"None",
       "energy/@type":"None",
       "energy/@units":"None",
-      "@energy_indices":"None",
-      "@energy_depends":"None"
+      "energy/@reference":"None",
+      "@energy_indices":"None"
     }
   }

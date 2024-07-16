@@ -513,7 +513,7 @@
       "value/@units": "@xps_token:defect_positioner/defect_positioner_rotation/@units"
     },
     "defect_positioner_reference_image":"@xps_token:defect_positioner/defect_positioner_reference_image",
-    "pressure_gauge_chamber":{
+    "pressure_gauge":{
       "name":"@eln",
       "measurement":"@eln",
       "type":"@eln",
@@ -571,7 +571,7 @@
       "cryostat":"None"
     },
     "gas_pressure_env":{
-      "pressure_gauge":"@link:/entry/instrument/pressure_gauge_chamber"
+      "pressure_gauge":"@link:/entry/instrument/pressure_gauge"
     },
     "bias_env":{
       "potentiostat":"@link:/entry/instrument/manipulator/sample_bias_potentiostat",
@@ -592,7 +592,7 @@
     "energy":"@data:energy",
     "energy/@type":"@xps_token:data/energy/@type",
     "energy/@units":"@xps_token:data/energy/@units",
-    "@energy_indices":"None",
-    "@energy_depends":"None"
+    "energy/@reference":"None",
+    "@energy_indices":"None"
   }
 }

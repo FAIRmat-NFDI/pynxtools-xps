@@ -200,7 +200,7 @@
         "value/@units":"@eln"
       }
     },
-    "pressure_gauge_chamber":{
+    "pressure_gauge":{
       "name":"@eln",
       "measurement":"@eln",
       "type":"@eln",
@@ -260,7 +260,7 @@
       "cryostat":"None"
     },
     "gas_pressure_env":{
-      "pressure_gauge":"@link:/entry/instrument/pressure_gauge_chamber"
+      "pressure_gauge":"@link:/entry/instrument/pressure_gauge"
     },
     "bias_env":{
       "potentiostat":"@link:/entry/instrument/manipulator/sample_bias_potentiostat",
@@ -283,7 +283,7 @@
     "energy":"@data:energy",
     "energy/@units":"@xps_token:region/energy_axis/@units",
     "energy/@type":"@xps_token:region/energy_scale",
-    "@energy_indices":"None",
-    "@energy_depends":"None"
+    "energy/@reference":"None",
+    "@energy_indices":"None"
   }
 }

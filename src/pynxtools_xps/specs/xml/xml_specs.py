@@ -21,8 +21,8 @@ Specs Lab Prodigy XML export, to be passed to mpes nxdl
 """
 
 import re
-import xml.etree.ElementTree as EmtT
-from typing import Tuple, List, Dict, Any
+import xml.etree.ElementTree as ET
+from typing import Tuple, List, Any
 import copy
 import xarray as xr
 import numpy as np
@@ -261,8 +261,8 @@ class XmlParserSpecs:
         Parameters
         ----------
         """
-        root_element = EmtT.parse(file).getroot()
-        root_element.attrib[self.child_nm_reslvers] = []  # type: ignore[assignment]
+        root_element = ET.parse(file).getroot()
+        root_element.attrib[self.child_nm_reslvers] = []
         child_num = len(root_element)
         parent_path = self._root_path
         skip_child = -1
@@ -303,7 +303,7 @@ class XmlParserSpecs:
 
     def pass_child_through_parsers(
         self,
-        element_: EmtT.Element,
+        element_: ET.Element,
         parent_path: str,
         child_elmt_ind: int,
         skip_child: int,
@@ -349,7 +349,7 @@ class XmlParserSpecs:
         else:
             raise TypeError("Needs to parse to different type of parser")
 
-    def parse_sequence(self, element_: EmtT.Element, parent_path: str) -> None:
+    def parse_sequence(self, element_: ET.Element, parent_path: str) -> None:
         """
         Parameters
         ----------
@@ -423,7 +423,7 @@ class XmlParserSpecs:
 
         return parent_path, skip_child
 
-    def parse_struct(self, element_: EmtT.Element, parent_path: str) -> None:
+    def parse_struct(self, element_: ET.Element, parent_path: str) -> None:
         """
         Parameters
         ----------
@@ -489,7 +489,7 @@ class XmlParserSpecs:
             child_num -= 1
             child_elmt_ind += 1
 
-    def last_element_parser(self, element_: EmtT.Element, parent_path: str) -> None:
+    def last_element_parser(self, element_: ET.Element, parent_path: str) -> None:
         """
 
         Parameters
@@ -651,7 +651,7 @@ class XmlParserSpecs:
 
     def cumulate_counts_series(
         self,
-        scan_seq_elem: EmtT.Element,
+        scan_seq_elem: ET.Element,
         counts_length: int = None,
         cumulative_counts: np.ndarray = None,
     ) -> Tuple[str, np.ndarray]:

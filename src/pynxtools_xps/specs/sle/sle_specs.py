@@ -32,13 +32,9 @@ import copy
 import logging
 import re
 import sqlite3
-import struct
-import warnings
-import xml.etree.ElementTree as ET
-from abc import ABC, abstractmethod
-from datetime import datetime
-from typing import Any
-
+from lxml import etree as ET
+from abc import ABC
+import xarray as xr
 import numpy as np
 import xarray as xr
 
@@ -46,18 +42,14 @@ from pynxtools_xps.reader_utils import (
     XPSMapper,
     construct_data_key,
     construct_entry_name,
-    drop_unused_keys,
-    re_map_keys,
-    re_map_values,
 )
 from pynxtools_xps.value_mappers import (
     convert_energy_scan_mode,
     convert_energy_type,
-    convert_measurement_method,
     convert_units,
     get_units_for_key,
-    MEASUREMENT_METHOD_MAP,
 )
+from pynxtools_xps.specs.sle.flatten_xml import flatten_xml
 
 logger = logging.getLogger(__name__)
 
@@ -370,7 +362,7 @@ class SleProdigyParser(ABC):
 
         # read and parse sle file
         self._get_xml_schedule()
-        self.spectra = self._flatten_xml(self.xml)
+        self.spectra = flatten_xml(self.xml)
         self._attach_node_ids()
         self._remove_empty_nodes()
         self._attach_device_protocols()
@@ -1261,80 +1253,6 @@ class SleProdigyParser(ABC):
         else:
             logger.error("This binary encoding is not supported.")
 
-    @abstractmethod
-    def _flatten_xml(self, xml):
-        """
-        Flatten the nested XML structure, keeping only the needed metadata.
-
-        This method has to be implemented in the inherited parsers.
-
-        Parameters
-        ----------
-        xml : xml.etree.ElementTree
-            XML schedule of the experiment.
-
-        Returns
-        -------
-        collect : list
-            List of dictionary with spectra metadata.
-
-        """
-        # pylint: disable=too-many-nested-blocks
-        collect = []
-
-        return collect
-
-    def _reindex_spectra(self):
-        """Re-number the spectrum_id."""
-        for idx, spectrum in enumerate(self.spectra):
-            spectrum["spectrum_id"] = idx
-
-    def _reindex_groups(self):
-        """Re-number the group_id."""
-        group_ids = list({spec["group_id"] for spec in self.spectra})
-        for idx, group_id in enumerate(group_ids):
-            for spec in self.spectra:
-                if int(spec["group_id"]) == int(group_id):
-                    spec["group_id"] = copy.copy(idx)
-
-    def _convert_to_common_format(self):
-        """
-        Reformat spectra into the format needed for the Mapper object
-        """
-        maps = {}
-        for key_map in self.key_maps:
-            maps.update(key_map)
-        for spec in self.spectra:
-            re_map_keys(spec, maps)
-            re_map_values(spec, self.value_map)
-            drop_unused_keys(spec, self.keys_to_drop)
-            spec["data"] = {}
-            spec["data"]["x"] = self._get_energy_data(spec)
-
-            channels = [
-                key
-                for key in spec
-                if any(name in key for name in ["cps_ch_", "cps_calib"])
-            ]
-
-            for channel_key in channels:
-                spec["data"][channel_key] = np.array(spec[channel_key])
-            for channel_key in channels:
-                spec.pop(channel_key)
-
-            spec["energy/@units"] = "eV"
-            spec["intensity/@units"] = "counts_per_second"
-
-            # Add energy axis for TF data.
-            if spec["energy/@type"] == "binding":
-                tf_energy = np.array(
-                    [spec["excitation_energy"] - x for x in spec["data"]["x"]]
-                )
-            elif spec["energy/@type"] == "kinetic":
-                tf_energy = spec["data"]["x"]
-
-            spec["transmission_function/kinetic_energy"] = tf_energy
-
     def _remove_fixed_energies(self):
         """
         Remove spectra measured with the scan mode FixedEnergies.
@@ -1384,167 +1302,6 @@ class SleProdigyParserV1(SleProdigyParser):
 
     supported_versions = ["1.2", "1.8", "1.9", "1.10", "1.11", "1.12", "1.13"]
 
-    def _flatten_xml(self, xml):
-        """
-        Flatten the nested XML structure, keeping only the needed metadata.
-
-        Parameters
-        ----------
-        xml : xml.etree.ElementTree
-            XML schedule of the experiment.
-
-        Returns
-        -------
-        collect : list
-            List of dictionary with spectra metadata.
-
-        """
-        collect = []
-        for measurement_type in MEASUREMENT_METHOD_MAP:
-            for group in xml.iter(measurement_type):
-                data = {}
-                data["analysis_method"] = convert_measurement_method(measurement_type)
-
-                data["devices"] = []
-
-                for device in group.iter("DeviceCommand"):
-                    settings = {}
-                    for param in device.iter("Parameter"):
-                        settings[param.attrib["name"]] = param.text
-                        data.update(copy.copy(settings))
-
-                    data["devices"] += [device.attrib["DeviceType"]]
-
-                    # data['devices'] += [{'device_type' : j.attrib['DeviceType'],
-                    #                     'settings':settings}]
-                for spectrum_group in group.iter("SpectrumGroup"):
-                    settings = self._get_group_metadata(spectrum_group)
-                    data.update(copy.copy(settings))
-                    collect += [copy.copy(data)]
-        return collect
-
-    def _get_group_metadata(self, spectrum_group):
-        """
-        Iteratively retrieve metadata for one spectrum group.
-
-        Parameters
-        ----------
-        spectrum_group: xml.etree.ElementTree.Element
-            XML element containing one spectrum group.
-
-        Returns
-        -------
-        settings: dict
-            Dictionary containing all metadata for
-            the spectrum group.
-
-        """
-        settings = {}
-        settings["group_name"] = spectrum_group.attrib["Name"]
-        settings["group_id"] = spectrum_group.attrib["ID"]
-        for comm_settings in spectrum_group.iter("CommonSpectrumSettings"):
-            common_spectrum_settings = self._extract_comm_settings(comm_settings)
-            settings.update(copy.copy(common_spectrum_settings))
-
-        for spectrum in spectrum_group.iter("Spectrum"):
-            spectrum_settings = self._get_spectrum_metadata(spectrum)
-            settings.update(copy.copy(spectrum_settings))
-
-        return settings
-
-    def _extract_comm_settings(self, comm_settings):
-        """
-        Iteratively retrieve metadata for common settings of one spectrum group.
-
-        Parameters
-        ----------
-        spectrum_group: xml.etree.ElementTree.Element
-            XML element containing common settings for one spectrum group.
-
-        Returns
-        -------
-        settings: dict
-            Dictionary containing all common metadata for
-            the spectrum group.
-
-        """
-        common_spectrum_settings = {}
-        for setting in comm_settings.iter():
-            if setting.tag == "ScanMode":
-                energy_scan_mode = convert_energy_scan_mode[setting.attrib["Name"]]
-                common_spectrum_settings[setting.tag] = energy_scan_mode
-            elif setting.tag == "SlitInfo":
-                for key, val in setting.attrib.items():
-                    common_spectrum_settings[key] = val
-            elif setting.tag == "Lens":
-                voltage_range = setting.attrib["VoltageRange"]
-                split_text = re.split(r"([A-Z])", voltage_range, 1)
-                val = split_text[0]
-                unit = "".join(split_text[1:])
-                common_spectrum_settings["voltage_range"] = float(val)
-                common_spectrum_settings["voltage_range/@units"] = unit
-            elif setting.tag == "EnergyChannelCalibration":
-                common_spectrum_settings["calibration_file/dir"] = setting.attrib["Dir"]
-                common_spectrum_settings["calibration_file/path"] = setting.attrib[
-                    "File"
-                ]
-            elif setting.tag == "Transmission":
-                common_spectrum_settings["transmission_function/file"] = setting.attrib[
-                    "File"
-                ]
-            elif setting.tag == "Iris":
-                common_spectrum_settings["iris_diameter"] = float(
-                    setting.attrib["Diameter"]
-                )
-        return common_spectrum_settings
-
-    def _get_spectrum_metadata(self, spectrum):
-        """
-        Iteratively retrieve metadata for one spectrum.
-
-        Parameters
-        ----------
-        spectrum: xml.etree.ElementTree.Element
-            XML element containing one spectrum.
-
-        Returns
-        -------
-        spectrum_ settings: dict
-            Dictionary containing all metadata for
-            the spectrum.
-
-        """
-        spectrum_settings = {}
-
-        spectrum_settings["spectrum_id"] = spectrum.attrib["ID"]
-        spectrum_settings["spectrum_type"] = spectrum.attrib["Name"]
-        for setting in spectrum.iter("FixedEnergiesSettings"):
-            spectrum_settings["dwell_time"] = float(setting.attrib["DwellTime"])
-            spectrum_settings["start_energy"] = float(copy.copy(setting.attrib["Ebin"]))
-            spectrum_settings["pass_energy"] = float(setting.attrib["Epass"])
-            spectrum_settings["lens_mode"] = setting.attrib["LensMode"]
-            spectrum_settings["total_scans"] = int(setting.attrib["NumScans"])
-            spectrum_settings["n_values"] = int(setting.attrib["NumValues"])
-            spectrum_settings["end_energy"] = float(setting.attrib["End"])
-            spectrum_settings["excitation_energy"] = float(setting.attrib["Eexc"])
-            spectrum_settings["step_size"] = (
-                spectrum_settings["start_energy"] - spectrum_settings["end_energy"]
-            ) / (spectrum_settings["n_values"] - 1)
-        for setting in spectrum.iter("FixedAnalyzerTransmissionSettings"):
-            spectrum_settings["dwell_time"] = float(setting.attrib["DwellTime"])
-            spectrum_settings["start_energy"] = float(copy.copy(setting.attrib["Ebin"]))
-            spectrum_settings["pass_energy"] = float(setting.attrib["Epass"])
-            spectrum_settings["lens_mode"] = setting.attrib["LensMode"]
-            spectrum_settings["total_scans"] = setting.attrib["NumScans"]
-            spectrum_settings["n_values"] = int(setting.attrib["NumValues"])
-            spectrum_settings["end_energy"] = float(setting.attrib["End"])
-            spectrum_settings["scans"] = int(setting.attrib["NumScans"])
-            spectrum_settings["excitation_energy"] = float(setting.attrib["Eexc"])
-            spectrum_settings["step_size"] = (
-                spectrum_settings["start_energy"] - spectrum_settings["end_energy"]
-            ) / (spectrum_settings["n_values"] - 1)
-        return spectrum_settings
-
 
 class SleProdigyParserV4(SleProdigyParser):
     """
@@ -1563,163 +1320,5 @@ class SleProdigyParserV4(SleProdigyParser):
         "4.71",
         "4.72",
         "4.73",
+        "4.100",
     ]
-
-    def _flatten_xml(self, xml):
-        """
-        Flatten the nested XML structure, keeping only the needed metadata.
-
-        Parameters
-        ----------
-        xml : xml.etree.ElementTree
-            XML schedule of the experiment.
-
-        Returns
-        -------
-        collect : list
-            List of dictionary with spectra metadata.
-
-        """
-        collect = []
-        for measurement_type in MEASUREMENT_METHOD_MAP:
-            for group in xml.iter(measurement_type):
-                data = {}
-                data["analysis_method"] = convert_measurement_method(measurement_type)
-
-                data["devices"] = []
-                data["device_group_id"] = group.attrib["ID"]
-
-                for device in group.iter("DeviceCommand"):
-                    settings = {}
-                    for param in device.iter("Parameter"):
-                        settings[param.attrib["name"]] = param.text
-                        data.update(copy.copy(settings))
-
-                    data["devices"] += [device.attrib["DeviceType"]]
-
-                for spectrum_group in group.iter("SpectrumGroup"):
-                    settings = self._get_group_metadata(spectrum_group)
-                    data.update(copy.copy(settings))
-                    collect += [copy.copy(data)]
-        return collect
-
-    def _get_group_metadata(self, spectrum_group):
-        """
-        Iteratively retrieve metadata for one spectrum group.
-
-        Parameters
-        ----------
-        spectrum_group: xml.etree.ElementTree.Element
-            XML element containing one spectrum group.
-
-        Returns
-        -------
-        settings: dict
-            Dictionary containing all metadata for
-            the spectrum group.
-
-        """
-        settings = {}
-        settings["group_name"] = spectrum_group.attrib["Name"]
-        settings["group_id"] = spectrum_group.attrib["ID"]
-        for comm_settings in spectrum_group.iter("CommonSpectrumSettings"):
-            common_spectrum_settings = self._extract_comm_settings(comm_settings)
-            settings.update(copy.copy(common_spectrum_settings))
-
-        for spectrum in spectrum_group.iter("Spectrum"):
-            spectrum_settings = self._get_spectrum_metadata(spectrum)
-            settings.update(copy.copy(spectrum_settings))
-
-        return settings
-
-    def _extract_comm_settings(self, comm_settings):
-        """
-        Iteratively retrieve metadata for common settings of one spectrum group.
-
-        Parameters
-        ----------
-        spectrum_group: xml.etree.ElementTree.Element
-            XML element containing common settings for one spectrum group.
-
-        Returns
-        -------
-        settings: dict
-            Dictionary containing all common metadata for
-            the spectrum group.
-
-        """
-        common_spectrum_settings = {}
-        for setting in comm_settings.iter():
-            if setting.tag == "ScanMode":
-                energy_scan_mode = convert_energy_scan_mode(setting.attrib["Name"])
-                common_spectrum_settings[setting.tag] = energy_scan_mode
-            elif setting.tag == "SlitInfo":
-                for key, val in setting.attrib.items():
-                    common_spectrum_settings[key] = val
-            elif setting.tag == "Lens":
-                voltage_range = setting.attrib["VoltageRange"]
-                match = re.match(r"(\d+\.?\d*)([a-zA-Z]+)", voltage_range)
-                if match:
-                    value, unit = match.groups()
-                else:
-                    value, unit = None, None
-                common_spectrum_settings["voltage_energy_range"] = float(value)
-                common_spectrum_settings["voltage_energy_range/@units"] = unit
-            elif setting.tag == "EnergyChannelCalibration":
-                common_spectrum_settings["calibration_file/dir"] = setting.attrib["Dir"]
-                common_spectrum_settings["calibration_file/path"] = setting.attrib[
-                    "File"
-                ]
-            elif setting.tag == "Transmission":
-                common_spectrum_settings["transmission_function/file"] = setting.attrib[
-                    "File"
-                ]
-            elif setting.tag == "Iris":
-                common_spectrum_settings["iris_diameter"] = float(
-                    setting.attrib["Diameter"]
-                )
-        return common_spectrum_settings
-
-    def _get_spectrum_metadata(self, spectrum):
-        """
-        Iteratively retrieve metadata for one spectrum.
-
-        Parameters
-        ----------
-        spectrum: xml.etree.ElementTree.Element
-            XML element containing one spectrum.
-
-        Returns
-        -------
-        spectrum_ settings: dict
-            Dictionary containing all metadata for
-            the spectrum.
-
-        """
-        spectrum_settings = {}
-
-        spectrum_settings["spectrum_id"] = spectrum.attrib["ID"]
-        spectrum_settings["spectrum_type"] = spectrum.attrib["Name"]
-        for comment in spectrum.iter("Comment"):
-            spectrum_settings["spectrum_comment"] = comment.text
-
-        for setting in spectrum.iter("FixedEnergiesSettings"):
-            spectrum_settings["dwell_time"] = float(setting.attrib["DwellTime"])
-            spectrum_settings["start_energy"] = float(copy.copy(setting.attrib["Ebin"]))
-            spectrum_settings["pass_energy"] = float(setting.attrib["Epass"])
-            spectrum_settings["lens_mode"] = setting.attrib["LensMode"]
-            spectrum_settings["total_scans"] = int(setting.attrib["NumScans"])
-            spectrum_settings["n_values"] = int(setting.attrib["NumValues"])
-        for setting in spectrum.iter("FixedAnalyzerTransmissionSettings"):
-            spectrum_settings["dwell_time"] = float(setting.attrib["DwellTime"])
-            spectrum_settings["start_energy"] = float(copy.copy(setting.attrib["Ebin"]))
-            spectrum_settings["pass_energy"] = float(setting.attrib["Epass"])
-            spectrum_settings["lens_mode"] = setting.attrib["LensMode"]
-            spectrum_settings["total_scans"] = setting.attrib["NumScans"]
-            spectrum_settings["n_values"] = int(setting.attrib["NumValues"])
-            spectrum_settings["end_energy"] = float(setting.attrib["End"])
-            spectrum_settings["scans"] = int(setting.attrib["NumScans"])
-            spectrum_settings["step_size"] = (
-                spectrum_settings["start_energy"] - spectrum_settings["end_energy"]
-            ) / (spectrum_settings["n_values"] - 1)
-        return spectrum_settings

@@ -23,7 +23,6 @@ mpes nxdl (NeXus Definition Language) template.
 # pylint: disable=too-many-lines,too-many-instance-attributes
 
 import re
-import datetime
 from typing import Any, Dict, List, Union, Tuple
 from pathlib import Path
 
@@ -34,6 +33,7 @@ from pynxtools_xps.reader_utils import (
 from pynxtools_xps.value_mappers import (
     convert_bool,
     convert_units,
+    parse_datetime,
 )
 
 from pynxtools_xps.kratos.kratos_data_model import (
@@ -72,6 +72,8 @@ UNIT_MISSING: Dict[str, str] = {
     "sample_tilt": "degree",
 }
 
+POSSIBLE_DATE_FORMATS: List[str] = ["%d.%m.%Y %H:%M", "%d/%m/%Y %H:%M"]
+
 
 class KratosParser:
     """
@@ -89,7 +91,7 @@ class KratosParser:
         self.metadata = KratosMetadata()
 
         self.value_function_map: Dict[str, Any] = {
-            "date_created": _parse_datetime,
+            "date_created": parse_datetime,
             "description": _convert_description,
             "charge_neutraliser": convert_bool,
             "deflection": _convert_xray_deflection,
@@ -218,10 +220,12 @@ class KratosParser:
             Value of correct type and internal structure.
 
         """
-
         if key in self.value_function_map:
             map_fn = self.value_function_map[key]
-            value = map_fn(value)
+            if "date" in key:
+                value = map_fn(value, POSSIBLE_DATE_FORMATS)
+            else:
+                value = map_fn(value)
         return field_type(value)
 
     def flatten_metadata(self) -> Dict[str, Any]:
@@ -266,34 +270,6 @@ class KratosParser:
                 setup_unit(flattened_dict, key)
 
         return flattened_dict
-
-
-def _parse_datetime(datetime_string: str) -> str:
-    """
-    Convert the native time format to the datetime string
-    in the ISO 8601 format: '%Y-%b-%dT%H:%M:%S.%fZ'.
-
-    Parameters
-    ----------
-    value : str
-        String representation of the date in the format
-        "%Y-%m-%d", "%m/%d/%Y" or "%H:%M:%S", "%I:%M:%S %p".
-
-    Returns
-    -------
-    date_object : str
-        Datetime in ISO8601 format.
-
-    """
-    possible_date_formats = ["%d.%m.%Y %H:%M", "%d/%m/%Y %H:%M"]
-    for date_fmt in possible_date_formats:
-        try:
-            datetime_obj = datetime.datetime.strptime(datetime_string, date_fmt)
-            return datetime_obj.astimezone().isoformat()
-
-        except ValueError:
-            continue
-    raise ValueError("Date and time could not be converted to ISO 8601 format.")
 
 
 def _convert_description(value: str) -> Dict[str, Any]:

@@ -6,7 +6,8 @@ Created on Thu Apr 18 11:57:41 2024
 """
 
 import re
-from typing import Dict, Any
+import datetime
+from typing import Dict, List, Any
 
 ENERGY_TYPE_MAP = {
     "BE": "binding",
@@ -127,3 +128,40 @@ def get_units_for_key(unit_key: str, unit_map: Dict[str, str]) -> str:
     if regex_match is None:
         return unit_map.get(unit_key, None)
     return regex_match.group(1)
+
+
+def parse_datetime(datetime_string: str, possible_date_formats: List[str]) -> str:
+    """
+    Convert the native time format to the ISO 8601 format.
+
+    Convert the native time format to the datetime string
+    in the ISO 8601 format: '%Y-%b-%dT%H:%M:%S.%fZ'.
+    For different vendors, there are different possible date formats,
+    all of which can be checked with this method.
+
+    Parameters
+    ----------
+    datetime_string : str
+        String representation of the date
+    possible_date_formats : List[str]
+        List of possible date time formats.
+
+    Raises
+    ------
+    ValueError
+        If the time format cannot be converted, a ValueError is raised.
+
+    Returns
+    -------
+    str
+        Datetime in ISO8601 format.
+
+    """
+    for date_fmt in possible_date_formats:
+        try:
+            datetime_obj = datetime.datetime.strptime(datetime_string, date_fmt)
+            return datetime_obj.astimezone().isoformat()
+
+        except ValueError:
+            continue
+    raise ValueError("Date and time could not be converted to ISO 8601 format.")

@@ -21,7 +21,7 @@
 Generic Classes for reading XPS files into python dictionary.
 """
 
-from typing import List, Dict
+from typing import Dict, Tuple
 
 from pynxtools_xps.phi.spe_pro_phi import MapperPhi
 from pynxtools_xps.scienta.scienta_reader import MapperScienta
@@ -61,7 +61,7 @@ class XpsDataFileParser:
         "Need an XPS data file from the following vendors: " f"{__vendors__}"
     )
 
-    def __init__(self, file_paths: List) -> None:
+    def __init__(self, file_paths: Tuple[str, ...]) -> None:
         """
         Receive XPS file path.
 

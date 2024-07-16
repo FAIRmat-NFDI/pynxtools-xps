@@ -179,10 +179,8 @@ def parse_datetime(
             datetime_obj = datetime.datetime.strptime(datetime_string, date_fmt)
 
             if tzinfo is not None:
-                # Apply the specified timezone to the datetime object
                 datetime_obj = datetime_obj.replace(tzinfo=tzinfo)
 
-            # Convert to ISO 8601 format
             return datetime_obj.isoformat()
 
         except ValueError:

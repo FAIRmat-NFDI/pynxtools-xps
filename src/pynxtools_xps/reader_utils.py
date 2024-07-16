@@ -88,7 +88,7 @@ class XPSMapper(ABC):
 
     def parse_file(self, file, **kwargs):
         """
-        Parse the file using the Scienta TXT parser.
+        Parse the file using the selected parser.
 
         """
         self.file = file

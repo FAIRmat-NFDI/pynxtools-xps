@@ -25,7 +25,7 @@ dependencies = [
     "h5py>=3.6.0",
     "igor2",
     "xarray>=0.20.2",
-    "pynxtools>=0.5.0",
+    "pynxtools>=0.5.1",
     "numpy>=1.21.2",
     "pint>=0.17",
 ]

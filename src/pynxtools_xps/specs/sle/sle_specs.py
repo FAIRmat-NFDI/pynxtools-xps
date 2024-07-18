@@ -214,13 +214,20 @@ class SleMapperSpecs(XPSMapper):
 
         """
         # pylint: disable=too-many-locals,duplicate-code
-        group_parent = f'{self._root_path}/Group_{spectrum["group_name"]}'
-        region_parent = f'{group_parent}/Region_{spectrum["spectrum_type"]}'
-        instrument_parent = f"{region_parent}/instrument"
+        entry_parts = []
+        for part in ["group_name", "spectrum_type"]:
+            val = spectrum.get(part, None)
+            if val:
+                entry_parts += [val]
+
+        entry = construct_entry_name(entry_parts)
+        entry_parent = f"/ENTRY[{entry}]"
+
+        instrument_parent = f"{entry_parent}/instrument"
         analyser_parent = f"{instrument_parent}/analyser"
 
         path_map = {
-            "user": f"{region_parent}/user",
+            "user": f"{entry_parent}/user",
             "instrument": f"{instrument_parent}",
             "source": f"{instrument_parent}/source",
             "beam": f"{instrument_parent}/beam",
@@ -229,11 +236,11 @@ class SleMapperSpecs(XPSMapper):
             "energydispersion": f"{analyser_parent}/energydispersion",
             "detector": f"{analyser_parent}/detector",
             "manipulator": f"{instrument_parent}/manipulator",
-            "process/energy_calibration": f"{region_parent}/process/energy_calibration",
-            "process/transmission_correction": f"{region_parent}/process/transmission_correction",
-            "sample": f"{region_parent}/sample",
-            "data": f"{region_parent}/data",
-            "region": f"{region_parent}/region",
+            "process/energy_calibration": f"{entry_parent}/process/energy_calibration",
+            "process/transmission_correction": f"{entry_parent}/process/transmission_correction",
+            "sample": f"{entry_parent}/sample",
+            "data": f"{entry_parent}/data",
+            "region": f"{entry_parent}/region",
         }
 
         for grouping, spectrum_keys in template_key_map.items():
@@ -251,7 +258,6 @@ class SleMapperSpecs(XPSMapper):
         self._xps_dict[f'{path_map["source"]}/name'] = spectrum["devices"][1]
 
         # Create keys for writing to data and detector
-        entry = construct_entry_name(region_parent)
         scan_key = construct_data_key(spectrum)
         detector_data_key_child = construct_detector_data_key(spectrum)
 

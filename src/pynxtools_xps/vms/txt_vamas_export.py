@@ -138,15 +138,22 @@ class TxtMapperVamasExport(XPSMapper):
 
         """
         # pylint: disable=too-many-locals,duplicate-code
-        group_parent = f'{self._root_path}/Group_{spectrum["group_name"]}'
-        region_parent = f'{group_parent}/Region_{spectrum["spectrum_type"]}'
-        file_parent = f"{region_parent}/file_info"
-        instrument_parent = f"{region_parent}/instrument"
+        entry_parts = []
+        for part in ["group_name", "spectrum_type"]:
+            val = spectrum.get(part, None)
+            if val:
+                entry_parts += [val]
+
+        entry = construct_entry_name(entry_parts)
+        entry_parent = f"/ENTRY[{entry}]"
+
+        file_parent = f"{entry_parent}/file_info"
+        instrument_parent = f"{entry_parent}/instrument"
         analyser_parent = f"{instrument_parent}/analyser"
 
         path_map = {
             "file_info": f"{file_parent}",
-            "user": f"{region_parent}/user",
+            "user": f"{entry_parent}/user",
             "instrument": f"{instrument_parent}",
             "source_xray": f"{instrument_parent}/source_xray",
             "beam_xray": f"{instrument_parent}/beam_xray",
@@ -156,8 +163,8 @@ class TxtMapperVamasExport(XPSMapper):
             "detector": f"{analyser_parent}/detector",
             "manipulator": f"{instrument_parent}/manipulator",
             "calibration": f"{instrument_parent}/calibration",
-            "sample": f"{region_parent}/sample",
-            "data": f"{region_parent}/data",
+            "sample": f"{entry_parent}/sample",
+            "data": f"{entry_parent}/data",
         }
 
         for grouping, spectrum_keys in template_key_map.items():
@@ -175,7 +182,6 @@ class TxtMapperVamasExport(XPSMapper):
                     self._xps_dict[f"{root}/{mpes_key}/@units"] = units
 
         # Create keys for writing to data and detector
-        entry = construct_entry_name(region_parent)
         scan_key = construct_data_key(spectrum)
         detector_data_key_child = construct_detector_data_key(spectrum)
         detector_data_key = f'{path_map["detector"]}/{detector_data_key_child}/counts'

@@ -695,18 +695,23 @@ class MapperPhi(XPSMapper):
 
         """
         # pylint: disable=too-many-locals,duplicate-code
-        try:
-            group_parent = f'{self._root_path}/Group_{spectrum["group_name"]}'
-            region_parent = f'{group_parent}/Region_{spectrum["spectrum_type"]}'
-        except KeyError:
-            region_parent = f'{self._root_path}/Region_{spectrum["spectrum_type"]}'
-        file_parent = f"{region_parent}/file_info"
-        instrument_parent = f"{region_parent}/instrument"
+        entry_parts = []
+
+        for part in ["group_name", "spectrum_type"]:
+            val = spectrum.get(part, None)
+            if val:
+                entry_parts += [val]
+
+        entry = construct_entry_name(entry_parts)
+        entry_parent = f"/ENTRY[{entry}]"
+
+        file_parent = f"{entry_parent}/file_info"
+        instrument_parent = f"{entry_parent}/instrument"
         analyser_parent = f"{instrument_parent}/analyser"
 
         path_map: Dict[str, str] = {
             "file_info": f"{file_parent}",
-            "user": f"{region_parent}/user",
+            "user": f"{entry_parent}/user",
             "instrument": f"{instrument_parent}",
             "xray_source": f"{instrument_parent}/xray_source",
             "beam": f"{instrument_parent}/beam",
@@ -721,11 +726,11 @@ class MapperPhi(XPSMapper):
             "gcib": f"{instrument_parent}/gcib",
             "neutral_ion_gun": f"{instrument_parent}/neutral_ion_gun",
             "sputter_gun": f"{instrument_parent}/sputter_gun",
-            "process": f"{region_parent}/process",
-            "sample": f"{region_parent}/sample",
-            "data": f"{region_parent}/data",
-            "region": f"{region_parent}/region",
-            "profiling": f"{region_parent}/profiling",
+            "process": f"{entry_parent}/process",
+            "sample": f"{entry_parent}/sample",
+            "data": f"{entry_parent}/data",
+            "region": f"{entry_parent}/region",
+            "profiling": f"{entry_parent}/profiling",
         }
 
         for grouping, spectrum_keys in key_map.items():
@@ -735,7 +740,6 @@ class MapperPhi(XPSMapper):
                 self._xps_dict[f"{root}/{mpes_key}"] = spectrum.get(spectrum_key)
 
         # Create keys for writing to data and detector
-        entry = construct_entry_name(region_parent)
         cycle_key = "cycle0"
 
         energy = np.array(spectrum["energy"])

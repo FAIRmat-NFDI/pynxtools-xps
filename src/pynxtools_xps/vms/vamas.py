@@ -249,13 +249,20 @@ class VamasMapper(XPSMapper):
     ):
         """Map one spectrum from raw data to NXmpes-ready dict."""
         # pylint: disable=too-many-locals,duplicate-code
-        group_parent = f'{self._root_path}/Group_{spectrum["group_name"]}'
-        region_parent = f'{group_parent}/regions/Region_{spectrum["spectrum_type"]}'
-        instrument_parent = f"{region_parent}/instrument"
+        entry_parts = []
+        for part in ["group_name", "spectrum_type"]:
+            val = spectrum.get(part, None)
+            if val:
+                entry_parts += [val]
+
+        entry = construct_entry_name(entry_parts)
+        entry_parent = f"/ENTRY[{entry}]"
+
+        instrument_parent = f"{entry_parent}/instrument"
         analyser_parent = f"{instrument_parent}/analyser"
 
         path_map: Dict[str, str] = {
-            "user": f"{region_parent}/user",
+            "user": f"{entry_parent}/user",
             "instrument": f"{instrument_parent}",
             "beam_xray": f"{instrument_parent}/beam_xray",
             "source_xray": f"{instrument_parent}/source_xray",
@@ -265,12 +272,12 @@ class VamasMapper(XPSMapper):
             "energydispersion": f"{analyser_parent}/energydispersion",
             "detector": f"{analyser_parent}/detector",
             "manipulator": f"{instrument_parent}/manipulator",
-            "sample": f"{region_parent}/sample",
-            "data": f"{region_parent}/data",
-            "process": f"{region_parent}/process",
-            "peak_fitting": f"{region_parent}/peak_fitting",
-            "profiling": f"{region_parent}/profiling",
-            "region": f"{region_parent}/region",
+            "sample": f"{entry_parent}/sample",
+            "data": f"{entry_parent}/data",
+            "process": f"{entry_parent}/process",
+            "peak_fitting": f"{entry_parent}/peak_fitting",
+            "profiling": f"{entry_parent}/profiling",
+            "region": f"{entry_parent}/region",
         }
 
         used_keys = []
@@ -310,7 +317,6 @@ class VamasMapper(XPSMapper):
                         pass
 
         # Create keys for writing to data and detector
-        entry = construct_entry_name(region_parent)
         scan_key = construct_data_key(spectrum)
         detector_data_key_child = construct_detector_data_key(spectrum)
         detector_data_key = f'{path_map["detector"]}/{detector_data_key_child}/counts'
@@ -355,7 +361,7 @@ class VamasMapper(XPSMapper):
         # Write additional keys to region parent.
         for spectrum_key, value in spectrum.items():
             if spectrum_key not in used_keys:
-                self._xps_dict[f"{region_parent}/misc/{spectrum_key}"] = value
+                self._xps_dict[f"{entry_parent}/misc/{spectrum_key}"] = value
 
 
 KEY_MAP = {

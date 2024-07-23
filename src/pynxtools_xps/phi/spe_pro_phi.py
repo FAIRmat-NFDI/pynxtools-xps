@@ -119,6 +119,7 @@ SETTINGS_MAP: Dict[str, str] = {
     "neutralizer_current": "flood_gun_current",
     "neutralizer_energy": "flood_gun_energy",
     "flood_gun_filament": "flood_gun_filament_current",
+    "flood_gun_extractor": "flood_gun_extractor_voltage",
     "detector _acq _time": "detector_acquisition_time",
     "number _of _channels": "number_of_channels",
     "stage_position": "stage_positions",
@@ -186,7 +187,7 @@ KEYS_WITH_UNITS: List[str] = [
     "xray_stigmator_y",
     "flood_gun_current",
     "flood_gun_energy",
-    "flood_gun_extractor",
+    "flood_gun_extractor_voltage",
     "flood_gun_filament_current",
     "flood_gun_pulse_length",
     "flood_gun_pulse_frequency",
@@ -301,8 +302,8 @@ class MapperPhi(XPSMapper):
                 "scan_deflection_span_y/@units",
                 "scan_deflection_offset_x",
                 "scan_deflection_offset_x/@units",
+                "scan_deflection_offset_y",
                 "scan_deflection_offset_y/@units",
-                "scan_deflection_offset_x/@units",
                 "xray_anode_material",
                 "xray_anode_position",
                 "xray_beam_voltage",
@@ -477,8 +478,8 @@ class MapperPhi(XPSMapper):
                 "flood_gun_current/@units",
                 "flood_gun_energy",
                 "flood_gun_energy/@units",
-                "flood_gun_extractor",
-                "flood_gun_extractor/@units",
+                "flood_gun_extractor_voltage",
+                "flood_gun_extractor_voltage/@units",
                 "flood_gun_filament_current",
                 "flood_gun_filament_current/@units",
                 "flood_gun_gain",
@@ -957,10 +958,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
                 if old_key in key:
                     key = key.replace(old_key, new_key)
 
-            try:
-                key = SETTINGS_MAP[key]
-            except KeyError:
-                pass
+            key = SETTINGS_MAP.get(key, key)
 
             return key, channel_count
 

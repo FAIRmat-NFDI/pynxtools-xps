@@ -199,8 +199,8 @@ class PhiMetadata(XpsDataclass):
     flood_gun_current_units: str = "A"
     flood_gun_energy: float = 0.0
     flood_gun_energy_units: str = "eV"
-    flood_gun_extractor: float = 0.0
-    flood_gun_extractor_units: str = "V"
+    flood_gun_extractor_voltage: float = 0.0
+    flood_gun_extractor_voltage_units: str = "V"
     flood_gun_x_steering: float = 0.0
     flood_gun_x_steering_units: str = "mm"
     flood_gun_y_steering: float = 0.0

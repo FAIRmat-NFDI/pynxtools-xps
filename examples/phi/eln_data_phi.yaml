@@ -15,6 +15,7 @@ instrument:
       unit: eV
   source_xray:
     type: Fixed Tube X-ray
+    name: VersaProbe 4 X-ray Source
     probe: photon
     device_information:
       vendor: PHI Electronics
@@ -165,3 +166,23 @@ sample:
       end_time: 2022-01-22T12:31:00.200Z
       description: loaded into the VersaProbe 4
       method: vacuum transfer
+ENTRY[Su1s]:
+  sample:
+    history:
+      PHYSICAL_PROCESS[Ar_sputtering]:
+        start_time: 2023-12-05T09:25:00.200Z
+        end_time: 2023-12-05T11:55:00.200Z
+        description: sputter cleaned with Ar ions for 150 min
+        method: Ar sputtering
+        time:
+          value: 150
+          unit: min
+        pressure:
+          value: 0.00005
+          unit: mbar
+        voltage:
+          value: 1.5
+          unit: kV
+        current:
+          value: 6
+          unit: mA

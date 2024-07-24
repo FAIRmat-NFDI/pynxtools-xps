@@ -1,5 +1,4 @@
 {
-  "/@default":"None",
   "/ENTRY":{
     "@default":"data",
     "title":"['@attrs:experiment_title', '@eln', 'no title']",

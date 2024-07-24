@@ -265,7 +265,7 @@ class ScientaTxtParser:
         self.header = ScientaHeader()
         self.spectra: List[Dict[str, Any]] = []
 
-    def parse_file(self, file: Union[str, Path]):
+    def parse_file(self, file: Union[str, Path], **kwargs):
         """
         Parse the file's data and metadata into a flat
         list of dictionaries.
@@ -426,7 +426,7 @@ class ScientaIgorParser:
         self.lines: List[str] = []
         self.spectra: List[Dict[str, Any]] = []
 
-    def parse_file(self, file: Union[str, Path]):
+    def parse_file(self, file: Union[str, Path], **kwargs):
         """
         Reads the igor binarywave files and returns a list of
         dictionary containing the wave data.

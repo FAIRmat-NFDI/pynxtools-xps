@@ -249,7 +249,7 @@ class XPSReader(MultiFormatReader):
                 Vendor name if that name is in the txt file.
 
             """
-            vendor_dict = XPSReader.__prmt_vndr_cls["txt"]
+            vendor_dict = XPSReader.__prmt_vndr_cls[".txt"]
 
             with open(file_path, encoding="utf-8") as txt_file:
                 contents = txt_file.read()
@@ -593,7 +593,7 @@ class XPSReader(MultiFormatReader):
         objects: Tuple[Any] = None,
         **kwargs,
     ) -> dict:
-        template = super().read(template, file_paths, objects, suppress_warning=True)
+        template = super().read(template, file_paths, objects, suppress_warning=False)
         self.set_root_default(template)
 
         final_template = Template()

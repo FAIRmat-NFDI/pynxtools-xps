@@ -1,8 +1,8 @@
 {
   "/@default":"None",
-  "/ENTRY[entry]":{
+  "/ENTRY":{
     "@default":"data",
-    "title":"@eln",
+    "title":"['@attrs:experiment_title', '@eln', 'no title']",
     "start_time":"@attrs:file_info/acquisition_file_date",
     "end_time":"@eln",
     "experiment_identifier":"@attrs:file_info/experiment_id",
@@ -13,7 +13,7 @@
     "program_name":"@attrs:file_info/software_version",
     "acquisition_filename":"@attrs:file_info/acquisition_filename"
   },
-  "/ENTRY[entry]/USER[user]":{
+  "/ENTRY/USER[user]":{
     "name":"@attrs:user/user_name",
     "affiliation":"@eln",
     "address":"@eln",
@@ -24,7 +24,7 @@
       "is_persistent":"@eln"
     }
   },
-  "/ENTRY[entry]/INSTRUMENT[instrument]":{
+  "/ENTRY/INSTRUMENT[instrument]":{
     "@default": "electronanalyser",
     "device_information":{
       "vendor":"@attrs:instrument/vendor",
@@ -46,7 +46,7 @@
         "identifier":"@eln",
         "model":"@eln"
       },
-
+      "anode_material":"@attrs:xray_source/xray_anode_material",
       "anode_position":"@attrs:xray_source/xray_anode_position",
       "delay_factor_x":"@attrs:xray_source/xray_delay_factor_x",
       "delay_factor_y":"@attrs:xray_source/xray_delay_factor_y",
@@ -119,10 +119,10 @@
       "distance/@units":"@eln",
       "incident_energy":"@attrs:beam/xray_energy",
       "incident_energy/@units":"@attrs:beam/xray_energy/@units",
-      "incident_energy_spread":"None",
-      "incident_energy_spread/@units":"None",
-      "incident_polarization":"None",
-      "incident_polarization/@units":"None",
+      "incident_energy_spread":null,
+      "incident_energy_spread/@units":null,
+      "incident_polarization":null,
+      "incident_polarization/@units":null,
       "extent":"@attrs:beam/xray_beam_diameter",
       "extent/@units":"@attrs:beam/xray_beam_diameter/@units",
       "associated_source":"/entry/instrument/source_xray"
@@ -253,7 +253,7 @@
         "voltage/@units":"@attrs:neutral_ion_gun/neutral_objective_lens_voltage/@units"
       }
     },
-    "sourceTYPE[]":{
+    "sourceTYPE[source_sputter_gun]":{
       "type": "other",
       "type_other":"@eln",
       "description":"@eln",
@@ -330,11 +330,11 @@
       "COLLECTIONCOLUMN[collectioncolumn]":{
         "scheme":"@eln",
         "lens_mode":"@eln",
-        "projection":"None",
-        "angular_acceptance":"None",
-        "spatial_acceptance":"None",
-        "field_aperture":"None",
-        "contrast_aperture":"None",
+        "projection":null,
+        "angular_acceptance":null,
+        "spatial_acceptance":null,
+        "field_aperture":null,
+        "contrast_aperture":null,
         "device_information":{
           "vendor":"@eln",
           "model":"@eln",
@@ -400,7 +400,7 @@
           "@signal":"raw",
           "raw":"@data:raw_data",
           "raw/@units":"counts",
-          "DATA[*]": "@data:channels",
+          "DATA[*]": "@data:*.channels",
           "DATA[*]/@units":"counts"
         }
       }
@@ -429,11 +429,11 @@
         "PID[pid]/setpoint/@units":"@eln"
       },
       "cryostat":{
-        "name":"None",
-        "physical_quantity":"None",
-        "type":"None",
-        "PID[pid]/setpoint":"None",
-        "PID[pid]/setpoint/@units":"@eln"
+        "name":null,
+        "physical_quantity":null,
+        "type":null,
+        "PID[pid]/setpoint":null,
+        "PID[pid]/setpoint/@units":null
       },
       "drain_current_amperemeter":{
         "name":"@eln",
@@ -522,22 +522,22 @@
       "value":"@link:/entry/instrument/source_flood_gun/current"   
     }
   },
-  "/ENTRY[entry]/PROCESS_MPES[process]":{
-    "energy_calibration":"None",
+  "/ENTRY/PROCESS_MPES[process]":{
+    "energy_calibration":null,
     "energy_referencing":{
-      "level":"None",
+      "level":null,
       "reference_peak":"@attrs:process/energy_reference_peak",
       "binding_energy":"@attrs:process/energy_reference_energy",
       "binding_energy/@units":"@attrs:process/energy_reference_energy/@units",
-      "offset":"None",
-      "calibrated_axis":"@test:energy",
+      "offset":null,
+      "calibrated_axis":"@data:energy",
       "calibrated_axis/@units":"@attrs:data/energy/@units"
     },
     "transmission_correction":{
       "intensity_calibration_coefficients":"@attrs:process/intensity_calibration_coefficients"
     }
   },
-  "/ENTRY[entry]/SAMPLE[sample]":{
+  "/ENTRY/SAMPLE[sample]":{
     "name":"@eln",
     "sample_id":"@eln",
     "atom_types":"@eln",
@@ -577,13 +577,13 @@
       "flood_gun":"@link:/entry/instrument/flood_gun"
     }
   },
-  "/ENTRY[entry]/data":{
+  "/ENTRY/data":{
     "@axes":["energy"],
     "@signal": "data",
     "data": "@data:average",
     "data_errors": "@data:errors",
     "data/@units":"@attrs:data/intensity/@units",
-    "DATA[*]": "@data:scans",
+    "DATA[*]": "@data:*.scans",
     "DATA[*]/@units":"@attrs:data/intensity/@units",
     "energy":"@data:energy",
     "energy/@type":"@attrs:data/energy/@type",
@@ -609,6 +609,20 @@
         "end_time":"@eln",
         "description":"@eln",
         "method":"@eln"
+      },
+      "PHYSICAL_PROCESS[Ar_sputtering]":{
+        "start_time":"@eln",
+        "end_time":"@eln",
+        "description":"@eln",
+        "method":"@eln",
+        "time":"@eln",
+        "time/@units":"@eln",
+        "pressure":"@eln",
+        "pressure/@units":"@eln",
+        "voltage":"@eln",
+        "voltage/@units":"@eln",
+        "current":"@eln",
+        "current/@units":"@eln"
       }
     }
   }

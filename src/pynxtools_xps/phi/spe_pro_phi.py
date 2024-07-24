@@ -351,7 +351,7 @@ class MapperPhi(XPSMapper):
                 "xray_spot_size",
                 "xray_spot_size/@units",
             ],
-            "analyser": [
+            "electronanalyser": [
                 "analyser_retardation_gain",
                 "analyser_solid_angle",
                 "analyser_solid_angle/@units",
@@ -708,7 +708,7 @@ class MapperPhi(XPSMapper):
 
         file_parent = f"{entry_parent}/file_info"
         instrument_parent = f"{entry_parent}/instrument"
-        analyser_parent = f"{instrument_parent}/analyser"
+        analyser_parent = f"{instrument_parent}/electronanalyser"
 
         path_map: Dict[str, str] = {
             "file_info": f"{file_parent}",
@@ -716,7 +716,7 @@ class MapperPhi(XPSMapper):
             "instrument": f"{instrument_parent}",
             "xray_source": f"{instrument_parent}/xray_source",
             "beam": f"{instrument_parent}/beam",
-            "analyser": f"{analyser_parent}",
+            "electronanalyser": f"{analyser_parent}",
             "collectioncolumn": f"{analyser_parent}/collectioncolumn",
             "energydispersion": f"{analyser_parent}/energydispersion",
             "detector": f"{analyser_parent}/detector",
@@ -768,13 +768,6 @@ class MapperPhi(XPSMapper):
                 data=intensity,
                 coords={"energy": energy},
             )
-
-            # Write raw intensities to 'detector'.
-            detector_data_key_child = f"cycles/Cycle_0/scans/Scan_{scan_no}"
-            detector_data_key = (
-                f'{path_map["detector"]}/{detector_data_key_child}/counts'
-            )
-            self._xps_dict[detector_data_key] = intensity
 
 
 class PhiParser:  # pylint: disable=too-few-public-methods

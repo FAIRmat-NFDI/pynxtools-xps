@@ -27,7 +27,7 @@ import datetime
 import copy
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Set, Tuple, Optional, Union
+from typing import Any, Dict, List, Set, Tuple, Optional, Literal
 import numpy as np
 
 from pynxtools.dataconverter.helpers import extract_atom_types
@@ -37,11 +37,6 @@ from pynxtools.dataconverter.readers.multi.reader import (
 )
 from pynxtools.dataconverter.readers.utils import parse_yml
 from pynxtools.dataconverter.template import Template
-from pynxtools.dataconverter.readers.utils import (
-    FlattenSettings,
-    flatten_and_replace,
-    parse_flatten_json,
-)
 
 from pynxtools_xps.phi.spe_pro_phi import MapperPhi
 from pynxtools_xps.scienta.scienta_reader import MapperScienta
@@ -80,6 +75,23 @@ CONVERT_DICT = {
 }
 
 REPLACE_NESTED: Dict[str, str] = {}
+
+CHAN_COUNT = "_chan"
+SCAN_COUNT = "_scan"
+
+
+def _get_channel_vars(data_vars: List[str]):
+    """Get all data vars that containt _chan."""
+    return [data_var for data_var in data_vars if CHAN_COUNT in data_var]
+
+
+def _get_scan_vars(data_vars: List[str]):
+    """Get all data vars that contain _scan, but not _chan."""
+    return [
+        data_var
+        for data_var in data_vars
+        if SCAN_COUNT in data_var and CHAN_COUNT not in data_var
+    ]
 
 
 def concatenate_values(value1, value2):
@@ -168,6 +180,7 @@ class XPSReader(MultiFormatReader):
             attrs_callback=self.get_attr,
             data_callback=self.get_data,
             eln_callback=self.get_eln_data,
+            dims=self.get_data_dims,
         )
 
     def set_config_file(self, file_path: str) -> Dict[str, Any]:
@@ -185,7 +198,11 @@ class XPSReader(MultiFormatReader):
             replace_nested=REPLACE_NESTED,
         )
 
-        for key, value in eln_data.items():
+        # replace paths for entry-specific ELN data
+        pattern = re.compile(r"(/ENTRY)/ENTRY(\[[^\]]+\])")
+
+        for key, value in eln_data.copy().items():
+            new_key = pattern.sub(r"\1\2", key)
             if "molecular_formula_hill" in key and "atom_types" not in key:
                 atom_types: List = []
                 atom_types = list(extract_atom_types(value))
@@ -194,16 +211,10 @@ class XPSReader(MultiFormatReader):
                     modified_key = key.replace("chemical_formula", "atom_types")
                     eln_data[modified_key] = ", ".join(atom_types)
 
-        # replace paths for entry-specific ELN data
-        pattern = re.compile(r"/ENTRY\[entry\]/(ENTRY\[[^\]]+\]/.*)")
+            if isinstance(value, datetime.datetime):
+                eln_data[key] = value.isoformat()
 
-        for key in eln_data.copy():
-            match = pattern.search(key)
-            if match:
-                new_key = match.group(1)
-                self.eln_data[new_key] = eln_data.pop(key)
-            else:
-                self.eln_data[key] = eln_data.pop(key)
+            self.eln_data[new_key] = eln_data.pop(key)
 
         return {}
 
@@ -352,9 +363,8 @@ class XPSReader(MultiFormatReader):
         try:
             for entry, entry_values in self.xps_data["data"].items():
                 for data_var in entry_values:
-                    chan_count = "_chan"
-                    if chan_count in data_var:
-                        detector_num = data_var.split(chan_count)[-1]
+                    if CHAN_COUNT in data_var:
+                        detector_num = data_var.split(CHAN_COUNT)[-1]
                         detector_nm = f"detector{detector_num}"
                         detector_set.add(detector_nm)
         except KeyError:
@@ -458,26 +468,56 @@ class XPSReader(MultiFormatReader):
 
         return value
 
-    def get_attr(self, path: str) -> Any:
+    def get_attr(self, key: str, path: str) -> Any:
         """
         Get the metadata that was stored in the main file.
         """
         return self.get_metadata(self.xps_data, path, self.callbacks.entry_name)
 
-    def get_eln_data(self, path: str) -> Any:
+    def get_eln_data(self, key: str, path: str) -> Any:
         """
         Returns data from the given eln path.
         Gives preference to ELN data for a given entry before searching
         the ELN data for all entries.
         Returns None if the path does not exist.
         """
-        for entry_name in [self.callbacks.entry_name, "entry"]:
-            value = self.get_metadata(self.eln_data, path, entry_name)
-            if value:
-                return value
-        return value
+        if key in self.eln_data:
+            return self.eln_data.get(key)
 
-    def get_data(self, path: str) -> Any:
+        else:
+            # check for similar key with generic /ENTRY/
+            pattern = re.compile(r"(/ENTRY)\[[^\]]+\]")
+            modified_key = pattern.sub(r"\1", key)
+            if modified_key in self.eln_data:
+                return self.eln_data.get(modified_key)
+        return
+
+    def get_data_dims(self, key: str, path: str) -> List[str]:
+        """
+        Returns the dimensions of the data from the given path.
+        """
+
+        def get_signals(key: Literal["scans", "channels"]) -> List[str]:
+            xr_data = self.xps_data["data"].get(f"{self.callbacks.entry_name}")
+
+            if key == "scans":
+                data_vars = _get_scan_vars(xr_data.data_vars)
+            elif key == "channels":
+                data_vars = _get_channel_vars(xr_data.data_vars)
+                if not data_vars:
+                    data_vars = _get_scan_vars(xr_data.data_vars)
+
+            return list(map(str, data_vars))
+
+        if path.startswith("@data:*"):
+            return get_signals(key=path.split(":*.")[-1])
+
+        if any(x in path for x in ["counts", "raw/@units"]):
+            return get_signals(key="channels")
+
+        return get_signals(key="scans")
+
+    def get_data(self, key: str, path: str) -> Any:
         """
         Returns data for a given key.
         Can either return averaged, scan, or channel data.
@@ -485,78 +525,39 @@ class XPSReader(MultiFormatReader):
         """
         xr_data = self.xps_data["data"].get(f"{self.callbacks.entry_name}")
 
-        chan_count = "_chan"
-        scan_count = "_scan"
-
         if path.endswith("average"):
             return np.mean(
-                [
-                    xr_data[x_arr].data
-                    for x_arr in xr_data.data_vars
-                    if (chan_count not in x_arr and scan_count in x_arr)
-                ],
+                [xr_data[x_arr].data for x_arr in _get_scan_vars(xr_data.data_vars)],
                 axis=0,
             )
 
         elif path.endswith("errors"):
             return np.std(
-                [
-                    xr_data[x_arr].data
-                    for x_arr in xr_data.data_vars
-                    if (chan_count not in x_arr and scan_count in x_arr)
-                ],
+                [xr_data[x_arr].data for x_arr in _get_scan_vars(xr_data.data_vars)],
                 axis=0,
             )
 
-        elif path.endswith("scans"):
-            scan_data: List[np.ndarray] = []
-            for data_var in xr_data.data_vars:
-                # Collecting only accumulated counts
-                # individual channeltron counts go to detector data section
-                if chan_count not in data_var and scan_count in data_var:
-                    self.callbacks.dim += [str(data_var)]
-                    scan_data += [xr_data[data_var].data]
-
-            return scan_data
-
         elif path.endswith("raw_data"):
-            raw_data: List[np.ndarray] = []
-
-            data_vars = [
-                data_var for data_var in xr_data.data_vars if chan_count in data_var
-            ]
+            data_vars = _get_channel_vars(xr_data.data_vars)
 
             if not data_vars:
                 # If there is no channel data, use scan data.
-                data_vars = [
-                    data_var for data_var in xr_data.data_vars if scan_count in data_var
+                data_vars = _get_scan_vars(xr_data.data_vars)
+
+            # Skip average cycle data
+            return np.array(
+                [
+                    xr_data[data_var].data
+                    for data_var in data_vars
+                    if SCAN_COUNT in data_var
                 ]
+            )
 
-            raw_data = [xr_data[data_var].data for data_var in data_vars]
-
-            return np.array(raw_data)
+        elif path.endswith("scans"):
+            return np.array(xr_data[path.split(".scans")[0]])
 
         elif path.endswith("channels"):
-            detector_data: List[np.ndarray] = []
-
-            # Iteration over channels
-            data_vars = [
-                data_var for data_var in xr_data.data_vars if chan_count in data_var
-            ]
-
-            if data_vars:
-                for data_var in data_vars:
-                    self.callbacks.dim += [str(data_var)]
-                    detector_data += [xr_data[data_var].data]
-
-            else:
-                # If there is no channel data, iterate over scans
-                data_vars = [data_var for data_var in xr_data.data_vars]
-                if scan_count in data_var:
-                    self.callbacks.dim += [str(data_var)]
-                    detector_data += [xr_data[data_var].data]
-
-            return detector_data
+            return np.array(xr_data[path.split(".channels")[0]])
 
         elif "energy" in path:
             return np.array(xr_data.coords["energy"].values)
@@ -592,14 +593,13 @@ class XPSReader(MultiFormatReader):
         objects: Tuple[Any] = None,
         **kwargs,
     ) -> dict:
-        template = super().read(template, file_paths, objects, **kwargs)
+        template = super().read(template, file_paths, objects, suppress_warning=True)
         self.set_root_default(template)
 
         final_template = Template()
         for key, val in template.items():
             if val is not None:
                 if "@units" in key:
-                    pass
                     check_units(key, val)
                 final_template[key] = val
 

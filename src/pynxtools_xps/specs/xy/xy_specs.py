@@ -30,7 +30,7 @@ import itertools
 from collections import OrderedDict
 import copy
 from pathlib import Path
-from datetime import datetime
+import datetime
 import xarray as xr
 import numpy as np
 
@@ -42,7 +42,6 @@ from pynxtools_xps.reader_utils import (
     get_minimal_step,
     construct_entry_name,
     construct_data_key,
-    construct_detector_data_key,
 )
 from pynxtools_xps.value_mappers import (
     convert_measurement_method,
@@ -223,7 +222,7 @@ class XyMapperSpecs(XPSMapper):
             "calibration": f"{instrument_parent}/calibration",
             "sample": f"{entry_parent}/sample",
             "data": f"{entry_parent}/data",
-            "region": f"{entry_parent}",
+            "region": f"{entry_parent}/region",
         }
 
         for grouping, spectrum_keys in key_map.items():
@@ -245,10 +244,8 @@ class XyMapperSpecs(XPSMapper):
             self._xps_dict[path] = spectrum["data"]["transmission_function"]
             self._xps_dict[f"{path}/units"] = spectrum["tf_units"]
 
-        # Create keys for writing to data and detector
+        # Create key for writing to data.
         scan_key = construct_data_key(spectrum)
-        detector_data_key_child = construct_detector_data_key(spectrum)
-        detector_data_key = f'{path_map["detector"]}/{detector_data_key_child}/counts'
 
         x_units = spectrum["x_units"]
         energy = np.array(spectrum["data"]["x"])
@@ -257,32 +254,36 @@ class XyMapperSpecs(XPSMapper):
         if entry not in self._xps_dict["data"]:
             self._xps_dict["data"][entry] = xr.Dataset()
 
-        # Write raw data to detector.
-        self._xps_dict[detector_data_key] = intensity
-
         if not self.parser.export_settings["Separate Channel Data"]:
             averaged_channels = intensity
         else:
             all_channel_data = [
                 value
-                for key, value in self._xps_dict.items()
-                if detector_data_key.split("Channel_")[0] in key
+                for key, value in self._xps_dict["data"][entry].items()
+                if "_chan" in key
             ]
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", category=RuntimeWarning)
-                averaged_channels = np.mean(all_channel_data, axis=0)
+            if not all_channel_data:
+                all_channel_data = intensity
+                averaged_channels = intensity
+            else:
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", category=RuntimeWarning)
+                    averaged_channels = np.mean(all_channel_data, axis=0)
 
         if not self.parser.export_settings["Separate Scan Data"]:
             averaged_scans = intensity
         else:
             all_scan_data = [
                 value
-                for key, value in self._xps_dict.items()
-                if detector_data_key.split("Scan_")[0] in key
+                for key, value in self._xps_dict["data"][entry].items()
+                if "_scan" in key and "_chan" not in key
             ]
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", category=RuntimeWarning)
-                averaged_scans = np.mean(all_scan_data, axis=0)
+            if not all_scan_data:
+                averaged_scans = intensity
+            else:
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", category=RuntimeWarning)
+                    averaged_scans = np.mean(all_scan_data, axis=0)
 
         # Write to data in order: scan, cycle, channel
 
@@ -292,18 +293,17 @@ class XyMapperSpecs(XPSMapper):
             coords={"energy": energy},
         )
 
-        if self.parser.export_settings["Separate Scan Data"]:
-            # Write average cycle data to 'data'.
-            self._xps_dict["data"][entry][scan_key] = xr.DataArray(
-                data=averaged_channels,
-                coords={"energy": energy},
-            )
+        # Write average cycle data to '_scan'.
+        self._xps_dict["data"][entry][scan_key] = xr.DataArray(
+            data=averaged_channels,
+            coords={"energy": energy},
+        )
 
         if (
             self.parser.export_settings["Separate Channel Data"]
             and self.write_channels_to_data
         ):
-            # Write channel data to 'data'.
+            # Write channel data to '_chan'.
             channel_no = spectrum["channel_no"]
             self._xps_dict["data"][entry][f"{scan_key}_chan{channel_no}"] = (
                 xr.DataArray(data=intensity, coords={"energy": energy})
@@ -825,9 +825,10 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
 
         return spectra
 
-    def _parse_datetime(self, date: str):
+    def _parse_datetime(self, date: str) -> str:
         """
-        Parse datetime into a datetime.datetime object.
+        Parse datetime into a datetime.datetime object and return a
+        sring value in ISO format.
 
         Parameters
         ----------
@@ -843,9 +844,13 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
         """
         if date.find("UTC"):
             date = date[: date.find("UTC")].strip()
+            tz = datetime.timezone.utc
         else:
             date = date.strip()
+            tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
 
-        date_object = datetime.strptime(date, "%m/%d/%y %H:%M:%S")
+        date_object = datetime.datetime.strptime(date, "%m/%d/%y %H:%M:%S").replace(
+            tzinfo=tz
+        )
 
-        return date_object
+        return date_object.isoformat()

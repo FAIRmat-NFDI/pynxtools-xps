@@ -31,7 +31,6 @@ from pynxtools_xps.reader_utils import (
     XPSMapper,
     construct_entry_name,
     construct_data_key,
-    construct_detector_data_key,
     _re_map_single_value,
     _check_valid_value,
 )
@@ -208,11 +207,6 @@ class MapperScienta(XPSMapper):
 
         # Create keys for writing to data and detector
         scan_key = construct_data_key(spectrum)
-        detector_data_key_child = construct_detector_data_key(spectrum)
-        detector_data_key = f'{path_map["detector"]}/{detector_data_key_child}/counts'
-
-        # Write raw data to detector.
-        self._xps_dict[detector_data_key] = spectrum["data"]["intensity"]
 
         # If multiple spectra exist to entry, only create a new
         # xr.Dataset if the entry occurs for the first time.

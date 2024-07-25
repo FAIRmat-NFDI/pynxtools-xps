@@ -36,6 +36,7 @@ instrument:
       identifier: null
     collectioncolumn:
       scheme: angular dispersive
+      lens_mode: Large Area
       device_information:
         vendor: null
         model: null
@@ -43,13 +44,16 @@ instrument:
     energydispersion:
       scheme: hemispherical
       energy_scan_mode: fixed_analyser_transmission
-      diameter:
-        unit: mm
+      radius:
         value: 150
+        unit: mm
       device_information:
         vendor: null
         model: null
         identifier: null
+      pass_energy:
+        value: 20
+        unit: eV      
     detector:
       amplifier_type: channeltron
       detector_type: Multi-anode   
@@ -132,8 +136,9 @@ sample:
   name: Ni foil
   description: Ni foil
   substance:
-    molecular_formula_hill: Fe
+    molecular_formula_hill: Ni
   situation: vacuum
+  physical_form: foil
   history:
     sample_preparation:
       start_time: 2022-04-08T11:02:38.0200Z

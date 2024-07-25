@@ -344,19 +344,18 @@ class XPSReader(MultiFormatReader):
         Defaults to creating a single entry named "entry".
         """
         # Track entries for using for eln data
-        entry_set: Set[str] = set()
-        entry_set.clear()
+        entries: List[str] = []
 
         try:
             for entry, entry_values in self.xps_data["data"].items():
-                entry_set.add(entry)
+                entries += [entry]
         except KeyError:
             pass
 
-        if not entry_set:
-            entry_set.add("entry")
+        if not entries:
+            entries += ["entry"]
 
-        return list(entry_set)
+        return list(dict.fromkeys(entries))
 
     def setup_template(self) -> Dict[str, Any]:
         """
@@ -375,6 +374,7 @@ class XPSReader(MultiFormatReader):
         """
         Do postprocessing after all files and the config file are read .
         """
+        # TODO: make processing of multiple entities robust
         pass  # self.process_multiple_entities()
 
     def _get_analyser_names(self) -> List[str]:
@@ -386,13 +386,12 @@ class XPSReader(MultiFormatReader):
         Currently, this is not used, but can be changed if there are
         multiple analysers in the future.
         """
-        analyser_set: Set[str] = set()
-        analyser_set.clear()
+        analysers: List[str] = []
 
-        if not analyser_set:
-            analyser_set.add("electronanalyser")
+        if not analysers:
+            analysers += ["electronanalyser"]
 
-        return list(analyser_set)
+        return list(dict.fromkeys(analysers))
 
     def _get_detector_names(self) -> List[str]:
         """
@@ -400,8 +399,7 @@ class XPSReader(MultiFormatReader):
         from the data. Defaults to creating a single detector named
         "detector".
         """
-        detector_set: Set[str] = set()
-        detector_set.clear()
+        detectors: List[str] = []
 
         try:
             for entry, entry_values in self.xps_data["data"].items():
@@ -409,14 +407,14 @@ class XPSReader(MultiFormatReader):
                     if CHAN_COUNT in data_var:
                         detector_num = data_var.split(CHAN_COUNT)[-1]
                         detector_nm = f"detector{detector_num}"
-                        detector_set.add(detector_nm)
+                        detectors += [detector_nm]
         except KeyError:
             pass
 
-        if not detector_set:
-            detector_set.add("detector")
+        if not detectors:
+            detectors += ["detector"]
 
-        return list(set(["detector"]))
+        return list(dict.fromkeys(detectors))
 
     def process_multiple_entities(self) -> None:
         """

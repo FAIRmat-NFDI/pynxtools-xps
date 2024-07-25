@@ -1,10 +1,9 @@
 title: XPS Experiment
-start_time: 2022-04-08T11:47:02.0200Z
-end_time: 2022-04-08T12:32:06.0200Z
 program_name: SpecsLab 2
 user:
   name: Lukas Pielsticker
   affiliation: Max Planck Institute for Chemical Energy Conversion
+  address: Muelheim an der Ruhr
   email: lukas.pielsticker@cec.mpg.de
 instrument:
   device_information:
@@ -36,6 +35,7 @@ instrument:
       identifier: null
     collectioncolumn:
       scheme: angular dispersive
+      lens_mode: ARM22
       device_information:
         vendor: null
         model: null
@@ -130,7 +130,9 @@ instrument:
         unit: null
 sample:
   description: CoO powder
+  physical_form: powder
   substance:
+    name: CoO
     molecular_formula_hill: CoO
   situation: vacuum
   history:

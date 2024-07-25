@@ -102,7 +102,7 @@ class MapperScienta(XPSMapper):
             "beam_xray": [
                 "excitation_energy",
             ],
-            "analyser": [],
+            "electronanalyser": [],
             "collectioncolumn": [
                 "lens_mode",
             ],
@@ -172,7 +172,7 @@ class MapperScienta(XPSMapper):
 
         file_parent = f"{entry_parent}/file_info"
         instrument_parent = f"{entry_parent}/instrument"
-        analyser_parent = f"{instrument_parent}/analyser"
+        analyser_parent = f"{instrument_parent}/electronanalyser"
 
         path_map = {
             "file_info": f"{file_parent}",
@@ -180,7 +180,7 @@ class MapperScienta(XPSMapper):
             "instrument": f"{instrument_parent}",
             "source_xray": f"{instrument_parent}/source_xray",
             "beam_xray": f"{instrument_parent}/beam_xray",
-            "analyser": f"{analyser_parent}",
+            "electronanalyser": f"{analyser_parent}",
             "collectioncolumn": f"{analyser_parent}/collectioncolumn",
             "energydispersion": f"{analyser_parent}/energydispersion",
             "detector": f"{analyser_parent}/detector",

@@ -1,7 +1,7 @@
 {
   "/ENTRY":{
     "@default":"data",
-    "title":"['@attrs:experiment_title', '@eln', 'no title']",
+    "title":"@eln",
     "start_time":"@attrs:file_info/acquisition_file_date",
     "end_time":"@eln",
     "experiment_identifier":"@attrs:file_info/experiment_id",

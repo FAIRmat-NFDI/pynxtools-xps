@@ -345,6 +345,7 @@ class XPSReader(MultiFormatReader):
         """
         # Track entries for using for eln data
         entry_set: Set[str] = set()
+        entry_set.clear()
 
         try:
             for entry, entry_values in self.xps_data["data"].items():
@@ -386,6 +387,7 @@ class XPSReader(MultiFormatReader):
         multiple analysers in the future.
         """
         analyser_set: Set[str] = set()
+        analyser_set.clear()
 
         if not analyser_set:
             analyser_set.add("electronanalyser")
@@ -399,6 +401,7 @@ class XPSReader(MultiFormatReader):
         "detector".
         """
         detector_set: Set[str] = set()
+        detector_set.clear()
 
         try:
             for entry, entry_values in self.xps_data["data"].items():

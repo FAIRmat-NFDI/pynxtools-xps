@@ -192,24 +192,64 @@ class XPSReader(MultiFormatReader):
         return {}
 
     def handle_eln_file(self, file_path: str) -> Dict[str, Any]:
+        """
+        Loads ELN file and handles specific cases.
+        """
+
+        def combine_and_unique_string(string: str, elements: List[str]) -> str:
+            """
+            Combines a comma-separated string and a list into a single string with unique elements.
+
+            Args:
+                string (str): A comma-separated string.
+                elements (list): A list of elements to combine with the string.
+
+            Returns:
+                str: A comma-separated string with unique elements.
+            """
+            existing_elements = [
+                item.strip() for item in string.split(",") if item.strip()
+            ]
+            combined_elements = list(set(existing_elements + elements))
+            combined_elements.sort()
+            return ", ".join(combined_elements)
+
+        # replace paths for entry-specific ELN data
+        pattern = re.compile(r"(/ENTRY)/ENTRY(\[[^\]]+\])")
+
+        formula_keys = ("molecular_formula_hill", "chemical_formula")
+
         eln_data = parse_yml(
             file_path,
             convert_dict=CONVERT_DICT,
             replace_nested=REPLACE_NESTED,
         )
 
-        # replace paths for entry-specific ELN data
-        pattern = re.compile(r"(/ENTRY)/ENTRY(\[[^\]]+\])")
+        initial_eln_keys = list(eln_data.keys())
 
         for key, value in eln_data.copy().items():
             new_key = pattern.sub(r"\1\2", key)
-            if "molecular_formula_hill" in key and "atom_types" not in key:
-                atom_types: List = []
-                atom_types = list(extract_atom_types(value))
 
-                if atom_types:
-                    modified_key = key.replace("chemical_formula", "atom_types")
-                    eln_data[modified_key] = ", ".join(atom_types)
+            # Parse substance/molecular_formula_hill and chemical_formula into atom_types
+            for form_key in formula_keys:
+                if form_key in key:
+                    atom_types = list(extract_atom_types(value))
+
+                    if atom_types:
+                        modified_key = re.sub(r"SUBSTANCE\[.*?\]/", "", key)
+                        modified_key = modified_key.replace(form_key, "atom_types")
+
+                        if modified_key not in initial_eln_keys:
+                            if modified_key not in self.eln_data:
+                                self.eln_data[modified_key] = ", ".join(atom_types)
+                            else:
+                                self.eln_data[modified_key] = combine_and_unique_string(
+                                    self.eln_data[modified_key], atom_types
+                                )
+                        else:
+                            logger.error(
+                                f"{key} from ELN was not parsed to atom_types because {modified_key} already exists."
+                            )
 
             if isinstance(value, datetime.datetime):
                 eln_data[key] = value.isoformat()
@@ -593,7 +633,7 @@ class XPSReader(MultiFormatReader):
         objects: Tuple[Any] = None,
         **kwargs,
     ) -> dict:
-        template = super().read(template, file_paths, objects, suppress_warning=False)
+        template = super().read(template, file_paths, objects, suppress_warning=True)
         self.set_root_default(template)
 
         final_template = Template()

@@ -145,7 +145,6 @@ instrument:
 sample:
   name: SnO2 10nnm
   sample_id: 1
-  atom_types: Sn, O
   physical_form: pellet
   situation: vacuum
   substance:

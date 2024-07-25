@@ -422,30 +422,6 @@ def construct_data_key(spectrum: Dict[str, Any]) -> str:
     return f"{cycle_key}_{scan_key}"
 
 
-def construct_detector_data_key(spectrum: Dict[str, Any]) -> str:
-    """
-    Construct a key for the detector data fields of the xps_dict.
-    Output example: 'cycles/Cycle_0/scans/Scan_0'
-
-    """
-    if "loop_no" in spectrum:
-        cycle_key = f'cycles/Cycle_{spectrum["loop_no"]}'
-    else:
-        cycle_key = "cycles/Cycle_0"
-
-    if "scan_no" in spectrum:
-        scan_key = f'scans/Scan_{spectrum["scan_no"]}'
-    else:
-        scan_key = "scans/Scan_0"
-
-    key = f"{cycle_key}/{scan_key}"
-
-    if "channel_no" in spectrum:
-        key += f'/channels/Channel_{spectrum["channel_no"]}'
-
-    return key
-
-
 def align_name_part(name_part: str):
     """Make one part of the entry name compliant with NeXus standards."""
     replacements = {

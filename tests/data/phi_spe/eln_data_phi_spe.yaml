@@ -5,8 +5,8 @@ experiment_laboratory: XPS Lab
 user:
   name: Sebastian Benz
   affiliation: Justus-Liebig-Universität Gießen, AG Spektroskopie und Optik
-  orcid: null
   email: null
+  IDENTIFIER[orcid]: null
 instrument:
   energy_resolution:
     type: calibrated
@@ -15,6 +15,7 @@ instrument:
       unit: eV
   source_xray:
     type: Fixed Tube X-ray
+    name: VersaProbe 4 X-ray Source
     probe: photon
     device_information:
       vendor: PHI Electronics
@@ -144,7 +145,6 @@ instrument:
 sample:
   name: SnO2 10nnm
   sample_id: 1
-  atom_types: Sn, O
   physical_form: pellet
   situation: vacuum
   substance:

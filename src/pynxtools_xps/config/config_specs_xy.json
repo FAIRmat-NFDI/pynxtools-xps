@@ -104,6 +104,8 @@
           "size/@units":"@eln"
         },
         "exit_slit":null,
+        "radius":"@eln",
+        "radius/@units":"@eln",
         "device_information":{
           "vendor":"@eln",
           "model":"@eln",

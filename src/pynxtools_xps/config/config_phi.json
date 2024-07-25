@@ -371,13 +371,13 @@
         "pass_energy/@units":"@attrs:energydispersion/pass_energy/@units",
         "energy_scan_mode":"@attrs:energydispersion/energy_scan_mode",
         "xps_scan_mode":"@attrs:energydispersion/xps_scan_mode",
+        "radius":"@eln",
+        "radius/@units":"@eln",
         "device_information":{
           "vendor":"@eln",
           "model":"@eln",
           "identifier":"@eln"
-        },
-        "diameter":"@eln",
-        "diameter/@units":"@eln"
+        }
       },
       "DETECTOR[detector]":{
         "@default":"raw_data",

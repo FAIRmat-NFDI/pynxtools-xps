@@ -151,6 +151,8 @@
         "pass_energy":"@attrs:energydispersion/pass_energy",
         "pass_energy/@units":"@attrs:energydispersion/pass_energy/@units",
         "energy_scan_mode":"@attrs:energydispersion/scan_mode",
+        "radius":"@eln",
+        "radius/@units":"@eln",
         "device_information":{
           "vendor":"@eln",
           "model":"@eln",

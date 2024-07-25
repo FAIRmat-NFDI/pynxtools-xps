@@ -47,13 +47,13 @@ instrument:
       radius:
         value: 150
         unit: mm
+      pass_energy:
+        value: 20
+        unit: eV
       device_information:
         vendor: null
         model: null
         identifier: null
-      pass_energy:
-        value: 20
-        unit: eV      
     detector:
       amplifier_type: channeltron
       detector_type: Multi-anode   

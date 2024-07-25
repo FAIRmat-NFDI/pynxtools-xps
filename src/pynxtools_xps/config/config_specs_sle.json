@@ -147,13 +147,13 @@
         "energy_scan_mode":"@attrs:energydispersion/energy_scan_mode",
         "entrance_slit/description":"@attrs:energydispersion/entrance_slit",
         "exit_slit/description":"@attrs:energydispersion/exit_slit",
+        "radius":"@eln",
+        "radius/@units":"@eln",
         "device_information":{
           "vendor":"@eln",
           "model":"@eln",
           "identifier":"@eln"
-        },
-        "diameter":"@eln",
-        "diameter/@units":"@eln"
+        }
       },
       "DETECTOR[detector]":{
         "@default":"raw_data",

@@ -99,13 +99,13 @@
           "energy_scan_mode":"@attrs:region/scan_mode/name",
           "entrance_slit/description":"@attrs:region/analyzer_slit",
           "exit_slit/description":null,
+          "radius":"@eln",
+          "radius/@units":"@eln",
           "device_information":{
             "vendor":"@eln",
             "model":"@eln",
             "identifier":"@eln"
-          },
-          "diameter":"@eln",
-          "diameter/@units":"@eln"
+          }
         },
         "DETECTOR[detector]":{
           "@default":"raw_data",

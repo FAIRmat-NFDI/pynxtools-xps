@@ -49,7 +49,7 @@ instrument:
         identifier: null
     energydispersion:
       scheme: hemispherical
-      diameter:
+      radius:
         unit: mm
         value: 150
       device_information:

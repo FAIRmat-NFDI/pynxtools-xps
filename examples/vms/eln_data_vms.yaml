@@ -43,7 +43,7 @@ instrument:
     energydispersion:
       scheme: hemispherical
       energy_scan_mode: fixed_analyser_transmission
-      diameter:
+      radius:
         unit: mm
         value: 150
       device_information:

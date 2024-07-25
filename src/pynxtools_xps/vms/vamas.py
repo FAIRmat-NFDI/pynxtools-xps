@@ -320,7 +320,7 @@ class VamasMapper(XPSMapper):
                     except KeyError:
                         pass
 
-        # Create keys for writing to data and detector
+        # Create key for writing to data.
         scan_key = construct_data_key(spectrum)
 
         energy = np.array(spectrum["data"]["x"])

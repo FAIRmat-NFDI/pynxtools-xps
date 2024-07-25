@@ -141,7 +141,6 @@ instrument:
 sample:
   name: Polycristalline Au foil
   sample_id: S718
-  atom_types: Au
   physical_form: foil
   situation: vacuum
   substance:

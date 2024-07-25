@@ -180,7 +180,7 @@ class TxtMapperVamasExport(XPSMapper):
                 if units is not None:
                     self._xps_dict[f"{root}/{mpes_key}/@units"] = units
 
-        # Create keys for writing to data and detector
+        # Create key for writing to data.
         scan_key = construct_data_key(spectrum)
         energy = np.array(spectrum["data"]["binding_energy"])
         intensity = np.array(spectrum["data"]["intensity"])

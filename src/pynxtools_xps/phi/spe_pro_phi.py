@@ -740,7 +740,7 @@ class MapperPhi(XPSMapper):
                 mpes_key = spectrum_key
                 self._xps_dict[f"{root}/{mpes_key}"] = spectrum.get(spectrum_key)
 
-        # Create keys for writing to data and detector
+        # Create key for writing to data
         cycle_key = "cycle0"
 
         energy = np.array(spectrum["energy"])

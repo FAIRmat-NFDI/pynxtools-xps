@@ -39,7 +39,6 @@ from pynxtools_xps.reader_utils import (
     XPSMapper,
     construct_entry_name,
     construct_data_key,
-    construct_detector_data_key,
     re_map_keys,
     re_map_values,
     drop_unused_keys,
@@ -52,7 +51,7 @@ from pynxtools_xps.value_mappers import (
 )
 
 UNITS: Dict[str, str] = {
-    "analyser/work_function": "eV",
+    "electronanalyser/work_function": "eV",
     "beam/excitation_energy": "eV",
     "collectioncolumn/iris_diameter": "mm",
     "data/step_size": "eV",
@@ -146,9 +145,9 @@ class SleMapperSpecs(XPSMapper):
                 "emission_current",
             ],
             "beam": ["excitation_energy"],
-            "analyser": [
-                "voltage_range",
-                "voltage_range/@units",
+            "electronanalyser": [
+                "voltage_energy_range",
+                "voltage_energy_range/@units",
                 "work_function",
             ],
             "collectioncolumn": [
@@ -224,14 +223,14 @@ class SleMapperSpecs(XPSMapper):
         entry_parent = f"/ENTRY[{entry}]"
 
         instrument_parent = f"{entry_parent}/instrument"
-        analyser_parent = f"{instrument_parent}/analyser"
+        analyser_parent = f"{instrument_parent}/electronanalyser"
 
         path_map = {
             "user": f"{entry_parent}/user",
             "instrument": f"{instrument_parent}",
             "source": f"{instrument_parent}/source",
             "beam": f"{instrument_parent}/beam",
-            "analyser": f"{analyser_parent}",
+            "electronanalyser": f"{analyser_parent}",
             "collectioncolumn": f"{analyser_parent}/collectioncolumn",
             "energydispersion": f"{analyser_parent}/energydispersion",
             "detector": f"{analyser_parent}/detector",
@@ -254,12 +253,11 @@ class SleMapperSpecs(XPSMapper):
                 if units is not None:
                     self._xps_dict[f"{root}/{mpes_key}/@units"] = units
 
-        self._xps_dict[f'{path_map["analyser"]}/name'] = spectrum["devices"][0]
+        self._xps_dict[f'{path_map["electronanalyser"]}/name'] = spectrum["devices"][0]
         self._xps_dict[f'{path_map["source"]}/name'] = spectrum["devices"][1]
 
-        # Create keys for writing to data and detector
+        # Create keys for writing to data
         scan_key = construct_data_key(spectrum)
-        detector_data_key_child = construct_detector_data_key(spectrum)
 
         energy = np.array(spectrum["data"]["x"])
 
@@ -304,14 +302,14 @@ class SleMapperSpecs(XPSMapper):
             for channel in channels:
                 ch_no = channel.rsplit("_")[-1]
                 channel_key = f"{scan_key}_chan{ch_no}"
-                detector_data_key = (
-                    f"{path_map['detector']}/{detector_data_key_child}"
-                    f"_channels_Channel_{ch_no}/counts"
-                )
+                # detector_data_key = (
+                #     f"{path_map['detector']}/{detector_data_key_child}"
+                #     f"_channels_Channel_{ch_no}/counts"
+                # )
                 cps = np.array(spectrum["data"][channel])
 
-                # Write raw data to detector.
-                self._xps_dict[detector_data_key] = spectrum["data"]["cps_calib"]
+                # # Write raw data to detector.
+                # self._xps_dict[detector_data_key] = spectrum["data"]["cps_calib"]
                 # Write channel data to 'data'.
                 self._xps_dict["data"][entry][channel_key] = xr.DataArray(
                     data=cps, coords={"energy": energy}
@@ -356,7 +354,7 @@ class SleProdigyParser(ABC):
             "Entrance": "entrance_slit",
             "Exit": "exit_slit",
             "ScanMode": "energy_scan_mode",
-            "VoltageRange": "voltage_range",
+            "VoltageRange": "voltage_energy_range",
         }
 
         spectrometer_setting_map = {
@@ -1735,12 +1733,13 @@ class SleProdigyParserV4(SleProdigyParser):
                     common_spectrum_settings[key] = val
             elif setting.tag == "Lens":
                 voltage_range = setting.attrib["VoltageRange"]
-                voltage_range = "400V"
-                split_text = re.split(r"([A-Z])", voltage_range, 1)
-                val = split_text[0]
-                unit = "".join(split_text[1:])
-                common_spectrum_settings["voltage_range"] = float(val)
-                common_spectrum_settings["voltage_range/@units"] = unit
+                match = re.match(r"(\d+\.?\d*)([a-zA-Z]+)", voltage_range)
+                if match:
+                    value, unit = match.groups()
+                else:
+                    value, unit = None, None
+                common_spectrum_settings["voltage_energy_range"] = float(value)
+                common_spectrum_settings["voltage_energy_range/@units"] = unit
             elif setting.tag == "EnergyChannelCalibration":
                 common_spectrum_settings["calibration_file/dir"] = setting.attrib["Dir"]
                 common_spectrum_settings["calibration_file/path"] = setting.attrib[

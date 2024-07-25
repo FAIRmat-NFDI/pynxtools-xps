@@ -22,7 +22,7 @@
   }
   },
   "/ENTRY/INSTRUMENT[instrument]":{
-    "@default": "electronanalyser",
+    "@default":"electronanalyser",
     "device_information":{
       "vendor":"@eln",
       "identifier":"@eln",
@@ -36,7 +36,7 @@
     },
     "sourceTYPE[source_xray]":{
       "type":"@eln",
-      "name": "@attrs:source_xray/source_label",
+      "name":"@attrs:source_xray/source_label",
       "probe":"photon",
       "device_information":{
         "vendor":"@eln",
@@ -60,7 +60,7 @@
     "ELECTRONANALYSER[electronanalyser]":{
       "@default":"detector",
       "description":"@eln",
-      "name": "@eln",
+      "name":"@eln",
       "work_function":"@attrs:instrument/work_function",
       "work_function/@units":"@attrs:instrument/work_function/@units",
       "fast_axes":null,
@@ -101,7 +101,7 @@
           "description":"@eln",
           "shape":"@eln",
           "size":"@eln",
-          "size/@units": "@eln"
+          "size/@units":"@eln"
         },
         "exit_slit":null,
         "device_information":{
@@ -113,8 +113,8 @@
       "DETECTOR[detector]":{
         "@default":"raw_data",
         "amplifier_type":"@eln",
-        "count_time": "@attrs:detector/dwell_time",
-        "count_time/@units": "@attrs:detector/dwell_time/@units",
+        "count_time":"@attrs:detector/dwell_time",
+        "count_time/@units":"@attrs:detector/dwell_time/@units",
         "detector_type":"@eln",
         "amplifier_bias":"@attrs:detector/bias_voltage_electrons",
         "amplifier_bias/@units":"@attrs:detector/bias_voltage_electrons/@units",
@@ -127,7 +127,7 @@
           "@signal":"raw",
           "raw":"@data:raw_data",
           "raw/@units":"counts",
-          "DATA[*]": "@data:*.channels",
+          "DATA[*]":"@data:*.channels",
           "DATA[*]/@units":"counts"
         }
       }
@@ -178,20 +178,20 @@
         "PID[pid]/setpoint/@units":"@eln"
       },
       "POSITIONER[positioner_x]":{
-          "value": "@eln",
-          "value/@units": "@eln"
+          "value":"@eln",
+          "value/@units":"@eln"
         },
       "POSITIONER[positioner_y]":{
-      "value": "@eln",
-      "value/@units": "@eln"
+      "value":"@eln",
+      "value/@units":"@eln"
       },          
       "POSITIONER[positioner_z]":{
-        "value": "@eln",
-        "value/@units": "@eln"
+        "value":"@eln",
+        "value/@units":"@eln"
       },
       "POSITIONER[positioner_phi]":{
-          "value": "@eln",
-          "value/@units": "@eln"
+          "value":"@eln",
+          "value/@units":"@eln"
         }
     },
     "pressure_gauge":{
@@ -216,7 +216,7 @@
   "/ENTRY/PROCESS_MPES[process]":{
     "energy_calibration":{
       "calibrated_axis":"@data:energy",
-      "calibrated_axis/@units": "eV"
+      "calibrated_axis/@units":"eV"
     },
     "energy_referencing":null,
     "transmission_correction":null
@@ -270,10 +270,10 @@
   "/ENTRY/data":{
     "@axes":["energy"],
     "@signal":"data",
-    "data": "@data:average",
-    "data_errors": "@data:errors",
+    "data":"@data:average",
+    "data_errors":"@data:errors",
     "data/@units":"@attrs:data/y_units",
-    "DATA[*]": "@data:*.scans",
+    "DATA[*]":"@data:*.scans",
     "DATA[*]/@units":"@attrs:data/y_units",
     "energy":"@data:energy",
     "energy/@type":"@attrs:data/x_units",

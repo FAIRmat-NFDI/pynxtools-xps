@@ -1,17 +1,16 @@
 {
-    "/@default":"None",
-    "/ENTRY[entry]":{
+    "ENTRY":{
       "@default":"data",
       "title":"None",
       "start_time":"None",
       "end_time":"None",
       "method":"None"
     },
-    "/ENTRY[entry]/USER[user]":{
+    "ENTRY/USER[user]":{
       "name":"None",
       "affiliation":"None"
     },
-    "/ENTRY[entry]/INSTRUMENT[instrument]":{
+    "ENTRY/INSTRUMENT[instrument]":{
       "@default": "electronanalyser",
       "device_information":{
         "vendor":"None",
@@ -49,7 +48,7 @@
         "associated_source":"None"
       },
       "ELECTRONANALYSER[electronanalyser]":{
-        "@default": "detector0",
+        "@default": "detector",
         "description":"None",
         "work_function":"None",
         "work_function/@units":"None",
@@ -104,8 +103,11 @@
             "identifier":"None"
           },
           "raw_data":{
-            "@signal":"None",
-            "raw":"None"
+            "@signal":"raw",
+            "raw":"@data:raw_data",
+            "raw/@units":"counts",
+            "DATA[*]": "@data:*.channels",
+            "DATA[*]/@units":"counts"
           }
         }
       },
@@ -178,7 +180,7 @@
         "current_log/value/@units":"None"
       }
     },
-    "/ENTRY[entry]/PROCESS[process]":{
+    "ENTRY/PROCESS[process]":{
       "angular_calibration":{
         "calibrated_axis":"None"
       },
@@ -208,7 +210,7 @@
         }
       }
     },
-    "/ENTRY[entry]/SAMPLE[sample]":{
+    "ENTRY/SAMPLE[sample]":{
       "name":"None",
       "atom_types":"@eln",
       "physical_form":"None",
@@ -242,11 +244,13 @@
         "flood_gun":"@None"
       }
     },
-    "/ENTRY[entry]/data":{
+    "ENTRY/data":{
       "@signal":"data",
       "@axes":["energy"],
-      "data":"None",
+      "data":"@data:average",
       "data/@units":"None",
+      "DATA[*]":"@data:*.scans",
+      "DATA[*]/@units":"None",
       "energy":"None",
       "energy/@type":"None",
       "energy/@units":"None",

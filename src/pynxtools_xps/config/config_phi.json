@@ -24,7 +24,7 @@
     }
   },
   "/ENTRY/INSTRUMENT[instrument]":{
-    "@default": "electronanalyser",
+    "@default":"electronanalyser",
     "device_information":{
       "vendor":"@attrs:instrument/vendor",
       "model":"@attrs:instrument/instrument_model",
@@ -100,13 +100,13 @@
         "offset_y":"@attrs:xray_source/xray_stigmator_y",
         "offset_y/@units":"@attrs:xray_source/xray_stigmator_y/@units"
       },
-      "depends_on": "/entry/instrument/source_xray/transformations/source_analyser_angle",
-      "TRANSFORMATIONS[transformations]": {
+      "depends_on":"/entry/instrument/source_xray/transformations/source_analyser_angle",
+      "TRANSFORMATIONS[transformations]":{
         "AXISNAME[source_analyser_angle]/@depends_on":".",
         "AXISNAME[source_analyser_angle]":"@attrs:source_analyser_angle",
-        "AXISNAME[source_analyser_angle]/@transformation_type": "rotation",
+        "AXISNAME[source_analyser_angle]/@transformation_type":"rotation",
         "AXISNAME[source_analyser_angle]/@units":"@attrs:source_analyser_angle/@units",
-        "AXISNAME[source_analyser_angle]/@vector": [
+        "AXISNAME[source_analyser_angle]/@vector":[
           0,
           0,
           1
@@ -127,7 +127,7 @@
       "associated_source":"/entry/instrument/source_xray"
     },
     "sourceTYPE[source_flood_gun]":{
-      "type": "Monochromatized electron source",
+      "type":"Monochromatized electron source",
       "current":"@attrs:flood_gun/flood_gun_current",
       "current/@units":"@attrs:flood_gun/flood_gun_current/@units",
       "energy":"@attrs:flood_gun/flood_gun_energy",
@@ -156,7 +156,7 @@
       "associated_beam":"none"
     },
     "sourceTYPE[source_gas_cluster_ion_beam]":{
-      "type": "other",
+      "type":"other",
       "type_other":"@eln",
       "description":"@eln",
       "cluster_size":"@attrs:gcib/gcib_cluster_size",
@@ -205,7 +205,7 @@
       }
     },
     "sourceTYPE[source_neutral_ion_gun]":{
-      "type": "other",
+      "type":"other",
       "type_other":"@eln",
       "description":"@eln",
       "current":"@attrs:neutral_ion_gun/neutral_current",
@@ -253,7 +253,7 @@
       }
     },
     "sourceTYPE[source_sputter_gun]":{
-      "type": "other",
+      "type":"other",
       "type_other":"@eln",
       "description":"@eln",
       "current":"@attrs:sputter_gun/sputter_current",
@@ -302,7 +302,7 @@
       }
     },
     "ELECTRONANALYSER[electronanalyser]":{
-      "@default": "detector",
+      "@default":"detector",
       "description":"@eln",
       "solid_angle":"@attrs:electronanalyser/analyser_solid_angle",
       "solid_angle/@units":"@attrs:electronanalyser/analyser_solid_angle/@units",
@@ -399,7 +399,7 @@
           "@signal":"raw",
           "raw":"@data:raw_data",
           "raw/@units":"counts",
-          "DATA[*]": "@data:*.channels",
+          "DATA[*]":"@data:*.channels",
           "DATA[*]/@units":"counts"
         }
       }
@@ -456,53 +456,53 @@
         "PID[pid]/setpoint/@units":"@eln"
       },
       "POSITIONER[stage_x]":{
-        "value": "@attrs:manipulator/stage_x",
-        "value/@units": "@attrs:manipulator/stage_x/@units"
+        "value":"@attrs:manipulator/stage_x",
+        "value/@units":"@attrs:manipulator/stage_x/@units"
       },
       "POSITIONER[stage_y]":{
-        "value": "@attrs:manipulator/stage_y",
-        "value/@units": "@attrs:manipulator/stage_y/@units"
+        "value":"@attrs:manipulator/stage_y",
+        "value/@units":"@attrs:manipulator/stage_y/@units"
       },          
       "POSITIONER[stage_z]":{
-        "value": "@attrs:manipulator/stage_z",
-        "value/@units": "@attrs:manipulator/stage_z/@units"
+        "value":"@attrs:manipulator/stage_z",
+        "value/@units":"@attrs:manipulator/stage_z/@units"
       },
       "POSITIONER[stage_azimuth]":{
-        "value": "@attrs:manipulator/stage_azimuth",
-        "value/@units": "@attrs:manipulator/stage_azimuth/@units"
+        "value":"@attrs:manipulator/stage_azimuth",
+        "value/@units":"@attrs:manipulator/stage_azimuth/@units"
       },
       "POSITIONER[stage_polar]":{
-        "value": "@attrs:manipulator/stage_polar",
-        "value/@units": "@attrs:manipulator/stage_polar/@units"
+        "value":"@attrs:manipulator/stage_polar",
+        "value/@units":"@attrs:manipulator/stage_polar/@units"
       }
     },
     "POSITIONER[defect_positioner_u]":{
-      "value": "@attrs:defect_positioner/defect_positioner_u",
-      "value/@units": "@attrs:defect_positioner/defect_positioner_u/@units"
+      "value":"@attrs:defect_positioner/defect_positioner_u",
+      "value/@units":"@attrs:defect_positioner/defect_positioner_u/@units"
     },
     "POSITIONER[defect_positioner_v]":{
-      "value": "@attrs:defect_positioner/defect_positioner_v",
-      "value/@units": "@attrs:defect_positioner/defect_positioner_v/@units"
+      "value":"@attrs:defect_positioner/defect_positioner_v",
+      "value/@units":"@attrs:defect_positioner/defect_positioner_v/@units"
     },
     "POSITIONER[defect_positioner_x]":{
-      "value": "@attrs:defect_positioner/defect_positioner_x",
-      "value/@units": "@attrs:defect_positioner/defect_positioner_x/@units"
+      "value":"@attrs:defect_positioner/defect_positioner_x",
+      "value/@units":"@attrs:defect_positioner/defect_positioner_x/@units"
     },
     "POSITIONER[defect_positioner_y]":{
-      "value": "@attrs:defect_positioner/defect_positioner_y",
-      "value/@units": "@attrs:defect_positioner/defect_positioner_y/@units"
+      "value":"@attrs:defect_positioner/defect_positioner_y",
+      "value/@units":"@attrs:defect_positioner/defect_positioner_y/@units"
     },
     "POSITIONER[defect_positioner_z]":{
-      "value": "@attrs:defect_positioner/defect_positioner_z",
-      "value/@units": "@attrs:defect_positioner/defect_positioner_z/@units"
+      "value":"@attrs:defect_positioner/defect_positioner_z",
+      "value/@units":"@attrs:defect_positioner/defect_positioner_z/@units"
     },
     "POSITIONER[defect_positioner_tilt]":{
-      "value": "@attrs:defect_positioner/defect_positioner_tilt",
-      "value/@units": "@attrs:defect_positioner/defect_positioner_tilt/@units"
+      "value":"@attrs:defect_positioner/defect_positioner_tilt",
+      "value/@units":"@attrs:defect_positioner/defect_positioner_tilt/@units"
     },
     "POSITIONER[defect_positioner_rotation]":{
-      "value": "@attrs:defect_positioner/defect_positioner_rotation",
-      "value/@units": "@attrs:defect_positioner/defect_positioner_rotation/@units"
+      "value":"@attrs:defect_positioner/defect_positioner_rotation",
+      "value/@units":"@attrs:defect_positioner/defect_positioner_rotation/@units"
     },
     "defect_positioner_reference_image":"@attrs:defect_positioner/defect_positioner_reference_image",
     "pressure_gauge":{
@@ -578,11 +578,11 @@
   },
   "/ENTRY/data":{
     "@axes":["energy"],
-    "@signal": "data",
-    "data": "@data:average",
-    "data_errors": "@data:errors",
+    "@signal":"data",
+    "data":"@data:average",
+    "data_errors":"@data:errors",
     "data/@units":"@attrs:data/intensity/@units",
-    "DATA[*]": "@data:*.scans",
+    "DATA[*]":"@data:*.scans",
     "DATA[*]/@units":"@attrs:data/intensity/@units",
     "energy":"@data:energy",
     "energy/@type":"@attrs:data/energy/@type",

@@ -122,7 +122,7 @@
           "@signal":"raw",
           "raw":"@data:raw_data",
           "raw/@units":"counts",
-          "DATA[*]": "@data:*.channels",
+          "DATA[*]":"@data:*.channels",
           "DATA[*]/@units":"counts_per_second"
         }
       }
@@ -254,11 +254,11 @@
   },
   "/ENTRY/data":{
     "@axes":["energy"],
-    "@signal": "data",
-    "data": "@data:average",
-    "data_errors": "@data:errors",
+    "@signal":"data",
+    "data":"@data:average",
+    "data_errors":"@data:errors",
     "data/@units":"@attrs:region/intensity/@units",
-    "DATA[*]": "@data:*.scans",
+    "DATA[*]":"@data:*.scans",
     "DATA[*]/@units":"@attrs:region/intensity/@units",
     "energy":"@data:energy",
     "energy/@type":"@attrs:region/energy_scale",

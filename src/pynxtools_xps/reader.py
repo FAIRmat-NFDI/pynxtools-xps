@@ -27,7 +27,7 @@ import datetime
 import copy
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Set, Tuple, Optional, Literal
+from typing import Any, Dict, List, Tuple, Optional, Literal, Union
 import numpy as np
 
 from pynxtools.dataconverter.helpers import extract_atom_types
@@ -123,7 +123,9 @@ class XPSReader(MultiFormatReader):
     ]
 
     reader_dir = Path(__file__).parent
-    config_file: Optional[str] = reader_dir.joinpath("config", "template.json")
+    config_file: Optional[Union[str, Path]] = reader_dir.joinpath(
+        "config", "template.json"
+    )
 
     __prmt_file_ext__ = [
         ".ibw",
@@ -538,7 +540,7 @@ class XPSReader(MultiFormatReader):
         Returns the dimensions of the data from the given path.
         """
 
-        def get_signals(key: Literal["scans", "channels"]) -> List[str]:
+        def get_signals(key: str) -> List[str]:
             xr_data = self.xps_data["data"].get(f"{self.callbacks.entry_name}")
 
             if key == "scans":
@@ -547,6 +549,8 @@ class XPSReader(MultiFormatReader):
                 data_vars = _get_channel_vars(xr_data.data_vars)
                 if not data_vars:
                     data_vars = _get_scan_vars(xr_data.data_vars)
+            else:
+                data_vars = [""]
 
             return list(map(str, data_vars))
 

@@ -265,7 +265,7 @@ class XmlParserSpecs:
         ----------
         """
         root_element = EmtT.parse(file).getroot()
-        root_element.attrib[self.child_nm_reslvers] = []
+        root_element.attrib[self.child_nm_reslvers] = []  # type: ignore[assignment]
         child_num = len(root_element)
         parent_path = self._root_path
         skip_child = -1

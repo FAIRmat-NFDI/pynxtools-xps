@@ -438,7 +438,7 @@ def align_name_part(name_part: str):
     return name_part
 
 
-def construct_entry_name(parts: Tuple[str, ...]) -> str:
+def construct_entry_name(parts: List[str]) -> str:
     """Construct name for the NXentry instances."""
     if len(parts) == 1:
         return parts[0]

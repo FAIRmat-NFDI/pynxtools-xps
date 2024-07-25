@@ -263,7 +263,6 @@ class XyMapperSpecs(XPSMapper):
                 if "_chan" in key
             ]
             if not all_channel_data:
-                all_channel_data = intensity
                 averaged_channels = intensity
             else:
                 with warnings.catch_warnings():
@@ -714,7 +713,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
         scan_settings = re_map_keys(scan_settings, SETTINGS_MAP)
         scan_settings = re_map_values(scan_settings, VALUE_MAP)
 
-        scan = {
+        scan: Dict[str, Any] = {
             "data": {
                 "x": np.array(energy),
                 "y": np.array(intensity),
@@ -847,7 +846,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
             tz = datetime.timezone.utc
         else:
             date = date.strip()
-            tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+            tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo  # type: ignore[assignment]
 
         date_object = datetime.datetime.strptime(date, "%m/%d/%y %H:%M:%S").replace(
             tzinfo=tz

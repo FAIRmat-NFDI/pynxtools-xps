@@ -35,7 +35,6 @@ from pynxtools_xps.reader_utils import (
     interpolate_arrays,
     construct_entry_name,
     construct_data_key,
-    construct_detector_data_key,
 )
 from pynxtools_xps.value_mappers import get_units_for_key, convert_units
 
@@ -138,15 +137,22 @@ class TxtMapperVamasExport(XPSMapper):
 
         """
         # pylint: disable=too-many-locals,duplicate-code
-        group_parent = f'{self._root_path}/Group_{spectrum["group_name"]}'
-        region_parent = f'{group_parent}/Region_{spectrum["spectrum_type"]}'
-        file_parent = f"{region_parent}/file_info"
-        instrument_parent = f"{region_parent}/instrument"
+        entry_parts = []
+        for part in ["group_name", "spectrum_type"]:
+            val = spectrum.get(part, None)
+            if val:
+                entry_parts += [val]
+
+        entry = construct_entry_name(entry_parts)
+        entry_parent = f"/ENTRY[{entry}]"
+
+        file_parent = f"{entry_parent}/file_info"
+        instrument_parent = f"{entry_parent}/instrument"
         analyser_parent = f"{instrument_parent}/analyser"
 
         path_map = {
             "file_info": f"{file_parent}",
-            "user": f"{region_parent}/user",
+            "user": f"{entry_parent}/user",
             "instrument": f"{instrument_parent}",
             "source_xray": f"{instrument_parent}/source_xray",
             "beam_xray": f"{instrument_parent}/beam_xray",
@@ -156,8 +162,8 @@ class TxtMapperVamasExport(XPSMapper):
             "detector": f"{analyser_parent}/detector",
             "manipulator": f"{instrument_parent}/manipulator",
             "calibration": f"{instrument_parent}/calibration",
-            "sample": f"{region_parent}/sample",
-            "data": f"{region_parent}/data",
+            "sample": f"{entry_parent}/sample",
+            "data": f"{entry_parent}/data",
         }
 
         for grouping, spectrum_keys in template_key_map.items():
@@ -174,12 +180,8 @@ class TxtMapperVamasExport(XPSMapper):
                 if units is not None:
                     self._xps_dict[f"{root}/{mpes_key}/@units"] = units
 
-        # Create keys for writing to data and detector
-        entry = construct_entry_name(region_parent)
+        # Create key for writing to data.
         scan_key = construct_data_key(spectrum)
-        detector_data_key_child = construct_detector_data_key(spectrum)
-        detector_data_key = f'{path_map["detector"]}/{detector_data_key_child}/counts'
-
         energy = np.array(spectrum["data"]["binding_energy"])
         intensity = np.array(spectrum["data"]["intensity"])
 
@@ -210,8 +212,6 @@ class TxtMapperVamasExport(XPSMapper):
         self._xps_dict["data"][entry][scan_key] = xr.DataArray(
             data=intensity, coords={"energy": energy}
         )
-
-        self._xps_dict[detector_data_key] = intensity
 
 
 class TextParser(ABC):  # pylint: disable=too-few-public-methods
@@ -392,13 +392,20 @@ class TextParserRows(TextParser):
         """
         settings = []
         for spec_header in header[-1].split("\t")[1::3]:
-            group_name = spec_header.split(":")[1]
-            region = spec_header.split(":")[2]
+            try:
+                group_name = spec_header.split(":")[1]
+                region = spec_header.split(":")[2]
+                y_units = convert_units(spec_header.split(":")[-1])
+            except IndexError:
+                group_name = spec_header if spec_header.strip() else "group"
+                region = spec_header if spec_header.strip() else "region"
+                y_units = "counts_per_second"
+
             spectrum_settings = {
                 "group_name": group_name,
                 "spectrum_type": region,
                 "energy_type": "binding",
-                "y_units": convert_units(spec_header.split(":")[3]),
+                "y_units": y_units,
             }
             settings += [spectrum_settings]
 

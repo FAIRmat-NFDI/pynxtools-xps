@@ -31,7 +31,6 @@ from pynxtools_xps.reader_utils import (
     XPSMapper,
     construct_entry_name,
     construct_data_key,
-    construct_detector_data_key,
     _re_map_single_value,
     _check_valid_value,
 )
@@ -102,7 +101,7 @@ class MapperScienta(XPSMapper):
             "beam_xray": [
                 "excitation_energy",
             ],
-            "analyser": [],
+            "electronanalyser": [],
             "collectioncolumn": [
                 "lens_mode",
             ],
@@ -161,28 +160,34 @@ class MapperScienta(XPSMapper):
         Map one spectrum from raw data to NXmpes-ready dict.
 
         """
-        # pylint: disable=too-many-locals,duplicate-code
-        group_parent = f'{self._root_path}/Group_{spectrum["spectrum_type"]}'
-        region_parent = f'{group_parent}/Region_{spectrum["region_name"]}'
-        file_parent = f"{region_parent}/file_info"
-        instrument_parent = f"{region_parent}/instrument"
-        analyser_parent = f"{instrument_parent}/analyser"
+        entry_parts = []
+        for part in ["spectrum_type", "region_name"]:
+            val = spectrum.get(part, None)
+            if val:
+                entry_parts += [val]
+
+        entry = construct_entry_name(entry_parts)
+        entry_parent = f"/ENTRY[{entry}]"
+
+        file_parent = f"{entry_parent}/file_info"
+        instrument_parent = f"{entry_parent}/instrument"
+        analyser_parent = f"{instrument_parent}/electronanalyser"
 
         path_map = {
             "file_info": f"{file_parent}",
-            "user": f"{region_parent}/user",
+            "user": f"{entry_parent}/user",
             "instrument": f"{instrument_parent}",
             "source_xray": f"{instrument_parent}/source_xray",
             "beam_xray": f"{instrument_parent}/beam_xray",
-            "analyser": f"{analyser_parent}",
+            "electronanalyser": f"{analyser_parent}",
             "collectioncolumn": f"{analyser_parent}/collectioncolumn",
             "energydispersion": f"{analyser_parent}/energydispersion",
             "detector": f"{analyser_parent}/detector",
             "manipulator": f"{instrument_parent}/manipulator",
             "calibration": f"{instrument_parent}/calibration",
-            "sample": f"{region_parent}/sample",
-            "data": f"{region_parent}/data",
-            "region": f"{region_parent}/region",
+            "sample": f"{entry_parent}/sample",
+            "data": f"{entry_parent}/data",
+            "region": f"{entry_parent}/region",
         }
 
         for grouping, spectrum_keys in template_key_map.items():
@@ -200,14 +205,8 @@ class MapperScienta(XPSMapper):
                 if units is not None:
                     self._xps_dict[f"{root}/{mpes_key}/@units"] = units
 
-        # Create keys for writing to data and detector
-        entry = construct_entry_name(region_parent)
+        # Create key for writing to data
         scan_key = construct_data_key(spectrum)
-        detector_data_key_child = construct_detector_data_key(spectrum)
-        detector_data_key = f'{path_map["detector"]}/{detector_data_key_child}/counts'
-
-        # Write raw data to detector.
-        self._xps_dict[detector_data_key] = spectrum["data"]["intensity"]
 
         # If multiple spectra exist to entry, only create a new
         # xr.Dataset if the entry occurs for the first time.
@@ -260,7 +259,7 @@ class ScientaTxtParser:
         self.header = ScientaHeader()
         self.spectra: List[Dict[str, Any]] = []
 
-    def parse_file(self, file: Union[str, Path]):
+    def parse_file(self, file: Union[str, Path], **kwargs):
         """
         Parse the file's data and metadata into a flat
         list of dictionaries.
@@ -421,7 +420,7 @@ class ScientaIgorParser:
         self.lines: List[str] = []
         self.spectra: List[Dict[str, Any]] = []
 
-    def parse_file(self, file: Union[str, Path]):
+    def parse_file(self, file: Union[str, Path], **kwargs):
         """
         Reads the igor binarywave files and returns a list of
         dictionary containing the wave data.

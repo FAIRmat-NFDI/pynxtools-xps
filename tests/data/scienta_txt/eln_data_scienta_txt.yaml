@@ -9,7 +9,6 @@ user:
   email: alexei.nefedov@kit.edu
   affiliation: Karlsruhe Institute of Technology (KIT), Institut für Funktionelle Grenzflächen
   address: KIT
-  orcid: 0000-0001-9361-8333
 instrument:
   energy_resolution:
     type: calibrated
@@ -140,10 +139,6 @@ instrument:
     value:
       value: 0.000000001
       unit: mbar
-    value_log:
-      value:
-        value: null
-        unit: null
   flood_gun:
     name: FG 22/35
     physical_quantity: current
@@ -151,14 +146,13 @@ instrument:
     current:
       value: 0.0
       unit: A
-    current_log:
-      value:
-        value: null
-        unit: null
 sample:
-  chemical_formula: Ag
+  sample_id: 0
   description: Ag foil on standard sample holder
-  situation: vacuum
+  physical_form: foil
+  substance:
+    name: Ag
+    molecular_formula_hill: Ag
   history:
     sample_preparation:
       start_time: 2022-04-08T11:25:00.200Z

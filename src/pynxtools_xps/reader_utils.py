@@ -20,7 +20,7 @@ Helper functions for populating NXmpes template
 #
 import re
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Union, Optional
+from typing import Any, Dict, List, Tuple, Union, Optional
 from pathlib import Path
 from scipy.interpolate import interp1d
 import numpy as np
@@ -57,7 +57,7 @@ class XPSMapper(ABC):
         self.file: Union[str, Path] = ""
         self.raw_data: List[str] = []
         self._xps_dict: Dict[str, Any] = {}
-        self._root_path = "/ENTRY[entry]"
+        self._root_path = ""
 
         self.parser = None
 
@@ -422,30 +422,6 @@ def construct_data_key(spectrum: Dict[str, Any]) -> str:
     return f"{cycle_key}_{scan_key}"
 
 
-def construct_detector_data_key(spectrum: Dict[str, Any]) -> str:
-    """
-    Construct a key for the detector data fields of the xps_dict.
-    Output example: 'cycles/Cycle_0/scans/Scan_0'
-
-    """
-    if "loop_no" in spectrum:
-        cycle_key = f'cycles/Cycle_{spectrum["loop_no"]}'
-    else:
-        cycle_key = "cycles/Cycle_0"
-
-    if "scan_no" in spectrum:
-        scan_key = f'scans/Scan_{spectrum["scan_no"]}'
-    else:
-        scan_key = "scans/Scan_0"
-
-    key = f"{cycle_key}/{scan_key}"
-
-    if "channel_no" in spectrum:
-        key += f'/channels/Channel_{spectrum["channel_no"]}'
-
-    return key
-
-
 def align_name_part(name_part: str):
     """Make one part of the entry name compliant with NeXus standards."""
     replacements = {
@@ -462,22 +438,11 @@ def align_name_part(name_part: str):
     return name_part
 
 
-KEY_PATTERNS = [
-    re.compile(rf"{key_part}(.*?)(?=\/|$)")
-    for key_part in ["Group_", "Region_", "RegionData_"]
-]
-
-
-def construct_entry_name(key: str) -> str:
-    """Construct entry name."""
-    name_parts = []
-
-    for key_pattern in KEY_PATTERNS:
-        match = re.search(key_pattern, key)
-        if match:
-            name_part = align_name_part(match.group(1))
-            name_parts.append(name_part)
-    return "__".join(name_parts)
+def construct_entry_name(parts: List[str]) -> str:
+    """Construct name for the NXentry instances."""
+    if len(parts) == 1:
+        return parts[0]
+    return "__".join([align_name_part(part) for part in parts])
 
 
 ureg = pint.UnitRegistry()

@@ -22,16 +22,34 @@ Specs Lab Prodigy XML export, to be passed to mpes nxdl
 #
 import re
 import xml.etree.ElementTree as EmtT
-from typing import Tuple, List, Any
+from typing import Tuple, List, Dict, Any
 import copy
 import xarray as xr
 import numpy as np
 
-from pynxtools_xps.reader_utils import (
-    XPSMapper,
-    construct_entry_name,
-)
+from pynxtools_xps.reader_utils import XPSMapper, align_name_part
 from pynxtools_xps.value_mappers import convert_energy_scan_mode
+
+KEY_PARTS = ["RegionGroup_", "RegionData_"]
+
+KEY_PATTERNS = [re.compile(rf"{key_part}(.*?)(?=\/|$)") for key_part in KEY_PARTS]
+
+
+def construct_entry_name(key: str) -> str:
+    """Construct entry name."""
+    name_parts = []
+
+    for key_pattern in KEY_PATTERNS:
+        match = re.search(key_pattern, key)
+        if match:
+            name_part = align_name_part(match.group(1))
+            name_parts.append(name_part)
+    return "__".join(name_parts)
+
+
+VALUE_MAP = {
+    "scan_mode/name": convert_energy_scan_mode,
+}
 
 
 class XmlMapperSpecs(XPSMapper):
@@ -235,19 +253,19 @@ class XmlParserSpecs:
     def __init__(self) -> None:
         self.metadata_dict: dict = {}
         self.entry_to_data: dict = {}
-        self._root_path = "/ENTRY[entry]"
+        self._root_path = "/ENTRY"
         self.tail_part_frm_struct = ""
         self.tail_part_frm_othr = ""
         self.child_nm_reslvers = "__child_name_resolver__"
 
-    def parse_file(self, file):
+    def parse_file(self, file: str, **kwargs):
         """Start parsing process and parse children recursively.
 
         Parameters
         ----------
         """
         root_element = EmtT.parse(file).getroot()
-        root_element.attrib[self.child_nm_reslvers] = []
+        root_element.attrib[self.child_nm_reslvers] = []  # type: ignore[assignment]
         child_num = len(root_element)
         parent_path = self._root_path
         skip_child = -1
@@ -260,6 +278,27 @@ class XmlParserSpecs:
 
             child_num -= 1
             child_elmt_ind += 1
+
+        metadata_dict: Dict[str, Any] = {}
+
+        for key, value in self.metadata_dict.items():
+            entry_name = construct_entry_name(key)
+            str_to_replace = "/"
+            for i, key_pattern in enumerate(KEY_PATTERNS):
+                match = re.search(key_pattern, key)
+                if match:
+                    if KEY_PARTS[i] == "RegionData_":
+                        str_to_replace += "regions/"
+                    str_to_replace += f"{KEY_PARTS[i]}{match.group(1)}/"
+            modified_key = key.replace(str_to_replace, f"[{entry_name}]/")
+
+            for suffix, func in VALUE_MAP.items():
+                if modified_key.endswith(suffix):
+                    value = func(value)
+
+            metadata_dict[modified_key] = value
+
+        self.metadata_dict = metadata_dict
 
         self.collect_raw_data_to_construct_data()
 
@@ -702,6 +741,11 @@ class XmlParserSpecs:
         for key, val in self.metadata_dict.items():
             if not key.endswith("parameters/File"):
                 entry = construct_entry_name(key)
+                match = re.search(r"/ENTRY\[([^\]]+)\]", key)
+                if match:
+                    entry = match.group(1)
+                else:
+                    entry = ""
 
             if entry and (entry not in entry_list):
                 self.entry_to_data[entry] = {"raw_data": copy.deepcopy(raw_dict)}

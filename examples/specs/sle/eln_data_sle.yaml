@@ -9,7 +9,7 @@ program_name: SpecsLabProdigy
 user:
   name: Lukas Pielsticker
   affiliation: Max Planck Institute for Chemical Energy Conversion
-  address: Lukas Pielsticker
+  address: Muelheim an der Ruhr
   email: lukas.pielsticker@cec.mpg.de
   orcid:
     service: orcid
@@ -49,7 +49,7 @@ instrument:
         identifier: null
     energydispersion:
       scheme: hemispherical
-      diameter:
+      radius:
         unit: mm
         value: 150
       device_information:
@@ -141,7 +141,6 @@ instrument:
 sample:
   name: Polycristalline Au foil
   sample_id: S718
-  atom_types: Au
   physical_form: foil
   situation: vacuum
   substance:

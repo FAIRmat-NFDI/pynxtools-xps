@@ -178,13 +178,6 @@ class XPSReader(MultiFormatReader):
         for ext in XPSReader.__prmt_file_ext__:
             self.extensions[ext] = self.handle_data_file
 
-        self.callbacks = ParseJsonCallbacks(
-            attrs_callback=self.get_attr,
-            data_callback=self.get_data,
-            eln_callback=self.get_eln_data,
-            dims=self.get_data_dims,
-        )
-
     def set_config_file(self, file_path: str) -> Dict[str, Any]:
         if self.config_file is not None:
             logger.info(
@@ -350,7 +343,7 @@ class XPSReader(MultiFormatReader):
         entries: List[str] = []
 
         try:
-            for entry, entry_values in self.xps_data["data"].items():
+            for entry in self.xps_data["data"]:
                 entries += [entry]
         except KeyError:
             pass

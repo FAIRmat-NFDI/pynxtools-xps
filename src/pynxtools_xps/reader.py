@@ -225,6 +225,7 @@ class XPSReader(MultiFormatReader):
             file_path,
             convert_dict=CONVERT_DICT,
             replace_nested=REPLACE_NESTED,
+            parent_key="/ENTRY",
         )
 
         initial_eln_keys = list(eln_data.keys())

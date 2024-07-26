@@ -27,7 +27,7 @@ import datetime
 import copy
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Optional, Literal, Union
+from typing import Any, Dict, List, Tuple, Optional, Union
 import numpy as np
 
 from pynxtools.dataconverter.helpers import extract_atom_types
@@ -216,17 +216,17 @@ class XPSReader(MultiFormatReader):
             combined_elements.sort()
             return ", ".join(combined_elements)
 
-        # replace paths for entry-specific ELN data
-        pattern = re.compile(r"(/ENTRY)/ENTRY(\[[^\]]+\])")
-
-        formula_keys = ("molecular_formula_hill", "chemical_formula")
-
         eln_data = parse_yml(
             file_path,
             convert_dict=CONVERT_DICT,
             replace_nested=REPLACE_NESTED,
             parent_key="/ENTRY",
         )
+
+        # replace paths for entry-specific ELN data
+        pattern = re.compile(r"(/ENTRY)/ENTRY(\[[^\]]+\])")
+
+        formula_keys = ("molecular_formula_hill", "chemical_formula")
 
         initial_eln_keys = list(eln_data.keys())
 
@@ -250,7 +250,7 @@ class XPSReader(MultiFormatReader):
                                     self.eln_data[modified_key], atom_types
                                 )
                         else:
-                            logger.error(
+                            logger.info(
                                 f"{key} from ELN was not parsed to atom_types because {modified_key} already exists."
                             )
 

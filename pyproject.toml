@@ -41,7 +41,7 @@ xps = "pynxtools_xps.reader:XPSReader"
 [project.optional-dependencies]
 dev = [
     "mypy",
-    "ruff==0.4.8",
+    "ruff==0.5.5",
     "pytest",
     "pytest-cov",
     "pytest-timeout",

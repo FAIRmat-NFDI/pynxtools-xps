@@ -356,8 +356,8 @@ class XPSReader(MultiFormatReader):
     def setup_template(self) -> Dict[str, Any]:
         """
         Setups the initial data in the template.
-        This may be used to set fixed information, e.g., about the reader.
         """
+        # TODO: Set fixed information, e.g., about the reader.
         return {}
 
     def handle_objects(self, objects: Tuple[Any]) -> Dict[str, Any]:

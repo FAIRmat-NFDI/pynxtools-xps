@@ -510,9 +510,7 @@
       "measurement":"@eln",
       "type":"@eln",
       "value":"@eln",
-      "value/@units":"@eln",
-      "value_log/value":"@eln",
-      "value_log/value/@units":"@eln"
+      "value/@units":"@eln"
     },
     "flood_gun":{
       "name":"@eln",
@@ -609,19 +607,11 @@
         "description":"@eln",
         "method":"@eln"
       },
-      "PHYSICAL_PROCESS[Ar_sputtering]":{
+      "PHYSICAL_PROCESS[sample_loading]":{
         "start_time":"@eln",
         "end_time":"@eln",
         "description":"@eln",
-        "method":"@eln",
-        "time":"@eln",
-        "time/@units":"@eln",
-        "pressure":"@eln",
-        "pressure/@units":"@eln",
-        "voltage":"@eln",
-        "voltage/@units":"@eln",
-        "current":"@eln",
-        "current/@units":"@eln"
+        "method":"@eln"
       }
     }
   }

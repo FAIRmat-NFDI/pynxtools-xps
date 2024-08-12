@@ -19,7 +19,7 @@
       "service":"@eln",
       "identifier":"@eln",
       "is_persistent":"@eln"
-  }
+    }
   },
   "/ENTRY/INSTRUMENT[instrument]":{
     "@default":"electronanalyser",
@@ -97,12 +97,7 @@
         "pass_energy":"@attrs:energydispersion/pass_energy",
         "pass_energy/@units":"eV",
         "energy_scan_mode":"@attrs:energydispersion/scan_mode",
-        "entrance_slit":{
-          "description":"@eln",
-          "shape":"@eln",
-          "size":"@eln",
-          "size/@units":"@eln"
-        },
+        "entrance_slit":null,
         "exit_slit":null,
         "radius":"@eln",
         "radius/@units":"@eln",
@@ -178,41 +173,21 @@
         "type":"@eln",
         "PID[pid]/setpoint":"@eln",
         "PID[pid]/setpoint/@units":"@eln"
-      },
-      "POSITIONER[positioner_x]":{
-          "value":"@eln",
-          "value/@units":"@eln"
-        },
-      "POSITIONER[positioner_y]":{
-      "value":"@eln",
-      "value/@units":"@eln"
-      },          
-      "POSITIONER[positioner_z]":{
-        "value":"@eln",
-        "value/@units":"@eln"
-      },
-      "POSITIONER[positioner_phi]":{
-          "value":"@eln",
-          "value/@units":"@eln"
-        }
+      }
     },
     "pressure_gauge":{
       "name":"@eln",
       "measurement":"@eln",
       "type":"@eln",
       "value":"@eln",
-      "value/@units":"@eln",
-      "value_log/value":"@eln",
-      "value_log/value/@units":"@eln"
+      "value/@units":"@eln"
     },
     "flood_gun":{
       "name":"@eln",
       "physical_quantity":"@eln",
       "type":"@eln",
       "current":"@eln",
-      "current/@units":"@eln",
-      "current_log/value":"@eln",
-      "current_log/value/@units":"@eln"
+      "current/@units":"@eln"
     }
   },
   "/ENTRY/PROCESS_MPES[process]":{

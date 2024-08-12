@@ -176,18 +176,14 @@
         "measurement":"@eln",
         "type":"@eln",
         "value":"@eln",
-        "value/@units":"@eln",
-        "value_log/value":"@eln",
-        "value_log/value/@units":"@eln"
+        "value/@units":"@eln"
       },
       "flood_gun":{
         "name":"@eln",
         "physical_quantity":"@eln",
         "type":"@eln",
         "current":"@eln",
-        "current/@units":"@eln",
-        "current_log/value":"@eln",
-        "current_log/value/@units":"@eln"
+        "current/@units":"@eln"
       }
     },
     "/ENTRY/PROCESS_MPES[process]":{

@@ -135,7 +135,7 @@ sample:
   substance:
     molecular_formula_hill: (C42H62S4)n
   situation: vacuum
-  sample_history:
+  history:
     sample_preparation:
       start_time: 2022-04-08T11:02:38.0200Z
       end_time: 2022-04-08T11:06:42.200Z

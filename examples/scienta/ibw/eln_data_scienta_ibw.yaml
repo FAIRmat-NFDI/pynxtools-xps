@@ -148,7 +148,6 @@ instrument:
       unit: A
 sample:
   sample_id: 1
-
   description: Cu-HHTP/Glass on standard sample holder
   physical_form: pellet
   situation: vacuum

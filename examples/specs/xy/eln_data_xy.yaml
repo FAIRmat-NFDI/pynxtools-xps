@@ -35,6 +35,7 @@ instrument:
       unit: mm
   analyser:
     description: hemispherical
+    name: PHOIBOS 150 NAP-XPS analyser
     device_information:
       vendor: SPECS GmbH
       model: PHOIBOS 150 NAP

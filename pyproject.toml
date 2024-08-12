@@ -27,8 +27,7 @@ dependencies = [
     "xarray>=0.20.2",
     "numpy>=1.21.2",
     "pint>=0.17",
-    # "pynxtools>=0.5.1",
-    "pynxtools@git+https://github.com/FAIRmat-NFDI/pynxtools@multi-format-reader#egg=pynxtools"
+    "pynxtools>=0.6.0",
 ]
 
 [project.entry-points."pynxtools.reader"]

@@ -41,7 +41,6 @@ from pynxtools_xps.reader_utils import (
     XPSMapper,
     construct_entry_name,
     construct_data_key,
-    construct_detector_data_key,
     convert_pascal_to_snake,
     get_minimal_step,
     check_for_allowed_in_list,
@@ -102,13 +101,13 @@ UNITS: dict = {
     "source_sputter/sputter_source_width_y": "um",
     "source_sputter/sputter_source_incidence_polar_angle": "degree",
     "source_sputter/sputter_source_azimuth_angle": "degree",
-    "analyser/analyser_take_off_polar_angle": "degree",
-    "analyser/analyser_take_off_azimuth_angle": "degree",
-    "analyser/analysis_width_x": "m",
-    "analyser/analysis_width_y": "m",
-    "analyser/target_bias": "V",
-    "analyser/time_correction": "s",
-    "analyser/work_function": "eV",
+    "electronanalyser/analyser_take_off_polar_angle": "degree",
+    "electronanalyser/analyser_take_off_azimuth_angle": "degree",
+    "electronanalyser/analysis_width_x": "m",
+    "electronanalyser/analysis_width_y": "m",
+    "electronanalyser/target_bias": "V",
+    "electronanalyser/time_correction": "s",
+    "electronanalyser/work_function": "eV",
     "collectioncolumn/spatial_acceptance": "um",
     "energydispersion/pass_energy": "eV",
     "energydispersion/differential_width_aes": "eV",
@@ -176,7 +175,7 @@ class VamasMapper(XPSMapper):
                 "sputter_source_incidence_polar_angle",
                 "sputter_source_azimuth_angle",
             ],
-            "analyser": [
+            "electronanalyser": [
                 "analyser_take_off_polar_angle",
                 "analyser_take_off_azimuth_angle",
                 "analysis_width_x",
@@ -225,6 +224,11 @@ class VamasMapper(XPSMapper):
                 "last_linescan_y_end",
             ],
             "region": [
+                "format_id",
+                "institute_id",
+                "instrument_model_id",
+                "operator_id",
+                "experiment_id",
                 "analysis_method",
                 "element",
                 "group_id",
@@ -249,28 +253,35 @@ class VamasMapper(XPSMapper):
     ):
         """Map one spectrum from raw data to NXmpes-ready dict."""
         # pylint: disable=too-many-locals,duplicate-code
-        group_parent = f'{self._root_path}/Group_{spectrum["group_name"]}'
-        region_parent = f'{group_parent}/regions/Region_{spectrum["spectrum_type"]}'
-        instrument_parent = f"{region_parent}/instrument"
-        analyser_parent = f"{instrument_parent}/analyser"
+        entry_parts = []
+        for part in ["group_name", "spectrum_type"]:
+            val = spectrum.get(part, None)
+            if val:
+                entry_parts += [val]
+
+        entry = construct_entry_name(entry_parts)
+        entry_parent = f"/ENTRY[{entry}]"
+
+        instrument_parent = f"{entry_parent}/instrument"
+        analyser_parent = f"{instrument_parent}/electronanalyser"
 
         path_map: Dict[str, str] = {
-            "user": f"{region_parent}/user",
+            "user": f"{entry_parent}/user",
             "instrument": f"{instrument_parent}",
             "beam_xray": f"{instrument_parent}/beam_xray",
             "source_xray": f"{instrument_parent}/source_xray",
             "source_sputter": f"{instrument_parent}/source_sputter",
-            "analyser": f"{analyser_parent}",
+            "electronanalyser": f"{analyser_parent}",
             "collectioncolumn": f"{analyser_parent}/collectioncolumn",
             "energydispersion": f"{analyser_parent}/energydispersion",
             "detector": f"{analyser_parent}/detector",
             "manipulator": f"{instrument_parent}/manipulator",
-            "sample": f"{region_parent}/sample",
-            "data": f"{region_parent}/data",
-            "process": f"{region_parent}/process",
-            "peak_fitting": f"{region_parent}/peak_fitting",
-            "profiling": f"{region_parent}/profiling",
-            "region": f"{region_parent}/region",
+            "sample": f"{entry_parent}/sample",
+            "data": f"{entry_parent}/data",
+            "process": f"{entry_parent}/process",
+            "peak_fitting": f"{entry_parent}/peak_fitting",
+            "profiling": f"{entry_parent}/profiling",
+            "region": f"{entry_parent}/region",
         }
 
         used_keys = []
@@ -309,11 +320,8 @@ class VamasMapper(XPSMapper):
                     except KeyError:
                         pass
 
-        # Create keys for writing to data and detector
-        entry = construct_entry_name(region_parent)
+        # Create key for writing to data.
         scan_key = construct_data_key(spectrum)
-        detector_data_key_child = construct_detector_data_key(spectrum)
-        detector_data_key = f'{path_map["detector"]}/{detector_data_key_child}/counts'
 
         energy = np.array(spectrum["data"]["x"])
         intensity_raw = np.array(spectrum["data"]["y"])
@@ -349,13 +357,15 @@ class VamasMapper(XPSMapper):
         )
         used_keys += ["data"]
 
-        # Write raw intensities to 'detector'.
-        self._xps_dict[detector_data_key] = intensity_raw
+        # Write raw intensities to 'cycle0'.
+        self._xps_dict["data"][entry][f"{scan_key}_chan0"] = xr.DataArray(
+            data=intensity_raw, coords={"energy": energy}
+        )
 
         # Write additional keys to region parent.
         for spectrum_key, value in spectrum.items():
             if spectrum_key not in used_keys:
-                self._xps_dict[f"{region_parent}/misc/{spectrum_key}"] = value
+                self._xps_dict[f"{entry_parent}/misc/{spectrum_key}"] = value
 
 
 KEY_MAP = {
@@ -401,7 +411,7 @@ class VamasParser:
         self.header = VamasHeader()
         self.blocks: List[VamasBlock] = []
 
-    def parse_file(self, file: Union[str, Path]):
+    def parse_file(self, file: Union[str, Path], **kwargs):
         """Parse the vamas file into a list of dictionaries.
 
         Parameters
@@ -894,7 +904,10 @@ class VamasParser:
                     tzinfo=tzinfo,
                 )
             except ValueError:
-                date_time = datetime.datetime.min
+                date_time = datetime.datetime(1, 1, 1, 0, 0, 0, tzinfo=tzinfo)
+
+            if isinstance(date_time, datetime.datetime):
+                date_time = date_time.isoformat()
 
             # Map x-y values to 2D lists.
             settings["extent"] = np.array(

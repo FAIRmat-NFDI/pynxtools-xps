@@ -133,7 +133,7 @@ def test_vms_comment_handler(file: str, comment_type: Literal["header", "block"]
     comments = handle_comments(comment_lines, comment_type=comment_type)
 
     for key, val in comments.items():
-        if type(val) == np.ndarray:
+        if isinstance(val, np.ndarray):
             comments[key] = val.tolist()
 
     with open(ref_json_filepath, "r") as json_file:

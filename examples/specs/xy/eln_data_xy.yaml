@@ -1,6 +1,4 @@
 title: EX439_S718_Au in 25 mbar O2
-start_time: 2022-04-08T11:47:02.0200Z
-end_time: 2022-04-08T14:52:26.0400Z
 entry_identifier: EX439
 experiment_institution: Max Planck Institute for Chemical Energy Conversion
 experiment_facility: Surface and Interface Analysis Group
@@ -37,6 +35,7 @@ instrument:
       unit: mm
   analyser:
     description: hemispherical
+    name: PHOIBOS 150 NAP-XPS analyser
     device_information:
       vendor: SPECS GmbH
       model: PHOIBOS 150 NAP
@@ -49,7 +48,7 @@ instrument:
         identifier: null
     energydispersion:
       scheme: hemispherical
-      diameter:
+      radius:
         unit: mm
         value: 150
       device_information:
@@ -141,7 +140,6 @@ instrument:
 sample:
   name: Polycristalline Au foil
   sample_id: S718
-  atom_types: Au
   physical_form: foil
   situation: vacuum
   substance:

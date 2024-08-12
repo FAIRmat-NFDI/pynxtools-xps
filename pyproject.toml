@@ -25,9 +25,9 @@ dependencies = [
     "h5py>=3.6.0",
     "igor2",
     "xarray>=0.20.2",
-    "pynxtools>=0.5.1",
     "numpy>=1.21.2",
     "pint>=0.17",
+    "pynxtools>=0.6.0",
 ]
 
 [project.entry-points."pynxtools.reader"]
@@ -40,7 +40,7 @@ xps = "pynxtools_xps.reader:XPSReader"
 [project.optional-dependencies]
 dev = [
     "mypy",
-    "ruff==0.4.8",
+    "ruff==0.5.5",
     "pytest",
     "pytest-cov",
     "pytest-timeout",

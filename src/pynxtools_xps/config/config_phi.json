@@ -1,22 +1,19 @@
 {
-  "/@default":"None",
-  "/ENTRY[entry]":{
+  "/ENTRY":{
     "@default":"data",
     "title":"@eln",
-    "start_time":"@xps_token:file_info/acquisition_file_date",
+    "start_time":"@attrs:file_info/acquisition_file_date",
     "end_time":"@eln",
-    "experiment_identifier":"@xps_token:file_info/experiment_id",
+    "experiment_identifier":"@attrs:file_info/experiment_id",
     "experiment_institution":"@eln",
     "experiment_facility":"@eln",
     "experiment_laboratory":"@eln",
-    "duration":"None",
-    "duration/@units":"s",
-    "method":"@xps_token:region/technique",
-    "program_name":"@xps_token:file_info/software_version",
-    "acquisition_filename":"@xps_token:file_info/acquisition_filename"
+    "method":"@attrs:region/technique",
+    "program_name":"@attrs:file_info/software_version",
+    "acquisition_filename":"@attrs:file_info/acquisition_filename"
   },
-  "/ENTRY[entry]/USER[user]":{
-    "name":"@xps_token:user/user_name",
+  "/ENTRY/USER[user]":{
+    "name":"@attrs:user/user_name",
     "affiliation":"@eln",
     "address":"@eln",
     "email":"@eln",
@@ -26,11 +23,11 @@
       "is_persistent":"@eln"
     }
   },
-  "/ENTRY[entry]/INSTRUMENT[instrument]":{
-    "@default": "electronanalyser",
+  "/ENTRY/INSTRUMENT[instrument]":{
+    "@default":"electronanalyser",
     "device_information":{
-      "vendor":"@xps_token:instrument/vendor",
-      "model":"@xps_token:instrument/instrument_model",
+      "vendor":"@attrs:instrument/vendor",
+      "model":"@attrs:instrument/instrument_model",
       "identifier":"@eln"
     },
     "energy_resolution":{
@@ -41,75 +38,75 @@
     },
     "sourceTYPE[source_xray]":{
       "type":"@eln",
-      "name":"@xps_token:xray_source/name",
+      "name":"@eln",
       "probe":"@eln",
       "device_information":{
         "vendor":"@eln",
         "identifier":"@eln",
         "model":"@eln"
       },
-      "anode_material":"@xps_token:xray_source/xray_anode_material",
-      "anode_position":"@xps_token:xray_source/xray_anode_position",
-      "delay_factor_x":"@xps_token:xray_source/xray_delay_factor_x",
-      "delay_factor_y":"@xps_token:xray_source/xray_delay_factor_y",
-      "emission_control":"@xps_token:xray_source/xray_emission_control",
-      "emission_current":"@xps_token:xray_source/xray_emission_current",
-      "emission_current/@units":"@xps_token:xray_source/xray_emission_current/@units",
-      "filament_current":"@xps_token:xray_source/xray_filament_current",
-      "filament_current/@units":"@xps_token:xray_source/xray_filament_current/@units",
-      "filament_current_limit":"@xps_token:xray_source/xray_max_filament_current",
-      "filament_current_limit/@units":"@xps_token:xray_source/xray_max_filament_current/@units",
-      "magnification_factor_x":"@xps_token:xray_source/xray_magnification_factor_x",
-      "magnification_factor_y":"@xps_token:xray_source/xray_magnification_factor_y",
-      "power":"@xps_token:xray_source/xray_power",
-      "power/@units":"@xps_token:xray_source/xray_power/@units",
-      "offset":"@xps_token:xray_source/xray_offset",
-      "offset/@units":"@xps_token:xray_source/xray_offset/@units",
-      "rotation":"@xps_token:xray_source/xray_rotation",
-      "rotation/@units":"@xps_token:xray_source/xray_rotation/@units",
-      "voltage":"@xps_token:xray_source/xray_high_voltage",
-      "voltage/@units":"@xps_token:xray_source/xray_high_voltage/@units",
+      "anode_material":"@attrs:xray_source/xray_anode_material",
+      "anode_position":"@attrs:xray_source/xray_anode_position",
+      "delay_factor_x":"@attrs:xray_source/xray_delay_factor_x",
+      "delay_factor_y":"@attrs:xray_source/xray_delay_factor_y",
+      "emission_control":"@attrs:xray_source/xray_emission_control",
+      "emission_current":"@attrs:xray_source/xray_emission_current",
+      "emission_current/@units":"@attrs:xray_source/xray_emission_current/@units",
+      "filament_current":"@attrs:xray_source/xray_filament_current",
+      "filament_current/@units":"@attrs:xray_source/xray_filament_current/@units",
+      "filament_current_limit":"@attrs:xray_source/xray_max_filament_current",
+      "filament_current_limit/@units":"@attrs:xray_source/xray_max_filament_current/@units",
+      "magnification_factor_x":"@attrs:xray_source/xray_magnification_factor_x",
+      "magnification_factor_y":"@attrs:xray_source/xray_magnification_factor_y",
+      "power":"@attrs:xray_source/xray_power",
+      "power/@units":"@attrs:xray_source/xray_power/@units",
+      "offset":"@attrs:xray_source/xray_offset",
+      "offset/@units":"@attrs:xray_source/xray_offset/@units",
+      "rotation":"@attrs:xray_source/xray_rotation",
+      "rotation/@units":"@attrs:xray_source/xray_rotation/@units",
+      "voltage":"@attrs:xray_source/xray_high_voltage",
+      "voltage/@units":"@attrs:xray_source/xray_high_voltage/@units",
       "associated_beam":"/entry/instrument/beam_xray",
       "LENS_EM[blanking_lens]":{
         "name":"blanking lens",
-        "voltage":"@xps_token:xray_source/xray_blanking_voltage",
-        "voltage/@units":"@xps_token:xray_source/xray_blanking_voltage/@units"
+        "voltage":"@attrs:xray_source/xray_blanking_voltage",
+        "voltage/@units":"@attrs:xray_source/xray_blanking_voltage/@units"
       },
       "LENS_EM[condenser_lens]":{
         "name":"condenser lens",
-        "voltage":"@xps_token:xray_source/xray_condenser_lens_voltage",
-        "voltage/@units":"@xps_token:xray_source/xray_condenser_lens_voltage/@units"
+        "voltage":"@attrs:xray_source/xray_condenser_lens_voltage",
+        "voltage/@units":"@attrs:xray_source/xray_condenser_lens_voltage/@units"
       },
       "LENS_EM[objective_coil]":{
         "name":"objective coil",
-        "current":"@xps_token:xray_source/xray_objective_coil_current",
-        "current/@units":"@xps_token:xray_source/xray_objective_coil_current/@units"
+        "current":"@attrs:xray_source/xray_objective_coil_current",
+        "current/@units":"@attrs:xray_source/xray_objective_coil_current/@units"
       },
       "DEFLECTOR[deflector]":{
         "name":"deflector",
-        "span_x":"@xps_token:xray_source/scan_deflection_span_x",
-        "span_x/@units":"@xps_token:xray_source/scan_deflection_span_x/@units",
-        "span_y":"@xps_token:xray_source/scan_deflection_span_y",
-        "span_y/@units":"@xps_token:xray_source/scan_deflection_span_y/@units",
-        "offset_x":"@xps_token:xray_source/scan_deflection_offset_x",
-        "offset_x/@units":"@xps_token:xray_source/scan_deflection_offset_x/@units",
-        "offset_y":"@xps_token:xray_source/scan_deflection_offset_y",
-        "offset_y/@units":"@xps_token:xray_source/scan_deflection_offset_y/@units"
+        "span_x":"@attrs:xray_source/scan_deflection_span_x",
+        "span_x/@units":"@attrs:xray_source/scan_deflection_span_x/@units",
+        "span_y":"@attrs:xray_source/scan_deflection_span_y",
+        "span_y/@units":"@attrs:xray_source/scan_deflection_span_y/@units",
+        "offset_x":"@attrs:xray_source/scan_deflection_offset_x",
+        "offset_x/@units":"@attrs:xray_source/scan_deflection_offset_x/@units",
+        "offset_y":"@attrs:xray_source/scan_deflection_offset_y",
+        "offset_y/@units":"@attrs:xray_source/scan_deflection_offset_y/@units"
       },
       "DEFLECTOR[stigmator]":{
         "name":"deflector",
-        "offset_x":"@xps_token:xray_source/xray_stigmator_x",
-        "offset_x/@units":"@xps_token:xray_source/xray_stigmator_x/@units",
-        "offset_y":"@xps_token:xray_source/xray_stigmator_y",
-        "offset_y/@units":"@xps_token:xray_source/xray_stigmator_y/@units"
+        "offset_x":"@attrs:xray_source/xray_stigmator_x",
+        "offset_x/@units":"@attrs:xray_source/xray_stigmator_x/@units",
+        "offset_y":"@attrs:xray_source/xray_stigmator_y",
+        "offset_y/@units":"@attrs:xray_source/xray_stigmator_y/@units"
       },
-      "depends_on": "/entry/instrument/source_xray/transformations/source_analyser_angle",
-      "TRANSFORMATIONS[transformations]": {
+      "depends_on":"/entry/instrument/source_xray/transformations/source_analyser_angle",
+      "TRANSFORMATIONS[transformations]":{
         "AXISNAME[source_analyser_angle]/@depends_on":".",
-        "AXISNAME[source_analyser_angle]":"@xps_token:source_analyser_angle",
-        "AXISNAME[source_analyser_angle]/@transformation_type": "rotation",
-        "AXISNAME[source_analyser_angle]/@units":"@xps_token:source_analyser_angle/@units",
-        "AXISNAME[source_analyser_angle]/@vector": [
+        "AXISNAME[source_analyser_angle]":"@attrs:source_analyser_angle",
+        "AXISNAME[source_analyser_angle]/@transformation_type":"rotation",
+        "AXISNAME[source_analyser_angle]/@units":"@attrs:source_analyser_angle/@units",
+        "AXISNAME[source_analyser_angle]/@vector":[
           0,
           0,
           1
@@ -119,203 +116,202 @@
     "beamTYPE[beam_xray]":{
       "distance":"@eln",
       "distance/@units":"@eln",
-      "incident_energy":"@xps_token:beam/xray_energy",
-      "incident_energy/@units":"@xps_token:beam/xray_energy/@units",
-      "incident_energy_spread":"None",
-      "incident_energy_spread/@units":"None",
-      "incident_polarization":"None",
-      "incident_polarization/@units":"None",
-      "extent":"@xps_token:beam/xray_beam_diameter",
-      "extent/@units":"@xps_token:beam/xray_beam_diameter/@units",
+      "incident_energy":"@attrs:beam/xray_energy",
+      "incident_energy/@units":"@attrs:beam/xray_energy/@units",
+      "incident_energy_spread":null,
+      "incident_energy_spread/@units":null,
+      "incident_polarization":null,
+      "incident_polarization/@units":null,
+      "extent":"@attrs:beam/xray_beam_diameter",
+      "extent/@units":"@attrs:beam/xray_beam_diameter/@units",
       "associated_source":"/entry/instrument/source_xray"
     },
     "sourceTYPE[source_flood_gun]":{
-      "type": "Monochromatized electron source",
-      "current":"@xps_token:flood_gun/flood_gun_current",
-      "current/@units":"@xps_token:flood_gun/flood_gun_current/@units",
-      "energy":"@xps_token:flood_gun/flood_gun_energy",
-      "energy/@units":"@xps_token:flood_gun/flood_gun_energy/@units",
-      "filament_current":"@xps_token:flood_gun/flood_gun_filament_current",
-      "filament_current/@units":"@xps_token:flood_gun/flood_gun_filament_current/@units",
-      "gain":"@xps_token:flood_gun/flood_gun_gain",
-      "flood_gun_mode":"@xps_token:flood_gun/flood_gun_mode",
-      "frequency":"@xps_token:flood_gun/pulse_frequency",
-      "frequency/@units":"@xps_token:flood_gun/pulse_frequency/@units",
-      "pulse_width":"@xps_token:flood_gun/flood_gun_pulse_length",
-      "pulse_width/@units":"@xps_token:flood_gun/flood_gun_pulse_length/@units",    
-      "ramp_rate":"@xps_token:flood_gun/flood_gun_ramp_rate",
-      "ramp_rate/@units":"@xps_token:flood_gun/flood_gun_ramp_rate/@units",
-      "time_per_step":"@xps_token:flood_gun/flood_gun_time_per_step",
-      "time_per_step/@units":"@xps_token:flood_gun/flood_gun_time_per_step/@units",
-      "x_steering":"@xps_token:flood_gun/flood_gun_x_steering",
-      "x_steering/@units":"@xps_token:flood_gun/flood_gun_x_steering/@units",
-      "y_steering":"@xps_token:flood_gun/flood_gun_y_steering",
-      "y_steering/@units":"@xps_token:flood_gun/flood_gun_y_steering/@units",
+      "type":"Monochromatized electron source",
+      "current":"@attrs:flood_gun/flood_gun_current",
+      "current/@units":"@attrs:flood_gun/flood_gun_current/@units",
+      "energy":"@attrs:flood_gun/flood_gun_energy",
+      "energy/@units":"@attrs:flood_gun/flood_gun_energy/@units",
+      "filament_current":"@attrs:flood_gun/flood_gun_filament_current",
+      "filament_current/@units":"@attrs:flood_gun/flood_gun_filament_current/@units",
+      "gain":"@attrs:flood_gun/flood_gun_gain",
+      "flood_gun_mode":"@attrs:flood_gun/flood_gun_mode",
+      "frequency":"@attrs:flood_gun/flood_gun_pulse_frequency",
+      "frequency/@units":"@attrs:flood_gun/flood_gun_pulse_frequency/@units",
+      "pulse_width":"@attrs:flood_gun/flood_gun_pulse_length",
+      "pulse_width/@units":"@attrs:flood_gun/flood_gun_pulse_length/@units",
+      "ramp_rate":"@attrs:flood_gun/flood_gun_ramp_rate",
+      "ramp_rate/@units":"@attrs:flood_gun/flood_gun_ramp_rate/@units",
+      "time_per_step":"@attrs:flood_gun/flood_gun_time_per_step",
+      "time_per_step/@units":"@attrs:flood_gun/flood_gun_time_per_step/@units",
+      "x_steering":"@attrs:flood_gun/flood_gun_x_steering",
+      "x_steering/@units":"@attrs:flood_gun/flood_gun_x_steering/@units",
+      "y_steering":"@attrs:flood_gun/flood_gun_y_steering",
+      "y_steering/@units":"@attrs:flood_gun/flood_gun_y_steering/@units",
       "LENS_EM[extractor]":{
         "name":"extractor",
-        "voltage":"@xps_token:flood_gun/extractor_voltage",
-        "voltage/@units":"@xps_token:flood_gun/extractor_voltage/@units"
+        "voltage":"@attrs:flood_gun/flood_gun_extractor_voltage",
+        "voltage/@units":"@attrs:flood_gun/flood_gun_extractor_voltage/@units"
       },
       "associated_beam":"none"
     },
     "sourceTYPE[source_gas_cluster_ion_beam]":{
-      "type": "other",
+      "type":"other",
       "type_other":"@eln",
       "description":"@eln",
-      "cluster_size":"@xps_token:gcib/gcib_cluster_size",
-      "cluster_size/@units":"@xps_token:gcib/gcib_cluster_size/@units",
-      "emission_current":"@xps_token:gcib/gcib_bend_voltage",
-      "emission_current/@units":"@xps_token:gcib/gcib_bend_voltage/@units",
-      "energy":"@xps_token:gcib/energy_per_atom",
-      "energy/@units":"@xps_token:gcib/energy_per_atom/@units",
-      "focus":"@xps_token:gcib/gcib_focus",
-      "focus/@units":"@xps_token:gcib/gcib_focus/@units",
-      "frequency":"@xps_token:gcib/gcib_sputter_rate",
-      "frequency/@units":"@xps_token:gcib/gcib_sputter_rate/@units",
-      "gas_pressure":"@xps_token:gcib/gcib_gas_pressure",
-      "gas_pressure/@units":"@xps_token:gcib/gcib_gas_pressure/@units",
-      "ionization_voltage":"@xps_token:gcib/gcib_ionization",
-      "ionization_voltage/@units":"@xps_token:gcib/gcib_ionization/@units",
-      "magnet_current":"@xps_token:gcib/gcib_magnet_current",
-      "magnet_current/@units":"@xps_token:gcib/gcib_magnet_current/@units",
-      "raster_offset_x":"@xps_token:gcib/gcib_raster_offset_x",
-      "raster_offset_x/@units":"@xps_token:gcib/gcib_raster_offset_x/@units",
-      "raster_offset_y":"@xps_token:gcib/gcib_raster_offset_y",
-      "raster_offset_y/@units":"@xps_token:gcib/gcib_raster_offset_y/@units",
-      "raster_size_x":"@xps_token:gcib/gcib_raster_size_x",
-      "raster_size_x/@units":"@xps_token:gcib/gcib_raster_size_x/@units",
-      "raster_size_y":"@xps_token:gcib/gcib_raster_size_y",
-      "raster_size_y/@units":"@xps_token:gcib/gcib_raster_size_y/@units",
-      "wien_filter_voltage":"@xps_token:gcib/gcib_wien_filter_voltage",
-      "wien_filter_voltage/@units":"@xps_token:gcib/gcib_wien_filter_voltage/@units",
-      "voltage":"@xps_token:gcib/gcib_high_voltage",
-      "voltage/@units":"@xps_token:gcib/gcib_high_voltage/@units",
+      "cluster_size":"@attrs:gcib/gcib_cluster_size",
+      "cluster_size/@units":"@attrs:gcib/gcib_cluster_size/@units",
+      "emission_current":"@attrs:gcib/gcib_bend_voltage",
+      "emission_current/@units":"@attrs:gcib/gcib_bend_voltage/@units",
+      "energy":"@attrs:gcib/gcib_energy_per_atom",
+      "energy/@units":"@attrs:gcib/gcib_energy_per_atom/@units",
+      "focus":"@attrs:gcib/gcib_focus",
+      "focus/@units":"@attrs:gcib/gcib_focus/@units",
+      "frequency":"@attrs:gcib/gcib_sputter_rate",
+      "frequency/@units":"@attrs:gcib/gcib_sputter_rate/@units",
+      "gas_pressure":"@attrs:gcib/gcib_gas_pressure",
+      "gas_pressure/@units":"@attrs:gcib/gcib_gas_pressure/@units",
+      "ionization_voltage":"@attrs:gcib/gcib_ionization",
+      "ionization_voltage/@units":"@attrs:gcib/gcib_ionization/@units",
+      "magnet_current":"@attrs:gcib/gcib_magnet_current",
+      "magnet_current/@units":"@attrs:gcib/gcib_magnet_current/@units",
+      "raster_offset_x":"@attrs:gcib/gcib_raster_offset_x",
+      "raster_offset_x/@units":"@attrs:gcib/gcib_raster_offset_x/@units",
+      "raster_offset_y":"@attrs:gcib/gcib_raster_offset_y",
+      "raster_offset_y/@units":"@attrs:gcib/gcib_raster_offset_y/@units",
+      "raster_size_x":"@attrs:gcib/gcib_raster_size_x",
+      "raster_size_x/@units":"@attrs:gcib/gcib_raster_size_x/@units",
+      "raster_size_y":"@attrs:gcib/gcib_raster_size_y",
+      "raster_size_y/@units":"@attrs:gcib/gcib_raster_size_y/@units",
+      "wien_filter_voltage":"@attrs:gcib/gcib_wien_filter_voltage",
+      "wien_filter_voltage/@units":"@attrs:gcib/gcib_wien_filter_voltage/@units",
+      "voltage":"@attrs:gcib/gcib_high_voltage",
+      "voltage/@units":"@attrs:gcib/gcib_high_voltage/@units",
       "associated_beam":"none",
       "LENS_EM[bending_lens]":{
         "name":"bending lens",
-        "voltage":"@xps_token:gcib/gcib_bend_voltage",
-        "voltage/@units":"@xps_token:gcib/gcib_bend_voltage/@units"
+        "voltage":"@attrs:gcib/gcib_bend_voltage",
+        "voltage/@units":"@attrs:gcib/gcib_bend_voltage/@units"
       },
       "LENS_EM[extractor]":{
         "name":"extractor",
-        "voltage":"@xps_token:gcib/gcib_extractor",
-        "voltage/@units":"@xps_token:gcib/gcib_extractor/@units"
+        "voltage":"@attrs:gcib/gcib_extractor",
+        "voltage/@units":"@attrs:gcib/gcib_extractor/@units"
       },
       "LENS_EM[objective_lens]":{
         "name":"objective lens",
-        "voltage":"@xps_token:gcib/gcib_objective",
-        "voltage/@units":"@xps_token:gcib/gcib_objective/@units"
+        "voltage":"@attrs:gcib/gcib_objective",
+        "voltage/@units":"@attrs:gcib/gcib_objective/@units"
       }
     },
     "sourceTYPE[source_neutral_ion_gun]":{
-      "type": "other",
+      "type":"other",
       "type_other":"@eln",
       "description":"@eln",
-      "current":"@xps_token:neutral_ion_gun/neutral_current",
-      "current/@units":"@xps_token:neutral_ion_gun/neutral_current/@units",
-      "deflection_bias":"@xps_token:neutral_ion_gun/neutral_deflection_bias",
-      "deflection_bias/@units":"@xps_token:neutral_ion_gun/neutral_deflection_bias/@units",
-      "emission_current":"@xps_token:neutral_ion_gun/neutral_emission",
-      "emission_current/@units":"@xps_token:neutral_ion_gun/neutral_emission/@units",
-      "energy":"@xps_token:neutral_ion_gun/neutral_energy",
-      "energy/@units":"@xps_token:neutral_ion_gun/neutral_energy/@units",
-      "float_voltage":"@xps_token:neutral_ion_gun/neutral_float_voltage",
-      "float_voltage/@units":"@xps_token:neutral_ion_gun/neutral_float_voltage/@units",
-      "frequency":"@xps_token:neutral_ion_gun/neutral_rate",
-      "frequency/@units":"@xps_token:neutral_ion_gun/neutral_rate/@units",
-      "gas_pressure":"@xps_token:neutral_ion_gun/neutral_ion_gun_gas_pressure",
-      "gas_pressure/@units":"@xps_token:neutral_ion_gun/neutral_ion_gun_gas_pressure/@units",
-      "grid_voltage":"@xps_token:neutral_ion_gun/neutral_grid_voltage",
-      "grid_voltage/@units":"@xps_token:neutral_ion_gun/neutral_grid_voltage/@units",
-      "ion":"@xps_token:neutral_ion_gun/neutral_ion",
-      "raster_offset_x":"@xps_token:neutral_ion_gun/neutral_raster_offset_x",
-      "raster_offset_x/@units":"@xps_token:neutral_ion_gun/neutral_raster_offset_x/@units",
-      "raster_offset_y":"@xps_token:neutral_ion_gun/neutral_raster_offset_y",
-      "raster_offset_y/@units":"@xps_token:neutral_ion_gun/neutral_raster_offset_y/@units",
-      "raster_size_x":"@xps_token:gcneutral_ion_gunib/neutral_raster_x",
-      "raster_size_x/@units":"@xps_token:neutral_ion_gun/neutral_raster_x/@units",
-      "raster_size_y":"@xps_token:neutral_ion_gun/neutral_raster_y",
-      "raster_size_y/@units":"@xps_token:neutral_ion_gun/neutral_raster_y/@units",
-      "target_sputter_time":"@xps_token:neutral_ion_gun/neutral_target_timed_on_time",
-      "target_sputter_time/@units":"@xps_token:neutral_ion_gun/neutral_target_timed_on_time/@units",
+      "current":"@attrs:neutral_ion_gun/neutral_current",
+      "current/@units":"@attrs:neutral_ion_gun/neutral_current/@units",
+      "deflection_bias":"@attrs:neutral_ion_gun/neutral_deflection_bias",
+      "deflection_bias/@units":"@attrs:neutral_ion_gun/neutral_deflection_bias/@units",
+      "emission_current":"@attrs:neutral_ion_gun/neutral_emission",
+      "emission_current/@units":"@attrs:neutral_ion_gun/neutral_emission/@units",
+      "energy":"@attrs:neutral_ion_gun/neutral_energy",
+      "energy/@units":"@attrs:neutral_ion_gun/neutral_energy/@units",
+      "float_voltage":"@attrs:neutral_ion_gun/neutral_float_voltage",
+      "float_voltage/@units":"@attrs:neutral_ion_gun/neutral_float_voltage/@units",
+      "frequency":"@attrs:neutral_ion_gun/neutral_rate",
+      "frequency/@units":"@attrs:neutral_ion_gun/neutral_rate/@units",
+      "gas_pressure":"@attrs:neutral_ion_gun/neutral_ion_gun_gas_pressure",
+      "gas_pressure/@units":"@attrs:neutral_ion_gun/neutral_ion_gun_gas_pressure/@units",
+      "grid_voltage":"@attrs:neutral_ion_gun/neutral_grid_voltage",
+      "grid_voltage/@units":"@attrs:neutral_ion_gun/neutral_grid_voltage/@units",
+      "ion":"@attrs:neutral_ion_gun/neutral_ion",
+      "raster_offset_x":"@attrs:neutral_ion_gun/neutral_raster_offset_x",
+      "raster_offset_x/@units":"@attrs:neutral_ion_gun/neutral_raster_offset_x/@units",
+      "raster_offset_y":"@attrs:neutral_ion_gun/neutral_raster_offset_y",
+      "raster_offset_y/@units":"@attrs:neutral_ion_gun/neutral_raster_offset_y/@units",
+      "raster_size_x":"@attrs:neutral_ion_gun/neutral_raster_x",
+      "raster_size_x/@units":"@attrs:neutral_ion_gun/neutral_raster_x/@units",
+      "raster_size_y":"@attrs:neutral_ion_gun/neutral_raster_y",
+      "raster_size_y/@units":"@attrs:neutral_ion_gun/neutral_raster_y/@units",
+      "target_sputter_time":"@attrs:neutral_ion_gun/neutral_target_timed_on_time",
+      "target_sputter_time/@units":"@attrs:neutral_ion_gun/neutral_target_timed_on_time/@units",
       "associated_beam":"none",
       "LENS_EM[bending_lens]":{
         "name":"bending lens",
-        "voltage":"@xps_token:neutral_ion_gun/neutral_bend_voltage",
-        "voltage/@units":"@xps_token:neutral_ion_gun/neutral_bend_voltage/@units"
+        "voltage":"@attrs:neutral_ion_gun/neutral_bend_voltage",
+        "voltage/@units":"@attrs:neutral_ion_gun/neutral_bend_voltage/@units"
       },
       "LENS_EM[condenser_lens]":{
         "name":"condenser lens",
-        "voltage":"@xps_token:neutral_ion_gun/neutral_condenser_lens_voltage",
-        "voltage/@units":"@xps_token:neutral_ion_gun/neutral_condenser_lens_voltage/@units"
+        "voltage":"@attrs:neutral_ion_gun/neutral_condenser_lens_voltage",
+        "voltage/@units":"@attrs:neutral_ion_gun/neutral_condenser_lens_voltage/@units"
       },
       "LENS_EM[objective_lens]":{
         "name":"objective lens",
-        "voltage":"@xps_token:neutral_ion_gun/neutral_objective_lens_voltage",
-        "voltage/@units":"@xps_token:neutral_ion_gun/neutral_objective_lens_voltage/@units"
+        "voltage":"@attrs:neutral_ion_gun/neutral_objective_lens_voltage",
+        "voltage/@units":"@attrs:neutral_ion_gun/neutral_objective_lens_voltage/@units"
       }
     },
     "sourceTYPE[source_sputter_gun]":{
-      "type": "other",
+      "type":"other",
       "type_other":"@eln",
       "description":"@eln",
-      "current":"@xps_token:sputter_gun/sputter_current",
-      "current/@units":"@xps_token:sputter_gun/sputter_current/@units",
-      "deflection_bias":"@xps_token:sputter_gun/deflection_bias",
-      "deflection_bias/@units":"@xps_token:sputter_gun/deflection_bias/@units",
-      "emission_current":"@xps_token:sputter_gun/sputter_emission",
-      "emission_current/@units":"@xps_token:sputter_gun/sputter_emission/@units",
-      "energy":"@xps_token:sputter_gun/sputter_energy",
-      "energy/@units":"@xps_token:sputter_gun/sputter_energy/@units",
-      "float_voltage":"@xps_token:sputter_gun/float_voltage",
-      "float_voltage/@units":"@xps_token:sputter_gun/float_voltage/@units",
-      "frequency":"@xps_token:sputter_gun/sputter_rate",
-      "frequency/@units":"@xps_token:sputter_gun/sputter_rate/@units",
-      "gas_pressure":"@xps_token:sputter_gun/ion_gun_gas_pressure",
-      "gas_pressure/@units":"@xps_token:sputter_gun/ion_gun_gas_pressure/@units",
-      "grid_voltage":"@xps_token:sputter_gun/grid_voltage",
-      "grid_voltage/@units":"@xps_token:sputter_gun/grid_voltage/@units",
-      "ion":"@xps_token:sputter_gun/sputter_ion",
-      "ion_gun_mode":"@xps_token:sputter_gun/ion_gun_mode",
-      "raster_offset_x":"@xps_token:sputter_gun/sputter_raster_offset_x",
-      "raster_offset_x/@units":"@xps_token:sputter_gun/sputter_raster_offset_x/@units",
-      "raster_offset_y":"@xps_token:sputter_gun/sputter_raster_offset_y",
-      "raster_offset_y/@units":"@xps_token:sputter_gun/sputter_raster_offset_y/@units",
-      "raster_size_x":"@xps_token:sputter_gun/sputter_raster_x",
-      "raster_size_x/@units":"@xps_token:sputter_gun/sputter_raster_x/@units",
-      "raster_size_y":"@xps_token:sputter_gun/sputter_raster_y",
-      "raster_size_y/@units":"@xps_token:sputter_gun/sputter_raster_y/@units",
-      "target_sputter_time":"@xps_token:sputter_gun/target_sputter_time",
-      "target_sputter_time/@units":"@xps_token:sputter_gun/target_sputter_time/@units",
+      "current":"@attrs:sputter_gun/sputter_current",
+      "current/@units":"@attrs:sputter_gun/sputter_current/@units",
+      "deflection_bias":"@attrs:sputter_gun/deflection_bias",
+      "deflection_bias/@units":"@attrs:sputter_gun/deflection_bias/@units",
+      "emission_current":"@attrs:sputter_gun/sputter_emission",
+      "emission_current/@units":"@attrs:sputter_gun/sputter_emission/@units",
+      "energy":"@attrs:sputter_gun/sputter_energy",
+      "energy/@units":"@attrs:sputter_gun/sputter_energy/@units",
+      "float_voltage":"@attrs:sputter_gun/float_voltage",
+      "float_voltage/@units":"@attrs:sputter_gun/float_voltage/@units",
+      "frequency":"@attrs:sputter_gun/sputter_rate",
+      "frequency/@units":"@attrs:sputter_gun/sputter_rate/@units",
+      "gas_pressure":"@attrs:sputter_gun/ion_gun_gas_pressure",
+      "gas_pressure/@units":"@attrs:sputter_gun/ion_gun_gas_pressure/@units",
+      "grid_voltage":"@attrs:sputter_gun/grid_voltage",
+      "grid_voltage/@units":"@attrs:sputter_gun/grid_voltage/@units",
+      "ion":"@attrs:sputter_gun/sputter_ion",
+      "ion_gun_mode":"@attrs:sputter_gun/ion_gun_mode",
+      "raster_offset_x":"@attrs:sputter_gun/sputter_raster_offset_x",
+      "raster_offset_x/@units":"@attrs:sputter_gun/sputter_raster_offset_x/@units",
+      "raster_offset_y":"@attrs:sputter_gun/sputter_raster_offset_y",
+      "raster_offset_y/@units":"@attrs:sputter_gun/sputter_raster_offset_y/@units",
+      "raster_size_x":"@attrs:sputter_gun/sputter_raster_x",
+      "raster_size_x/@units":"@attrs:sputter_gun/sputter_raster_x/@units",
+      "raster_size_y":"@attrs:sputter_gun/sputter_raster_y",
+      "raster_size_y/@units":"@attrs:sputter_gun/sputter_raster_y/@units",
+      "target_sputter_time":"@attrs:sputter_gun/target_sputter_time",
+      "target_sputter_time/@units":"@attrs:sputter_gun/target_sputter_time/@units",
       "associated_beam":"none",
       "LENS_EM[bending_lens]":{
         "name":"bending lens",
-        "voltage":"@xps_token:sputter_gun/bend_voltage",
-        "voltage/@units":"@xps_token:sputter_gun/bend_voltage/@units"
+        "voltage":"@attrs:sputter_gun/bend_voltage",
+        "voltage/@units":"@attrs:sputter_gun/bend_voltage/@units"
       },
       "LENS_EM[condenser_lens]":{
         "name":"condenser lens",
-        "voltage":"@xps_token:sputter_gun/condenser_lens_voltage",
-        "voltage/@units":"@xps_token:sputter_gun/condenser_lens_voltage/@units"
+        "voltage":"@attrs:sputter_gun/condenser_lens_voltage",
+        "voltage/@units":"@attrs:sputter_gun/condenser_lens_voltage/@units"
       },
       "LENS_EM[objective_lens]":{
         "name":"objective lens",
-        "voltage":"@xps_token:sputter_gun/objective_lens_voltage",
-        "voltage/@units":"@xps_token:sputter_gun/objective_lens_voltage/@units"
+        "voltage":"@attrs:sputter_gun/objective_lens_voltage",
+        "voltage/@units":"@attrs:sputter_gun/objective_lens_voltage/@units"
       }
     },
     "ELECTRONANALYSER[electronanalyser]":{
-      "@default": "detector0",
-      "name":"@xps_token:analyser/name",
+      "@default":"detector",
       "description":"@eln",
-      "solid_angle":"@xps_token:analyser/analyser_solid_angle",
-      "solid_angle/@units":"@xps_token:analyser/analyser_solid_angle/@units",
-      "rotator_current":"@xps_token:analyser/sxi_rotator",
-      "rotator_current/@units":"@xps_token:analyser/sxi_rotator/@units",
-      "shutter_bias_voltage":"@xps_token:analyser/sxi_shutter_bias",
-      "shutter_bias_voltage/@units":"@xps_token:analyser/sxi_shutter_bias/@units",
-      "work_function":"@xps_token:analyser/analyser_work_function",
-      "work_function/@units":"@xps_token:analyser/analyser_work_function/@units",
+      "solid_angle":"@attrs:electronanalyser/analyser_solid_angle",
+      "solid_angle/@units":"@attrs:electronanalyser/analyser_solid_angle/@units",
+      "rotator_current":"@attrs:electronanalyser/sxi_rotator",
+      "rotator_current/@units":"@attrs:electronanalyser/sxi_rotator/@units",
+      "shutter_bias_voltage":"@attrs:electronanalyser/sxi_shutter_bias_voltage",
+      "shutter_bias_voltage/@units":"@attrs:electronanalyser/sxi_shutter_bias_voltage/@units",
+      "work_function":"@attrs:electronanalyser/analyser_work_function",
+      "work_function/@units":"@attrs:electronanalyser/analyser_work_function/@units",
       "fast_axes":"None",
       "slow_axes":"energy",
       "device_information":{
@@ -332,16 +328,12 @@
       "transmission_function":"None",
       "COLLECTIONCOLUMN[collectioncolumn]":{
         "scheme":"@eln",
-        "lens_mode":"@xps_token:collectioncolumn/lens_mode",
-        "projection":"None",
-        "angular_acceptance":"None",
-        "spatial_acceptance":"None",
-        "field_aperture":"None",
-        "contrast_aperture":"None",
-        "iris":{
-          "size":"@xps_token:collectioncolumn/iris_diameter",
-          "size/@units":"@xps_token:collectioncolumn/iris_diameter/@units"
-        },
+        "lens_mode":"@eln",
+        "projection":null,
+        "angular_acceptance":null,
+        "spatial_acceptance":null,
+        "field_aperture":null,
+        "contrast_aperture":null,
         "device_information":{
           "vendor":"@eln",
           "model":"@eln",
@@ -349,43 +341,43 @@
         },
         "LENS_EM[lens_2]":{
           "name":"Lens 2",
-          "voltage":"@xps_token:collectioncolumn/sxi_lens2_voltage",
-          "voltage/@units":"@xps_token:collectioncolumn/sxi_lens2_voltage/@units"
+          "voltage":"@attrs:collectioncolumn/sxi_lens2_voltage",
+          "voltage/@units":"@attrs:collectioncolumn/sxi_lens2_voltage/@units"
         },
         "LENS_EM[lens_3]":{
           "name":"Lens 3",
-          "voltage":"@xps_token:collectioncolumn/sxi_lens3_voltage",
-          "voltage/@units":"@xps_token:collectioncolumn/sxi_lens3_voltage/@units"
+          "voltage":"@attrs:collectioncolumn/sxi_lens3_voltage",
+          "voltage/@units":"@attrs:collectioncolumn/sxi_lens3_voltage/@units"
         },
         "LENS_EM[lens_4]":{
           "name":"Lens 4",
-          "voltage":"@xps_token:collectioncolumn/sxi_lens4_voltage",
-          "voltage/@units":"@xps_token:collectioncolumn/sxi_lens4_voltage/@units"
+          "voltage":"@attrs:collectioncolumn/sxi_lens4_voltage",
+          "voltage/@units":"@attrs:collectioncolumn/sxi_lens4_voltage/@units"
         },
         "LENS_EM[lens_5]":{
           "name":"Lens 5",
-          "voltage":"@xps_token:collectioncolumn/sxi_lens5_voltage",
-          "voltage/@units":"@xps_token:collectioncolumn/sxi_lens5_voltage/@units"
+          "voltage":"@attrs:collectioncolumn/sxi_lens5_voltage",
+          "voltage/@units":"@attrs:collectioncolumn/sxi_lens5_voltage/@units"
         },                     
         "LENS_EM[lens_bias]":{
           "name":"Lens bias",
-          "voltage":"@xps_token:collectioncolumn/sxi_lens_bias_voltage",
-          "voltage/@units":"@xps_token:collectioncolumn/sxi_lens_bias_voltage/@units"
+          "voltage":"@attrs:collectioncolumn/sxi_lens_bias_voltage",
+          "voltage/@units":"@attrs:collectioncolumn/sxi_lens_bias_voltage/@units"
         }
       },
       "ENERGYDISPERSION[energydispersion]":{
         "scheme":"@eln",
-        "pass_energy":"@xps_token:energydispersion/pass_energy",
-        "pass_energy/@units":"@xps_token:energydispersion/pass_energy/@units",
-        "energy_scan_mode":"@xps_token:energydispersion/scan_mode",
-        "xps_scan_mode":"@xps_token:energydispersion/xps_scan_mode",
+        "pass_energy":"@attrs:energydispersion/pass_energy",
+        "pass_energy/@units":"@attrs:energydispersion/pass_energy/@units",
+        "energy_scan_mode":"@attrs:energydispersion/energy_scan_mode",
+        "xps_scan_mode":"@attrs:energydispersion/xps_scan_mode",
+        "radius":"@eln",
+        "radius/@units":"@eln",
         "device_information":{
           "vendor":"@eln",
           "model":"@eln",
           "identifier":"@eln"
-        },
-        "diameter":"@eln",
-        "diameter/@units":"@eln"
+        }
       },
       "DETECTOR[detector]":{
         "@default":"raw_data",
@@ -395,20 +387,20 @@
           "identifier":"@eln"
         },
         "amplifier_type":"@eln",
-        "delay_before_acquire":"@xps_token:detector/delay_before_acquire",
-        "delay_before_acquire/@units":"@xps_token:detector/delay_before_acquire/@units",
+        "delay_before_acquire":"@attrs:detector/delay_before_acquire",
+        "delay_before_acquire/@units":"@attrs:detector/delay_before_acquire/@units",
         "detector_type":"@eln",
-        "detector_voltage":"@xps_token:detector/sca_multiplier_voltages",
-        "detector_voltage/@units":"@xps_token:detector/sca_multiplier_voltage/@units",
-        "amplifier_bias":"@xps_token:detector/bias_voltage_electrons",
-        "amplifier_bias/@units":"@xps_token:detector/bias_voltage_electrons/@units",
-        "count_time":"@xps_token:detector/survey_dwell_time",
-        "count_time/@units":"@xps_token:detector/survey_dwell_time/@units",
-        "number_of_channels":"@xps_token:detector/number_of_channels",
+        "detector_voltage":"@attrs:detector/sca_multiplier_voltage",
+        "detector_voltage/@units":"@attrs:detector/sca_multiplier_voltage/@units",
+        "count_time":"@attrs:detector/dwell_time",
+        "count_time/@units":"@attrs:detector/dwell_time/@units",
+        "number_of_channels":"@attrs:detector/number_of_channels",
         "raw_data":{
           "@signal":"raw",
-          "raw":"@detector_data:cycles/Cycle_",
-          "raw/@units":"counts"
+          "raw":"@data:raw_data",
+          "raw/@units":"counts",
+          "DATA[*]":"@data:*.channels",
+          "DATA[*]/@units":"counts"
         }
       }
     },
@@ -436,11 +428,11 @@
         "PID[pid]/setpoint/@units":"@eln"
       },
       "cryostat":{
-        "name":"None",
-        "physical_quantity":"None",
-        "type":"None",
-        "PID[pid]/setpoint":"None",
-        "PID[pid]/setpoint/@units":"@eln"
+        "name":null,
+        "physical_quantity":null,
+        "type":null,
+        "PID[pid]/setpoint":null,
+        "PID[pid]/setpoint/@units":null
       },
       "drain_current_amperemeter":{
         "name":"@eln",
@@ -464,63 +456,61 @@
         "PID[pid]/setpoint/@units":"@eln"
       },
       "POSITIONER[stage_x]":{
-        "value": "@xps_token:manipulator/stage_x",
-        "value/@units": "@xps_token:manipulator/stage_x/@units"
+        "value":"@attrs:manipulator/stage_x",
+        "value/@units":"@attrs:manipulator/stage_x/@units"
       },
       "POSITIONER[stage_y]":{
-        "value": "@xps_token:manipulator/stage_y",
-        "value/@units": "@xps_token:manipulator/stage_y/@units"
+        "value":"@attrs:manipulator/stage_y",
+        "value/@units":"@attrs:manipulator/stage_y/@units"
       },          
       "POSITIONER[stage_z]":{
-        "value": "@xps_token:manipulator/stage_z",
-        "value/@units": "@xps_token:manipulator/stage_z/@units"
+        "value":"@attrs:manipulator/stage_z",
+        "value/@units":"@attrs:manipulator/stage_z/@units"
       },
       "POSITIONER[stage_azimuth]":{
-        "value": "@xps_token:manipulator/stage_azimuth",
-        "value/@units": "@xps_token:manipulator/stage_azimuth/@units"
+        "value":"@attrs:manipulator/stage_azimuth",
+        "value/@units":"@attrs:manipulator/stage_azimuth/@units"
       },
       "POSITIONER[stage_polar]":{
-        "value": "@xps_token:manipulator/stage_polar",
-        "value/@units": "@xps_token:manipulator/stage_polar/@units"
+        "value":"@attrs:manipulator/stage_polar",
+        "value/@units":"@attrs:manipulator/stage_polar/@units"
       }
     },
     "POSITIONER[defect_positioner_u]":{
-      "value": "@xps_token:defect_positioner/defect_positioner_u",
-      "value/@units": "@xps_token:defect_positioner/defect_positioner_u/@units"
+      "value":"@attrs:defect_positioner/defect_positioner_u",
+      "value/@units":"@attrs:defect_positioner/defect_positioner_u/@units"
     },
     "POSITIONER[defect_positioner_v]":{
-      "value": "@xps_token:defect_positioner/defect_positioner_v",
-      "value/@units": "@xps_token:defect_positioner/defect_positioner_v/@units"
+      "value":"@attrs:defect_positioner/defect_positioner_v",
+      "value/@units":"@attrs:defect_positioner/defect_positioner_v/@units"
     },
     "POSITIONER[defect_positioner_x]":{
-      "value": "@xps_token:defect_positioner/defect_positioner_x",
-      "value/@units": "@xps_token:defect_positioner/defect_positioner_x/@units"
+      "value":"@attrs:defect_positioner/defect_positioner_x",
+      "value/@units":"@attrs:defect_positioner/defect_positioner_x/@units"
     },
     "POSITIONER[defect_positioner_y]":{
-      "value": "@xps_token:defect_positioner/defect_positioner_y",
-      "value/@units": "@xps_token:defect_positioner/defect_positioner_y/@units"
+      "value":"@attrs:defect_positioner/defect_positioner_y",
+      "value/@units":"@attrs:defect_positioner/defect_positioner_y/@units"
     },
     "POSITIONER[defect_positioner_z]":{
-      "value": "@xps_token:defect_positioner/defect_positioner_z",
-      "value/@units": "@xps_token:defect_positioner/defect_positioner_z/@units"
+      "value":"@attrs:defect_positioner/defect_positioner_z",
+      "value/@units":"@attrs:defect_positioner/defect_positioner_z/@units"
     },
     "POSITIONER[defect_positioner_tilt]":{
-      "value": "@xps_token:defect_positioner/defect_positioner_tilt",
-      "value/@units": "@xps_token:defect_positioner/defect_positioner_tilt/@units"
+      "value":"@attrs:defect_positioner/defect_positioner_tilt",
+      "value/@units":"@attrs:defect_positioner/defect_positioner_tilt/@units"
     },
     "POSITIONER[defect_positioner_rotation]":{
-      "value": "@xps_token:defect_positioner/defect_positioner_rotation",
-      "value/@units": "@xps_token:defect_positioner/defect_positioner_rotation/@units"
+      "value":"@attrs:defect_positioner/defect_positioner_rotation",
+      "value/@units":"@attrs:defect_positioner/defect_positioner_rotation/@units"
     },
-    "defect_positioner_reference_image":"@xps_token:defect_positioner/defect_positioner_reference_image",
+    "defect_positioner_reference_image":"@attrs:defect_positioner/defect_positioner_reference_image",
     "pressure_gauge":{
       "name":"@eln",
       "measurement":"@eln",
       "type":"@eln",
       "value":"@eln",
-      "value/@units":"@eln",
-      "value_log/value":"@eln",
-      "value_log/value/@units":"@eln"
+      "value/@units":"@eln"
     },
     "flood_gun":{
       "name":"@eln",
@@ -529,22 +519,22 @@
       "value":"@link:/entry/instrument/source_flood_gun/current"   
     }
   },
-  "/ENTRY[entry]/PROCESS_MPES[process]":{
-    "energy_calibration":"None",
+  "/ENTRY/PROCESS_MPES[process]":{
+    "energy_calibration":null,
     "energy_referencing":{
-      "level":"None",
-      "reference_peak":"@xps_token:process/energy_reference_peak",
-      "binding_energy":"@xps_token:process/energy_reference_energy",
-      "binding_energy/@units":"@xps_token:process/energy_reference_energy/@units",
-      "offset":"None",
+      "level":null,
+      "reference_peak":"@attrs:process/energy_reference_peak",
+      "binding_energy":"@attrs:process/energy_reference_energy",
+      "binding_energy/@units":"@attrs:process/energy_reference_energy/@units",
+      "offset":null,
       "calibrated_axis":"@data:energy",
-      "calibrated_axis/@units":"@xps_token:data/energy/@units"
+      "calibrated_axis/@units":"@attrs:data/energy/@units"
     },
     "transmission_correction":{
-      "intensity_calibration_coefficients":"@xps_token:data/intensity_calibration_coefficients"
+      "intensity_calibration_coefficients":"@attrs:process/intensity_calibration_coefficients"
     }
   },
-  "/ENTRY[entry]/SAMPLE[sample]":{
+  "/ENTRY/SAMPLE[sample]":{
     "name":"@eln",
     "sample_id":"@eln",
     "atom_types":"@eln",
@@ -584,15 +574,45 @@
       "flood_gun":"@link:/entry/instrument/flood_gun"
     }
   },
-  "/ENTRY[entry]/data":{
-    "@signal":"data",
+  "/ENTRY/data":{
     "@axes":["energy"],
-    "data":"@data:cycle",
-    "data/@units":"@xps_token:data/intensity/@units",
+    "@signal":"data",
+    "data":"@data:average",
+    "data_errors":"@data:errors",
+    "data/@units":"@attrs:data/intensity/@units",
+    "DATA[*]":"@data:*.scans",
+    "DATA[*]/@units":"@attrs:data/intensity/@units",
     "energy":"@data:energy",
-    "energy/@type":"@xps_token:data/energy/@type",
-    "energy/@units":"@xps_token:data/energy/@units",
-    "energy/@reference":"None",
-    "@energy_indices":"None"
+    "energy/@type":"@attrs:data/energy/@type",
+    "energy/@units":"@attrs:data/energy/@units",
+    "@energy_indices":0
+  },
+"/ENTRY[Su1s]/SAMPLE[sample]":{
+    "name":"@eln",
+    "sample_id":"@eln",
+    "atom_types":"@eln",
+    "physical_form":"@eln",
+    "situation":"@eln",
+    "SUBSTANCE[substance]":{
+      "name":"@eln",
+      "molecular_mass":"@eln",
+      "molecular_mass/@units":"@eln",
+      "cas_number":"@eln",
+      "molecular_formula_hill":"@eln"
+    },
+    "history":{
+      "sample_preparation":{
+        "start_time":"@eln",
+        "end_time":"@eln",
+        "description":"@eln",
+        "method":"@eln"
+      },
+      "PHYSICAL_PROCESS[sample_loading]":{
+        "start_time":"@eln",
+        "end_time":"@eln",
+        "description":"@eln",
+        "method":"@eln"
+      }
+    }
   }
 }

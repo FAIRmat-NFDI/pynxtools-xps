@@ -2,11 +2,6 @@
 A generic reader for loading XPS (X-ray Photoelectron Spectroscopy) data
 file into mpes nxdl (NeXus Definition Language) template.
 """
-
-import sys
-import datetime
-import copy
-
 # Copyright The NOMAD Authors.
 #
 # This file is part of NOMAD. See https://nomad-lab.eu for further info.
@@ -23,37 +18,42 @@ import copy
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from pathlib import Path
-from typing import Any, Dict, List, Set, Tuple
+# pylint: disable=too-many-lines,too-few-public-methods
 
+import os
+import sys
+import re
+import datetime
+import copy
+import logging
+from pathlib import Path
+from typing import Any, Dict, List, Tuple, Optional, Union
 import numpy as np
-import yaml
 
 from pynxtools.dataconverter.helpers import extract_atom_types
-from pynxtools.dataconverter.readers.base.reader import BaseReader
-from pynxtools.dataconverter.readers.utils import (
-    FlattenSettings,
-    flatten_and_replace,
-    parse_flatten_json,
+from pynxtools.dataconverter.readers.multi.reader import (
+    MultiFormatReader,
+    ParseJsonCallbacks,
 )
+from pynxtools.dataconverter.readers.utils import parse_yml
 from pynxtools.dataconverter.template import Template
-from pynxtools_xps.file_parser import XpsDataFileParser
-from pynxtools_xps.reader_utils import construct_entry_name, check_units
+
+from pynxtools_xps.phi.spe_pro_phi import MapperPhi
+from pynxtools_xps.scienta.scienta_reader import MapperScienta
+from pynxtools_xps.specs.sle.sle_specs import SleMapperSpecs
+from pynxtools_xps.specs.xy.xy_specs import XyMapperSpecs
+from pynxtools_xps.specs.xml.xml_specs import XmlMapperSpecs
+from pynxtools_xps.vms.txt_vamas_export import TxtMapperVamasExport
+from pynxtools_xps.vms.vamas import VamasMapper
+
+from pynxtools_xps.reader_utils import check_units
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 np.set_printoptions(threshold=sys.maxsize)
-
-XPS_TOKEN = "@xps_token:"
-XPS_DATA_TOKEN = "@data:"
-XPS_DETECTOR_TOKEN = "@detector_data:"
-ELN_TOKEN = "@eln"
-LINK_TOKEN = "link"
-TOKEN_SET = {XPS_TOKEN, XPS_DATA_TOKEN, XPS_DETECTOR_TOKEN, ELN_TOKEN}
-
-# Track entries for using for eln data
-ENTRY_SET: Set[str] = set()
-DETECTOR_SET: Set[str] = set()
-POSSIBLE_ENTRY_PATH: Dict = {}
 
 
 CONVERT_DICT = {
@@ -72,344 +72,26 @@ CONVERT_DICT = {
     "process": "PROCESS[process]",
     "sample": "SAMPLE[sample]",
     "substance": "SUBSTANCE[substance]",
-    # "Data": "DATA[data]",
 }
 
 REPLACE_NESTED: Dict[str, str] = {}
 
-
-def find_entry_and_value(xps_data_dict, key_part, dt_typ):
-    """Construct the entry name and pick up the corresponding data for
-    that for that entry.
-    """
-    entries_values = {}
-    if dt_typ == XPS_TOKEN:
-        for key, val in xps_data_dict.items():
-            if key.endswith(key_part):
-                entry = construct_entry_name(key)
-                entries_values[entry] = val
-
-    elif dt_typ in (XPS_DATA_TOKEN, XPS_DETECTOR_TOKEN):
-        try:
-            entries_values = xps_data_dict["data"]
-        except KeyError:
-            pass
-
-    return entries_values
+CHAN_COUNT = "_chan"
+SCAN_COUNT = "_scan"
 
 
-def get_entries_and_detectors(config_dict, xps_data_dict):
-    """Get all entries in the xps_data_dict"""
-    for key, value in config_dict.items():
-        for token in [XPS_DATA_TOKEN, XPS_DETECTOR_TOKEN, XPS_TOKEN]:
-            try:
-                key_part = value.split(token)[-1]
-                entries_values = find_entry_and_value(
-                    xps_data_dict, key_part, dt_typ=token
-                )
-
-                for entry, data in entries_values.items():
-                    if entry:
-                        ENTRY_SET.add(entry)
-                    if token == XPS_DETECTOR_TOKEN:
-                        chan_count = "_chan"
-                        # Iteration over scan
-                        for data_var in data.data_vars:
-                            if chan_count in data_var:
-                                detector_num = data_var.split(chan_count)[-1]
-                                detector_nm = f"detector{detector_num}"
-                                DETECTOR_SET.add(detector_nm)
-            except AttributeError:
-                continue
-    if not ENTRY_SET:
-        ENTRY_SET.add("entry")
-    if not DETECTOR_SET:
-        DETECTOR_SET.add("detector0")
+def _get_channel_vars(data_vars: List[str]):
+    """Get all data vars that containt _chan."""
+    return [data_var for data_var in data_vars if CHAN_COUNT in data_var]
 
 
-# pylint: disable=too-many-locals
-# pylint: disable=too-many-statements
-def fill_data_group(
-    key, key_part, entries_values, config_dict, xps_data_dict, template
-):
-    """Fill out fields and attributes for NXdata"""
-
-    survey_count_ = 0
-    count = 0
-
-    unit_config_value = config_dict[f"{key}/@units"]
-
-    for entry, xr_data in entries_values.items():
-        root = key[0]
-
-        # Set first Survey as default for .nxs file
-        if "Survey" in entry and survey_count_ == 0:
-            survey_count_ += 1
-            template[f"{root}@default"] = entry
-
-        # If no Survey set any scan for default
-        if survey_count_ == 0 and count == 0:
-            count += 1
-            template[f"{root}@default"] = entry
-
-        modified_key = key.replace("/ENTRY[entry]/", f"/ENTRY[{entry}]/")
-
-        long_names = {
-            "energy": "energy",
-        }
-
-        if key_part == "energy":
-            energy = np.array(xr_data.coords["energy"].values)
-            template[modified_key] = energy
-            long_name = key_part
-            if key_part in long_names:
-                long_name = long_names[key_part]
-            template[f"{modified_key}/@long_name"] = long_name
-
-        else:
-            # Define energy long name and energy_indices
-            data_group_key = modified_key.rsplit("/data", 1)[0]
-            template[f"{data_group_key}/@energy_indices"] = 0
-
-            units = "counts_per_seconds"
-            if unit_config_value.startswith(XPS_TOKEN):
-                key_part = unit_config_value.split(XPS_TOKEN)[-1]
-                for unit_key, val in xps_data_dict.items():
-                    if unit_key.endswith(key_part):
-                        units = val
-            else:
-                units = unit_config_value
-
-            chan_count = "_chan"
-            scan_count = "_scan"
-            for data_var in xr_data.data_vars:
-                cycle_scan = data_var
-                # Collecting only accumulated counts
-                # individual channeltron counts go to detector data section
-                if chan_count not in cycle_scan and scan_count in cycle_scan:
-                    indv_scan_key = f"{data_group_key}/{cycle_scan}"
-                    indv_scan_key_unit = f"{indv_scan_key}/@units"
-                    template[indv_scan_key] = xr_data[data_var].data
-
-                    if units:
-                        template[indv_scan_key_unit] = units
-
-            template[modified_key] = np.mean(
-                [
-                    xr_data[x_arr].data
-                    for x_arr in xr_data.data_vars
-                    if (chan_count not in x_arr and scan_count in x_arr)
-                ],
-                axis=0,
-            )
-
-            template[f"{modified_key}_errors"] = np.std(
-                [
-                    xr_data[x_arr].data
-                    for x_arr in xr_data.data_vars
-                    if (chan_count not in x_arr and scan_count in x_arr)
-                ],
-                axis=0,
-            )
-            template[f"{modified_key}_errors/@units"] = units
-
-            template[f"{modified_key}/@long_name"] = "XPS intensity"
-
-
-def fill_detector_group(key, entries_values, config_dict, xps_data_dict, template):
-    """Fill out fields and attributes for NXdetector/NXdata"""
-
-    chan_count = "_chan"
-    scan_count = "_scan"
-
-    unit_config_value = config_dict[f"{key}/@units"]
-
-    for entry, xr_data in entries_values.items():
-        modified_key = key.replace("/ENTRY[entry]/", f"/ENTRY[{entry}]/")
-
-        units = "counts"
-        if unit_config_value.startswith(XPS_TOKEN):
-            key_part = unit_config_value.split(XPS_TOKEN)[-1]
-            for unit_key, val in xps_data_dict.items():
-                if unit_key.endswith(key_part):
-                    units = val
-        else:
-            units = unit_config_value
-
-        detector_scans = {detector: [] for detector in DETECTOR_SET}
-
-        # Iteration over channels
-        data_vars = [
-            data_var for data_var in xr_data.data_vars if chan_count in data_var
-        ]
-        if not data_vars:
-            data_vars = [data_var for data_var in xr_data.data_vars]
-            channels_exist = False
-        else:
-            channels_exist = True
-
-        for data_var in data_vars:
-            if channels_exist:
-                if chan_count in data_var:
-                    detector_num = data_var.split(chan_count)[-1]
-                    detector_nm = f"detector{detector_num}"
-                    detector_scans[detector_nm] += [xr_data[data_var].data]
-
-                    cycle_scan_num = data_var.split(chan_count)[0]
-                    detector_key = modified_key.replace(
-                        "/DETECTOR[detector]/", f"/DETECTOR[{detector_nm}]/"
-                    )
-
-                    cycle_scan_key = detector_key.replace(
-                        "raw_data/raw", f"raw_data/{cycle_scan_num}"
-                    )
-                    template[cycle_scan_key] = xr_data[data_var].data
-                    if units:
-                        template[f"{cycle_scan_key}/@units"] = units
-            else:
-                # If there is no channel data, iterate over scans
-                detector_key = modified_key.replace(
-                    "/DETECTOR[detector]/", "/DETECTOR[detector0]/"
-                )
-                if scan_count in data_var:
-                    detector_scans["detector0"] += [xr_data[data_var].data]
-                    scan_key = detector_key.replace(
-                        "raw_data/raw", f"raw_data/{data_var}"
-                    )
-
-                    template[scan_key] = xr_data[data_var].data
-                    if units:
-                        template[f"{scan_key}/@units"] = units
-
-        # Add multi-dimensional `raw` array for each detector
-        for detector_nm, value in detector_scans.items():
-            raw_key = modified_key.replace(
-                "/DETECTOR[detector]/", f"/DETECTOR[{detector_nm}]/"
-            )
-            template[raw_key] = np.array(value)
-
-
-def fill_template_with_value(key, value, template):
-    """
-    Fill NeXus template with a key-value pair.
-
-    Parameters
-    ----------
-    key : str
-        DESCRIPTION.
-    value :
-        Any value coming from the XPS, config, or ELN file.
-    template : Template
-        A NeXus template.
-
-    """
-    if value is None or str(value) == "None":
-        return
-
-    atom_types: List = []
-    if "chemical_formula" in key:
-        atom_types = list(extract_atom_types(value))
-
-    if isinstance(value, datetime.datetime):
-        value = value.isoformat()
-
-    elif isinstance(value, dict) and LINK_TOKEN in value:
-        initial_link_text = value[LINK_TOKEN]
-
-    # Do for all entry names
-    for entry in ENTRY_SET:
-        modified_key = key.replace("/ENTRY[entry]/", f"/ENTRY[{entry}]/")
-        modified_value = copy.deepcopy(value)
-
-        if isinstance(value, dict) and LINK_TOKEN in value:
-            modified_value[LINK_TOKEN] = initial_link_text.replace(
-                "/entry/", f"/{entry}/"
-            )
-
-        if isinstance(value, str) and "/entry/" in value:
-            modified_value = value.replace("/entry/", f"/{entry}/")
-
-        # Do for all detectors
-        if "[detector]" in key:
-            for detector in DETECTOR_SET:
-                detr_key = modified_key.replace(
-                    "/DETECTOR[detector]/", f"/DETECTOR[{detector}]/"
-                )
-                template[detr_key] = modified_value
-
-                if isinstance(value, dict) and LINK_TOKEN in value:
-                    link_text = value[LINK_TOKEN]
-                    if "/detector/" in link_text:
-                        # Only replace if generic detector is given in
-                        # link.
-                        link_text = link_text.replace("/detector/", f"/{detector}/")
-                        modified_value = {LINK_TOKEN: link_text}
-
-                if isinstance(value, str) and "/detector/" in value:
-                    value = value.replace("/detector/", f"/{detector}/")
-                template[detr_key] = modified_value
-
-        else:
-            template[modified_key] = modified_value
-
-        if atom_types:
-            modified_key = modified_key.replace("chemical_formula", "atom_types")
-            template[modified_key] = ", ".join(atom_types)
-
-
-def fill_template_with_xps_data(config_dict, xps_data_dict, template):
-    """Collect the xps data from xps_data_dict
-    and store them into template. We use searching_keys
-    for separating the data from xps_data_dict.
-    """
-    for key, config_value in config_dict.items():
-        if isinstance(config_value, str) and any(
-            token in config_value for token in TOKEN_SET
-        ):
-            if str(config_value).startswith(XPS_DATA_TOKEN):
-                key_part = config_value.split(XPS_DATA_TOKEN)[-1]
-                entries_values = find_entry_and_value(
-                    xps_data_dict, key_part, dt_typ=XPS_DATA_TOKEN
-                )
-                fill_data_group(
-                    key, key_part, entries_values, config_dict, xps_data_dict, template
-                )
-
-            elif str(config_value).startswith(XPS_DETECTOR_TOKEN):
-                key_part = config_value.split(XPS_DETECTOR_TOKEN)[-1]
-                entries_values = find_entry_and_value(
-                    xps_data_dict, key_part, dt_typ=XPS_DETECTOR_TOKEN
-                )
-
-                fill_detector_group(
-                    key, entries_values, config_dict, xps_data_dict, template
-                )
-
-            elif str(config_value).startswith(XPS_TOKEN):
-                key_part = config_value.split(XPS_TOKEN)[-1]
-                entries_values = find_entry_and_value(
-                    xps_data_dict, key_part, dt_typ=XPS_TOKEN
-                )
-                for entry, ent_value in entries_values.items():
-                    modified_key = key.replace("/ENTRY[entry]/", f"/ENTRY[{entry}]/")
-                    fill_template_with_value(modified_key, ent_value, template)
-
-        else:
-            fill_template_with_value(key, config_value, template)
-
-
-def fill_template_with_eln_data(eln_data_dict, config_dict, template):
-    """Fill the template from provided eln data"""
-    for key, config_value in config_dict.items():
-        if str(config_value).startswith(ELN_TOKEN):
-            try:
-                field_value = eln_data_dict[key]
-                fill_template_with_value(key, field_value, template)
-            except KeyError:
-                pass
-        elif key in eln_data_dict:
-            field_value = eln_data_dict[key]
-            fill_template_with_value(key, field_value, template)
+def _get_scan_vars(data_vars: List[str]):
+    """Get all data vars that contain _scan, but not _chan."""
+    return [
+        data_var
+        for data_var in data_vars
+        if SCAN_COUNT in data_var and CHAN_COUNT not in data_var
+    ]
 
 
 def concatenate_values(value1, value2):
@@ -432,7 +114,7 @@ def concatenate_values(value1, value2):
 
 
 # pylint: disable=too-few-public-methods
-class XPSReader(BaseReader):
+class XPSReader(MultiFormatReader):
     """Reader for XPS."""
 
     supported_nxdls = [
@@ -440,71 +122,518 @@ class XPSReader(BaseReader):
         # "NXxps",
     ]
 
+    reader_dir = Path(__file__).parent
+    config_file: Optional[Union[str, Path]] = reader_dir.joinpath(
+        "config", "template.json"
+    )
+
+    __prmt_file_ext__ = [
+        ".ibw",
+        ".npl",
+        ".pro",
+        ".spe",
+        ".sle",
+        ".slh",
+        ".txt",
+        ".vms",
+        ".xml",
+        ".xy",
+    ]
+    __vendors__ = ["kratos", "phi", "scienta", "specs", "unkwown"]
+    __prmt_vndr_cls: Dict[str, Dict] = {
+        ".ibw": {"scienta": MapperScienta},
+        ".npl": {"unkwown": VamasMapper},
+        ".pro": {"phi": MapperPhi},
+        ".spe": {"phi": MapperPhi},
+        ".sle": {"specs": SleMapperSpecs},
+        ".txt": {
+            "scienta": MapperScienta,
+            "unknown": TxtMapperVamasExport,
+        },
+        ".vms": {"unkwown": VamasMapper},
+        ".xml": {"specs": XmlMapperSpecs},
+        ".xy": {"specs": XyMapperSpecs},
+    }
+
+    __file_err_msg__ = (
+        "Need an XPS data file with the following extension: " f"{__prmt_file_ext__}"
+    )
+
+    __vndr_err_msg__ = (
+        "Need an XPS data file from the following vendors: " f"{__vendors__}"
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.xps_data: Dict[str, Any] = {}
+        self.eln_data: Dict[str, Any] = {}
+
+        self.extensions = {
+            ".yml": self.handle_eln_file,
+            ".yaml": self.handle_eln_file,
+            ".json": self.set_config_file,
+        }
+
+        for ext in XPSReader.__prmt_file_ext__:
+            self.extensions[ext] = self.handle_data_file
+
+    def set_config_file(self, file_path: str) -> Dict[str, Any]:
+        if self.config_file is not None:
+            logger.info(
+                f"Config file already set. Replaced by the new file {file_path}."
+            )
+        self.config_file = file_path
+        return {}
+
+    def handle_eln_file(self, file_path: str) -> Dict[str, Any]:
+        """
+        Loads ELN file and handles specific cases.
+        """
+
+        def combine_and_unique_string(string: str, elements: List[str]) -> str:
+            """
+            Combines a comma-separated string and a list into a single string with unique elements.
+
+            Args:
+                string (str): A comma-separated string.
+                elements (list): A list of elements to combine with the string.
+
+            Returns:
+                str: A comma-separated string with unique elements.
+            """
+            existing_elements = [
+                item.strip() for item in string.split(",") if item.strip()
+            ]
+            combined_elements = list(set(existing_elements + elements))
+            combined_elements.sort()
+            return ", ".join(combined_elements)
+
+        eln_data = parse_yml(
+            file_path,
+            convert_dict=CONVERT_DICT,
+            replace_nested=REPLACE_NESTED,
+            parent_key="/ENTRY",
+        )
+
+        # replace paths for entry-specific ELN data
+        pattern = re.compile(r"(/ENTRY)/ENTRY(\[[^\]]+\])")
+
+        formula_keys = ("molecular_formula_hill", "chemical_formula")
+
+        initial_eln_keys = list(eln_data.keys())
+
+        for key, value in eln_data.copy().items():
+            new_key = pattern.sub(r"\1\2", key)
+
+            # Parse substance/molecular_formula_hill and chemical_formula into atom_types
+            for form_key in formula_keys:
+                if form_key in key:
+                    atom_types = list(extract_atom_types(value))
+
+                    if atom_types:
+                        modified_key = re.sub(r"SUBSTANCE\[.*?\]/", "", key)
+                        modified_key = modified_key.replace(form_key, "atom_types")
+
+                        if modified_key not in initial_eln_keys:
+                            if modified_key not in self.eln_data:
+                                self.eln_data[modified_key] = ", ".join(atom_types)
+                            else:
+                                self.eln_data[modified_key] = combine_and_unique_string(
+                                    self.eln_data[modified_key], atom_types
+                                )
+                        else:
+                            logger.info(
+                                f"{key} from ELN was not parsed to atom_types because {modified_key} already exists."
+                            )
+
+            if isinstance(value, datetime.datetime):
+                eln_data[key] = value.isoformat()
+
+            self.eln_data[new_key] = eln_data.pop(key)
+
+        return {}
+
+    def handle_data_file(self, file_path: str) -> Dict[str, Any]:
+        def _check_for_vendors(file_path: str) -> str:
+            """
+            Check for the vendor name of the XPS data file.
+
+            """
+            _, file_ext = os.path.splitext(file_path)
+
+            vendor_dict = XPSReader.__prmt_vndr_cls[file_ext]
+
+            if len(vendor_dict) == 1:
+                return list(vendor_dict.keys())[0]
+            if file_ext == ".txt":
+                return _check_for_vendors_txt(file_path)
+            return None
+
+        def _check_for_vendors_txt(file_path: str) -> str:
+            """
+            Search for a vendor names in a txt file
+
+            Parameters
+            ----------
+            file : str
+                XPS txt file.
+
+            Returns
+            -------
+            vendor
+                Vendor name if that name is in the txt file.
+
+            """
+            vendor_dict = XPSReader.__prmt_vndr_cls[".txt"]
+
+            with open(file_path, encoding="utf-8") as txt_file:
+                contents = txt_file.read()
+
+            for vendor in vendor_dict:
+                vendor_options = [vendor, vendor.upper(), vendor.capitalize()]
+
+                if any(vendor_opt in contents for vendor_opt in vendor_options):
+                    return vendor
+                if contents[:6] == "[Info]":
+                    # This is for picking the Scienta reader is "scienta"
+                    # is not in the file
+                    return vendor
+            return "unknown"
+
+        _, file_ext = os.path.splitext(file_path)
+
+        if file_ext in XPSReader.__prmt_file_ext__:
+            vendor = _check_for_vendors(file_path)
+            try:
+                parser = XPSReader.__prmt_vndr_cls[file_ext][vendor]()
+
+                parser.parse_file(file_path, **self.kwargs)
+                self.config_file = XPSReader.reader_dir.joinpath(
+                    "config", parser.config_file
+                )
+                data_dict = parser.data_dict
+
+            except ValueError as val_err:
+                raise ValueError(XPSReader.__vndr_err_msg__) from val_err
+            except KeyError as key_err:
+                raise KeyError(XPSReader.__vndr_err_msg__) from key_err
+        else:
+            raise ValueError(XPSReader.__file_err_msg__)
+
+        # If there are multiple input data files of the same type,
+        # make sure that existing keys are not overwritten.
+        existing = [
+            (key, self.xps_data[key], data_dict[key])
+            for key in set(self.xps_data).intersection(data_dict)
+        ]
+
+        self.xps_data = {**self.xps_data, **data_dict}
+        for key, value1, value2 in existing:
+            self.xps_data[key] = concatenate_values(value1, value2)
+
+        return {}
+
+    def get_entry_names(self) -> List[str]:
+        """
+        Returns a list of entry names which should be constructed from the data.
+        Defaults to creating a single entry named "entry".
+        """
+        # Track entries for using for eln data
+        entries: List[str] = []
+
+        try:
+            for entry in self.xps_data["data"]:
+                entries += [entry]
+        except KeyError:
+            pass
+
+        if not entries:
+            entries += ["entry"]
+
+        return list(dict.fromkeys(entries))
+
+    def setup_template(self) -> Dict[str, Any]:
+        """
+        Setups the initial data in the template.
+        """
+        # TODO: Set fixed information, e.g., about the reader.
+        return {}
+
+    def handle_objects(self, objects: Tuple[Any]) -> Dict[str, Any]:
+        """
+        Handles the objects passed into the reader.
+        """
+        return {}
+
+    def post_process(self) -> None:
+        """
+        Do postprocessing after all files and the config file are read .
+        """
+        # TODO: make processing of multiple entities robust
+        pass  # self.process_multiple_entities()
+
+    def _get_analyser_names(self) -> List[str]:
+        """
+        Returns a list of analyser names which should be constructed
+        from the data. Defaults to creating a single analyser named
+        "analyser".
+
+        Currently, this is not used, but can be changed if there are
+        multiple analysers in the future.
+        """
+        analysers: List[str] = []
+
+        if not analysers:
+            analysers += ["electronanalyser"]
+
+        return list(dict.fromkeys(analysers))
+
+    def _get_detector_names(self) -> List[str]:
+        """
+        Returns a list of detector names which should be constructed
+        from the data. Defaults to creating a single detector named
+        "detector".
+        """
+        detectors: List[str] = []
+
+        try:
+            for entry, entry_values in self.xps_data["data"].items():
+                for data_var in entry_values:
+                    if CHAN_COUNT in data_var:
+                        detector_num = data_var.split(CHAN_COUNT)[-1]
+                        detector_nm = f"detector{detector_num}"
+                        detectors += [detector_nm]
+        except KeyError:
+            pass
+
+        if not detectors:
+            detectors += ["detector"]
+
+        return list(dict.fromkeys(detectors))
+
+    def process_multiple_entities(self) -> None:
+        """
+        Check if there are multiple of some class and, if so, change the
+        keys and values in the config file.
+
+        This replaces all occureces of "detector" and "electronanalyser"
+        in the config dict by the respective names (e.g., detector0, detector1)
+        and removes the generic term if there are multiple different instances.
+
+        """
+        multiples_to_check = {
+            "electronanalyser": self._get_analyser_names,
+            "detector": self._get_detector_names,
+        }
+
+        """
+        Currently, it only works if the config_dict is loaded BEFORE the
+        parse_json_config method".
+
+        In principle, the same replacement should be done for the eln and
+        (meta)data dicts.
+        """
+
+        for config_key, config_value in self.config_dict.copy().items():
+            for original_key, search_func in multiples_to_check.items():
+                entity_names = search_func()
+
+                if len(entity_names) >= 1 and entity_names[0] is not original_key:
+                    for name in entity_names:
+                        modified_value = copy.deepcopy(config_value)
+
+                        modified_key = config_key.replace(
+                            f"[{original_key}]",
+                            f"[{name}]",
+                        )
+
+                        if (
+                            isinstance(config_value, str)
+                            and f"{original_key}/" in config_value
+                        ):
+                            modified_value = config_value.replace(
+                                f"{original_key}/", f"{name}/"
+                            )
+
+                        self.config_dict[modified_key] = modified_value
+                        del self.config_dict[config_key]
+
+    def get_metadata(
+        self,
+        metadata_dict: Dict[str, Any],
+        path: str,
+        entry_name: str,
+    ) -> Any:
+        """
+        Get metadata from the ELN or XPS data dictionaries.
+
+        Note that the keys of metadata_dict may contain more than
+        the path, i.e.,
+        /ENTRY[my-entry]/instrument/analyser/collectioncolumn/voltage.
+        With the regex, the path = "collectioncolumn/voltage" would
+        still yield the correct value.
+
+        Parameters
+        ----------
+        metadata_dict : Dict[str, Any]
+            One of ELN or XPS data dictionaries .
+        path : str
+            Path to search in the metadata_dict
+        entry_name : str
+            Entry name to search.
+
+        Yields
+        ------
+        value: Any
+            The value in the metadata_dict.
+
+        """
+        pattern = re.compile(
+            rf"^/ENTRY\[{re.escape(entry_name)}\](?:/.*/|/){re.escape(path)}$"
+        )
+
+        matching_key = next((key for key in metadata_dict if pattern.match(key)), None)
+
+        value = metadata_dict.get(matching_key)
+
+        if value is None or str(value) == "None":
+            return
+
+        if isinstance(value, datetime.datetime):
+            value = value.isoformat()
+
+        return value
+
+    def get_attr(self, key: str, path: str) -> Any:
+        """
+        Get the metadata that was stored in the main file.
+        """
+        return self.get_metadata(self.xps_data, path, self.callbacks.entry_name)
+
+    def get_eln_data(self, key: str, path: str) -> Any:
+        """
+        Returns data from the given eln path.
+        Gives preference to ELN data for a given entry before searching
+        the ELN data for all entries.
+        Returns None if the path does not exist.
+        """
+        if key in self.eln_data:
+            return self.eln_data.get(key)
+
+        else:
+            # check for similar key with generic /ENTRY/
+            pattern = re.compile(r"(/ENTRY)\[[^\]]+\]")
+            modified_key = pattern.sub(r"\1", key)
+            if modified_key in self.eln_data:
+                return self.eln_data.get(modified_key)
+        return
+
+    def get_data_dims(self, key: str, path: str) -> List[str]:
+        """
+        Returns the dimensions of the data from the given path.
+        """
+
+        def get_signals(key: str) -> List[str]:
+            xr_data = self.xps_data["data"].get(f"{self.callbacks.entry_name}")
+
+            if key == "scans":
+                data_vars = _get_scan_vars(xr_data.data_vars)
+            elif key == "channels":
+                data_vars = _get_channel_vars(xr_data.data_vars)
+                if not data_vars:
+                    data_vars = _get_scan_vars(xr_data.data_vars)
+            else:
+                data_vars = [""]
+
+            return list(map(str, data_vars))
+
+        if path.startswith("@data:*"):
+            return get_signals(key=path.split(":*.")[-1])
+
+        if any(x in path for x in ["counts", "raw/@units"]):
+            return get_signals(key="channels")
+
+        return get_signals(key="scans")
+
+    def get_data(self, key: str, path: str) -> Any:
+        """
+        Returns data for a given key.
+        Can either return averaged, scan, or channel data.
+        Should return None if the path does not exist.
+        """
+        xr_data = self.xps_data["data"].get(f"{self.callbacks.entry_name}")
+
+        if path.endswith("average"):
+            return np.mean(
+                [xr_data[x_arr].data for x_arr in _get_scan_vars(xr_data.data_vars)],
+                axis=0,
+            )
+
+        elif path.endswith("errors"):
+            return np.std(
+                [xr_data[x_arr].data for x_arr in _get_scan_vars(xr_data.data_vars)],
+                axis=0,
+            )
+
+        elif path.endswith("raw_data"):
+            data_vars = _get_channel_vars(xr_data.data_vars)
+
+            if not data_vars:
+                # If there is no channel data, use scan data.
+                data_vars = _get_scan_vars(xr_data.data_vars)
+
+            # Skip average cycle data
+            return np.array(
+                [
+                    xr_data[data_var].data
+                    for data_var in data_vars
+                    if SCAN_COUNT in data_var
+                ]
+            )
+
+        elif path.endswith("scans"):
+            return np.array(xr_data[path.split(".scans")[0]])
+
+        elif path.endswith("channels"):
+            return np.array(xr_data[path.split(".channels")[0]])
+
+        elif "energy" in path:
+            return np.array(xr_data.coords["energy"].values)
+
+        else:
+            try:
+                return xr_data[path]
+            except KeyError:
+                try:
+                    return np.array(xr_data.coords[path].values)
+                except KeyError:
+                    pass
+
+    def set_root_default(self, template):
+        """Set the default for automatic plotting."""
+        survey_count_ = 0
+        count = 0
+
+        for entry in self.get_entry_names():
+            if "Survey" in entry and survey_count_ == 0:
+                survey_count_ += 1
+                template["/@default"] = entry
+
+            # If no Survey set any scan for default
+            if survey_count_ == 0 and count == 0:
+                count += 1
+                template["/@default"] = entry
+
     def read(
         self,
         template: dict = None,
-        file_paths: Tuple[str, ...] = None,
+        file_paths: Tuple[str] = None,
         objects: Tuple[Any] = None,
         **kwargs,
     ) -> dict:
-        """Reads data from given file and returns
-        a filled template dictionary"""
-
-        reader_dir = Path(__file__).parent
-
-        ENTRY_SET.clear()
-        DETECTOR_SET.clear()
-
-        xps_data_dict: Dict[str, Any] = {}
-        eln_data_dict: Dict[str, Any] = {}
-        config_file: Path = reader_dir.joinpath("config", "template.json")
-
-        for file in file_paths:
-            file_ext = file.rsplit(".")[-1]
-
-            if file_ext in ["yaml", "yml"]:
-                with open(file, mode="r", encoding="utf-8") as eln:
-                    eln_data_dict = flatten_and_replace(
-                        FlattenSettings(
-                            yaml.safe_load(eln), CONVERT_DICT, REPLACE_NESTED
-                        )
-                    )
-            elif file_ext in XpsDataFileParser.__prmt_file_ext__:
-                parser = XpsDataFileParser([file])
-                data_dict = parser.get_dict(**kwargs)
-                config_file = parser.config_file
-
-                # If there are multiple input data files of the same type,
-                # make sure that existing keys are not overwritten.
-                existing = [
-                    (key, xps_data_dict[key], data_dict[key])
-                    for key in set(xps_data_dict).intersection(data_dict)
-                ]
-
-                xps_data_dict = {**xps_data_dict, **data_dict}
-                for key, value1, value2 in existing:
-                    xps_data_dict[key] = concatenate_values(value1, value2)
-
-                config_file = reader_dir.joinpath(f"config/{config_file}")
-            elif file_ext in XpsDataFileParser.__prmt_metadata_file_ext__:
-                data_dict = XpsDataFileParser([file]).get_dict(**kwargs)
-
-                xps_data_dict = {**xps_data_dict, **data_dict}
-
-            # This code is not very robust.
-            elif file_ext == "json":
-                if "config" in file:
-                    config_file = Path(file)
-
-        config_dict = parse_flatten_json(config_file)
-
-        get_entries_and_detectors(config_dict, xps_data_dict)
-        fill_template_with_xps_data(config_dict, xps_data_dict, template)
-
-        if eln_data_dict:
-            # Filling in ELN metadata and overwriting the common
-            # paths by giving preference to the ELN metadata
-            fill_template_with_eln_data(eln_data_dict, config_dict, template)
+        template = super().read(template, file_paths, objects, suppress_warning=True)
+        self.set_root_default(template)
 
         final_template = Template()
         for key, val in template.items():

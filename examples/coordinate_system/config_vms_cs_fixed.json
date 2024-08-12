@@ -1,5 +1,5 @@
 {
-  "/ENTRY[entry]/geometries":{
+  "/ENTRY/geometries":{
     "COORDINATE_SYSTEM[xps_coordinate_system]":{
       "origin":"sample stage",
       "handedness":"left_handed",
@@ -29,7 +29,7 @@
       }
     }
   },
-  "/ENTRY[entry]/INSTRUMENT[instrument]":{
+  "/ENTRY/INSTRUMENT[instrument]":{
     "beamTYPE[beam_xray]":{
       "depends_on":"/entry/instrument/beam_xray/transformations/beam_polar_angle_of_incidence",
       "TRANSFORMATIONS[transformations]":{
@@ -45,7 +45,7 @@
         "AXISNAME[beam_azimuth_angle]/@vector":[0, 0, -1],
         "AXISNAME[beam_azimuth_angle]/@depends_on":"/entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation"
       }
-    },         
+    },
     "ELECTRONANALYSER[electronanalyser]":{
       "depends_on":"/entry/instrument/electronanalyser/transformations/analyser_take_off_polar_angle",
       "TRANSFORMATIONS[transformations]":{
@@ -62,8 +62,8 @@
         "AXISNAME[analyser_take_off_azimuth_angle]/@depends_on":"/entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation"
       }
     }
-  }, 
-  "/ENTRY[entry]/SAMPLE[sample]":{
+  },
+  "/ENTRY/SAMPLE[sample]":{
     "depends_on":"/entry/sample/transformations/sample_rotation_angle",
     "TRANSFORMATIONS[transformations]":{
       "AXISNAME[sample_rotation_angle]":50.0,

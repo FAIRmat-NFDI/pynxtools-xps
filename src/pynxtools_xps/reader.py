@@ -27,13 +27,12 @@ import datetime
 import copy
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Optional, Union
+from typing import Any, Dict, List, Tuple, Optional, Union, Set
 import numpy as np
 
 from pynxtools.dataconverter.helpers import extract_atom_types
 from pynxtools.dataconverter.readers.multi.reader import (
     MultiFormatReader,
-    ParseJsonCallbacks,
 )
 from pynxtools.dataconverter.readers.utils import parse_yml
 from pynxtools.dataconverter.template import Template
@@ -166,6 +165,7 @@ class XPSReader(MultiFormatReader):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.xps_data_dicts: List[Dict[str, Any]] = []
         self.xps_data: Dict[str, Any] = {}
         self.eln_data: Dict[str, Any] = {}
 
@@ -321,16 +321,7 @@ class XPSReader(MultiFormatReader):
         else:
             raise ValueError(XPSReader.__file_err_msg__)
 
-        # If there are multiple input data files of the same type,
-        # make sure that existing keys are not overwritten.
-        existing = [
-            (key, self.xps_data[key], data_dict[key])
-            for key in set(self.xps_data).intersection(data_dict)
-        ]
-
-        self.xps_data = {**self.xps_data, **data_dict}
-        for key, value1, value2 in existing:
-            self.xps_data[key] = concatenate_values(value1, value2)
+        self.xps_data_dicts += [data_dict]
 
         return {}
 
@@ -370,8 +361,98 @@ class XPSReader(MultiFormatReader):
         """
         Do postprocessing after all files and the config file are read .
         """
+        self._combine_datasets()
+
         # TODO: make processing of multiple entities robust
-        pass  # self.process_multiple_entities()
+        # self.process_multiple_entities()
+
+    def _combine_datasets(self) -> None:
+        """
+        This function (which as called after all files have been read)
+        combines the different data sets from the XPS files and ensures
+        that entry names are different and that no data is overwritten.
+
+        Returns
+        -------
+        None
+
+        """
+
+        def check_for_same_entries(
+            dicts: List[Dict[str, any]],
+        ) -> Optional[Tuple[Set[str], List[Set[int]]]]:
+            """
+            Checks whether the input dictionaries have the same entries and identifies which
+            dictionaries contain each common entry.
+
+            Args:
+                dicts (List[Dict[str, any]]): A list of dictionaries with keys potentially containing entries.
+
+            Returns:
+                Optional[Tuple[Set[str], List[Set[int]]]]:
+                - A tuple where:
+                  - The first element is a set of common entries found across the dictionaries.
+                  - The second element is a list of sets, where each set contains the indices of dictionaries
+                    that have the corresponding entry.
+                - None if no common entries are found.
+            """
+            entry_pattern = re.compile(r"/ENTRY\[(.*?)\]")
+
+            entry_to_dicts = {}
+
+            for i, d in enumerate(dicts):
+                for key in d.keys():
+                    entries = entry_pattern.findall(key)
+                    for entry in entries:
+                        if entry not in entry_to_dicts:
+                            entry_to_dicts[entry] = set()
+                        entry_to_dicts[entry].add(i)
+
+            common_entries = {
+                entry
+                for entry, dict_indices in entry_to_dicts.items()
+                if len(dict_indices) > 1
+            }
+
+            if not common_entries:
+                return None, None
+
+            dict_indices = [entry_to_dicts[entry] for entry in common_entries]
+
+            return common_entries, dict_indices
+
+        common_entries, dict_indices = check_for_same_entries(self.xps_data_dicts)
+
+        if common_entries:
+            for entry, indices in zip(common_entries, dict_indices):
+                dicts_with_common_entries = [self.xps_data_dicts[i] for i in indices]
+
+                for i, data_dict in enumerate(dicts_with_common_entries):
+                    for key, value in data_dict.copy().items():
+                        new_key = key.replace(f"/ENTRY[{entry}]", f"/ENTRY[{entry}{i}]")
+                        if key == "data":
+                            for entry_name, xarr in value.copy().items():
+                                if entry_name == entry:
+                                    new_entry_name = entry_name.replace(
+                                        f"{entry}", f"{entry}{i}"
+                                    )
+                                    value[new_entry_name] = xarr
+                                    del value[entry_name]
+                        if new_key != key:
+                            data_dict[new_key] = value
+                            del data_dict[key]
+
+        for data_dict in self.xps_data_dicts:
+            # If there are multiple input data files of the same type,
+            # make sure that existing keys are not overwritten.
+            existing = [
+                (key, self.xps_data[key], data_dict[key])
+                for key in set(self.xps_data).intersection(data_dict)
+            ]
+
+            self.xps_data = {**self.xps_data, **data_dict}
+            for key, value1, value2 in existing:
+                self.xps_data[key] = concatenate_values(value1, value2)
 
     def _get_analyser_names(self) -> List[str]:
         """

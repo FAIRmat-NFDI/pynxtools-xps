@@ -19,7 +19,7 @@ Comment handler for .vms files.
 #
 # pylint: disable=too-many-instance-attributes
 
-from typing import List, Literal, Any, Dict, Tuple
+from typing import List, Literal, Any, Dict, Tuple, Union
 
 from pynxtools_xps.vms.casa_data_model import CasaProcess
 from pynxtools_xps.phi.spe_pro_phi import PhiParser
@@ -160,15 +160,17 @@ def _handle_kratos_block_comments(comment_list: List[str]) -> Dict[str, Any]:
     return kratos_parser.flatten_metadata()
 
 
-def _handle_misc_comments(comment_list: List[str]) -> Dict[str, str]:
+def _handle_misc_comments(
+    comment_list: List[str],
+) -> Dict[str, Union[int, float, str, Any]]:
     """Handle any other comments."""
     comments = {}
     for sep in ("=", ":"):
         for line in comment_list:
             try:
-                key, value = [part.strip(" ") for part in line.split(sep, 1)]
+                key, value_str = [part.strip(" ") for part in line.split(sep, 1)]
                 key = convert_pascal_to_snake(key)
-                value, unit = split_value_and_unit(value)
+                value, unit = split_value_and_unit(value_str)
 
                 comments[key] = value
                 if unit:

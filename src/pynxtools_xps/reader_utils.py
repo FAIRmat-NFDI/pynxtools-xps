@@ -28,6 +28,8 @@ import pint
 
 from dataclasses import dataclass
 
+from pynxtools_xps.value_mappers import convert_units
+
 
 @dataclass
 class XpsDataclass:
@@ -445,7 +447,9 @@ def construct_entry_name(parts: List[str]) -> str:
     return "__".join([align_name_part(part) for part in parts])
 
 
-def split_value_and_unit(value: str) -> Union[Tuple[Union[int, float], str], str]:
+def split_value_and_unit(
+    value_str: str,
+) -> Union[Tuple[Union[int, float], str], Tuple[str, str]]:
     """
     Splits a string into a numerical value and its associated unit.
 
@@ -463,18 +467,17 @@ def split_value_and_unit(value: str) -> Union[Tuple[Union[int, float], str], str
     -------
     (Union[Tuple[Union[int, float], str], str])
         - A tuple with the value and unit if the string matches the pattern.
-        - The original string if it does not match the pattern.
-
+        - A tuple with he original string and an empty string if it does not
+          match the pattern.
     """
-    match = re.match(r"^(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\s*([a-zA-Z/\s]+)$", value)
+    match = re.match(
+        r"^(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\s*([a-zA-Z/\s]+)$", value_str
+    )
     if match:
         value = float(match.group(1)) if "." in match.group(1) else int(match.group(1))
         unit = match.group(2).replace(" ", "")  # Remove any internal spaces in the unit
-
-        from pynxtools_xps.value_mappers import convert_units
-
         return value, convert_units(unit)
-    return value, ""
+    return value_str, ""
 
 
 ureg = pint.UnitRegistry()

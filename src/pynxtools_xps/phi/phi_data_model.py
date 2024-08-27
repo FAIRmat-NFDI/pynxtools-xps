@@ -177,7 +177,7 @@ class PhiMetadata(XpsDataclass):
     xray_filament_current: float = 0.0
     xray_filament_current_units: str = "A"
     xray_stigmator: dict = field(default_factory=dict)
-    xray_offset: float = 0.0
+    xray_offset: dict = field(default_factory=dict)
     xray_offset_units: str = "m"
     xray_magnification_factor: dict = field(default_factory=dict)
     xray_delay_factor: dict = field(default_factory=dict)  ## what are the keys?

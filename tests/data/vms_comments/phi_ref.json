@@ -28,7 +28,7 @@
     "photo_filename": "Blank.pho",
     "sxi_filename": "",
     "source_analyser_angle": 45.0,
-    "source_analyser_angle_units": "d",
+    "source_analyser_angle_units": "degree",
     "analyser_solid_angle": 0.38,
     "analyser_solid_angle_units": "sr",
     "intensity_recalibration": true,
@@ -96,11 +96,11 @@
     },
     "ion_gun_mode": "Standby",
     "sputter_ion": "Ar+",
-    "sputter_current": "0.000",
+    "sputter_current": "0.0",
     "sputter_current_units": "uA",
-    "sputter_rate": "0.000",
+    "sputter_rate": "0.0",
     "sputter_rate_units": "A/min",
-    "sputter_energy": "0.100",
+    "sputter_energy": "0.1",
     "sputter_energy_units": "kV",
     "float_voltage": 0.0,
     "float_voltage_units": "V",
@@ -216,7 +216,10 @@
         "x": 1.5,
         "y": -0.5
     },
-    "xray_offset": -15.0,
+    "xray_offset": {
+        "x": -15.0,
+        "y": -40.0
+    },
     "xray_offset_units": "um",
     "xray_magnification_factor": {
         "x": 0.365,

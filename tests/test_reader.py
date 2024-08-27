@@ -102,12 +102,12 @@ def read_comment_file(filepath: str):
 
 
 COMMENT_LENGHTS = {
-    "kratos.vms": 50,
+    "kratos.vms": 51,
     "phi.vms": 312,
     "casa_header.vms": 1,
     "casa_process.vms": 144,
-    "specs_header.vms": 1,
-    "specs_block.vms": 8,
+    "specs_header.vms": 3,
+    "specs_block.vms": 11,
 }
 
 

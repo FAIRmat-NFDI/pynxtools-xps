@@ -60,6 +60,8 @@ UNIT_MAP = {
     "Percent": "",  # should be changed back to percent once pint is updated
     "atom": "dimensionless",
     "eV/atom": "eV",
+    "microm": "micrometer",
+    "d": "degree",
 }
 
 

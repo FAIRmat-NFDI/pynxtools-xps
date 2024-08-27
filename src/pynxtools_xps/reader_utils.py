@@ -432,8 +432,8 @@ def align_name_part(name_part: str):
         ":": "_",
     }
 
-    for key, val in replacements.items():
-        name_part = name_part.replace(key, val)
+    for original, replacement in replacements.items():
+        name_part = name_part.replace(original, replacement)
 
     return name_part
 
@@ -441,8 +441,40 @@ def align_name_part(name_part: str):
 def construct_entry_name(parts: List[str]) -> str:
     """Construct name for the NXentry instances."""
     if len(parts) == 1:
-        return parts[0]
+        return align_name_part(parts[0])
     return "__".join([align_name_part(part) for part in parts])
+
+
+def split_value_and_unit(value: str) -> Union[Tuple[Union[int, float], str], str]:
+    """
+    Splits a string into a numerical value and its associated unit.
+
+    If the string contains a pattern where a number (which can be negative and
+    in scientific notation) is followed by a unit, it returns a tuple containing
+    the value (as a float) and the unit (as a string). If the string does not match
+    this pattern, it returns the original string.
+
+    Parameters
+    ----------
+    value : str
+        The input string to be split.
+
+    Returns
+    -------
+    (Union[Tuple[Union[int, float], str], str])
+        - A tuple with the value and unit if the string matches the pattern.
+        - The original string if it does not match the pattern.
+
+    """
+    match = re.match(r"^(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\s*([a-zA-Z/\s]+)$", value)
+    if match:
+        value = float(match.group(1)) if "." in match.group(1) else int(match.group(1))
+        unit = match.group(2).replace(" ", "")  # Remove any internal spaces in the unit
+
+        from pynxtools_xps.value_mappers import convert_units
+
+        return value, convert_units(unit)
+    return value, ""
 
 
 ureg = pint.UnitRegistry()

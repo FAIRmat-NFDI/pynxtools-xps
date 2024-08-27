@@ -27,6 +27,7 @@ from pynxtools_xps.kratos.metadata_kratos import KratosParser
 
 from pynxtools_xps.reader_utils import (
     convert_pascal_to_snake,
+    split_value_and_unit,
 )
 
 
@@ -162,11 +163,16 @@ def _handle_kratos_block_comments(comment_list: List[str]) -> Dict[str, Any]:
 def _handle_misc_comments(comment_list: List[str]) -> Dict[str, str]:
     """Handle any other comments."""
     comments = {}
-    for line in comment_list:
-        for sep in ("=", ":"):
+    for sep in ("=", ":"):
+        for line in comment_list:
             try:
-                key, value = [part.strip(" ") for part in line.split("=", 1)]
-                comments[convert_pascal_to_snake(key)] = value
+                key, value = [part.strip(" ") for part in line.split(sep, 1)]
+                key = convert_pascal_to_snake(key)
+                value, unit = split_value_and_unit(value)
+
+                comments[key] = value
+                if unit:
+                    comments[f"{key}/@units"] = unit
             except ValueError:
                 continue
     return comments

@@ -38,6 +38,7 @@ from pynxtools_xps.reader_utils import (
     construct_entry_name,
     safe_arange_with_edges,
     convert_pascal_to_snake,
+    split_value_and_unit,
 )
 
 from pynxtools_xps.value_mappers import (
@@ -818,6 +819,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
             "energy_scan_mode": convert_energy_scan_mode,
             "xray_source": _convert_xray_source_params,
             "xray_stigmator": _map_to_xy,
+            "xray_offset": _map_to_xy,
             "xray_magnification_factor": _map_to_xy,
             "xray_delay_factor": _map_to_xy,
             "xray_high_power": convert_bool,
@@ -1274,7 +1276,9 @@ class PhiParser:  # pylint: disable=too-few-public-methods
         }
 
         try:
-            value, unit = value.split(" ")
+            value, unit = split_value_and_unit(value)
+
+            # value, unit = value.split(" ")
         except ValueError:
             unit = ""
 

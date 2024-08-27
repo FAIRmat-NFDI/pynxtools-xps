@@ -259,6 +259,9 @@ class VamasMapper(XPSMapper):
             if val:
                 entry_parts += [val]
 
+        if len(entry_parts) == 1:
+            entry_parts += [spectrum["time_stamp"]]
+
         entry = construct_entry_name(entry_parts)
         entry_parent = f"/ENTRY[{entry}]"
 

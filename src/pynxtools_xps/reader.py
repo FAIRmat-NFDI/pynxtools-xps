@@ -379,7 +379,7 @@ class XPSReader(MultiFormatReader):
         """
 
         def check_for_same_entries(
-            dicts: List[Dict[str, any]],
+            dicts: List[Dict[str, Any]],
         ) -> Optional[Tuple[Set[str], List[Set[int]]]]:
             """
             Checks whether the input dictionaries have the same entries and identifies which
@@ -398,7 +398,7 @@ class XPSReader(MultiFormatReader):
             """
             entry_pattern = re.compile(r"/ENTRY\[(.*?)\]")
 
-            entry_to_dicts = {}
+            entry_to_dicts: Dict[str, Set] = {}
 
             for i, d in enumerate(dicts):
                 for key in d.keys():

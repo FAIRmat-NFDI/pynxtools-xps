@@ -153,7 +153,6 @@ def save_to_stl(indices, vertices, filename):
 
 if __name__ == "__main__":
     folder = os.path.dirname(__file__)
-    print(folder)
     shapes = {
         "sample": (create_flat_cuboid_arrays, (1, 2, 1.3, 0.3)),
         "beam": (create_flat_cuboid_arrays, (1, 10, 0.1, 0.2)),

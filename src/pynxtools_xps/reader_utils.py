@@ -20,8 +20,9 @@ Helper functions for populating NXmpes template
 #
 import re
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Tuple, Union, Optional
+import logging
 from pathlib import Path
+from typing import Any, Dict, List, Tuple, Union, Optional
 from scipy.interpolate import interp1d
 import numpy as np
 import pint
@@ -29,6 +30,8 @@ import pint
 from dataclasses import dataclass
 
 from pynxtools_xps.value_mappers import convert_units
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -40,13 +43,16 @@ class XpsDataclass:
         for field_name, field_def in self.__dataclass_fields__.items():
             actual_type = type(getattr(self, field_name))
             if actual_type != field_def.type:
-                print(f"\t{field_name}: '{actual_type}' instead of '{field_def.type}'")
+                logger.info
+                logger.warning(
+                    f"Type mismatch in dataclass {type(self).__name__}. {field_name}: '{actual_type}' instead of '{field_def.type}'"
+                )
                 ret = False
         return ret
 
     def __post_init__(self):
         if not self.validate_types():
-            raise ValueError("Wrong types")
+            raise ValueError(f"Type mismatch in dataclass {type(self).__name__}")
 
     def dict(self):
         return self.__dict__.copy()

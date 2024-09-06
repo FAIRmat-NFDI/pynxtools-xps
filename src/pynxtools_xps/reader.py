@@ -155,11 +155,12 @@ class XPSReader(MultiFormatReader):
     }
 
     __file_err_msg__ = (
-        "Need an XPS data file with the following extension: " f"{__prmt_file_ext__}"
+        "Need an XPS data file with one of the following extensions: "
+        f"{__prmt_file_ext__}"
     )
 
     __vndr_err_msg__ = (
-        "Need an XPS data file from the following vendors: " f"{__vendors__}"
+        "Need an XPS data file from one of the following vendors: " f"{__vendors__}"
     )
 
     def __init__(self, *args, **kwargs):

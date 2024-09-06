@@ -26,6 +26,7 @@ import re
 import warnings
 import copy
 import datetime
+import logging
 import struct
 from typing import Any, Dict, List, Union
 from pathlib import Path
@@ -53,6 +54,8 @@ from pynxtools_xps.phi.phi_data_model import (
     PhiSpectralRegion,
     PhiSpatialArea,
 )
+
+logger = logging.getLogger(__name__)
 
 SETTINGS_MAP: Dict[str, str] = {
     "FileDesc": "file_description",
@@ -1243,7 +1246,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
         elif binary_size / datasize == 8:
             self.encoding = encodings_map["double"]
         else:
-            print("This binary encoding is not supported.")
+            logger.error("This binary encoding is not supported.")
 
     def extract_unit(self, key: str, value):
         """
@@ -1277,8 +1280,6 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         try:
             value, unit = split_value_and_unit(value)
-
-            # value, unit = value.split(" ")
         except ValueError:
             unit = ""
 

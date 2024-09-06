@@ -26,6 +26,7 @@ Specs Lab Prodigy SLE format, to be passed to mpes nxdl
 import re
 import struct
 import copy
+import logging
 from typing import Dict, Any
 import warnings
 from datetime import datetime
@@ -49,6 +50,8 @@ from pynxtools_xps.value_mappers import (
     convert_measurement_method,
     get_units_for_key,
 )
+
+logger = logging.getLogger(__name__)
 
 UNITS: Dict[str, str] = {
     "electronanalyser/work_function": "eV",
@@ -104,7 +107,12 @@ class SleMapperSpecs(XPSMapper):
 
         """
         version = self._get_sle_version()
-        return self.versions_map[version]()
+        try:
+            return self.versions_map[version]()
+        except KeyError as exc:
+            raise KeyError(
+                f"Version f{version} of SPECS Prodigy is currently not supported."
+            ) from exc
 
     def _get_sle_version(self):
         """Get the Prodigy SLE version from the file."""
@@ -1336,7 +1344,7 @@ class SleProdigyParser(ABC):
         elif data / chunksize == 8:
             self.encoding = encodings_map["double"]
         else:
-            print("This binary encoding is not supported.")
+            logger.error("This binary encoding is not supported.")
 
     @abstractmethod
     def _flatten_xml(self, xml):

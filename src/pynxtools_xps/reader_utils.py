@@ -43,7 +43,6 @@ class XpsDataclass:
         for field_name, field_def in self.__dataclass_fields__.items():
             actual_type = type(getattr(self, field_name))
             if actual_type != field_def.type:
-                logger.info
                 logger.warning(
                     f"Type mismatch in dataclass {type(self).__name__}. {field_name}: '{actual_type}' instead of '{field_def.type}'"
                 )

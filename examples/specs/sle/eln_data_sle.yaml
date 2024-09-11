@@ -67,7 +67,8 @@ instrument:
     device_information:
       vendor: SPECS GmbH
       model: 5-axis manipulator
-      identifier: v1.0
+      identifier:
+        identifier: v1.0
     temperature_sensor:
       name: type K thermocouple
       measurement: temperature
@@ -140,7 +141,8 @@ instrument:
         unit: null
 sample:
   name: Polycristalline Au foil
-  sample_id: S718
+  identifier:
+    identifier: S718
   physical_form: foil
   situation: vacuum
   substance:

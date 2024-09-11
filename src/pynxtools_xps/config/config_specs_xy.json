@@ -25,8 +25,12 @@
     "@default":"electronanalyser",
     "device_information":{
       "vendor":"@eln",
-      "identifier":"@eln",
-      "model":"@eln"
+      "model":"@eln",
+      "identifier":{
+        "service":"@eln",
+        "identifier":"@eln",
+        "is_persistent":"@eln"
+      }
     },
     "energy_resolution":{
       "physical_quantity":"energy",
@@ -40,8 +44,12 @@
       "probe":"photon",
       "device_information":{
         "vendor":"@eln",
-        "identifier":"@eln",
-        "model":"@eln"
+        "model":"@eln",
+        "identifier":{
+          "service":"@eln",
+          "identifier":"@eln",
+          "is_persistent":"@eln"
+        }
       },
       "associated_beam":"/entry/instrument/beam_xray"
     },
@@ -68,7 +76,11 @@
       "device_information":{
         "vendor":"@eln",
         "model":"@eln",
-        "identifier":"@eln"
+        "identifier":{
+          "service":"@eln",
+          "identifier":"@eln",
+          "is_persistent":"@eln"
+        }
       },
       "energy_resolution":{
         "physical_quantity":"energy",
@@ -89,7 +101,11 @@
         "device_information":{
           "vendor":"@eln",
           "model":"@eln",
-          "identifier":"@eln"
+          "identifier":{
+            "service":"@eln",
+            "identifier":"@eln",
+            "is_persistent":"@eln"
+          }
         }
       },
       "ENERGYDISPERSION[energydispersion]":{
@@ -104,7 +120,11 @@
         "device_information":{
           "vendor":"@eln",
           "model":"@eln",
-          "identifier":"@eln"
+          "identifier":{
+            "service":"@eln",
+            "identifier":"@eln",
+            "is_persistent":"@eln"
+          }
         }
       },
       "DETECTOR[detector]":{
@@ -118,7 +138,11 @@
         "device_information":{
           "vendor":"@eln",
           "model":"@eln",
-          "identifier":"@eln"
+          "identifier":{
+            "service":"@eln",
+            "identifier":"@eln",
+            "is_persistent":"@eln"
+          }
         },
         "raw_data":{
           "@signal":"raw",
@@ -133,7 +157,11 @@
       "device_information":{
         "vendor":"@eln",
         "model":"@eln",
-        "identifier":"@eln"
+        "identifier":{
+          "service":"@eln",
+          "identifier":"@eln",
+          "is_persistent":"@eln"
+        }
       },
       "temperature_sensor":{
         "name":"@eln",
@@ -200,7 +228,9 @@
   },
   "/ENTRY/SAMPLE[sample]":{
     "name":"@eln",
-    "sample_id":"@eln",
+    "identifier":{
+      "identifier":"@eln"
+    },
     "atom_types":"@eln",
     "physical_form":"@eln",
     "situation":"@eln",

@@ -28,7 +28,11 @@
     "device_information":{
       "vendor":"@attrs:instrument/vendor",
       "model":"@attrs:instrument/instrument_model",
-      "identifier":"@eln"
+      "identifier":{
+        "service":"@eln",
+        "identifier":"@eln",
+        "is_persistent":"@eln"
+      }
     },
     "energy_resolution":{
       "physical_quantity":"energy",
@@ -42,8 +46,12 @@
       "probe":"@eln",
       "device_information":{
         "vendor":"@eln",
-        "identifier":"@eln",
-        "model":"@eln"
+        "model":"@eln",
+        "identifier":{
+          "service":"@eln",
+          "identifier":"@eln",
+          "is_persistent":"@eln"
+        }
       },
       "anode_material":"@attrs:xray_source/xray_anode_material",
       "anode_position":"@attrs:xray_source/xray_anode_position",
@@ -317,7 +325,11 @@
       "device_information":{
         "vendor":"@eln",
         "model":"@eln",
-        "identifier":"@eln"
+        "identifier":{
+          "service":"@eln",
+          "identifier":"@eln",
+          "is_persistent":"@eln"
+        }
       },
       "energy_resolution":{
         "physical_quantity":"energy",
@@ -337,7 +349,11 @@
         "device_information":{
           "vendor":"@eln",
           "model":"@eln",
-          "identifier":"@eln"
+          "identifier":{
+            "service":"@eln",
+            "identifier":"@eln",
+            "is_persistent":"@eln"
+          }
         },
         "LENS_EM[lens_2]":{
           "name":"Lens 2",
@@ -376,7 +392,11 @@
         "device_information":{
           "vendor":"@eln",
           "model":"@eln",
-          "identifier":"@eln"
+          "identifier":{
+            "service":"@eln",
+            "identifier":"@eln",
+            "is_persistent":"@eln"
+          }
         }
       },
       "DETECTOR[detector]":{
@@ -384,7 +404,11 @@
         "device_information":{
           "vendor":"@eln",
           "model":"@eln",
-          "identifier":"@eln"
+          "identifier":{
+            "service":"@eln",
+            "identifier":"@eln",
+            "is_persistent":"@eln"
+          }
         },
         "amplifier_type":"@eln",
         "delay_before_acquire":"@attrs:detector/delay_before_acquire",
@@ -408,7 +432,11 @@
       "device_information":{
         "vendor":"@eln",
         "model":"@eln",
-        "identifier":"@eln"
+        "identifier":{
+          "service":"@eln",
+          "identifier":"@eln",
+          "is_persistent":"@eln"
+        }
       },
       "temperature_sensor":{
         "name":"@eln",
@@ -536,7 +564,9 @@
   },
   "/ENTRY/SAMPLE[sample]":{
     "name":"@eln",
-    "sample_id":"@eln",
+    "identifier":{
+      "identifier":"@eln"
+    },
     "atom_types":"@eln",
     "physical_form":"@eln",
     "situation":"@eln",
@@ -589,7 +619,9 @@
   },
 "/ENTRY[Su1s]/SAMPLE[sample]":{
     "name":"@eln",
-    "sample_id":"@eln",
+    "identifier":{
+      "identifier":"@eln"
+    },
     "atom_types":"@eln",
     "physical_form":"@eln",
     "situation":"@eln",

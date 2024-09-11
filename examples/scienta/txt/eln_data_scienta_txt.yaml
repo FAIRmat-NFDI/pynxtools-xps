@@ -22,7 +22,8 @@ instrument:
     device_information:
       vendor: Helmholtz-Zentrum Berlin
       model: BESSY II
-      identifier: "2.0"
+      identifier:
+        identifier: "2.0"
     current:
       value: 298
       unit: mA
@@ -67,7 +68,8 @@ instrument:
     device_information:
       vendor: Scienta Omicron
       model: 5-axis manipulator
-      identifier: v1.0
+      identifier: 
+        identifier: v1.0
     temperature_sensor:
       name: type K thermocouple
       measurement: temperature
@@ -147,7 +149,8 @@ instrument:
       value: 0.0
       unit: A
 sample:
-  sample_id: 1
+  identifier:
+    identifier: 1
   description: Cu-HHTP/Glass on standard sample holder
   physical_form: pellet
   situation: vacuum

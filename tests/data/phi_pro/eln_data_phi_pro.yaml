@@ -20,7 +20,8 @@ instrument:
     device_information:
       vendor: PHI Electronics
       model: VersaProbe 4 X-ray Source
-      identifier: v1.0
+      identifier:
+        identifier: v1.0
   beam_xray:
     distance:
       value: 0.0
@@ -144,7 +145,8 @@ instrument:
         unit: null
 sample:
   name: SnO2 10nnm
-  sample_id: 1
+  identifier:
+    identifier: 1
   physical_form: pellet
   situation: vacuum
   substance:

@@ -11,7 +11,8 @@ instrument:
   device_information:
     vendor: SPECS GmbH
     model: XPS setup
-    identifier: v1.0
+    identifier:
+      identifier: v1.0
   energy_resolution:
     type: calibrated
     resolution:
@@ -59,7 +60,8 @@ instrument:
     device_information:
       vendor: SPECS GmbH
       model: 5-axis manipulator
-      identifier: v1.0
+      identifier:
+        identifier: v1.0
     temperature_sensor:
       name: type K thermocouple
       measurement: temperature

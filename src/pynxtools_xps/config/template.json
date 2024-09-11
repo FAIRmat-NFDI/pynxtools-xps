@@ -13,9 +13,13 @@
     "ENTRY/INSTRUMENT[instrument]":{
       "@default": "electronanalyser",
       "device_information":{
-        "vendor":"None",
-        "identifier":"None",
-        "model":"None"
+        "vendor":"@eln",
+        "model":"@eln",
+        "identifier":{
+          "service":"None",
+          "identifier":"None",
+          "is_persistent":"None"
+        }
       },
       "energy_resolution":{
         "physical_quantity":"energy",
@@ -29,9 +33,13 @@
         "name":"None",
         "probe":"None",
         "device_information":{
-          "vendor":"None",
-          "identifier":"None",
-          "model":"None"
+          "vendor":"@eln",
+          "model":"@eln",
+          "identifier":{
+            "service":"None",
+            "identifier":"None",
+            "is_persistent":"None"
+          }
         },
         "associated_beam":"None"
       },
@@ -55,9 +63,13 @@
         "fast_axes":"None",
         "slow_axes":"None",
         "device_information":{
-          "vendor":"None",
-          "model":"None",
-          "identifier":"None"
+          "vendor":"@eln",
+          "model":"@eln",
+          "identifier":{
+            "service":"None",
+            "identifier":"None",
+            "is_persistent":"None"
+          }
         },
         "energy_resolution":{
           "physical_quantity":"energy",
@@ -75,9 +87,13 @@
           "contrast_aperture":"None",
           "iris":"None",
           "device_information":{
-            "vendor":"None",
-            "model":"None",
-            "identifier":"None"
+            "vendor":"@eln",
+            "model":"@eln",
+            "identifier":{
+              "service":"None",
+              "identifier":"None",
+              "is_persistent":"None"
+            }
           }
         },
         "ENERGYDISPERSION[energydispersion]":{
@@ -88,9 +104,13 @@
           "entrance_slit":"None",
           "exit_slit":"None",
           "device_information":{
-            "vendor":"None",
-            "model":"None",
-            "identifier":"None"
+            "vendor":"@eln",
+            "model":"@eln",
+            "identifier":{
+              "service":"None",
+              "identifier":"None",
+              "is_persistent":"None"
+            }
           }
         },
         "DETECTOR[detector]":{
@@ -98,9 +118,13 @@
           "amplifier_type":"None",
           "detector_type":"None",
           "device_information":{
-            "vendor":"None",
-            "model":"None",
-            "identifier":"None"
+            "vendor":"@eln",
+            "model":"@eln",
+            "identifier":{
+              "service":"None",
+              "identifier":"None",
+              "is_persistent":"None"
+            }
           },
           "raw_data":{
             "@signal":"raw",
@@ -113,9 +137,13 @@
       },
       "MANIPULATOR[manipulator]":{
         "device_information":{
-          "vendor":"None",
-          "model":"None",
-          "identifier":"None"
+          "vendor":"@eln",
+          "model":"@eln",
+          "identifier":{
+            "service":"None",
+            "identifier":"None",
+            "is_persistent":"None"
+          }
         },
         "temperature_sensor":{
           "name":"None",
@@ -212,6 +240,9 @@
     },
     "ENTRY/SAMPLE[sample]":{
       "name":"None",
+      "identifier":{
+        "identifier":"@eln"
+      },
       "atom_types":"@eln",
       "physical_form":"None",
       "situation":"None",

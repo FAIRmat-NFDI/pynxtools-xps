@@ -66,9 +66,7 @@ test_params = [
     "nxdl, sub_reader_data_dir, ref_log_file",
     test_params,
 )
-def test_nexus_conversion(
-    nxdl, sub_reader_data_dir, tmp_path, caplog, ref_log_file=None
-):
+def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog, ref_log_file):
     """
     Test XPS reader
 
@@ -112,7 +110,7 @@ def test_nexus_conversion(
         files_or_dir=files_or_dir,
         tmp_path=tmp_path,
         caplog=caplog,
-        ref_log_file=ref_log_file,
+        ref_log_file=ref_log_filepath,
     )
     test.convert_to_nexus(caplog_level="WARNING", ignore_undocumented=True)
     # test.test_verify_nexus(caplog_level="WARNING")

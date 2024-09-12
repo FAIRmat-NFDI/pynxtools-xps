@@ -70,15 +70,9 @@
         "@default":"detector",
         "name":"@attrs:analyzer_info/name",
         "description":"@eln",
-<<<<<<< HEAD
         "work_function":"@eln",
         "work_function/@units":"@eln",
         "fast_axes":null,
-=======
-        "work_function":"@xps_token:region/effective_workfunction",
-        "work_function/@units":"eV",
-        "fast_axes":"None",
->>>>>>> 5aa540f (use reference log files in tests)
         "slow_axes":"energy",
         "device_information":{
           "vendor":"@eln",

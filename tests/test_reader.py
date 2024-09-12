@@ -110,9 +110,6 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, ref_log_file, ignore_sectio
     caplog : _pytest.logging.LogCaptureFixture
         Pytest fixture variable, used to capture the log messages during the
         test.
-    ref_log_file: str
-            Full path string to the reference log file generated from the same
-            set of input files.
 
     Returns
     -------
@@ -135,7 +132,7 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, ref_log_file, ignore_sectio
         files_or_dir=files_or_dir,
         tmp_path=tmp_path,
         caplog=caplog,
-        ref_log_file=ref_log_file,
+        ref_log_file=ref_log_filepath,
     )
     test.convert_to_nexus(caplog_level="WARNING", ignore_undocumented=True)
     test.test_verify_nexus(caplog_level="WARNING")

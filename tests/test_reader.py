@@ -138,7 +138,9 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, ref_log_file, ignore_sectio
         ref_log_file=ref_log_file,
     )
     test.convert_to_nexus(caplog_level="WARNING", ignore_undocumented=True)
+    test.test_verify_nexus(caplog_level="WARNING")
     test.check_reproducibility_of_nexus(ignore_sections=ignore_sections)
+    test.test_parse_nomad()
 
 
 def read_comment_file(filepath: str):

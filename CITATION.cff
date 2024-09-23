@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+title: A pynxtools plugin for XPS (X-ray Photoelectron Spectroscopy) data readers
+message:
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+version: 0.4.3
+authors:
+  - given-names: Lukas
+    family-names: Pielsticker
+    orcid: 'https://orcid.org/0000-0001-9361-8333'
+  - given-names: Rubel
+    family-names: Mozumder
+    orcid: 'https://orcid.org/0009-0007-5926-6646'
+  - given-names: Florian
+    family-names: Dobener
+    orcid: 'https://orcid.org/0000-0003-1987-6224'
+  - given-names: Sandor
+    family-names: Brockhauser
+    orcid: 'https://orcid.org/0000-0002-9700-4803'
+# NOTE: After publishing this software in zenodo, replace add DOI and URL
+# Each indivisual version has a own doi, but DOI should be the all version
+# doi that will always points to the latest version
+# of the release. Similarly, zenodo will provide single URL for the published
+# software.
+doi: TODO
+repository-code: 'https://github.com/FAIRmat-NFDI/pynxtools-xps'
+url: TODO
+abstract:
+ TODO: Add abstract
+
+
+license: Apache-2.0

@@ -50,6 +50,7 @@ dev = [
     "types-requests",
     "uv",
     "pre-commit",
+    "cffconvert"
 ]
 docs = [
     "mkdocs",

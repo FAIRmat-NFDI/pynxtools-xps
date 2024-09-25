@@ -6,6 +6,7 @@
 ![](https://img.shields.io/pypi/l/pynxtools-xps)
 ![](https://img.shields.io/pypi/v/pynxtools-xps)
 ![](https://coveralls.io/repos/github/FAIRmat-NFDI/pynxtools_xps/badge.svg?branch=main)
+<!-- [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1323437.svg)]() -->
 
 # A reader for XPS data
 

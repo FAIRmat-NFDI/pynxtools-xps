@@ -1,0 +1,49 @@
+name: Create Release After CITATION.cff update
+
+on:
+  pull_request:
+    types: [merged]
+    branches:
+      - main
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if PR was created by the version update workflow
+        id: check-pr
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          if [[ "$PR_TITLE" != *"[ci skip release]"* ]]; then
+            echo "This PR was not created by the version update workflow."
+            exit 1
+          fi
+
+      - name: Get the merged PR tag
+        id: get-tag
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          # Extract the tag from the PR title
+          TAG=$(echo "$PR_TITLE" | grep -oP 'v[0-9]+\.[0-9]+\.[0-9]+')
+          echo "tag=$TAG" >> $GITHUB_ENV
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag=${{ env.tag }}
+          if [ -z "$tag" ]; then
+            echo "No valid tag found in PR title!"
+            exit 1
+          fi
+
+          # Create the release
+          gh release create ${tag} \
+              --repo "${{ github.repository }}" \
+              --title "${tag}" \
+              --generate-notes

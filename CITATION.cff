@@ -19,7 +19,7 @@ authors:
     orcid: 'https://orcid.org/0000-0003-4728-0786'
   - given-names: Laurenz
     family-names: Rettig
-    orcid: 'https://orcid.org/0000-0002-0725-6696'    
+    orcid: 'https://orcid.org/0000-0002-0725-6696'
   - given-names: Sandor
     family-names: Brockhauser
     orcid: 'https://orcid.org/0000-0002-9700-4803'
@@ -33,12 +33,12 @@ keywords:
   - NeXus
 abstract:
   pynxtools-xps is a reader plugin for pynxtools (https://github.com/FAIRmat-NFDI/pynxtools)
-  written in Python. pynxtools-xps is a tool for reading and translating data from various 
+  written in Python. pynxtools-xps is a tool for reading and translating data from various
   propietary and open data formats from technology partners and the wider X-ray photoelectron spectroscopy
   community and standardizing it such that it is compliant with the NeXus application definition NXmpes and NXxps
-  (https://fairmat-nfdi.github.io/nexus_definitions/). 
-  
-  pynxtools-xps is developed both as a standalone reader and as a tool within NOMAD, an open-source data 
+  (https://fairmat-nfdi.github.io/nexus_definitions/).
+
+  pynxtools-xps is developed both as a standalone reader and as a tool within NOMAD, an open-source data
   management platform for materials science ((https://nomad-lab.eu/nomad-lab/).
 
   The work is funded by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) - 460197019 (FAIRmat)

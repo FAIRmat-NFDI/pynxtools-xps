@@ -28,15 +28,37 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.x"
+
       - name: Install dependencies
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
+
           uv pip install build
+      
+      - name: Get Git tag version
+        id: git_tag_version
+        run: echo "GIT_TAG_VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Parse CITATION.cff version
+        id: citation_version
+        run: |
+          CITATION_VERSION=$(grep '^version:' CITATION.cff | cut -d' ' -f2)
+          echo "CITATION_VERSION=$CITATION_VERSION" >> $GITHUB_ENV
+
+      - name: Verify version consistency
+        run: |
+          if [ "$GIT_TAG_VERSION" != "$CITATION_VERSION" ]; then
+            echo "Version mismatch: Git tag is $GIT_TAG_VERSION, CITATION.cff version is $CITATION_VERSION"
+            exit 1
+          fi
+      
       - name: Build package
         run: python -m build
+
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

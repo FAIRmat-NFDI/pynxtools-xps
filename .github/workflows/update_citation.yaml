@@ -11,6 +11,9 @@ on:
         required: true
         default: false  # No quotes, set as boolean
 
+env:
+  UV_SYSTEM_PYTHON: true
+
 jobs:
   update-version-and-pr:
     runs-on: ubuntu-latest
@@ -34,34 +37,38 @@ jobs:
           jq -r .tag_name)
           echo "LATEST_RELEASE=${LATEST_RELEASE}" >> $GITHUB_ENV
 
-      - name: Install semver
+      - name: Install dependencies
         run: |
-          npm install -g semver
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          uv pip install semver
 
-      - name: Validate new tag against SemVer
+      - name: Validate new tag against SemVer using Python semver
         run: |
           NEW_TAG="${{ github.event.inputs.tag }}"
           LATEST_RELEASE="${{ env.LATEST_RELEASE }}"
 
-          # Check if the new tag is in proper SemVer format
-          if [[ ! "$NEW_TAG" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "New tag ($NEW_TAG) is not a valid semantic version!"
-            exit 1
-          fi
-
           # Strip the 'v' prefix for comparison
           NEW_TAG_NO_V=${NEW_TAG#v}
-          echo "New Tag (no 'v'): $NEW_TAG_NO_V"
-          echo "Latest Release: ${LATEST_RELEASE#v}"
+          LATEST_RELEASE_NO_V=${LATEST_RELEASE#v}
 
-          # Compare versions using SemVer
-          if semver -r "${LATEST_RELEASE#v}" "$NEW_TAG_NO_V"; then
-            echo "New tag ($NEW_TAG_NO_V) is greater than latest release (${LATEST_RELEASE#v})"
-          else
-            echo "New tag ($NEW_TAG_NO_V) is not greater than latest release (${LATEST_RELEASE#v})!"
-            exit 1
-          fi
+          # Python script for version comparison
+          python3 -c "
+          import semver
+          new_tag = '${NEW_TAG_NO_V}'
+          latest_release = '${LATEST_RELEASE_NO_V}'
 
+          # Check if new tag is valid semver
+          if not semver.VersionInfo.is_valid(new_tag):
+              print(f'New tag ({new_tag}) is not a valid semantic version!')
+              exit(1)
+
+          # Compare versions
+          if semver.compare(new_tag, latest_release) > 0:
+              print(f'New tag ({new_tag}) is greater than latest release ({latest_release})')
+          else:
+              print(f'New tag ({new_tag}) is not greater than latest release ({latest_release})!')
+              exit(1)
+          "
       - name: Update version in CITATION.cff
         run: |
           NEW_VERSION="${{ github.event.inputs.tag }}"

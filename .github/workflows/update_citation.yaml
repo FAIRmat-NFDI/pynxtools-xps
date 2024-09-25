@@ -95,7 +95,7 @@ jobs:
           tag=${{ github.event.inputs.tag }}
           gh pr create \
               --repo "${{ github.repository }}" \
-              --title "Update CITATION.cff version to ${tag} [ci skip release]" \  # Unique identifier
+              --title "Update CITATION.cff version to '${tag}' [ci skip release]" \
               --head "update-version-${tag}" \
-              --base main \
-              --body "This PR updates the CITATION.cff version to ${tag}"
+              --base "main" \
+              --body "This PR updates the CITATION.cff version to '${tag}'"

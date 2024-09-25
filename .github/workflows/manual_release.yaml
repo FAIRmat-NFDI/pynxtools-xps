@@ -11,6 +11,12 @@ jobs:
   update-version-and-release:
     runs-on: ubuntu-latest
     steps:
+      - name: Check if branch is main
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "This workflow can only be run from the main branch."
+          exit 1
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:

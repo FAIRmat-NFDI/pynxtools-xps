@@ -2,7 +2,7 @@ name: Create Release After CITATION.cff update
 
 on:
   pull_request:
-    types: [merged]
+    types: [closed]
     branches:
       - main
 

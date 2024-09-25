@@ -50,7 +50,6 @@ dev = [
     "types-requests",
     "uv",
     "pre-commit",
-    "cffconvert" # validates CITATION.cff
 ]
 docs = [
     "mkdocs",

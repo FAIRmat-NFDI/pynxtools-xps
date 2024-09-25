@@ -1,3 +1,12 @@
+name: Update CITATION.cff version and create a new release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'New version'
+        required: true
+
 jobs:
   update-version-and-release:
     runs-on: ubuntu-latest

@@ -1,11 +1,3 @@
-name: Update CITATION.cff version and create a new release
-on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'New version'
-        required: true
-
 jobs:
   update-version-and-release:
     runs-on: ubuntu-latest
@@ -31,7 +23,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const { version } = github.event.inputs;
+            const version = github.inputs.version;
             github.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -40,15 +32,3 @@ jobs:
               base: `main`,
               body: `This PR updates the CITATION.cff version to ${version}`
             })
-
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.event.inputs.version }}
-          release_name: Release ${{ github.event.inputs.version }}
-          body: ${{ steps.changelog.outputs.changelog }}
-          draft: false
-          prerelease: false

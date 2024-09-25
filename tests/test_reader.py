@@ -30,18 +30,23 @@ test_cases = [
     ("vms_txt_export", "Vamas txt export"),
 ]
 
-test_params = []
-
-for test_case in test_cases:
-    for nxdl in READER_CLASS.supported_nxdls:
-        test_params += [pytest.param(nxdl, test_case[0], id=f"{test_case[1]}, {nxdl}")]
+test_params = [
+    pytest.param(
+        nxdl,
+        test_case[0],
+        f"{test_case[0]}_{nxdl.lower()}_ref.log",
+        id=f"{test_case[1]}, {nxdl}",
+    )
+    for test_case in test_cases
+    for nxdl in READER_CLASS.supported_nxdls
+]
 
 
 @pytest.mark.parametrize(
-    "nxdl, sub_reader_data_dir",
+    "nxdl, sub_reader_data_dir, ref_log_file",
     test_params,
 )
-def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
+def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog, ref_log_file):
     """
     Test XPS reader
 
@@ -60,6 +65,9 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
     caplog : _pytest.logging.LogCaptureFixture
         Pytest fixture variable, used to capture the log messages during the
         test.
+    ref_log_file: str
+            Full path string to the reference log file generated from the same
+            set of input files.
 
     Returns
     -------
@@ -74,15 +82,20 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
         *[os.path.dirname(__file__), "data", sub_reader_data_dir]
     )
 
+    ref_log_filepath = os.path.join(files_or_dir, ref_log_file)
+
     test = ReaderTest(
         nxdl=nxdl,
         reader_name=READER_NAME,
         files_or_dir=files_or_dir,
         tmp_path=tmp_path,
         caplog=caplog,
+        ref_log_file=ref_log_filepath,
     )
     test.convert_to_nexus(caplog_level="WARNING", ignore_undocumented=True)
+    # test.test_verify_nexus(caplog_level="WARNING")
     test.check_reproducibility_of_nexus()
+    test.test_parse_nomad()
 
 
 def read_comment_file(filepath: str):

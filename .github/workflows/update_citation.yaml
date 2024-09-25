@@ -1,4 +1,4 @@
-name: Update CITATION.cff version and create a new release
+name: Update CITATION.cff version and create a new PR
 
 on:
   workflow_dispatch:
@@ -9,48 +9,48 @@ on:
       prerelease:
         description: 'Should this release be a prerelease?'
         required: true
-        default: 'false'
-        options:
-          - true
-          - false
+        default: false  # No quotes, set as boolean
 
 jobs:
-  update-version-and-release:
+  update-version-and-pr:
     runs-on: ubuntu-latest
     steps:
-      - name: Check if branch is main
-        if: github.ref != 'refs/heads/main'
-        run: |
-          echo "This workflow can only be run from the main branch."
-          exit 1
-      
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - name: Check if branch is main
+        run: |
+          if [ "${GITHUB_REF##*/}" != "main" ]; then
+            echo "This workflow can only be run from the main branch."
+            exit 1
+          fi
+
       - name: Get the latest release version from GitHub
-        id: get_latest_release
         run: |
           LATEST_RELEASE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
           "https://api.github.com/repos/${{ github.repository }}/releases/latest" | \
           jq -r .tag_name)
-          echo "Latest release version is $LATEST_RELEASE"
-          echo "::set-output name=latest_release::$LATEST_RELEASE"
+          echo "LATEST_RELEASE=${LATEST_RELEASE}" >> $GITHUB_ENV
+
+      - name: Install semver
+        run: |
+          npm install -g semver
 
       - name: Validate new tag against SemVer
         run: |
           NEW_TAG="${{ github.event.inputs.tag }}"
-          
+          LATEST_RELEASE="${{ env.LATEST_RELEASE }}"
+
           # Check if the new tag is in proper SemVer format
           if [[ ! "$NEW_TAG" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "New tag ($NEW_TAG) is not a valid semantic version!"
             exit 1
           fi
 
-          # Strip the 'v' prefix if it exists for comparison
+          # Strip the 'v' prefix for comparison
           NEW_TAG_NO_V=${NEW_TAG#v}
-
           echo "New Tag (no 'v'): $NEW_TAG_NO_V"
           echo "Latest Release: ${LATEST_RELEASE#v}"
 
@@ -65,7 +65,6 @@ jobs:
       - name: Update version in CITATION.cff
         run: |
           NEW_VERSION="${{ github.event.inputs.tag }}"
-          # Remove 'v' prefix for CITATION.cff version
           NEW_VERSION_NO_V=${NEW_VERSION#v}
           sed -i "s/^version: .*/version: ${NEW_VERSION_NO_V}/" CITATION.cff
 
@@ -78,27 +77,13 @@ jobs:
           git push origin update-version-${{ github.event.inputs.tag }}
 
       - name: Create pull request
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const tag = github.inputs.tag;
-            github.pulls.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `Update CITATION.cff version to ${tag}`,
-              head: `update-version-${tag}`,
-              base: `main`,
-              body: `This PR updates the CITATION.cff version to ${tag}`
-            })
-
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.event.inputs.tag }}
-          release_name: Release ${{ github.event.inputs.tag }}
-          body: ${{ steps.changelog.outputs.changelog }}
-          draft: false
-          prerelease: ${{ github.event.inputs.prerelease }}
+        run: |
+          tag=${{ github.event.inputs.tag }}
+          gh pr create \
+              --repo "${{ github.repository }}" \
+              --title "Update CITATION.cff version to ${tag} [ci skip release]" \  # Unique identifier
+              --head "update-version-${tag}" \
+              --base main \
+              --body "This PR updates the CITATION.cff version to ${tag}"

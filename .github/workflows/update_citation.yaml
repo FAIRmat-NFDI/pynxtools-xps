@@ -1,15 +1,15 @@
 name: Update CITATION.cff version and create a new PR
 
+permissions:
+  contents: write
+  pull-requests: write
+
 on:
   workflow_dispatch:
     inputs:
       tag:
         description: 'New version tag (e.g., v0.4.3)'
         required: true
-      prerelease:
-        description: 'Should this release be a prerelease?'
-        required: true
-        default: false  # No quotes, set as boolean
 
 env:
   UV_SYSTEM_PYTHON: true
@@ -29,11 +29,10 @@ jobs:
           python-version: "3.11"         
 
       - name: Check if branch is main
+        if: github.ref != 'refs/heads/main'
         run: |
-          if [ "${GITHUB_REF##*/}" != "main" ]; then
-            echo "This workflow can only be run from the main branch."
-            exit 1
-          fi
+          echo "This workflow can only be run from the main branch."
+          exit 1
 
       - name: Get the latest release version from GitHub
         run: |

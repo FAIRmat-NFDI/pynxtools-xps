@@ -132,7 +132,11 @@ def get_units_for_key(unit_key: str, unit_map: Dict[str, str]) -> str:
     return regex_match.group(1)
 
 
-def parse_datetime(datetime_string: str, possible_date_formats: List[str], tzinfo: datetime.tzinfo = datetime.timezone.utc) -> str:
+def parse_datetime(
+    datetime_string: str,
+    possible_date_formats: List[str],
+    tzinfo: datetime.tzinfo = datetime.timezone.utc,
+) -> str:
     """
     Convert a date string to ISO 8601 format with optional timezone handling.
 
@@ -167,7 +171,7 @@ def parse_datetime(datetime_string: str, possible_date_formats: List[str], tzinf
     for date_fmt in possible_date_formats:
         try:
             datetime_obj = datetime.datetime.strptime(datetime_string, date_fmt)
-            
+
             if tzinfo is not None:
                 datetime_obj = datetime_obj.replace(tzinfo=tzinfo)
 

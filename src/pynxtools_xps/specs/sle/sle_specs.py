@@ -32,14 +32,14 @@ import re
 import struct
 import copy
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, List
 import warnings
 from datetime import datetime
 import sqlite3
 from lxml import etree as ET
 from abc import ABC
-import xarray as xr
 import numpy as np
+import xarray as xr
 
 from pynxtools_xps.reader_utils import (
     XPSMapper,

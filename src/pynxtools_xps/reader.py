@@ -118,7 +118,7 @@ class XPSReader(MultiFormatReader):
 
     supported_nxdls = [
         "NXmpes",
-        # "NXxps",
+        "NXxps",
     ]
 
     reader_dir = Path(__file__).parent

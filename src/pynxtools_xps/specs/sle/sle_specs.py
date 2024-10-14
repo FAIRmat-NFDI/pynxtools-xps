@@ -87,8 +87,7 @@ class SleMapperSpecs(XPSMapper):
 
     def __init__(self):
         self.parsers = [
-            SleProdigyParserV1,
-            SleProdigyParserV4,
+            SleProdigyParser,
         ]
 
         self.versions_map = {}
@@ -337,11 +336,33 @@ KEYS_TO_DROP: List[str] = [
 POSSIBLE_DATE_FORMATS: List[str] = ["%Y-%b-%d %H:%M:%S.%f"]
 
 
-class SleProdigyParser(ABC):
+class SleProdigyParser:
     """
     Generic parser without reading capabilities,
     to be used as template for implementing parsers for different versions.
     """
+
+    supported_versions = [
+        "1.2",
+        "1.8",
+        "1.9",
+        "1.10",
+        "1.11",
+        "1.12",
+        "1.13",
+        "4.63",
+        "4.64",
+        "4.65",
+        "4.66",
+        "4.67",
+        "4.68",
+        "4.69",
+        "4.70",
+        "4.71",
+        "4.72",
+        "4.73",
+        "4.100",
+    ]
 
     def __init__(self):
         self.con = ""
@@ -350,7 +371,17 @@ class SleProdigyParser(ABC):
         self.sum_channels: bool = False
         self.remove_align: bool = True
 
-        self.encoding: List[str, float] = ["f", 4]
+        self.encodings_dtype = {
+            "short": np.int16,
+            "double": np.float64,
+            "float": np.float32,
+        }
+        self.encoding = np.float32
+
+        encodings_map: Dict[str, List[str, float]] = {
+            "double": ["d", 8],
+            "float": ["f", 4],
+        }
 
     def initiate_file_connection(self, filepath: str):
         """Set the sqllite connection of the file to be opened."""
@@ -380,17 +411,17 @@ class SleProdigyParser(ABC):
             Flat list of dictionaries containing one spectrum each.
 
         """
-        if "remove_align" in kwargs:
-            self.remove_align = kwargs["remove_align"]
-
-        if "sum_channels" in kwargs:
-            self.sum_channels = kwargs["sum_channels"]
+        self.remove_align = kwargs.get("remove_align", True)
+        self.sum_channels = kwargs.get("sum_channels", False)
 
         # initiate connection to sql file
         self.initiate_file_connection(filepath)
 
         # read and parse sle file
         self._get_xml_schedule()
+        self._get_xml_schedule()
+        self._get_xml_schedule()
+
         self.spectra = flatten_xml(self.xml)
         self._attach_node_ids()
         self._remove_empty_nodes()
@@ -413,12 +444,32 @@ class SleProdigyParser(ABC):
 
         return self.spectra
 
+    def _addVersion(self):
+        self.cursor.execute('SELECT Value FROM Configuration WHERE Key="Version"')
+        self.version = self.cursor.fetchone()[0]
+
+    def _addAppVersion(self):
+        self.cursor.execute('SELECT Value FROM Configuration WHERE Key="AppVersion"')
+        self.app_version = self.cursor.fetchone()[0]
+
+    def _get_xml_from_key(key: str):
+        cur = self.con.cursor()
+        query = f"SELECT Value FROM Configuration WHERE Key={key}"
+        cur.execute(query)
+        return ET.fromstring(self.cursor.fetchone()[0])
+
     def _get_xml_schedule(self):
         """Parse the schedule into an XML object."""
-        cur = self.con.cursor()
-        query = 'SELECT Value FROM Configuration WHERE Key="Schedule"'
-        cur.execute(query)
-        self.xml = ET.fromstring(cur.fetchall()[0][0])
+        self.xml_schedule = _get_xml_from_key("Schedule")
+
+    def _get_xml_context(self):
+        """Parse the context into an XML object."""
+        self.xml_context = _get_xml_from_key("Context")
+
+    def _get_xml_metainfo(self):
+        XML = _get_xml_from_key("MetaInfo")
+        for i in XML.iter("Parameter"):
+            self.metainfo[i.attrib["name"].replace(" ", "_")] = i.text
 
     def _append_scan_data(self):
         """
@@ -1254,11 +1305,6 @@ class SleProdigyParser(ABC):
         cur.execute(query)
         data, chunksize = cur.fetchall()[0]
 
-        encodings_map: Dict[str, List[str, float]] = {
-            "double": ["d", 8],
-            "float": ["f", 4],
-        }
-
         if data / chunksize == 4:
             self.encoding = encodings_map["float"]
         elif data / chunksize == 8:
@@ -1357,32 +1403,3 @@ class SleProdigyParser(ABC):
         cur.execute(query)
         version = cur.fetchall()[0][0]
         return version
-
-
-class SleProdigyParserV1(SleProdigyParser):
-    """
-    Parser for SLE version 1.
-    """
-
-    supported_versions = ["1.2", "1.8", "1.9", "1.10", "1.11", "1.12", "1.13"]
-
-
-class SleProdigyParserV4(SleProdigyParser):
-    """
-    Parser for SLE version 4.
-    """
-
-    supported_versions = [
-        "4.63",
-        "4.64",
-        "4.65",
-        "4.66",
-        "4.67",
-        "4.68",
-        "4.69",
-        "4.70",
-        "4.71",
-        "4.72",
-        "4.73",
-        "4.100",
-    ]

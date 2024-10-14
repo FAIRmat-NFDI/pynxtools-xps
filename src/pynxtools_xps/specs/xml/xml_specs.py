@@ -22,7 +22,7 @@ Specs Lab Prodigy XML export, to be passed to mpes nxdl
 
 import re
 import xml.etree.ElementTree as ET
-from typing import Tuple, List, Any
+from typing import Tuple, List, Any, Dict
 import copy
 import xarray as xr
 import numpy as np
@@ -262,7 +262,7 @@ class XmlParserSpecs:
         ----------
         """
         root_element = ET.parse(file).getroot()
-        root_element.attrib[self.child_nm_reslvers] = []
+        root_element.attrib[self.child_nm_reslvers] = []  # type: ignore[assignment]
         child_num = len(root_element)
         parent_path = self._root_path
         skip_child = -1

@@ -29,14 +29,6 @@ dependencies = [
     "pint>=0.17",
     "pynxtools>=0.7.0",
 ]
-
-[project.entry-points."pynxtools.reader"]
-xps = "pynxtools_xps.reader:XPSReader"
-
-[project.urls]
-"Homepage" = "https://github.com/FAIRmat-NFDI/pynxtools-xps"
-"Bug Tracker" = "https://github.com/FAIRmat-NFDI/pynxtools-xps/issues"
-
 [project.optional-dependencies]
 dev = [
     "mypy",
@@ -59,6 +51,13 @@ docs = [
     "pymdown-extensions",
     "mkdocs-click"
 ]
+
+[project.urls]
+"Homepage" = "https://github.com/FAIRmat-NFDI/pynxtools-xps"
+"Bug Tracker" = "https://github.com/FAIRmat-NFDI/pynxtools-xps/issues"
+
+[project.entry-points."pynxtools.reader"]
+xps = "pynxtools_xps.reader:XPSReader"
 
 [tool.setuptools.packages.find]
 where = [

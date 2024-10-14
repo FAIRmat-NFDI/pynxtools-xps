@@ -267,8 +267,12 @@ class XmlParserSpecs:
         root_element.attrib[self.child_nm_resolvers] = []  # type: ignore[assignment]
 =======
         root_element = ET.parse(file).getroot()
+<<<<<<< HEAD
         root_element.attrib[self.child_nm_reslvers] = []
 >>>>>>> a3aa0db7 (initiate cleaner xml metadata parsing)
+=======
+        root_element.attrib[self.child_nm_reslvers] = []  # type: ignore[assignment]
+>>>>>>> 9ec8c8e7 (save current version)
         child_num = len(root_element)
         parent_path = self._root_path
         skip_child = -1

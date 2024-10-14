@@ -60,7 +60,7 @@ docs = [
 xps = "pynxtools_xps.reader:XPSReader"
 
 [project.entry-points.'nomad.plugin']
-xps_example = "pynxtools_mpes.nomad.entrypoints:xps_example"
+xps_example = "pynxtools_xps.nomad.entrypoints:xps_example"
 
 [tool.setuptools.packages.find]
 where = [

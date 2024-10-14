@@ -1,5 +1,5 @@
 prune *
 exclude *
-recursive-include src/pynxtools_xps *.py
+recursive-include src/pynxtools_xps *.py *.json
 include pyproject.toml README.md dev-requirements.txt
 recursive-include src/pynxtools_xps/nomad/examples

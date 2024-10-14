@@ -7,7 +7,7 @@ Created on Mon Jul 15 13:17:23 2024
 
 import re
 import copy
-from typing import Tuple, Dict, Any
+from typing import Tuple, Dict, Any, List
 
 from lxml import etree as ET
 
@@ -40,7 +40,7 @@ def extract_devices(elem: ET.Element) -> Dict[str, Any]:
 
 
 def step_profiling(elem: ET.Element) -> Dict[str, Any]:
-    settings = {}
+    settings: Dict[str, Any] = {}
 
     for setting in elem.iter():
         print(setting.tag, setting.attrib)
@@ -174,7 +174,7 @@ FUNC_MAP = {
 }
 
 
-def flatten_xml(xml: ET.Element) -> Dict[str, Any]:
+def flatten_xml(xml: ET.Element) -> List[Dict[str, Any]]:
     """
     Flatten the nested XML structure, keeping only the needed metadata.
 
@@ -208,7 +208,7 @@ def flatten_xml(xml: ET.Element) -> Dict[str, Any]:
 
     for measurement_type in MEASUREMENT_METHOD_MAP:
         for group in xml.iter(measurement_type):
-            data = {}
+            data: Dict[str, Any] = {}
             data["devices"] = []
             data["analysis_method"] = convert_measurement_method(measurement_type)
             process_element(group, data)

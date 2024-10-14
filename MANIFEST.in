@@ -1,0 +1,4 @@
+prune *
+exclude *
+recursive-include src/pynxtools_xps *.py
+include pyproject.toml README.md dev-requirements.txt

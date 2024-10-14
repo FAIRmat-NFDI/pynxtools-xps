@@ -851,10 +851,4 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
 
         possible_time_formats = ["%m/%d/%y %H:%M:%S"]
 
-        date_object = datetime.datetime.strptime(date, "%m/%d/%y %H:%M:%S").replace(
-            tzinfo=tz
-        )
-
-        return date_object.isoformat()
-
-        return parse_datetime(date, possible_time_formats, tzinfo)
+        return parse_datetime(date, possible_time_formats, tz)

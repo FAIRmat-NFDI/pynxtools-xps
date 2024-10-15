@@ -39,7 +39,12 @@ from pynxtools_xps.nomad.entrypoints import xps_example
 
 
 @pytest.mark.parametrize(
-    "mainfile", get_file_parameter(os.path.join(os.path.dirname(__file__), '..', 'src', 'pynxtools_xps', 'nomad', 'examples'))
+    "mainfile",
+    get_file_parameter(
+        os.path.join(
+            os.path.dirname(__file__), "..", "src", "pynxtools_xps", "nomad", "examples"
+        )
+    ),
 )
 def test_parse_nomad_examples(mainfile):
     """Test if NOMAD examples work."""

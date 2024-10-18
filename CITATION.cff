@@ -1,6 +1,6 @@
 cff-version: 1.2.0
-title: A pynxtools reader plugin for X-ray photoelectron spectroscopy (XPS) data
-version: 0.4.2
+title: 'pynxtools-xps: A pynxtools reader plugin for X-ray photoelectron spectroscopy (XPS) data'
+version: 0.4.4
 message:
   If you use this software, please cite it using the
   metadata from this file.
@@ -8,25 +8,25 @@ type: software
 authors:
   - given-names: Lukas
     family-names: Pielsticker
-    orcid: 'https://orcid.org/0000-0001-9361-8333'
+    orcid: https://orcid.org/0000-0001-9361-8333
   - given-names: Rubel
     family-names: Mozumder
-    orcid: 'https://orcid.org/0009-0007-5926-6646'
+    orcid: https://orcid.org/0009-0007-5926-6646
   - given-names: Florian
     family-names: Dobener
-    orcid: 'https://orcid.org/0000-0003-1987-6224'
+    orcid: https://orcid.org/0000-0003-1987-6224
   - given-names: Walid
     family-names: Hetaba
-    orcid: 'https://orcid.org/0000-0003-4728-0786'
+    orcid: https://orcid.org/0000-0003-4728-0786
   - given-names: Laurenz
     family-names: Rettig
-    orcid: 'https://orcid.org/0000-0002-0725-6696'
+    orcid: https://orcid.org/0000-0002-0725-6696
   - given-names: Sandor
     family-names: Brockhauser
-    orcid: 'https://orcid.org/0000-0002-9700-4803'
-doi: TODO
-repository-code: 'https://github.com/FAIRmat-NFDI/pynxtools-xps'
-url: TODO
+    orcid: https://orcid.org/0000-0002-9700-4803
+doi: 10.5281/zenodo.13951684
+repository-code: https://github.com/FAIRmat-NFDI/pynxtools-xps
+url: https://zenodo.org/records/13951685
 keywords:
   - X-ray Photoelectron Spectroscopy
   - NOMAD
@@ -45,3 +45,8 @@ abstract:
   The work is funded by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) - 460197019 (FAIRmat)
   (https://gepris.dfg.de/gepris/projekt/460197019?language=en).
 license: Apache-2.0
+funding:
+  - name: Deutsche Forschungsgemeinschaft
+    award-number: 460197019
+    title: FAIRmat - FAIR Data Infrastructure for Condensed-Matter Physics and the Chemical Physics of Solids
+    award-uri: https://gepris.dfg.de/gepris/projekt/460197019?language=en

@@ -2,7 +2,7 @@
     "data":{
         "m_def":"../upload/raw/xps.scheme.archive.yaml#/definitions/section_definitions/0",
         "reader":"xps",
-        "nxdl":"NXmpes.nxdl",
+        "nxdl":"NXmpes",
         "input_files":[
             "EX439_S718_Au.sle",
             "eln_data.yaml"

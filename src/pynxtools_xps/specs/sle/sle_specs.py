@@ -27,14 +27,14 @@ import re
 import struct
 import copy
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, List
 import warnings
 from datetime import datetime
 import sqlite3
-import xml.etree.ElementTree as ET
-from abc import ABC, abstractmethod
-import xarray as xr
+from lxml import etree as ET
+from abc import ABC
 import numpy as np
+import xarray as xr
 
 from pynxtools_xps.reader_utils import (
     XPSMapper,
@@ -47,9 +47,10 @@ from pynxtools_xps.reader_utils import (
 from pynxtools_xps.value_mappers import (
     convert_energy_type,
     convert_energy_scan_mode,
-    convert_measurement_method,
     get_units_for_key,
+    parse_datetime,
 )
+from pynxtools_xps.specs.sle.flatten_xml import flatten_xml
 
 logger = logging.getLogger(__name__)
 
@@ -82,8 +83,7 @@ class SleMapperSpecs(XPSMapper):
 
     def __init__(self):
         self.parsers = [
-            SleProdigyParserV1,
-            SleProdigyParserV4,
+            SleProdigyParser,
         ]
 
         self.versions_map = {}
@@ -114,7 +114,7 @@ class SleMapperSpecs(XPSMapper):
                 f"Version f{version} of SPECS Prodigy is currently not supported."
             ) from exc
 
-    def _get_sle_version(self):
+    def _get_sle_version(self) -> str:
         """Get the Prodigy SLE version from the file."""
         con = sqlite3.connect(self.sql_connection)
         cur = con.cursor()
@@ -125,21 +125,41 @@ class SleMapperSpecs(XPSMapper):
         version = version[0] + "." + version[1].split("-")[0]
         return version
 
-    def parse_file(self, file, **kwargs):
+    def parse_file(self, file: str, **kwargs: Dict[str, Any]) -> Dict[str, Any]:
         """
         Parse the file using the parser that fits the Prodigy SLE version.
+
         Returns flat list of dictionaries containing one spectrum each.
+
+        Parameters
+        ----------
+        file : str
+            String name of the file.
+        **kwargs : Dict[str, Any]
+            Dict with additional keyword arguments.
+
+        Returns
+        -------
+        Dict[str, Any]
+            Dict with parsed data.
 
         """
         self.sql_connection = file
         return super().parse_file(file, **kwargs)
 
     def construct_data(self):
-        """Map SLE format to NXmpes-ready dict."""
+        """
+        Map SLE format to NXmpes-ready dict.
+
+        Returns
+        -------
+        None.
+
+        """
         # pylint: disable=duplicate-code
         spectra = copy.deepcopy(self.raw_data)
 
-        self._xps_dict["data"]: dict = {}
+        self._xps_dict["data"]: Dict[str, Any] = {}
         template_key_map = {
             "user": [],
             "instrument": [
@@ -218,6 +238,17 @@ class SleMapperSpecs(XPSMapper):
     ):
         """
         Map one spectrum from raw data to NXmpes-ready dict.
+
+        Parameters
+        ----------
+        spectrum : Dict[str, Any]
+            Dictionary with data and metadata for one spectrum.
+        template_key_map : Dict[str, str]
+            Mapping to NXmpes terms.
+
+        Returns
+        -------
+        None.
 
         """
         # pylint: disable=too-many-locals,duplicate-code
@@ -331,131 +362,155 @@ class SleMapperSpecs(XPSMapper):
                 self._xps_dict[detector_data_unit_key] = detector_data_units
 
 
-class SleProdigyParser(ABC):
+KEY_MAP: Dict[str, str] = {
+    "Udet": "detector_voltage",
+    "Comment": "comments",
+    "ElectronEnergy": "start_energy",
+    "SpectrumID": "spectrum_id",
+    "EpassOrRR": "pass_energy",
+    "EnergyType": "energy/@type",
+    "Samples": "n_values",
+    "Wf": "work_function",
+    "Step": "step",
+    "Ubias": "electron_bias",
+    "DwellTime": "dwell_time",
+    "NumScans": "total_scans",
+    "LensMode": "lens_mode",
+    "Timestamp": "time_stamp",
+    "Entrance": "entrance_slit",
+    "Exit": "exit_slit",
+    "ScanMode": "energy_scan_mode",
+    "VoltageRange": "voltage_range",
+    # spectrometer settings
+    "Coil Current [mA]": "coil_current [mA]",
+    "Pre Defl Y [nU]": "pre_deflector_y_current [nU]",
+    "Pre Defl X [nU]": "pre_deflector_x_current [nU]",
+    "L1 [nU]": "lens1_voltage [nU]",
+    "L2 [nU]": "lens2_voltage [nU]",
+    "Focus Displacement 1 [nu]": "focus_displacement_current [nU]",
+    "Detector Voltage [V]": "detector_voltage [V]",
+    "Bias Voltage Electrons [V]": "bias_voltage_electrons [V]",
+    "Bias Voltage Ions [V]": "bias_voltage_ions [V]",
+    # source settings
+    "anode": "source_label",
+    "uanode": "source_voltage",
+    "iemission": "emission_current",
+    "ihv": "source_high_voltage",
+    "ufilament": "filament_voltage",
+    "ifilament": "filament_current",
+    "DeviceExcitationEnergy": "excitation_energy",
+    "panode": "anode_power",
+    "temperature": "source_temperature",
+    # sql metadata map: Dict[str, str]
+    "EnergyType": "energy/@type",
+    "EpassOrRR": "pass_energy",
+    "Wf": "work_function",
+    "Timestamp": "time_stamp",
+    "Samples": "n_values",
+    "ElectronEnergy": "start_energy",
+}
+
+VALUE_MAP: Dict[str, Any] = {
+    "energy/@type": convert_energy_type,
+    "excitation_energy": float,
+    "time_stamp": parse_datetime,
+    "energy_scan_mode": convert_energy_scan_mode,
+}
+
+KEYS_TO_DROP: List[str] = [
+    "Work Function",
+]
+
+POSSIBLE_DATE_FORMATS: List[str] = ["%Y-%b-%d %H:%M:%S.%f"]
+
+
+class SleProdigyParser:
     """
     Generic parser without reading capabilities,
     to be used as template for implementing parsers for different versions.
     """
 
+    supported_versions = [
+        "1.2",
+        "1.8",
+        "1.9",
+        "1.10",
+        "1.11",
+        "1.12",
+        "1.13",
+        "4.63",
+        "4.64",
+        "4.65",
+        "4.66",
+        "4.67",
+        "4.68",
+        "4.69",
+        "4.70",
+        "4.71",
+        "4.72",
+        "4.73",
+        "4.100",
+    ]
+
     def __init__(self):
         self.con = ""
-        self.spectra = []
-        self.xml = None
-        self.sum_channels = False
-        self.remove_align = True
+        self.spectra: List[Dict[str, Any]] = []
+        self.xml: ET.Element = None
+        self.sum_channels: bool = False
+        self.remove_align: bool = True
 
-        keys_map = {
-            "Udet": "detector_voltage",
-            "Comment": "comments",
-            "ElectronEnergy": "start_energy",
-            "SpectrumID": "spectrum_id",
-            "EpassOrRR": "pass_energy",
-            "EnergyType": "energy/@type",
-            "Samples": "n_values",
-            "Wf": "work_function",
-            "Step": "step",
-            "Ubias": "electron_bias",
-            "DwellTime": "dwell_time",
-            "NumScans": "total_scans",
-            "LensMode": "lens_mode",
-            "Timestamp": "time_stamp",
-            "Entrance": "entrance_slit",
-            "Exit": "exit_slit",
-            "ScanMode": "energy_scan_mode",
-            "VoltageRange": "voltage_energy_range",
+        self.encodings_dtype = {
+            "short": np.int16,
+            "double": np.float64,
+            "float": np.float32,
+        }
+        self.encoding = np.float32
+
+        encodings_map: Dict[str, List[str, float]] = {
+            "double": ["d", 8],
+            "float": ["f", 4],
         }
 
-        spectrometer_setting_map = {
-            "Coil Current [mA]": "coil_current [mA]",
-            "Pre Defl Y [nU]": "pre_deflector_y_current [nU]",
-            "Pre Defl X [nU]": "pre_deflector_x_current [nU]",
-            "L1 [nU]": "lens1_voltage [nU]",
-            "L2 [nU]": "lens2_voltage [nU]",
-            "Focus Displacement 1 [nu]": "focus_displacement_current [nU]",
-            "Detector Voltage [V]": "detector_voltage [V]",
-            "Bias Voltage Electrons [V]": "bias_voltage_electrons [V]",
-            "Bias Voltage Ions [V]": "bias_voltage_ions [V]",
-        }
-
-        source_setting_map = {
-            "anode": "source_label",
-            "uanode": "source_voltage",
-            "iemission": "emission_current",
-            "ihv": "source_high_voltage",
-            "ufilament": "filament_voltage",
-            "ifilament": "filament_current",
-            "DeviceExcitationEnergy": "excitation_energy",
-            "panode": "anode_power",
-            "temperature": "source_temperature",
-        }
-
-        self.sql_metadata_map = {
-            "EnergyType": "energy/@type",
-            "EpassOrRR": "pass_energy",
-            "Wf": "work_function",
-            "Timestamp": "time_stamp",
-            "Samples": "n_values",
-            "ElectronEnergy": "start_energy",
-            "Step": "step_size",
-        }
-
-        self.key_maps = [
-            keys_map,
-            spectrometer_setting_map,
-            source_setting_map,
-            self.sql_metadata_map,
-        ]
-
-        self.value_map = {
-            "energy/@type": convert_energy_type,
-            "excitation_energy": self._convert_excitation_energy,
-            "time_stamp": self._convert_date_time,
-            "energy_scan_mode": convert_energy_scan_mode,
-        }
-
-        self.keys_to_drop = [
-            "Work Function",
-        ]
-
-        self.encoding = ["f", 4]
-
-        self.measurement_types = ["XPS", "UPS", "ElectronSpectroscopy"]
-
-    def initiate_file_connection(self, filepath):
-        """Set the filename of the file to be opened."""
+    def initiate_file_connection(self, filepath: str):
+        """Set the sqllite connection of the file to be opened."""
         sql_connection = filepath
         self.con = sqlite3.connect(sql_connection)
 
-    def parse_file(self, filepath, **kwargs):
+    def parse_file(
+        self, filepath: str, **kwargs: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """
         Parse the file's data and metadata into a flat list of dictionaries.
 
-
         Parameters
         ----------
-        filename : str
+        filepath : str
             Filepath of the SLE file to be read.
+        **kwargs : Dict[str, Any]
+            Additional keyword arguments:
+               remove_align(bool):
+                   Whether or not alignment spectra shall be removed.
+               sum_channels(bool):
+                   Whether or not channel data shall be summed.
 
         Returns
         -------
-        self.spectra
+        List[Dict[str, Any]]
             Flat list of dictionaries containing one spectrum each.
 
         """
-        if "remove_align" in kwargs:
-            self.remove_align = kwargs["remove_align"]
-
-        try:
-            self.sum_channels = kwargs["sum_channels"]
-        except KeyError:
-            self.sum_channels = False
+        self.remove_align = kwargs.get("remove_align", True)
+        self.sum_channels = kwargs.get("sum_channels", False)
 
         # initiate connection to sql file
         self.initiate_file_connection(filepath)
 
         # read and parse sle file
         self._get_xml_schedule()
-        self.spectra = self._flatten_xml(self.xml)
+        self._get_xml_schedule()
+        self._get_xml_schedule()
+
+        self.spectra = flatten_xml(self.xml)
         self._attach_node_ids()
         self._remove_empty_nodes()
         self._attach_device_protocols()
@@ -477,12 +532,32 @@ class SleProdigyParser(ABC):
 
         return self.spectra
 
+    def _addVersion(self):
+        self.cursor.execute('SELECT Value FROM Configuration WHERE Key="Version"')
+        self.version = self.cursor.fetchone()[0]
+
+    def _addAppVersion(self):
+        self.cursor.execute('SELECT Value FROM Configuration WHERE Key="AppVersion"')
+        self.app_version = self.cursor.fetchone()[0]
+
+    def _get_xml_from_key(key: str):
+        cur = self.con.cursor()
+        query = f"SELECT Value FROM Configuration WHERE Key={key}"
+        cur.execute(query)
+        return ET.fromstring(self.cursor.fetchone()[0])
+
     def _get_xml_schedule(self):
         """Parse the schedule into an XML object."""
-        cur = self.con.cursor()
-        query = 'SELECT Value FROM Configuration WHERE Key="Schedule"'
-        cur.execute(query)
-        self.xml = ET.fromstring(cur.fetchall()[0][0])
+        self.xml_schedule = _get_xml_from_key("Schedule")
+
+    def _get_xml_context(self):
+        """Parse the context into an XML object."""
+        self.xml_context = _get_xml_from_key("Context")
+
+    def _get_xml_metainfo(self):
+        XML = _get_xml_from_key("MetaInfo")
+        for i in XML.iter("Parameter"):
+            self.metainfo[i.attrib["name"].replace(" ", "_")] = i.text
 
     def _append_scan_data(self):
         """
@@ -551,7 +626,7 @@ class SleProdigyParser(ABC):
         # update self.spectra with the scan data
         self.spectra = individual_scans
 
-    def _get_transmission(self, node_id):
+    def _get_transmission(self, node_id: int) -> np.ndarray:
         """
         Get the transmission function data.
 
@@ -583,24 +658,23 @@ class SleProdigyParser(ABC):
 
         return stream
 
-    def _separate_channels(self, data, n_channels):
+    def _separate_channels(self, data: List[float], n_channels: int) -> np.ndarray:
         """
         Separate energy channels.
 
         Parameters
         ----------
-        data : list
-            Array of measured daata .
+        data : List[float]
+            List of measured data.
         n_channels : int
             Number of channels to be summed.
 
         Returns
         -------
-        list
-            Summed data across n_channels.
+        TYPE
+            Separate data across n_channels.
 
         """
-
         n_points = int(len(data) / n_channels)
         return np.reshape(np.array(data), (n_channels, n_points))
 
@@ -820,7 +894,7 @@ class SleProdigyParser(ABC):
     #
     #     return channel_dict
 
-    def _check_energy_channels(self, node_id):
+    def _check_energy_channels(self, node_id: int) -> int:
         """
         Get the number of separate energy channels for the spectrum.
 
@@ -845,7 +919,7 @@ class SleProdigyParser(ABC):
             n_channels = result[0][0]
         return n_channels
 
-    def _get_raw_ids(self, node_id):
+    def _get_raw_ids(self, node_id: int) -> List[int]:
         """
         Get the raw IDs from SQL.
 
@@ -861,7 +935,7 @@ class SleProdigyParser(ABC):
 
         Returns
         -------
-        list
+        List[int]
             List of raw IDs for the given note ID.
 
         """
@@ -871,7 +945,7 @@ class SleProdigyParser(ABC):
 
         return [i[0] for i in cur.fetchall()]
 
-    def _check_number_of_scans(self, node_id):
+    def _check_number_of_scans(self, node_id: int) -> int:
         """
         Get the number of separate scans for the spectrum.
 
@@ -891,7 +965,7 @@ class SleProdigyParser(ABC):
         cur.execute(query)
         return len(cur.fetchall())
 
-    def _get_detector_data(self, node_id):
+    def _get_detector_data(self, node_id: int) -> List[float]:
         """
         Get the detector data from sle file.
 
@@ -906,7 +980,7 @@ class SleProdigyParser(ABC):
 
         Returns
         -------
-        detector_data : list
+        detector_data : List[float]
             List of lists with measured data.
 
         """
@@ -951,22 +1025,22 @@ class SleProdigyParser(ABC):
                 protocal_params = self._get_one_device_protocol(protocol)
                 spectrum.update(protocal_params)
 
-    def _get_one_device_protocol(self, protocol):
+    def _get_one_device_protocol(self, protocol: ET.Element) -> Dict[str, Any]:
         """
          Get all parameters for one device protocol
 
         Parameters
         ----------
-        protocol : xml.etree.ElementTree.Element
+        protocol : lxml.etree.Element
             One device protocol.
 
         Returns
         -------
-        protocal_params : dict
+        protocal_params:  Dict[str, Any]
             All parameters given in the device protocol.
 
         """
-        protocal_params = {}
+        protocol_params: Dict[str, Any] = {}
         for device in protocol.iter("Command"):
             if "Phoibos" in device.attrib["UniqueDeviceName"]:
                 # iterate through the parameters and add to spectrum
@@ -976,18 +1050,18 @@ class SleProdigyParser(ABC):
                         param_text = float(parameter.text)
                     else:
                         param_text = parameter.text
-                    protocal_params[parameter.attrib["name"]] = param_text
+                    protocol_params[parameter.attrib["name"]] = param_text
             elif "XRC1000" in device.attrib["UniqueDeviceName"]:
                 for parameter in device.iter("Parameter"):
                     if parameter.attrib["type"] == "double":
                         param_text = float(parameter.text)
                     else:
                         param_text = parameter.text
-                    protocal_params[parameter.attrib["name"]] = param_text
+                    protocol_params[parameter.attrib["name"]] = param_text
 
-        return protocal_params
+        return protocol_params
 
-    def _get_one_scan(self, raw_id):
+    def _get_one_scan(self, raw_id: int) -> List[float]:
         """
         Get the detector data for a single scan and convert it to float.
 
@@ -1002,7 +1076,7 @@ class SleProdigyParser(ABC):
 
         Returns
         -------
-        stream : list
+        List[float]
             List with measured data.
 
         """
@@ -1020,14 +1094,14 @@ class SleProdigyParser(ABC):
                 stream.append(struct.unpack(encoding, data[i : i + buffer])[0])
         return stream
 
-    def _parse_external_channels(self, channel):
+    def _parse_external_channels(self, channel: int):
         """
-        Parse additional external channels.
+        Parse additional external channels by channel number.
 
         Parameters
         ----------
         channel : int
-            DESCRIPTION.
+            Channel number.
 
         Returns
         -------
@@ -1074,8 +1148,10 @@ class SleProdigyParser(ABC):
                 spectrum["work_function"] = i.attrib["Workfunction"]
                 spectrum["step_size"] = float(i.attrib["ScanDelta"])
 
-    def _get_scan_metadata(self, raw_id):
+    def _get_scan_metadata(self, raw_id: int) -> Dict[str, Any]:
         """
+        Get metadata for each scan.
+
         Get the scan and the loop/iteration number of each spectrum scan
         and the datetime it was taken from the RawData table.
 
@@ -1086,7 +1162,7 @@ class SleProdigyParser(ABC):
 
         Returns
         -------
-        scan_meta : dict
+        Dict[str, Any]
             dictionary containing scan metadata.
 
         """
@@ -1095,28 +1171,29 @@ class SleProdigyParser(ABC):
         query = f'SELECT ScanDate, Trace FROM RawData WHERE RawID="{raw_id}"'
         result = cur.execute(query).fetchone()
         # process metadata into a dictionary
-        scan_meta = {}
+        scan_meta: Dict[str, Any] = {}
         scan_meta["time_stamp_trace"] = result[0]
         scan_meta.update(self._process_trace(result[1]))
 
         return scan_meta
 
-    def _process_trace(self, trace):
+    def _process_trace(self, trace: str) -> Dict[str, Any]:
         """
-        Parse Trace string to determine the Scan, loop and iteration for the
-        given trace.
+        Parse Trace string to determine the scan, loop, and iteration
+        for the given trace.
 
         Parameters
         ----------
         trace : str
-            string to be parsed.
+            Trace string to be parsed.
 
         Returns
         -------
-        trace_dict : dict
-            dictionary containing scan loop and iteration params
+        Dict[str, Any]
+            Dictionary containing scan loop and iteration params
+
         """
-        trace_dict = {}
+        trace_dict: Dict[str, Any] = {}
         loop = re.findall(r"Loop=([0-9]+)u", trace)
         if len(loop) != 0:
             trace_dict["loop_no"] = loop[0]
@@ -1131,21 +1208,23 @@ class SleProdigyParser(ABC):
 
         return trace_dict
 
-    def _convert_to_counts_per_sec(self, signal_data, dwell_time):
+    def _convert_to_counts_per_sec(
+        self, signal_data: np.ndarray, dwell_time: float
+    ) -> np.ndarray:
         """
         Convert signal data given in counts to counts per second.
 
         Parameters
         ----------
-        signal_data : list
+        signal_data : np.ndarray
             2D array of floats representing counts
             Shape: (n_channel, n_value)
         dwell_time : float
-            value of dwell_time per scan.
+            Value of dwell_time per scan.
 
         Returns
         -------
-        cps : array
+        cps : np.ndarray
             2D array of values converted to counts per second.
             Shape: (n_channel, n_value)
 
@@ -1153,7 +1232,7 @@ class SleProdigyParser(ABC):
         cps = signal_data / dwell_time
         return cps
 
-    def _get_sql_node_id(self, xml_id):
+    def _get_sql_node_id(self, xml_id: int) -> int:
         """
         Get the SQL internal ID for the NodeID taken from XML.
 
@@ -1210,19 +1289,19 @@ class SleProdigyParser(ABC):
             if len(result) == 0:
                 del self.spectra[idx]
 
-    def _get_energy_data(self, spectrum):
+    def _get_energy_data(self, spectrum: Dict[str, Any]) -> np.ndarray:
         """
-        Create an array of x values.
+        Create an array of energy values.
 
         Parameters
         ----------
-        spectrum : dict
+        spectrum : Dict[str, Any]
             Dictionary with spectrum data and metadata.
 
         Returns
         -------
-        x : list
-            List of uniformly separated energy values.
+        np.ndarray
+            Array of uniformly separated energy values.
 
         """
         if spectrum["energy/@type"] == "binding":
@@ -1237,22 +1316,21 @@ class SleProdigyParser(ABC):
             energy = [start + i * step for i in range(points)]
         return np.array(energy)
 
-    def _get_table_names(self):
+    def _get_table_names(self) -> List[str]:
         """
         Get a list of table names in the current database file.
 
         Returns
         -------
-        data : list
+        List[str]
             List of spectrum names.
 
         """
         cur = self.con.cursor()
         cur.execute('SELECT name FROM sqlite_master WHERE type= "table"')
-        data = [i[0] for i in cur.fetchall()]
-        return data
+        return [i[0] for i in cur.fetchall()]
 
-    def _get_column_names(self, table_name):
+    def _get_column_names(self, table_name: str) -> List[str]:
         """
         Get the names of the columns in the table.
 
@@ -1263,8 +1341,8 @@ class SleProdigyParser(ABC):
 
         Returns
         -------
-        names : list
-            List of descriptions.
+        List[str]
+            List of column names.
 
         """
         cur = self.con.cursor()
@@ -1283,38 +1361,19 @@ class SleProdigyParser(ABC):
         """
         self.con.close()
 
-    def _convert_excitation_energy(self, excitation_energy):
-        """
-        Convert the excitation_energy to a float.
-
-        """
-        return float(excitation_energy)
-
-    def _convert_date_time(self, timestamp):
-        """
-        Convert the native time format to the one we decide to use.
-        Returns datetime string in the format '%Y-%b-%d %H:%M:%S.%f'.
-
-        """
-        date_time = datetime.strptime(timestamp, "%Y-%b-%d %H:%M:%S.%f")
-        date_time = datetime.strftime(date_time, "%Y-%m-%d %H:%M:%S.%f")
-        return date_time
-
-    def _sum_channels(self, data):
+    def _sum_channels(self, data: List[float]) -> np.ndarray:
         """
         Sum together energy channels.
 
         Parameters
         ----------
-        data : list
-            Array of measured daata .
-        n : int
-            Number of channels to be summed.
+        data : List[float]
+            List of measured data.
 
         Returns
         -------
-        list
-            Summed data across n_channels.
+        np.ndarray
+            Summed energy channels.
 
         """
         summed = np.sum(data, axis=0)
@@ -1334,40 +1393,12 @@ class SleProdigyParser(ABC):
         cur.execute(query)
         data, chunksize = cur.fetchall()[0]
 
-        encodings_map = {
-            "double": ["d", 8],
-            "float": ["f", 4],
-        }
-
         if data / chunksize == 4:
             self.encoding = encodings_map["float"]
         elif data / chunksize == 8:
             self.encoding = encodings_map["double"]
         else:
             logger.error("This binary encoding is not supported.")
-
-    @abstractmethod
-    def _flatten_xml(self, xml):
-        """
-        Flatten the nested XML structure, keeping only the needed metadata.
-
-        This method has to be implemented in the inherited parsers.
-
-        Parameters
-        ----------
-        xml : xml.etree.ElementTree
-            XML schedule of the experiment.
-
-        Returns
-        -------
-        collect : list
-            List of dictionary with spectra metadata.
-
-        """
-        # pylint: disable=too-many-nested-blocks
-        collect = []
-
-        return collect
 
     def _reindex_spectra(self):
         """Re-number the spectrum_id."""
@@ -1445,7 +1476,7 @@ class SleProdigyParser(ABC):
             spec for spec in self.spectra if "snapshot" not in spec["energy_scan_mode"]
         ]
 
-    def get_sle_version(self):
+    def get_sle_version(self) -> str:
         """
         Get the Prodigy SLE version from the file.
 
@@ -1460,347 +1491,3 @@ class SleProdigyParser(ABC):
         cur.execute(query)
         version = cur.fetchall()[0][0]
         return version
-
-
-class SleProdigyParserV1(SleProdigyParser):
-    """
-    Parser for SLE version 1.
-    """
-
-    supported_versions = ["1.2", "1.8", "1.9", "1.10", "1.11", "1.12", "1.13"]
-
-    def _flatten_xml(self, xml):
-        """
-        Flatten the nested XML structure, keeping only the needed metadata.
-
-        Parameters
-        ----------
-        xml : xml.etree.ElementTree
-            XML schedule of the experiment.
-
-        Returns
-        -------
-        collect : list
-            List of dictionary with spectra metadata.
-
-        """
-        collect = []
-        for measurement_type in self.measurement_types:
-            for group in xml.iter(measurement_type):
-                data = {}
-                data["analysis_method"] = convert_measurement_method(measurement_type)
-
-                data["devices"] = []
-
-                for device in group.iter("DeviceCommand"):
-                    settings = {}
-                    for param in device.iter("Parameter"):
-                        settings[param.attrib["name"]] = param.text
-                        data.update(copy.copy(settings))
-
-                    data["devices"] += [device.attrib["DeviceType"]]
-
-                    # data['devices'] += [{'device_type' : j.attrib['DeviceType'],
-                    #                     'settings':settings}]
-                for spectrum_group in group.iter("SpectrumGroup"):
-                    settings = self._get_group_metadata(spectrum_group)
-                    data.update(copy.copy(settings))
-                    collect += [copy.copy(data)]
-        return collect
-
-    def _get_group_metadata(self, spectrum_group):
-        """
-        Iteratively retrieve metadata for one spectrum group.
-
-        Parameters
-        ----------
-        spectrum_group: xml.etree.ElementTree.Element
-            XML element containing one spectrum group.
-
-        Returns
-        -------
-        settings: dict
-            Dictionary containing all metadata for
-            the spectrum group.
-
-        """
-        settings = {}
-        settings["group_name"] = spectrum_group.attrib["Name"]
-        settings["group_id"] = spectrum_group.attrib["ID"]
-        for comm_settings in spectrum_group.iter("CommonSpectrumSettings"):
-            common_spectrum_settings = self._extract_comm_settings(comm_settings)
-            settings.update(copy.copy(common_spectrum_settings))
-
-        for spectrum in spectrum_group.iter("Spectrum"):
-            spectrum_settings = self._get_spectrum_metadata(spectrum)
-            settings.update(copy.copy(spectrum_settings))
-
-        return settings
-
-    def _extract_comm_settings(self, comm_settings):
-        """
-        Iteratively retrieve metadata for common settings of one spectrum group.
-
-        Parameters
-        ----------
-        spectrum_group: xml.etree.ElementTree.Element
-            XML element containing common settings for one spectrum group.
-
-        Returns
-        -------
-        settings: dict
-            Dictionary containing all common metadata for
-            the spectrum group.
-
-        """
-        common_spectrum_settings = {}
-        for setting in comm_settings.iter():
-            if setting.tag == "ScanMode":
-                energy_scan_mode = self.energy_scan_mode_map[setting.attrib["Name"]]
-                common_spectrum_settings[setting.tag] = energy_scan_mode
-            elif setting.tag == "SlitInfo":
-                for key, val in setting.attrib.items():
-                    common_spectrum_settings[key] = val
-            elif setting.tag == "Lens":
-                voltage_range = setting.attrib["VoltageRange"]
-                split_text = re.split(r"([A-Z])", voltage_range, 1)
-                val = split_text[0]
-                unit = "".join(split_text[1:])
-                common_spectrum_settings["voltage_range"] = float(val)
-                common_spectrum_settings["voltage_range/@units"] = unit
-            elif setting.tag == "EnergyChannelCalibration":
-                common_spectrum_settings["calibration_file/dir"] = setting.attrib["Dir"]
-                common_spectrum_settings["calibration_file/path"] = setting.attrib[
-                    "File"
-                ]
-            elif setting.tag == "Transmission":
-                common_spectrum_settings["transmission_function/file"] = setting.attrib[
-                    "File"
-                ]
-            elif setting.tag == "Iris":
-                common_spectrum_settings["iris_diameter"] = setting.attrib["Diameter"]
-        return common_spectrum_settings
-
-    def _get_spectrum_metadata(self, spectrum):
-        """
-        Iteratively retrieve metadata for one spectrum.
-
-        Parameters
-        ----------
-        spectrum: xml.etree.ElementTree.Element
-            XML element containing one spectrum.
-
-        Returns
-        -------
-        spectrum_ settings: dict
-            Dictionary containing all metadata for
-            the spectrum.
-
-        """
-        spectrum_settings = {}
-
-        spectrum_settings["spectrum_id"] = spectrum.attrib["ID"]
-        spectrum_settings["spectrum_type"] = spectrum.attrib["Name"]
-        for setting in spectrum.iter("FixedEnergiesSettings"):
-            spectrum_settings["dwell_time"] = float(setting.attrib["DwellTime"])
-            spectrum_settings["start_energy"] = float(copy.copy(setting.attrib["Ebin"]))
-            spectrum_settings["pass_energy"] = float(setting.attrib["Epass"])
-            spectrum_settings["lens_mode"] = setting.attrib["LensMode"]
-            spectrum_settings["total_scans"] = int(setting.attrib["NumScans"])
-            spectrum_settings["n_values"] = int(setting.attrib["NumValues"])
-            spectrum_settings["end_energy"] = float(setting.attrib["End"])
-            spectrum_settings["excitation_energy"] = float(setting.attrib["Eexc"])
-            spectrum_settings["step_size"] = (
-                spectrum_settings["start_energy"] - spectrum_settings["end_energy"]
-            ) / (spectrum_settings["n_values"] - 1)
-        for setting in spectrum.iter("FixedAnalyzerTransmissionSettings"):
-            spectrum_settings["dwell_time"] = float(setting.attrib["DwellTime"])
-            spectrum_settings["start_energy"] = float(copy.copy(setting.attrib["Ebin"]))
-            spectrum_settings["pass_energy"] = float(setting.attrib["Epass"])
-            spectrum_settings["lens_mode"] = setting.attrib["LensMode"]
-            spectrum_settings["total_scans"] = setting.attrib["NumScans"]
-            spectrum_settings["n_values"] = int(setting.attrib["NumValues"])
-            spectrum_settings["end_energy"] = float(setting.attrib["End"])
-            spectrum_settings["scans"] = int(setting.attrib["NumScans"])
-            spectrum_settings["excitation_energy"] = float(setting.attrib["Eexc"])
-            spectrum_settings["step_size"] = (
-                spectrum_settings["start_energy"] - spectrum_settings["end_energy"]
-            ) / (spectrum_settings["n_values"] - 1)
-        return spectrum_settings
-
-
-class SleProdigyParserV4(SleProdigyParser):
-    """
-    Parser for SLE version 4.
-    """
-
-    supported_versions = [
-        "4.63",
-        "4.64",
-        "4.65",
-        "4.66",
-        "4.67",
-        "4.68",
-        "4.69",
-        "4.70",
-        "4.71",
-        "4.72",
-        "4.73",
-    ]
-
-    def _flatten_xml(self, xml):
-        """
-        Flatten the nested XML structure, keeping only the needed metadata.
-
-        Parameters
-        ----------
-        xml : xml.etree.ElementTree
-            XML schedule of the experiment.
-
-        Returns
-        -------
-        collect : list
-            List of dictionary with spectra metadata.
-
-        """
-        collect = []
-        for measurement_type in self.measurement_types:
-            for group in xml.iter(measurement_type):
-                data = {}
-                data["analysis_method"] = convert_measurement_method(measurement_type)
-
-                data["devices"] = []
-                data["device_group_id"] = group.attrib["ID"]
-
-                for device in group.iter("DeviceCommand"):
-                    settings = {}
-                    for param in device.iter("Parameter"):
-                        settings[param.attrib["name"]] = param.text
-                        data.update(copy.copy(settings))
-
-                    data["devices"] += [device.attrib["DeviceType"]]
-
-                for spectrum_group in group.iter("SpectrumGroup"):
-                    settings = self._get_group_metadata(spectrum_group)
-                    data.update(copy.copy(settings))
-                    collect += [copy.copy(data)]
-        return collect
-
-    def _get_group_metadata(self, spectrum_group):
-        """
-        Iteratively retrieve metadata for one spectrum group.
-
-        Parameters
-        ----------
-        spectrum_group: xml.etree.ElementTree.Element
-            XML element containing one spectrum group.
-
-        Returns
-        -------
-        settings: dict
-            Dictionary containing all metadata for
-            the spectrum group.
-
-        """
-        settings = {}
-        settings["group_name"] = spectrum_group.attrib["Name"]
-        settings["group_id"] = spectrum_group.attrib["ID"]
-        for comm_settings in spectrum_group.iter("CommonSpectrumSettings"):
-            common_spectrum_settings = self._extract_comm_settings(comm_settings)
-            settings.update(copy.copy(common_spectrum_settings))
-
-        for spectrum in spectrum_group.iter("Spectrum"):
-            spectrum_settings = self._get_spectrum_metadata(spectrum)
-            settings.update(copy.copy(spectrum_settings))
-
-        return settings
-
-    def _extract_comm_settings(self, comm_settings):
-        """
-        Iteratively retrieve metadata for common settings of one spectrum group.
-
-        Parameters
-        ----------
-        spectrum_group: xml.etree.ElementTree.Element
-            XML element containing common settings for one spectrum group.
-
-        Returns
-        -------
-        settings: dict
-            Dictionary containing all common metadata for
-            the spectrum group.
-
-        """
-        common_spectrum_settings = {}
-        for setting in comm_settings.iter():
-            if setting.tag == "ScanMode":
-                energy_scan_mode = convert_energy_scan_mode(setting.attrib["Name"])
-                common_spectrum_settings[setting.tag] = energy_scan_mode
-            elif setting.tag == "SlitInfo":
-                for key, val in setting.attrib.items():
-                    common_spectrum_settings[key] = val
-            elif setting.tag == "Lens":
-                voltage_range = setting.attrib["VoltageRange"]
-                match = re.match(r"(\d+\.?\d*)([a-zA-Z]+)", voltage_range)
-                if match:
-                    value, unit = match.groups()
-                else:
-                    value, unit = None, None
-                common_spectrum_settings["voltage_energy_range"] = float(value)
-                common_spectrum_settings["voltage_energy_range/@units"] = unit
-            elif setting.tag == "EnergyChannelCalibration":
-                common_spectrum_settings["calibration_file/dir"] = setting.attrib["Dir"]
-                common_spectrum_settings["calibration_file/path"] = setting.attrib[
-                    "File"
-                ]
-            elif setting.tag == "Transmission":
-                common_spectrum_settings["transmission_function/file"] = setting.attrib[
-                    "File"
-                ]
-            elif setting.tag == "Iris":
-                common_spectrum_settings["iris_diameter"] = setting.attrib["Diameter"]
-        return common_spectrum_settings
-
-    def _get_spectrum_metadata(self, spectrum):
-        """
-        Iteratively retrieve metadata for one spectrum.
-
-        Parameters
-        ----------
-        spectrum: xml.etree.ElementTree.Element
-            XML element containing one spectrum.
-
-        Returns
-        -------
-        spectrum_ settings: dict
-            Dictionary containing all metadata for
-            the spectrum.
-
-        """
-        spectrum_settings = {}
-
-        spectrum_settings["spectrum_id"] = spectrum.attrib["ID"]
-        spectrum_settings["spectrum_type"] = spectrum.attrib["Name"]
-        for comment in spectrum.iter("Comment"):
-            spectrum_settings["spectrum_comment"] = comment.text
-
-        for setting in spectrum.iter("FixedEnergiesSettings"):
-            spectrum_settings["dwell_time"] = float(setting.attrib["DwellTime"])
-            spectrum_settings["start_energy"] = float(copy.copy(setting.attrib["Ebin"]))
-            spectrum_settings["pass_energy"] = float(setting.attrib["Epass"])
-            spectrum_settings["lens_mode"] = setting.attrib["LensMode"]
-            spectrum_settings["total_scans"] = int(setting.attrib["NumScans"])
-            spectrum_settings["n_values"] = int(setting.attrib["NumValues"])
-        for setting in spectrum.iter("FixedAnalyzerTransmissionSettings"):
-            spectrum_settings["dwell_time"] = float(setting.attrib["DwellTime"])
-            spectrum_settings["start_energy"] = float(copy.copy(setting.attrib["Ebin"]))
-            spectrum_settings["pass_energy"] = float(setting.attrib["Epass"])
-            spectrum_settings["lens_mode"] = setting.attrib["LensMode"]
-            spectrum_settings["total_scans"] = setting.attrib["NumScans"]
-            spectrum_settings["n_values"] = int(setting.attrib["NumValues"])
-            spectrum_settings["end_energy"] = float(setting.attrib["End"])
-            spectrum_settings["scans"] = int(setting.attrib["NumScans"])
-            spectrum_settings["step_size"] = (
-                spectrum_settings["start_energy"] - spectrum_settings["end_energy"]
-            ) / (spectrum_settings["n_values"] - 1)
-        return spectrum_settings

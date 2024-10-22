@@ -31,7 +31,7 @@ jobs:
           uv pip install coverage coveralls
       - name: Install pynxtools-xps
         run: |
-          uv pip install .[dev]
+          uv pip install ".[dev]"
       - name: Install pynxtools version ${{ matrix.pynxtools_versions }}
         run: |
          if [ "${{ matrix.pynxtools_versions }}" == "master" ]; then

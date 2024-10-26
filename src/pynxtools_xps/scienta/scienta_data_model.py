@@ -1,6 +1,3 @@
-"""
-Data model for data from Scienta instruments.
-"""
 # Copyright The NOMAD Authors.
 #
 # This file is part of NOMAD. See https://nomad-lab.eu for further info.
@@ -17,7 +14,9 @@ Data model for data from Scienta instruments.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# pylint: disable=too-many-instance-attributes
+"""
+Data model for data from Scienta instruments.
+"""
 
 from dataclasses import dataclass, field
 import numpy as np

@@ -1,9 +1,3 @@
-"""
-Parser for reading XPS (X-ray Photoelectron Spectroscopy) data from
-Specs Lab Prodigy XML export, to be passed to mpes nxdl
-(NeXus Definition Language) template.
-"""
-
 # Copyright The NOMAD Authors.
 #
 # This file is part of NOMAD. See https://nomad-lab.eu for further info.
@@ -20,6 +14,12 @@ Specs Lab Prodigy XML export, to be passed to mpes nxdl
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+"""
+Parser for reading XPS (X-ray Photoelectron Spectroscopy) data from
+Specs Lab Prodigy XML export, to be passed to mpes nxdl
+(NeXus Definition Language) template.
+"""
+
 import re
 import xml.etree.ElementTree as EmtT
 from typing import Tuple, List, Dict, Any

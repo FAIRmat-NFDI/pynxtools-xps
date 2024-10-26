@@ -1,6 +1,3 @@
-"""
-Comment handler for .vms files.
-"""
 # Copyright The NOMAD Authors.
 #
 # This file is part of NOMAD. See https://nomad-lab.eu for further info.
@@ -18,6 +15,9 @@ Comment handler for .vms files.
 # limitations under the License.
 #
 # pylint: disable=too-many-instance-attributes
+"""
+Comment handler for .vms files.
+"""
 
 from typing import List, Literal, Any, Dict, Tuple, Union
 

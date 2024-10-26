@@ -1,6 +1,3 @@
-"""
-Data model for Kratos spectrometers for export to CasaXPS.
-"""
 # Copyright The NOMAD Authors.
 #
 # This file is part of NOMAD. See https://nomad-lab.eu for further info.
@@ -17,10 +14,11 @@ Data model for Kratos spectrometers for export to CasaXPS.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# pylint: disable=too-many-instance-attributes
+"""
+Data model for Kratos spectrometers for export to CasaXPS.
+"""
 
-from dataclasses import dataclass
-from dataclasses import field
+from dataclasses import dataclass, field
 
 from pynxtools_xps.reader_utils import XpsDataclass
 

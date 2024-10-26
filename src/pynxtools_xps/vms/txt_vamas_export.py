@@ -1,6 +1,3 @@
-"""
-Classes for reading XPS files from TXT export of CasaXPS.
-"""
 # Copyright The NOMAD Authors.
 #
 # This file is part of NOMAD. See https://nomad-lab.eu for further info.
@@ -18,6 +15,9 @@ Classes for reading XPS files from TXT export of CasaXPS.
 # limitations under the License.
 #
 # pylint: disable=too-many-lines,too-few-public-methods
+"""
+Classes for reading XPS files from TXT export of CasaXPS.
+"""
 
 import itertools
 import operator

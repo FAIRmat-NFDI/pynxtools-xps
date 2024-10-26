@@ -20,8 +20,13 @@ Specs Lab Prodigy SLE format, to be passed to mpes nxdl
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 # pylint: disable=too-many-lines,too-many-instance-attributes
+
+"""
+Parser for reading XPS (X-ray Photoelectron Spectroscopy) metadata from
+SPECS Lab Prodigy, to be passed to MPES nxdl (NeXus Definition Language)
+template.
+"""
 
 import re
 import struct

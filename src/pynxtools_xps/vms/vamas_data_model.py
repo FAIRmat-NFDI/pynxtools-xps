@@ -1,6 +1,3 @@
-"""
-Data model for Vamas ISO standard.
-"""
 # Copyright The NOMAD Authors.
 #
 # This file is part of NOMAD. See https://nomad-lab.eu for further info.
@@ -18,6 +15,9 @@ Data model for Vamas ISO standard.
 # limitations under the License.
 #
 # pylint: disable=too-many-instance-attributes
+"""
+Data model for Vamas ISO standard.
+"""
 
 from dataclasses import dataclass, field
 from pynxtools_xps.reader_utils import XpsDataclass

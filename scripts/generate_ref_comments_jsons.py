@@ -1,8 +1,3 @@
-"""
-Parser for reading XPS (X-ray Photoelectron Spectroscopy) data from
-Phi PHI VersaProbe 4 instruments (.spe or .pro format), to be passed to
-mpes nxdl (NeXus Definition Language) template.
-"""
 # Copyright The NOMAD Authors.
 #
 # This file is part of NOMAD. See https://nomad-lab.eu for further info.
@@ -20,7 +15,9 @@ mpes nxdl (NeXus Definition Language) template.
 # limitations under the License.
 #
 
-# pylint: disable=too-many-lines,too-many-instance-attributes
+"""
+Regenerate reference JSON files for testing the VAMAS comment extraction.
+"""
 
 import os
 import json
@@ -66,7 +63,7 @@ def generate_ref_comment_jsons():
         comments = handle_comments(comment_lines, comment_type=comment_type)
 
         for key, val in comments.items():
-            if type(val) == np.ndarray:
+            if isinstance(val, np.ndarray):
                 comments[key] = val.tolist()
 
         with open(ref_json_filepath, "w") as json_file:

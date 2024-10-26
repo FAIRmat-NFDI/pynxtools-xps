@@ -1,7 +1,3 @@
-"""
-A generic reader for loading XPS (X-ray Photoelectron Spectroscopy) data
-file into mpes nxdl (NeXus Definition Language) template.
-"""
 # Copyright The NOMAD Authors.
 #
 # This file is part of NOMAD. See https://nomad-lab.eu for further info.
@@ -19,34 +15,35 @@ file into mpes nxdl (NeXus Definition Language) template.
 # limitations under the License.
 #
 # pylint: disable=too-many-lines,too-few-public-methods
+"""
+A generic reader for loading XPS (X-ray Photoelectron Spectroscopy) data
+file into mpes nxdl (NeXus Definition Language) template.
+"""
 
-import os
-import sys
-import re
-import datetime
 import copy
+import datetime
 import logging
+import os
+import re
+import sys
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Optional, Union, Set
-import numpy as np
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
+import numpy as np
 from pynxtools.dataconverter.helpers import extract_atom_types
-from pynxtools.dataconverter.readers.multi.reader import (
-    MultiFormatReader,
-)
+from pynxtools.dataconverter.readers.multi.reader import MultiFormatReader
 from pynxtools.dataconverter.readers.utils import parse_yml
 from pynxtools.dataconverter.template import Template
+
+from pynxtools_xps.reader_utils import check_units
 
 from pynxtools_xps.phi.spe_pro_phi import MapperPhi
 from pynxtools_xps.scienta.scienta_reader import MapperScienta
 from pynxtools_xps.specs.sle.sle_specs import SleMapperSpecs
-from pynxtools_xps.specs.xy.xy_specs import XyMapperSpecs
 from pynxtools_xps.specs.xml.xml_specs import XmlMapperSpecs
+from pynxtools_xps.specs.xy.xy_specs import XyMapperSpecs
 from pynxtools_xps.vms.txt_vamas_export import TxtMapperVamasExport
 from pynxtools_xps.vms.vamas import VamasMapper
-
-from pynxtools_xps.reader_utils import check_units
-
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

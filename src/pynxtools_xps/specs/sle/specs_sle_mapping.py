@@ -27,11 +27,8 @@ from typing import List, Dict, Any
 # )
 
 from pynxtools_xps.value_mappers import (
-    # convert_measurement_method,
     convert_energy_type,
     convert_energy_scan_mode,
-    # MEASUREMENT_METHOD_MAP,
-    convert_units,
     parse_datetime,
 )
 

@@ -7,43 +7,114 @@ Created on Mon Jul 15 13:17:23 2024
 
 import re
 import copy
-from typing import Tuple, Dict, Any, List
+from typing import Tuple, Dict, Any, List, Union
 
 from lxml import etree as ET
 
-from pynxtools_xps.reader_utils import convert_pascal_to_snake
-
+from pynxtools_xps.reader_utils import (
+    convert_pascal_to_snake,
+    _re_map_single_value,
+    _format_value,
+)
 from pynxtools_xps.value_mappers import (
-    convert_measurement_method,
-    convert_energy_scan_mode,
-    MEASUREMENT_METHOD_MAP,
     convert_units,
+    extract_unit,
+    MEASUREMENT_METHOD_MAP,
+    convert_measurement_method,
 )
 
+from pynxtools_xps.specs.sle.specs_sle_mapping import KEY_MAP, VALUE_MAP
 
-def extract_devices(elem: ET.Element) -> Dict[str, Any]:
+
+def format_key_and_value(key: str, value: str) -> Tuple[Any, str]:
+    key = KEY_MAP.get(key, key)
+    key = convert_pascal_to_snake(key)
+    value, unit = extract_unit(value)
+    value = _format_value(value)
+    value = _re_map_single_value(key, value, VALUE_MAP)
+
+    return key, value
+
+
+def iterate_xml_at_tag(
+    xml_elem: ET.Element, tag: str
+) -> Dict[str, Union[str, float, int]]:
+    """
+    Iterates through XML elements at the specified tag and formats their attributes.
+
+    Parameters
+    ----------
+    xml_elem : ET.Element
+        The XML element to search within.
+
+    tag : str
+        The tag name to find in the XML structure.
+
+    Returns
+    -------
+    Dict[str, Union[str, float, int]]
+        A dictionary containing formatted attribute values keyed by their corresponding names.
+    """
+
+    subelem = xml_elem.find(tag)
+
     settings = {}
 
-    for key, val in elem.attrib.items():
-        settings[convert_pascal_to_snake(key)] = val
+    # print(f"tag: {tag}")
+    # print(subelem)
 
-    for param in elem.iter("Parameter"):
-        settings[convert_pascal_to_snake(param.attrib["name"])] = param.text
+    special_key_map = KEY_MAP.get(tag, {})
+
+    if subelem is not None:
+        for param in subelem.iter():
+            for key, value in param.attrib.items():
+                key = special_key_map.get(key, key)
+                key, value = format_key_and_value(key, value)
+                settings[key] = value
 
     return settings
 
-    # data['devices'] += [{'device_type' : j.attrib['DeviceType'],
-    #                     'settings':settings}]
+
+def extract_devices(elem: ET.Element) -> Dict[str, Any]:
+    device_settings = {}
+
+    for key, value in elem.attrib.items():
+        if key == "Name":
+            key = "command"
+        key, value = format_key_and_value(key, value)
+        device_settings[key] = value
+
+    for param in elem.iter("Parameter"):
+        key, value = format_key_and_value(param.attrib["name"], param.text)
+        device_settings[key] = value
+
+    return device_settings
 
 
-# data["devices"] += [device.attrib["DeviceType"]]
+def extract_device_commands(elem: ET.Element) -> Dict[str, Any]:
+    unique_device_name = elem.attrib["UniqueDeviceName"]
+
+    device_settings = extract_devices(elem)
+
+    return {unique_device_name: device_settings}
+
+
+def extract_device_info(elem: ET.Element) -> Dict[str, Any]:
+    unique_name = elem.attrib["UniqueName"]
+
+    device_settings = extract_devices(elem)
+
+    print(device_settings)
+
+    return {unique_name: device_settings}
 
 
 def step_profiling(elem: ET.Element) -> Dict[str, Any]:
     settings: Dict[str, Any] = {}
 
-    for setting in elem.iter():
-        print(setting.tag, setting.attrib)
+    profiling_settings = iterate_xml_at_tag(xml_elem=elem, tag="ProfilingParams")
+
+    return profiling_settings
 
     return settings
 
@@ -67,18 +138,11 @@ def _get_group_metadata(spectrum_group: ET.Element) -> Dict[str, Any]:
     settings = {}
     settings["group_name"] = spectrum_group.attrib["Name"]
     settings["group_id"] = spectrum_group.attrib["ID"]
-    for comm_settings in spectrum_group.iter("CommonSpectrumSettings"):
-        common_spectrum_settings = _extract_comm_settings(comm_settings)
-        settings.update(copy.copy(common_spectrum_settings))
-
-    for spectrum in spectrum_group.iter("Spectrum"):
-        spectrum_settings = _get_spectrum_metadata(spectrum)
-        settings.update(copy.copy(spectrum_settings))
 
     return settings
 
 
-def _extract_comm_settings(comm_settings: ET.Element) -> Dict[str, Any]:
+def _extract_comm_settings(elem: ET.Element) -> Dict[str, Any]:
     """
     Iteratively retrieve metadata for common settings of one spectrum group.
 
@@ -94,32 +158,30 @@ def _extract_comm_settings(comm_settings: ET.Element) -> Dict[str, Any]:
         the spectrum group.
 
     """
-    common_spectrum_settings = {}
-    for setting in comm_settings.iter():
-        if setting.tag == "ScanMode":
-            energy_scan_mode = convert_energy_scan_mode(setting.attrib["Name"])
-            common_spectrum_settings[setting.tag] = energy_scan_mode
-        elif setting.tag == "SlitInfo":
-            for key, val in setting.attrib.items():
-                common_spectrum_settings[key] = val
-        elif setting.tag == "Lens":
-            voltage_range = setting.attrib["VoltageRange"]
-            value, unit = _extract_unit(voltage_range)
-            common_spectrum_settings["voltage_range"] = float(value)
-            common_spectrum_settings["voltage_range/@units"] = unit
-        elif setting.tag == "EnergyChannelCalibration":
-            common_spectrum_settings["calibration_file/dir"] = setting.attrib["Dir"]
-            common_spectrum_settings["calibration_file/path"] = setting.attrib["File"]
-        elif setting.tag == "Transmission":
-            common_spectrum_settings["transmission_function/file"] = setting.attrib[
-                "File"
-            ]
-        elif setting.tag == "Iris":
-            common_spectrum_settings["iris_diameter"] = setting.attrib["Diameter"]
-    return common_spectrum_settings
+    tags_to_search = [
+        "ScanMode",
+        "SlitInfo",
+        "Lens",
+        "EnergyChannelCalibration",
+        "Transmission",
+        "Iris",
+    ]
+
+    common_settings = {}
+
+    for tag in tags_to_search:
+        common_setting = iterate_xml_at_tag(
+            xml_elem=elem,
+            tag=tag,
+        )
+
+        if common_setting:
+            common_settings.update(common_setting)
+
+    return common_settings
 
 
-def _get_spectrum_metadata(spectrum: ET.Element) -> Dict[str, Any]:
+def _get_spectrum_metadata(elem: ET.Element) -> Dict[str, Any]:
     """
     Iteratively retrieve metadata for one spectrum.
 
@@ -137,46 +199,53 @@ def _get_spectrum_metadata(spectrum: ET.Element) -> Dict[str, Any]:
     """
     spectrum_settings = {}
 
-    spectrum_settings["spectrum_id"] = spectrum.attrib["ID"]
-    spectrum_settings["spectrum_type"] = spectrum.attrib["Name"]
-    for setting in spectrum.iter("FixedEnergiesSettings"):
-        spectrum_settings["dwell_time"] = float(setting.attrib["DwellTime"])
-        spectrum_settings["start_energy"] = float(copy.copy(setting.attrib["Ebin"]))
-        spectrum_settings["pass_energy"] = float(setting.attrib["Epass"])
-        spectrum_settings["lens_mode"] = setting.attrib["LensMode"]
-        # spectrum_settings["total_scans"] = int(setting.attrib["NumScans"])
-        spectrum_settings["n_values"] = int(setting.attrib["NumValues"])
-        # spectrum_settings["end_energy"] = float(setting.attrib["End"])
-        # spectrum_settings["excitation_energy"] = float(setting.attrib["Eexc"])
-        # spectrum_settings["step_size"] = (
-        #     spectrum_settings["start_energy"] - spectrum_settings["end_energy"]
-        # ) / (spectrum_settings["n_values"] - 1)
-    for setting in spectrum.iter("FixedAnalyzerTransmissionSettings"):
-        spectrum_settings["dwell_time"] = float(setting.attrib["DwellTime"])
-        spectrum_settings["start_energy"] = float(copy.copy(setting.attrib["Ebin"]))
-        spectrum_settings["pass_energy"] = float(setting.attrib["Epass"])
-        spectrum_settings["lens_mode"] = setting.attrib["LensMode"]
-        # spectrum_settings["total_scans"] = setting.attrib["NumScans"]
-        spectrum_settings["n_values"] = int(setting.attrib["NumValues"])
-        spectrum_settings["end_energy"] = float(setting.attrib["End"])
-        # spectrum_settings["excitation_energy"] = float(setting.attrib["Eexc"])
-        # spectrum_settings["step_size"] = (
-        #     spectrum_settings["start_energy"] - spectrum_settings["end_energy"]
-        # ) / (spectrum_settings["n_values"] - 1)
+    spectrum_settings["spectrum_id"] = elem.attrib["ID"]
+    spectrum_settings["spectrum_type"] = elem.attrib["Name"]
+
+    spectrum_types = {
+        "FixedEnergiesSettings": "Alignment",
+        "FixedAnalyzerTransmissionSettings": "fixed_analyer_transmission",
+        "ConstantFinalStateSettings": "constant_final_state",
+    }
+
+    for tag, spectrum_type in spectrum_types.items():
+        scan_settings = iterate_xml_at_tag(xml_elem=elem, tag=tag)
+
+        if scan_settings:
+            spectrum_settings.update(scan_settings)
+            spectrum_settings["scan_type"] = spectrum_type
+
+    if (comment := elem.find("Comment")) is not None:
+        spectrum_settings.update({"spectrum_comment": comment.text})
+
     return spectrum_settings
 
 
 FUNC_MAP = {
-    "DeviceCommand": extract_devices,
+    "DeviceCommand": extract_device_commands,
+    "DeviceInfo": extract_device_info,
     "StepProfiling": step_profiling,
+    "SpectrumGroup": _get_group_metadata,
     "CommonSpectrumSettings": _extract_comm_settings,
     "Spectrum": _get_spectrum_metadata,
 }
 
 
-def flatten_xml(xml: ET.Element) -> List[Dict[str, Any]]:
+def process_xml_element(elem: ET.Element, settings: Dict[str, Any]):
+    if elem.tag in FUNC_MAP:
+        elem_settings = FUNC_MAP[elem.tag](elem)
+        settings.update(elem_settings)
+
+    # Recursively process each child element
+    for child in elem:
+        process_xml_element(child, settings)
+
+    return settings
+
+
+def flatten_schedule(xml: ET.Element) -> List[Dict[str, Any]]:
     """
-    Flatten the nested XML structure, keeping only the needed metadata.
+    Flatten the nested XML schedule, keeping only the needed metadata.
 
     Parameters
     ----------
@@ -189,81 +258,60 @@ def flatten_xml(xml: ET.Element) -> List[Dict[str, Any]]:
         List of dictionary with spectra metadata.
 
     """
-
-    def process_element(elem: ET.Element, settings: Dict[str, Any]):
-        # Check if the element's tag is in FUNC_MAP
-        if elem.tag in FUNC_MAP:
-            # Apply the corresponding function to the element itself
-            elem_settings = FUNC_MAP[elem.tag](elem)
-            print(elem_settings)
-            settings.update(elem_settings)
-
-        # Recursively process each child element
-        for child in elem:
-            process_element(child, settings)
-
-        return settings
-
     collect = []
 
     for measurement_type in MEASUREMENT_METHOD_MAP:
         for group in xml.iter(measurement_type):
             data: Dict[str, Any] = {}
-            data["devices"] = []
             data["analysis_method"] = convert_measurement_method(measurement_type)
-            process_element(group, data)
+            process_xml_element(group, data)
 
             collect += [copy.copy(data)]
-    # =============================================================================
-    #
-    #             for spectrum_group in group.iter("SpectrumGroup"):
-    #                 settings = _get_group_metadata(spectrum_group)
-    #                 data.update(copy.copy(settings))
-    #
-    # =============================================================================
-    print(collect)
 
     return collect
 
 
-def _extract_unit(value: str) -> Tuple[Any, str]:
+def flatten_context(xml: ET.Element) -> List[Dict[str, Any]]:
     """
-    Extract units for the metadata containing unit information.
-
-    Example:
-        analyser_work_function: 4.506eV
-        -> analyser_work_function: 4.506,
-           analyser_work_function_units: eV,
+    Flatten the nested XML context, keeping only the needed metadata.
 
     Parameters
     ----------
-    key : str
-        Key of the associated value.
-    value : str
-        Combined unit and value information.
+    xml : lxml.etree
+        XML context of the experiment.
 
     Returns
     -------
-    value :
-        value with units.
-    unit : str
-        Associated unit.
+    collect : list
+        Dictionary with device metadata.
 
     """
+    device_metadata: Dict[str, Any] = {}
 
-    pattern = re.compile(r"([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)([a-zA-Z]+)")
-    match = pattern.match(value)
+    for elem in xml.iter("DeviceContext"):
+        process_xml_element(elem, device_metadata)
 
-    if match:
-        value, unit = match.groups()
-    else:
-        unit = ""
+    return device_metadata
 
-    unit = convert_units(unit)
 
-    # =============================================================================
-    #     if key in UNIT_MISSING:
-    #         unit = UNIT_MISSING[key]
-    # =============================================================================
+def flatten_metainfo(xml: ET.Element) -> List[Dict[str, Any]]:
+    """
+    Flatten the nested XML metainfo, keeping only the needed metadata.
 
-    return value, unit
+    Parameters
+    ----------
+    xml : lxml.etree
+        XML metainfo of the experiment.
+
+    Returns
+    -------
+    collect : list
+        Dictionary with metainfo.
+
+    """
+    metainfo: Dict[str, Any] = {}
+
+    for elem in xml.iter("DeviceContext"):
+        process_xml_element(elem, metainfo)
+
+    return metainfo

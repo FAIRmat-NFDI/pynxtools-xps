@@ -150,7 +150,7 @@ class KratosParser:
                 field_type = type(getattr(self.metadata, key))
 
                 if key in KEYS_WITH_UNITS:
-                    value, unit = extract_unit(key, value, UNIT_MISSING)
+                    value, unit = extract_unit(key, value, UNIT_MISSING)   # type: ignore[assignment]
                     setattr(self.metadata, f"{key}_units", unit)
 
                 value = self.map_values(key, value, field_type)

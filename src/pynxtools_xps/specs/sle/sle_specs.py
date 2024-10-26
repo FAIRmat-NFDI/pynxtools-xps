@@ -1,9 +1,3 @@
-"""
-Parser for reading XPS (X-ray Photoelectron Spectroscopy) data from native
-Specs Lab Prodigy SLE format, to be passed to mpes nxdl
-(NeXus Definition Language) template.
-"""
-
 # Copyright The NOMAD Authors.
 #
 # This file is part of NOMAD. See https://nomad-lab.eu for further info.
@@ -21,6 +15,11 @@ Specs Lab Prodigy SLE format, to be passed to mpes nxdl
 # limitations under the License.
 #
 # pylint: disable=too-many-lines,too-many-instance-attributes
+"""
+Parser for reading XPS (X-ray Photoelectron Spectroscopy) data from native
+Specs Lab Prodigy SLE format, to be passed to mpes nxdl
+(NeXus Definition Language) template.
+"""
 
 """
 Parser for reading XPS (X-ray Photoelectron Spectroscopy) metadata from
@@ -32,11 +31,10 @@ import copy
 import logging
 from typing import Dict, Any, List
 import warnings
-from datetime import datetime
+from packaging.version import Version, InvalidVersion
 import sqlite3
 import struct
 from lxml import etree as ET
-from abc import ABC
 import numpy as np
 import xarray as xr
 
@@ -53,7 +51,11 @@ from pynxtools_xps.value_mappers import (
     MEASUREMENT_METHOD_MAP,
     parse_datetime,
 )
-from pynxtools_xps.specs.sle.flatten_xml import flatten_xml
+from pynxtools_xps.specs.sle.flatten_xml import (
+    flatten_schedule,
+    flatten_context,
+    flatten_metainfo,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +79,13 @@ UNITS: dict[str, str] = {
 }
 
 
+def execute_sql_query_on_con(con: sqlite3.Connection, query: str):
+    """Excute a query on a sqlite connection object."""
+    cur = con.cursor()
+    cur.execute(query)
+    return cur.fetchall()
+
+
 class SleMapperSpecs(XPSMapper):
     """
     Class for restructuring .sle data file from
@@ -96,38 +105,92 @@ class SleMapperSpecs(XPSMapper):
             for version in supported_versions:
                 self.versions_map[version] = parser
 
-        self.sql_connection = None
+        self.sql_connection: str
 
         super().__init__()
 
     def _select_parser(self):
         """
-        Select the correct parser for the SLE file version.
+        Select the correct parser for the SLE file version. If multiple parsers
+        support the version, the most recent parser is returned.
 
         Returns
         -------
         Parser
             Specs SLE Parser.
 
-        """
-        version = self._get_sle_version()
-        try:
-            return self.versions_map[version]()
-        except KeyError as exc:
-            raise KeyError(
-                f"Version f{version} of SPECS Prodigy is currently not supported."
-            ) from exc
+        Raises
+        ------
+        KeyError
+            If no parser supports the given version.
 
-    def _get_sle_version(self) -> str:
-        """Get the Prodigy SLE version from the file."""
-        con = sqlite3.connect(self.sql_connection)
-        cur = con.cursor()
-        query = 'SELECT Value FROM Configuration WHERE Key=="Version"'
-        cur.execute(query)
-        version = cur.fetchall()[0][0]
-        version = version.split(".")
-        version = version[0] + "." + version[1].split("-")[0]
-        return version
+        """
+
+        def is_in_range(version_tuple, start, end):
+            """
+            Check if a version tuple falls within a specified range.
+
+            Parameters
+            ----------
+            version_tuple : tuple
+                Tuple containing the major and minor version (e.g., (1, 0)).
+            start : tuple
+                Starting version of the range.
+            end : tuple or None
+                Ending version of the range. If None, there is no upper limit.
+
+            Returns
+            -------
+            bool
+                True if the version is within the range, False otherwise.
+            """
+
+            if end is None:
+                return version_tuple >= start
+            return start <= version_tuple <= end
+
+        def is_version_supported(version, supported_version_ranges):
+            """
+            Determine if a version is supported by a parser based on version ranges.
+
+            Parameters
+            ----------
+            version : str
+                Version string to check (e.g., 'v4.75').
+            supported_version_ranges : list of tuple
+                List of version range tuples, where each tuple has a start and optional end.
+
+            Returns
+            -------
+            bool
+                True if the version is supported, False otherwise.
+            """
+            try:
+                parsed_version = Version(version.lstrip("v"))
+            except InvalidVersion:
+                raise ValueError(f"Invalid version: {version}")
+
+            version_tuple = (parsed_version.major, parsed_version.minor)
+
+            for start, end in supported_version_ranges:
+                if is_in_range(version_tuple, start, end):
+                    return True
+            return False
+
+        version = SleMapperSpecs._get_sle_version()
+
+        supporting_parsers = []
+
+        for parser in self.parsers:
+            if is_version_supported(version, parser.supported_version_ranges):
+                supporting_parsers += [parser]
+
+        if not supporting_parsers:
+            raise KeyError(
+                f"Version {version} of SPECS Prodigy is currently not supported."
+            )
+
+        return supporting_parsers[-1]  # always use newest parser
 
     def parse_file(self, file: str, **kwargs: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -274,100 +337,26 @@ class SleMapperSpecs(XPSMapper):
                 self._xps_dict[detector_data_unit_key] = detector_data_units
 
 
-KEY_MAP: Dict[str, str] = {
-    "Udet": "detector_voltage",
-    "Comment": "comments",
-    "ElectronEnergy": "start_energy",
-    "SpectrumID": "spectrum_id",
-    "EpassOrRR": "pass_energy",
-    "EnergyType": "energy/@type",
-    "Samples": "n_values",
-    "Wf": "work_function",
-    "Step": "step",
-    "Ubias": "electron_bias",
-    "DwellTime": "dwell_time",
-    "NumScans": "total_scans",
-    "LensMode": "lens_mode",
-    "Timestamp": "time_stamp",
-    "Entrance": "entrance_slit",
-    "Exit": "exit_slit",
-    "ScanMode": "energy_scan_mode",
-    "VoltageRange": "voltage_range",
-    # spectrometer settings
-    "Coil Current [mA]": "coil_current [mA]",
-    "Pre Defl Y [nU]": "pre_deflector_y_current [nU]",
-    "Pre Defl X [nU]": "pre_deflector_x_current [nU]",
-    "L1 [nU]": "lens1_voltage [nU]",
-    "L2 [nU]": "lens2_voltage [nU]",
-    "Focus Displacement 1 [nu]": "focus_displacement_current [nU]",
-    "Detector Voltage [V]": "detector_voltage [V]",
-    "Bias Voltage Electrons [V]": "bias_voltage_electrons [V]",
-    "Bias Voltage Ions [V]": "bias_voltage_ions [V]",
-    # source settings
-    "anode": "source_label",
-    "uanode": "source_voltage",
-    "iemission": "emission_current",
-    "ihv": "source_high_voltage",
-    "ufilament": "filament_voltage",
-    "ifilament": "filament_current",
-    "DeviceExcitationEnergy": "excitation_energy",
-    "panode": "anode_power",
-    "temperature": "source_temperature",
-    # sql metadata map: Dict[str, str]
-    "EnergyType": "energy/@type",
-    "EpassOrRR": "pass_energy",
-    "Wf": "work_function",
-    "Timestamp": "time_stamp",
-    "Samples": "n_values",
-    "ElectronEnergy": "start_energy",
-}
-
-VALUE_MAP: Dict[str, Any] = {
-    "energy/@type": convert_energy_type,
-    "excitation_energy": float,
-    "time_stamp": parse_datetime,
-    "energy_scan_mode": convert_energy_scan_mode,
-}
-
-KEYS_TO_DROP: List[str] = [
-    "Work Function",
-]
-
-POSSIBLE_DATE_FORMATS: List[str] = ["%Y-%b-%d %H:%M:%S.%f"]
-
-
 class SleProdigyParser:
     """
     Generic parser without reading capabilities,
     to be used as template for implementing parsers for different versions.
     """
 
-    supported_versions = [
-        "1.2",
-        "1.8",
-        "1.9",
-        "1.10",
-        "1.11",
-        "1.12",
-        "1.13",
-        "4.63",
-        "4.64",
-        "4.65",
-        "4.66",
-        "4.67",
-        "4.68",
-        "4.69",
-        "4.70",
-        "4.71",
-        "4.72",
-        "4.73",
-        "4.100",
+    supported_version_ranges = [
+        ((1, 0), None),  # Supports v1.* and higher
+        ((2, 0), (2, None)),  # Supports v2.* and higher
+        ((3, 0), (3, None)),  # Supports v3.* and higher
+        ((4, 0), (4, None)),  # Supports 4.1 through 4.100
     ]
 
     def __init__(self):
         self.con = ""
         self.spectra: List[Dict[str, Any]] = []
-        self.xml: ET.Element = None
+        self.xml_schedule: ET.Element = None
+        self.xml_context: ET.Element = None
+        self.xml_metainfo: ET.Element = None  ######## TODO
+
         self.sum_channels: bool = False
         self.remove_align: bool = True
 
@@ -379,14 +368,10 @@ class SleProdigyParser:
         self.encoding = np.float32
 
         encodings_map: Dict[str, List[str, float]] = {
+            "short": ["h", 2],
             "double": ["d", 8],
             "float": ["f", 4],
         }
-
-    def initiate_file_connection(self, filepath: str):
-        """Set the sqllite connection of the file to be opened."""
-        sql_connection = filepath
-        self.con = sqlite3.connect(sql_connection)
 
     def parse_file(
         self, filepath: str, **kwargs: Dict[str, Any]
@@ -419,8 +404,8 @@ class SleProdigyParser:
 
         # read and parse sle file
         self._get_xml_schedule()
-        self._get_xml_schedule()
-        self._get_xml_schedule()
+        self._get_xml_context()
+        self._get_xml_metainfo()
 
         self.spectra = flatten_xml(self.xml)
         self._attach_node_ids()
@@ -444,30 +429,36 @@ class SleProdigyParser:
 
         return self.spectra
 
-    def _addVersion(self):
-        self.cursor.execute('SELECT Value FROM Configuration WHERE Key="Version"')
-        self.version = self.cursor.fetchone()[0]
+    def initiate_file_connection(self, filepath: str):
+        """Set the sqllite connection of the file to be opened."""
+        sql_connection = filepath
+        self.con = sqlite3.connect(sql_connection)
 
-    def _addAppVersion(self):
-        self.cursor.execute('SELECT Value FROM Configuration WHERE Key="AppVersion"')
-        self.app_version = self.cursor.fetchone()[0]
+    def _execute_sql_query(self, con: sqlite3.Connection, query: str):
+        return execute_sql_query_on_con(self.con, query)
 
-    def _get_xml_from_key(key: str):
-        cur = self.con.cursor()
+    def _get_version(self):
+        query = 'SELECT Value FROM Configuration WHERE Key="Version"'
+        self.version = self._execute_sql_query(query)[0][0]
+
+    def _get_app_version(self):
+        query = 'SELECT Value FROM Configuration WHERE Key="AppVersion"'
+        self.app_version = self._execute_sql_query(query)[0][0]
+
+    def _get_xml_from_key(self, key: str):
         query = f"SELECT Value FROM Configuration WHERE Key={key}"
-        cur.execute(query)
-        return ET.fromstring(self.cursor.fetchone()[0])
+        return ET.fromstring(self._execute_sql_query(query)[0][0])
 
     def _get_xml_schedule(self):
         """Parse the schedule into an XML object."""
-        self.xml_schedule = _get_xml_from_key("Schedule")
+        self.xml_schedule = self._get_xml_from_key("Schedule")
 
     def _get_xml_context(self):
         """Parse the context into an XML object."""
-        self.xml_context = _get_xml_from_key("Context")
+        self.xml_context = self._get_xml_from_key("Context")
 
     def _get_xml_metainfo(self):
-        XML = _get_xml_from_key("MetaInfo")
+        XML = self._get_xml_from_key("MetaInfo")
         for i in XML.iter("Parameter"):
             self.metainfo[i.attrib["name"].replace(" ", "_")] = i.text
 
@@ -1329,11 +1320,8 @@ class SleProdigyParser:
         """
         Reformat spectra into the format needed for the Mapper object
         """
-        maps = {}
-        for key_map in self.key_maps:
-            maps.update(key_map)
         for spec in self.spectra:
-            re_map_keys(spec, maps)
+            re_map_keys(spec, KEY_MAP)
             re_map_values(spec, self.value_map)
             drop_unused_keys(spec, self.keys_to_drop)
             spec["data"] = {}

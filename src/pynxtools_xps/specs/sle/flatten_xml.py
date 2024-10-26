@@ -5,7 +5,6 @@ Created on Mon Jul 15 13:17:23 2024
 @author: pielsticker
 """
 
-import re
 import copy
 from typing import Tuple, Dict, Any, List, Union
 
@@ -15,10 +14,10 @@ from pynxtools_xps.reader_utils import (
     convert_pascal_to_snake,
     _re_map_single_value,
     _format_value,
+    extract_unit,
 )
 from pynxtools_xps.value_mappers import (
     convert_units,
-    extract_unit,
     MEASUREMENT_METHOD_MAP,
     convert_measurement_method,
 )
@@ -26,10 +25,10 @@ from pynxtools_xps.value_mappers import (
 from pynxtools_xps.specs.sle.specs_sle_mapping import KEY_MAP, VALUE_MAP
 
 
-def format_key_and_value(key: str, value: str) -> Tuple[Any, str]:
+def format_key_and_value(key: str, value_str: str) -> Tuple[Any, str]:
     key = KEY_MAP.get(key, key)
     key = convert_pascal_to_snake(key)
-    value, unit = extract_unit(value)
+    value, unit = extract_unit(key, value_str)
     value = _format_value(value)
     value = _re_map_single_value(key, value, VALUE_MAP)
 

@@ -51,6 +51,7 @@ from pynxtools_xps.value_mappers import (
     MEASUREMENT_METHOD_MAP,
     parse_datetime,
 )
+from pynxtools_xps.specs.sle.specs_sle_mapping import KEY_MAP, VALUE_MAP
 from pynxtools_xps.specs.sle.flatten_xml import (
     flatten_schedule,
     flatten_context,
@@ -99,15 +100,14 @@ class SleMapperSpecs(XPSMapper):
             SleProdigyParser,
         ]
 
-        self.versions_map = {}
-        for parser in self.parsers:
-            supported_versions = parser.supported_versions
-            for version in supported_versions:
-                self.versions_map[version] = parser
-
         self.sql_connection: str
 
         super().__init__()
+
+    def _get_sle_version(self):
+        con = sqlite3.connect(self.sql_connection)
+        query = 'SELECT Value FROM Configuration WHERE Key="Version"'
+        return execute_sql_query_on_con(con, query)[0][0]
 
     def _select_parser(self):
         """
@@ -177,7 +177,7 @@ class SleMapperSpecs(XPSMapper):
                     return True
             return False
 
-        version = SleMapperSpecs._get_sle_version()
+        version = self._get_sle_version()
 
         supporting_parsers = []
 
@@ -373,9 +373,7 @@ class SleProdigyParser:
             "float": ["f", 4],
         }
 
-    def parse_file(
-        self, filepath: str, **kwargs: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+    def parse_file(self, file: str, **kwargs: Dict[str, Any]) -> List[Dict[str, Any]]:
         """
         Parse the file's data and metadata into a flat list of dictionaries.
 
@@ -400,14 +398,14 @@ class SleProdigyParser:
         self.sum_channels = kwargs.get("sum_channels", False)
 
         # initiate connection to sql file
-        self.initiate_file_connection(filepath)
+        self.initiate_file_connection(file)
 
         # read and parse sle file
         self._get_xml_schedule()
         self._get_xml_context()
         self._get_xml_metainfo()
 
-        self.spectra = flatten_xml(self.xml)
+        self.spectra = flatten_schedule(self.xml)
         self._attach_node_ids()
         self._remove_empty_nodes()
         self._attach_device_protocols()
@@ -429,9 +427,9 @@ class SleProdigyParser:
 
         return self.spectra
 
-    def initiate_file_connection(self, filepath: str):
+    def initiate_file_connection(self, file: str):
         """Set the sqllite connection of the file to be opened."""
-        sql_connection = filepath
+        sql_connection = file
         self.con = sqlite3.connect(sql_connection)
 
     def _execute_sql_query(self, con: sqlite3.Connection, query: str):
@@ -1322,7 +1320,7 @@ class SleProdigyParser:
         """
         for spec in self.spectra:
             re_map_keys(spec, KEY_MAP)
-            re_map_values(spec, self.value_map)
+            re_map_values(spec, VALUE_MAP)
             drop_unused_keys(spec, self.keys_to_drop)
             spec["data"] = {}
             spec["data"]["x"] = self._get_energy_data(spec)

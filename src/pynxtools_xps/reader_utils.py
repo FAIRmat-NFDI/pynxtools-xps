@@ -477,7 +477,7 @@ UNIT_PATTERN = re.compile(r"^([-+]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\s*([a-zA-Z/\s
 
 def split_value_and_unit(
     value_str: str,
-) -> Union[Tuple[Union[int, float], str], Tuple[str, str]]:
+) -> Tuple[Union[int, float, str], str]:
     """
     Splits a string into a numerical value and its associated unit.
 
@@ -507,33 +507,40 @@ def split_value_and_unit(
 
 
 def extract_unit(
-    key: str, value: str, unit_missing: Dict[str, str] = {}
+    key: str, value_str: str, unit_missing: Dict[str, str] = {}
 ) -> Tuple[Union[int, float, str], str]:
     """
-    Extract units for metadata containing unit information.
+    Extracts a numeric value and its associated unit from a metadata string.
+
+    The function identifies and separates numerical and unit components from
+    the `value_str` string. If no unit is found in `value_str`, it checks the
+    `unit_missing` dictionary for a default unit.
 
     Example:
-        analyser_work_function: 4.506eV
-        -> analyser_work_function: 4.506,
-           analyser_work_function_units: eV
+        analyser_work_function: "4.506eV"
+        -> ("4.506", "eV")
 
     Parameters
     ----------
     key : str
         Key of the associated value.
-    value : str
+    value_str : str
         Combined unit and value information.
-    unit_missing: Dict[str, str], optional
+    unit_missing : Dict[str, str], optional
         Dictionary with default units for keys that do not have a unit attached.
-        By default, this dictionary is empty.
+        By default, this dictionary is None.
 
     Returns
     -------
     Tuple[Union[int, float, str], str]
-        - A tuple with the numeric value and associated unit if the unit is extracted.
-        - If no unit is found, checks `unit_missing` dictionary for a default unit.
+        - A tuple with the numeric value (as int, float, or str) and associated unit
+          if extracted from `value_str`.
+        - If no unit is found in `value_str`, checks `unit_missing`
+          for a default unit.
+        - If no unit is found in both `value_str` and `unit_missing`,
+          returns an empty string for the unit.
     """
-    value, unit = split_value_and_unit(value)
+    value, unit = split_value_and_unit(value_str)
 
     if not unit:
         unit = unit_missing.get(key, "")

@@ -1,7 +1,3 @@
-"""
-Helper functions for populating NXmpes template
-"""
-
 # Copyright The NOMAD Authors.
 #
 # This file is part of NOMAD. See https://nomad-lab.eu for further info.
@@ -18,18 +14,20 @@ Helper functions for populating NXmpes template
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+"""
+Helper functions for populating NXmpes template
+"""
+
+import logging
 import re
 from abc import ABC, abstractmethod
-import logging
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Union, Optional
-from scipy.interpolate import interp1d
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 import numpy as np
 import pint
-
-from dataclasses import dataclass
-
-from pynxtools_xps.value_mappers import convert_units
+from scipy.interpolate import interp1d
 
 logger = logging.getLogger(__name__)
 
@@ -452,9 +450,34 @@ def construct_entry_name(parts: List[str]) -> str:
     return "__".join([align_name_part(part) for part in parts])
 
 
+def _format_value(value: Union[str, float, int]) -> Union[float, int, str]:
+    """
+    Formats the input value as an int or float if it's a numeric string.
+
+    If a string represents a float (e.g., "5.0"), it remains a float even if it has no decimals.
+
+    Parameters
+    ----------
+    value : Union[str, float, int]
+        The input value to format.
+
+    Returns
+    -------
+    Union[float, int, str]
+        The formatted value, converted to int or float if applicable; otherwise, the original value.
+    """
+    if isinstance(value, str) and re.match(r"^-?\d*\.?\d+(?:[eE][-+]?\d+)?$", value):
+        # Check for decimal to ensure float, even if the decimal part is zero
+        return float(value) if "." in value or "e" in value.lower() else int(value)
+    return value
+
+
+UNIT_PATTERN = re.compile(r"^([-+]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\s*([a-zA-Z/\s]+)$")
+
+
 def split_value_and_unit(
     value_str: str,
-) -> Union[Tuple[Union[int, float], str], Tuple[str, str]]:
+) -> Tuple[Union[int, float, str], str]:
     """
     Splits a string into a numerical value and its associated unit.
 
@@ -475,14 +498,54 @@ def split_value_and_unit(
         - A tuple with he original string and an empty string if it does not
           match the pattern.
     """
-    match = re.match(
-        r"^(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\s*([a-zA-Z/\s]+)$", value_str
-    )
+    match = UNIT_PATTERN.match(value_str)
     if match:
-        value = float(match.group(1)) if "." in match.group(1) else int(match.group(1))
-        unit = match.group(2).replace(" ", "")  # Remove any internal spaces in the unit
-        return value, convert_units(unit)
-    return value_str, ""
+        value = _format_value(match.group(1))
+        unit = match.group(2).replace(" ", "") if match.group(2) else ""
+        return value, unit
+    return _format_value(value_str), ""
+
+
+def extract_unit(
+    key: str, value_str: str, unit_missing: Dict[str, str] = {}
+) -> Tuple[Union[int, float, str], str]:
+    """
+    Extracts a numeric value and its associated unit from a metadata string.
+
+    The function identifies and separates numerical and unit components from
+    the `value_str` string. If no unit is found in `value_str`, it checks the
+    `unit_missing` dictionary for a default unit.
+
+    Example:
+        analyser_work_function: "4.506eV"
+        -> ("4.506", "eV")
+
+    Parameters
+    ----------
+    key : str
+        Key of the associated value.
+    value_str : str
+        Combined unit and value information.
+    unit_missing : Dict[str, str], optional
+        Dictionary with default units for keys that do not have a unit attached.
+        By default, this dictionary is None.
+
+    Returns
+    -------
+    Tuple[Union[int, float, str], str]
+        - A tuple with the numeric value (as int, float, or str) and associated unit
+          if extracted from `value_str`.
+        - If no unit is found in `value_str`, checks `unit_missing`
+          for a default unit.
+        - If no unit is found in both `value_str` and `unit_missing`,
+          returns an empty string for the unit.
+    """
+    value, unit = split_value_and_unit(value_str)
+
+    if not unit:
+        unit = unit_missing.get(key, "")
+
+    return value, unit
 
 
 ureg = pint.UnitRegistry()

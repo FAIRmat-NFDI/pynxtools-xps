@@ -1,6 +1,3 @@
-"""
-Class for reading XPS files from raw VMS data.
-"""
 # Copyright The NOMAD Authors.
 #
 # This file is part of NOMAD. See https://nomad-lab.eu for further info.
@@ -18,6 +15,11 @@ Class for reading XPS files from raw VMS data.
 # limitations under the License.
 #
 # pylint: disable=too-many-lines
+"""
+Parser for reading XPS (X-ray Photoelectron Spectroscopy) metadata from
+VAMAS standard, to be passed to MPES nxdl (NeXus Definition Language)
+template.
+"""
 
 from copy import deepcopy
 import datetime

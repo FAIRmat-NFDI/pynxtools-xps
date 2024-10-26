@@ -1,12 +1,27 @@
-# -*- coding: utf-8 -*-
+# Copyright The NOMAD Authors.
+#
+# This file is part of NOMAD. See https://nomad-lab.eu for further info.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# pylint: disable=too-many-lines,too-few-public-methods
 """
-Created on Thu Apr 18 11:57:41 2024
-
-@author: pielsticker
+Utility function for mapping keys and values in the pynxtools template.
 """
 
 import re
-from typing import Dict, Any
+import datetime
+from typing import Dict, List, Any
 
 ENERGY_TYPE_MAP = {
     "BE": "binding",
@@ -129,3 +144,54 @@ def get_units_for_key(unit_key: str, unit_map: Dict[str, str]) -> str:
     if regex_match is None:
         return unit_map.get(unit_key, None)
     return regex_match.group(1)
+
+
+def parse_datetime(
+    datetime_string: str,
+    possible_date_formats: List[str],
+    tzinfo: datetime.tzinfo = datetime.timezone.utc,
+) -> str:
+    """
+    Convert a date string to ISO 8601 format with optional timezone handling.
+
+    Convert the native time format to the datetime string
+    in the ISO 8601 format: '%Y-%b-%dT%H:%M:%S.%fZ'.
+    For different vendors, there are different possible date formats,
+    all of which can be checked with this method.
+    Optionally, a timezone (tzinfo) can be applied to the datetime object if provided.
+
+    Parameters
+    ----------
+    datetime_string : str
+        String representation of the date
+    possible_date_formats : List[str]
+        List of possible date time formats to attempt for parsing.
+    tzinfo: datetime.tzinfo
+        A tzinfo object specifying the desired timezone to apply to the datetime object.
+        Defaults to UTC (datetime.timezone.utc).
+
+    Raises
+    ------
+    ValueError
+        If the time format cannot be converted, a ValueError is raised.
+
+    Returns
+    -------
+    str
+        Datetime in ISO 8601 format.
+    """
+    for date_fmt in possible_date_formats:
+        try:
+            datetime_obj = datetime.datetime.strptime(datetime_string, date_fmt)
+
+            if tzinfo is not None:
+                # Apply the specified timezone to the datetime object
+                datetime_obj = datetime_obj.replace(tzinfo=tzinfo)
+
+            # Convert to ISO 8601 format
+            return datetime_obj.isoformat()
+
+        except ValueError:
+            continue
+
+    raise ValueError("Date and time could not be converted to ISO 8601 format.")

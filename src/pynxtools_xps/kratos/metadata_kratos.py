@@ -1,8 +1,3 @@
-"""
-Parser for reading XPS (X-ray Photoelectron Spectroscopy) metadata from
-Kratos instruments (currently only after exporting to .vms format), to be passed to
-mpes nxdl (NeXus Definition Language) template.
-"""
 # Copyright The NOMAD Authors.
 #
 # This file is part of NOMAD. See https://nomad-lab.eu for further info.
@@ -19,21 +14,24 @@ mpes nxdl (NeXus Definition Language) template.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-# pylint: disable=too-many-lines,too-many-instance-attributes
+"""
+Parser for reading XPS (X-ray Photoelectron Spectroscopy) metadata from
+Kratos instruments (currently only after exporting to .vms format), to be
+passed to MPES nxdl (NeXus Definition Language) template.
+"""
 
 import re
-import datetime
 from typing import Any, Dict, List, Union, Tuple
 from pathlib import Path
 
 from pynxtools_xps.reader_utils import (
     convert_pascal_to_snake,
+    extract_unit,
 )
 
 from pynxtools_xps.value_mappers import (
     convert_bool,
-    convert_units,
+    parse_datetime,
 )
 
 from pynxtools_xps.kratos.kratos_data_model import (
@@ -72,6 +70,8 @@ UNIT_MISSING: Dict[str, str] = {
     "sample_tilt": "degree",
 }
 
+POSSIBLE_DATE_FORMATS: List[str] = ["%d.%m.%Y %H:%M", "%d/%m/%Y %H:%M"]
+
 
 class KratosParser:
     """
@@ -89,7 +89,7 @@ class KratosParser:
         self.metadata = KratosMetadata()
 
         self.value_function_map: Dict[str, Any] = {
-            "date_created": _parse_datetime,
+            "date_created": parse_datetime,
             "description": _convert_description,
             "charge_neutraliser": convert_bool,
             "deflection": _convert_xray_deflection,
@@ -150,7 +150,7 @@ class KratosParser:
                 field_type = type(getattr(self.metadata, key))
 
                 if key in KEYS_WITH_UNITS:
-                    value, unit = self.extract_unit(key, value)
+                    value, unit = extract_unit(key, value, UNIT_MISSING)  # type: ignore[assignment]
                     setattr(self.metadata, f"{key}_units", unit)
 
                 value = self.map_values(key, value, field_type)
@@ -158,46 +158,6 @@ class KratosParser:
                 setattr(self.metadata, key, value)
 
         self.metadata.validate_types()
-
-    def extract_unit(self, key: str, value: str) -> Tuple[Any, str]:
-        """
-        Extract units for the metadata containing unit information.
-
-        Example:
-            analyser_work_function: 4.506eV
-            -> analyser_work_function: 4.506,
-               analyser_work_function_units: eV,
-
-        Parameters
-        ----------
-        key : str
-            Key of the associated value.
-        value : str
-            Combined unit and value information.
-
-        Returns
-        -------
-        value :
-            value with units.
-        unit : str
-            Associated unit.
-
-        """
-
-        pattern = re.compile(r"([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)([a-zA-Z]+)")
-        match = pattern.match(value)
-
-        if match:
-            value, unit = match.groups()
-        else:
-            unit = ""
-
-        unit = convert_units(unit)
-
-        if key in UNIT_MISSING:
-            unit = UNIT_MISSING[key]
-
-        return value, unit
 
     def map_values(self, key: str, value, field_type):
         """
@@ -221,7 +181,10 @@ class KratosParser:
 
         if key in self.value_function_map:
             map_fn = self.value_function_map[key]
-            value = map_fn(value)
+            if key == "date_created":
+                value = map_fn(value, POSSIBLE_DATE_FORMATS)
+            else:
+                value = map_fn(value)
         return field_type(value)
 
     def flatten_metadata(self) -> Dict[str, Any]:
@@ -266,34 +229,6 @@ class KratosParser:
                 setup_unit(flattened_dict, key)
 
         return flattened_dict
-
-
-def _parse_datetime(datetime_string: str) -> str:
-    """
-    Convert the native time format to the datetime string
-    in the ISO 8601 format: '%Y-%b-%dT%H:%M:%S.%fZ'.
-
-    Parameters
-    ----------
-    value : str
-        String representation of the date in the format
-        "%Y-%m-%d", "%m/%d/%Y" or "%H:%M:%S", "%I:%M:%S %p".
-
-    Returns
-    -------
-    date_object : str
-        Datetime in ISO8601 format.
-
-    """
-    possible_date_formats = ["%d.%m.%Y %H:%M", "%d/%m/%Y %H:%M"]
-    for date_fmt in possible_date_formats:
-        try:
-            datetime_obj = datetime.datetime.strptime(datetime_string, date_fmt)
-            return datetime_obj.astimezone().isoformat()
-
-        except ValueError:
-            continue
-    raise ValueError("Date and time could not be converted to ISO 8601 format.")
 
 
 def _convert_description(value: str) -> Dict[str, Any]:

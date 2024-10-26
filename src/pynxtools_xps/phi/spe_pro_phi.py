@@ -1,8 +1,3 @@
-"""
-Parser for reading XPS (X-ray Photoelectron Spectroscopy) data from
-Phi PHI VersaProbe 4 instruments (.spe or .pro format), to be passed to
-mpes nxdl (NeXus Definition Language) template.
-"""
 # Copyright The NOMAD Authors.
 #
 # This file is part of NOMAD. See https://nomad-lab.eu for further info.
@@ -19,8 +14,11 @@ mpes nxdl (NeXus Definition Language) template.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-# pylint: disable=too-many-lines,too-many-instance-attributes
+"""
+Parser for reading XPS (X-ray Photoelectron Spectroscopy) data from
+Phi PHI VersaProbe 4 instruments (.spe or .pro format), to be passed to
+MPES nxdl (NeXus Definition Language) template.
+"""
 
 import re
 import warnings

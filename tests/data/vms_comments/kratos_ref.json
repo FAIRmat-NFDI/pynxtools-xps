@@ -49,5 +49,5 @@
     "sweeps": 1,
     "x_ray_power": 100.0,
     "x_ray_power/@units": "W",
-    "quality": "190.25"
+    "quality": 190.25
 }

@@ -1,6 +1,3 @@
-"""
-Class for reading XPS files from Scienta spectrometers.
-"""
 # Copyright The NOMAD Authors.
 #
 # This file is part of NOMAD. See https://nomad-lab.eu for further info.
@@ -17,32 +14,37 @@ Class for reading XPS files from Scienta spectrometers.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+"""
+Parser for reading XPS (X-ray Photoelectron Spectroscopy) data from
+Scienta spectrometers (.ibw or .txt format), to be passed to
+MPES nxdl (NeXus Definition Language) template.
+"""
 
-import re
 import copy
+import re
 import warnings
 from pathlib import Path
-from typing import Any, Dict, List, Union, Tuple
-import xarray as xr
+from typing import Any, Dict, List, Tuple, Union
+
 import numpy as np
+import xarray as xr
 from igor2 import binarywave
 
 from pynxtools_xps.reader_utils import (
     XPSMapper,
-    construct_entry_name,
-    construct_data_key,
-    _re_map_single_value,
     _check_valid_value,
+    _re_map_single_value,
+    construct_data_key,
+    construct_entry_name,
 )
-from pynxtools_xps.value_mappers import get_units_for_key, convert_units
-
 from pynxtools_xps.scienta.scienta_data_model import ScientaHeader, ScientaRegion
 from pynxtools_xps.scienta.scienta_mappings import (
     UNITS,
     VALUE_MAP,
-    _get_key_value_pair,
     _construct_date_time,
+    _get_key_value_pair,
 )
+from pynxtools_xps.value_mappers import convert_units, get_units_for_key
 
 
 class MapperScienta(XPSMapper):

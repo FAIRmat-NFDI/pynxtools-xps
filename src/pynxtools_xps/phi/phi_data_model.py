@@ -1,6 +1,3 @@
-"""
-Data model for Phi VersaProbe 4 software (version SS 3.3.3.2).
-"""
 # Copyright The NOMAD Authors.
 #
 # This file is part of NOMAD. See https://nomad-lab.eu for further info.
@@ -17,10 +14,11 @@ Data model for Phi VersaProbe 4 software (version SS 3.3.3.2).
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# pylint: disable=too-many-instance-attributes
+"""
+Data model for Phi VersaProbe 4 software (version SS 3.3.3.2).
+"""
 
-from dataclasses import dataclass
-from dataclasses import field
+from dataclasses import dataclass, field
 
 import numpy as np
 

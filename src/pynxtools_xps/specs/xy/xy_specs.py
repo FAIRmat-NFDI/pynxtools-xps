@@ -1,9 +1,3 @@
-"""
-Parser for reading XPS (X-ray Photoelectron Spectroscopy) data from
-Specs Lab Prodigy XY exports, to be passed to mpes nxdl
-(NeXus Definition Language) template.
-"""
-
 # Copyright The NOMAD Authors.
 #
 # This file is part of NOMAD. See https://nomad-lab.eu for further info.
@@ -20,8 +14,12 @@ Specs Lab Prodigy XY exports, to be passed to mpes nxdl
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 # pylint: disable=too-many-lines,too-many-instance-attributes
+"""
+Parser for reading XPS (X-ray Photoelectron Spectroscopy) data from
+Specs Lab Prodigy XY exports, to be passed to mpes nxdl
+(NeXus Definition Language) template.
+"""
 
 import re
 from typing import List, Dict, Any, Union

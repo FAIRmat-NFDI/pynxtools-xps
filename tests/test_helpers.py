@@ -93,57 +93,57 @@ def test_extract_unit(
 
 
 @pytest.mark.parametrize(
-    "datetime_string, possible_date_formats, expected_iso8601, tzinfo",
+    "datetime_string, possible_date_formats, tzinfo, expected_iso8601",
     [
         # Test cases with valid datetime strings and formats
         (
             "2023-10-23 14:30:00",
             ["%Y-%m-%d %H:%M:%S"],
-            "2023-10-23T14:30:00+00:00",
             datetime.timezone.utc,
+            "2023-10-23T14:30:00+00:00",
         ),
         (
             "23/10/2023 14:30",
             ["%d/%m/%Y %H:%M"],
-            "2023-10-23T14:30:00+00:00",
             datetime.timezone.utc,
+            "2023-10-23T14:30:00+00:00",
         ),
         (
             "October 23, 2023 14:30",
             ["%B %d, %Y %H:%M"],
-            "2023-10-23T14:30:00+00:00",
             datetime.timezone.utc,
+            "2023-10-23T14:30:00+00:00",
         ),
         (
             "2023-10-23T14:30:00Z",
             ["%Y-%m-%dT%H:%M:%SZ"],
-            "2023-10-23T14:30:00+00:00",
             datetime.timezone.utc,
+            "2023-10-23T14:30:00+00:00",
         ),
         (
             "2023-10-23T14:30:00+0200",
             ["%Y-%m-%dT%H:%M:%S%z"],
-            "2023-10-23T14:30:00+02:00",
             datetime.timezone(datetime.timedelta(hours=2)),
+            "2023-10-23T14:30:00+02:00",
         ),
         # Test cases with timezone information
         (
             "2023-10-23 14:30:00",
             ["%Y-%m-%d %H:%M:%S"],
-            "2023-10-23T14:30:00+00:00",
             datetime.timezone(datetime.timedelta(hours=1)),
+            "2023-10-23T14:30:00+01:00",
         ),
         # Test case with missing timezone should still return UTC
         (
             "2023-10-23 14:30:00",
             ["%Y-%m-%d %H:%M:%S"],
-            "2023-10-23T14:30:00+00:00",
             None,
+            "2023-10-23T14:30:00",
         ),
     ],
 )
 def test_parse_datetime(
-    datetime_string, possible_date_formats, expected_iso8601, tzinfo
+    datetime_string, possible_date_formats, tzinfo, expected_iso8601
 ):
     result = parse_datetime(datetime_string, possible_date_formats, tzinfo)
     assert result == expected_iso8601, f"Expected {expected_iso8601} but got {result}"

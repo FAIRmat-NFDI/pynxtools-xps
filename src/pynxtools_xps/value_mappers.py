@@ -160,7 +160,6 @@ def parse_datetime(
     all of which can be checked with this method.
     Optionally, a timezone (tzinfo) can be applied to the datetime object if provided.
 
-
     Parameters
     ----------
     datetime_string : str
@@ -179,18 +178,20 @@ def parse_datetime(
     Returns
     -------
     str
-        Datetime in ISO8601 format.
-
+        Datetime in ISO 8601 format.
     """
     for date_fmt in possible_date_formats:
         try:
             datetime_obj = datetime.datetime.strptime(datetime_string, date_fmt)
 
             if tzinfo is not None:
+                # Apply the specified timezone to the datetime object
                 datetime_obj = datetime_obj.replace(tzinfo=tzinfo)
 
-            return datetime_obj.astimezone().isoformat()
+            # Convert to ISO 8601 format
+            return datetime_obj.isoformat()
 
         except ValueError:
             continue
+
     raise ValueError("Date and time could not be converted to ISO 8601 format.")

@@ -31,7 +31,8 @@ import re
 import struct
 import copy
 import logging
-from typing import Dict, Any, List
+from pathlib import Path
+from typing import Dict, Any, List, Union
 import warnings
 from packaging.version import Version, InvalidVersion
 import sqlite3
@@ -46,6 +47,7 @@ from pynxtools_xps.reader_utils import (
     re_map_keys,
     re_map_values,
     drop_unused_keys,
+    update_dict_without_overwrite,
 )
 from pynxtools_xps.value_mappers import (
     convert_energy_type,
@@ -104,12 +106,12 @@ class SleMapperSpecs(XPSMapper):
             SleProdigyParser,
         ]
 
-        self.sql_connection: str
+        self.file: Union[str, Path] = ""
 
         super().__init__()
 
     def _get_sle_version(self):
-        con = sqlite3.connect(self.sql_connection)
+        con = sqlite3.connect(self.file)
         query = 'SELECT Value FROM Configuration WHERE Key="Version"'
         return execute_sql_query_on_con(con, query)[0][0]
 
@@ -194,7 +196,7 @@ class SleMapperSpecs(XPSMapper):
                 f"Version {version} of SPECS Prodigy is currently not supported."
             )
 
-        return supporting_parsers[-1]  # always use newest parser
+        return supporting_parsers[-1]()  # always use newest parser
 
     def parse_file(self, file: str, **kwargs: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -215,7 +217,7 @@ class SleMapperSpecs(XPSMapper):
             Dict with parsed data.
 
         """
-        self.sql_connection = file
+        self.file = file
         return super().parse_file(file, **kwargs)
 
     def construct_data(self):
@@ -359,7 +361,7 @@ class SleProdigyParser:
         self.spectra: List[Dict[str, Any]] = []
         self.xml_schedule: ET.Element = None
         self.xml_context: ET.Element = None
-        self.xml_metainfo: ET.Element = None  ######## TODO
+        self.xml_metainfo: ET.Element = None
 
         self.sum_channels: bool = False
         self.remove_align: bool = True
@@ -409,7 +411,12 @@ class SleProdigyParser:
         self._get_xml_context()
         self._get_xml_metainfo()
 
-        self.spectra = flatten_schedule(self.xml)
+        self.spectra = flatten_schedule(self.xml_schedule)
+
+        for spectrum in self.spectra:
+            update_dict_without_overwrite(spectrum, flatten_context(self.xml_context))
+            update_dict_without_overwrite(spectrum, flatten_metainfo(self.xml_metainfo))
+
         self._attach_node_ids()
         self._remove_empty_nodes()
         self._attach_device_protocols()
@@ -436,7 +443,7 @@ class SleProdigyParser:
         sql_connection = file
         self.con = sqlite3.connect(sql_connection)
 
-    def _execute_sql_query(self, con: sqlite3.Connection, query: str):
+    def _execute_sql_query(self, query: str):
         return execute_sql_query_on_con(self.con, query)
 
     def _get_version(self):
@@ -448,8 +455,11 @@ class SleProdigyParser:
         self.app_version = self._execute_sql_query(query)[0][0]
 
     def _get_xml_from_key(self, key: str):
-        query = f"SELECT Value FROM Configuration WHERE Key={key}"
-        return ET.fromstring(self._execute_sql_query(query)[0][0])
+        query = f"SELECT Value FROM Configuration WHERE Key='{key}'"
+        try:
+            return ET.fromstring(self._execute_sql_query(query)[0][0])
+        except IndexError:
+            return None
 
     def _get_xml_schedule(self):
         """Parse the schedule into an XML object."""
@@ -460,9 +470,8 @@ class SleProdigyParser:
         self.xml_context = self._get_xml_from_key("Context")
 
     def _get_xml_metainfo(self):
-        XML = self._get_xml_from_key("MetaInfo")
-        for i in XML.iter("Parameter"):
-            self.metainfo[i.attrib["name"].replace(" ", "_")] = i.text
+        """Parse the metainfo into an XML object."""
+        self.xml_metainfo = self._get_xml_from_key("MetaInfo")
 
     def _append_scan_data(self):
         """

@@ -103,8 +103,6 @@ def extract_device_info(elem: ET.Element) -> Dict[str, Any]:
 
     device_settings = extract_devices(elem)
 
-    print(device_settings)
-
     return {unique_name: device_settings}
 
 
@@ -270,7 +268,7 @@ def flatten_schedule(xml: ET.Element) -> List[Dict[str, Any]]:
     return collect
 
 
-def flatten_context(xml: ET.Element) -> List[Dict[str, Any]]:
+def flatten_context(xml: ET.Element) -> Dict[str, Any]:
     """
     Flatten the nested XML context, keeping only the needed metadata.
 
@@ -281,10 +279,13 @@ def flatten_context(xml: ET.Element) -> List[Dict[str, Any]]:
 
     Returns
     -------
-    collect : list
+    Dict[str, Any]:
         Dictionary with device metadata.
 
     """
+    if xml is not None:
+        return {}
+
     device_metadata: Dict[str, Any] = {}
 
     for elem in xml.iter("DeviceContext"):
@@ -304,13 +305,16 @@ def flatten_metainfo(xml: ET.Element) -> List[Dict[str, Any]]:
 
     Returns
     -------
-    collect : list
+    Dict[str, Any]:
         Dictionary with metainfo.
 
     """
+    if xml is not None:
+        return {}
+
     metainfo: Dict[str, Any] = {}
 
-    for elem in xml.iter("DeviceContext"):
+    for elem in xml.iter("Parameter"):
         process_xml_element(elem, metainfo)
 
     return metainfo

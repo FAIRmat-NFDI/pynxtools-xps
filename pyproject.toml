@@ -28,6 +28,7 @@ dependencies = [
     "pint>=0.17",
     "pynxtools>=0.10.7",
     "xarray>=0.20.2",
+    "scipy",
 ]
 [project.optional-dependencies]
 dev = [

@@ -5,11 +5,14 @@
     "start_time":"@eln",
     "end_time":"@eln",
     "method":"@attrs:analysis_method",
+    "method/@long_name":"@attrs:analysis_method_long_name",
     "transitions":"@attrs:transitions",
     "experiment_institution":"@eln",
     "experiment_facility":"@eln",
     "experiment_laboratory":"@eln",
     "identifierNAME[identifier_entry]":"@eln",
+    "duration":null,
+    "duration/@units":"s",
     "program_name":"@eln"
   },
   "/ENTRY/USER[user]":{

@@ -28,17 +28,18 @@ template.
 """
 
 import re
-import struct
 import copy
 import logging
 from pathlib import Path
-from typing import Dict, Any, List, Union
+from typing import Any, Union, cast
 import warnings
 from packaging.version import Version, InvalidVersion
 import sqlite3
 from lxml import etree as ET
+import zlib
 import numpy as np
 import xarray as xr
+from scipy.interpolate import interp1d
 
 from pynxtools_xps.reader_utils import (
     XPSMapper,
@@ -57,38 +58,24 @@ from pynxtools_xps.value_mappers import (
     MEASUREMENT_METHOD_MAP,
     parse_datetime,
 )
-from pynxtools_xps.specs.sle.specs_sle_mapping import KEY_MAP, VALUE_MAP
+from pynxtools_xps.specs.sle.utils import (
+    KEY_MAP,
+    VALUE_MAP,
+    UNITS,
+    iterate_xml_at_tag,
+    format_key_and_value,
+)
 from pynxtools_xps.specs.sle.flatten_xml import (
     flatten_schedule,
     flatten_context,
     flatten_metainfo,
 )
 
-logger = logging.getLogger(__name__)
-
-UNITS: Dict[str, str] = {
-    "work_function": "eV",
-    "excitation_energy": "eV",
-    "iris_diameter": "mm",
-    "step_size": "eV",
-    "detector_voltage": "V",
-    "dwell_time": "s",
-    "raw_data/raw": "counts_per_second ",
-    "polar_angle": "degree ",
-    "azimuth_angle": "degree",
-    "pass_energy": "eV",
-    "start_energy": "eV",
-    "emission_current": "A",
-    "source_voltage": "V",
-    "energy_calibration/energy": "eV",
-    "transmission_function/kinetic_energy": "eV",
-    "transmission_correction/transmission_function/kinetic_energy": "eV",
-}
+logger = logging.getLogger("pynxtools")
 
 
-def execute_sql_query_on_con(con: sqlite3.Connection, query: str):
-    """Excute a query on a sqlite connection object."""
-    cur = con.cursor()
+def execute_sql_query_with_cur(cur: sqlite3.Cursor, query: str):
+    """Execute a query with a sqlite3 Cursor object."""
     cur.execute(query)
     return cur.fetchall()
 
@@ -107,13 +94,14 @@ class SleMapperSpecs(XPSMapper):
         ]
 
         self.file: Union[str, Path] = ""
+        self.multiple_spectra_groups: bool = True
 
         super().__init__()
 
     def _get_sle_version(self):
         con = sqlite3.connect(self.file)
         query = 'SELECT Value FROM Configuration WHERE Key="Version"'
-        return execute_sql_query_on_con(con, query)[0][0]
+        return execute_sql_query_with_cur(con.cursor(), query)[0][0]
 
     def _select_parser(self):
         """
@@ -198,7 +186,7 @@ class SleMapperSpecs(XPSMapper):
 
         return supporting_parsers[-1]()  # always use newest parser
 
-    def parse_file(self, file: str, **kwargs: Dict[str, Any]) -> Dict[str, Any]:
+    def parse_file(self, file: str, **kwargs: dict[str, Any]) -> dict[str, Any]:
         """
         Parse the file using the parser that fits the Prodigy SLE version.
 
@@ -208,12 +196,12 @@ class SleMapperSpecs(XPSMapper):
         ----------
         file : str
             String name of the file.
-        **kwargs : Dict[str, Any]
+        **kwargs : dict[str, Any]
             Dict with additional keyword arguments.
 
         Returns
         -------
-        Dict[str, Any]
+        dict[str, Any]
             Dict with parsed data.
 
         """
@@ -229,24 +217,27 @@ class SleMapperSpecs(XPSMapper):
         None.
 
         """
-        # pylint: disable=duplicate-code
         spectra = copy.deepcopy(self.raw_data)
 
-        self._xps_dict["data"]: dict = {}
+        if len({spectrum.get("group_name") for spectrum in spectra}) == 1:
+            self.multiple_spectra_groups = False
+
+        self._xps_dict["data"] = cast(dict[str, Any], {})
 
         for spectrum in spectra:
             self._update_xps_dict_with_spectrum(spectrum)
 
-    def _update_xps_dict_with_spectrum(self, spectrum: Dict[str, Any]):
+    def _update_xps_dict_with_spectrum(
+        self,
+        spectrum: dict[str, Any],
+    ):
         """
         Map one spectrum from raw data to NXmpes-ready dict.
 
         Parameters
         ----------
-        spectrum : Dict[str, Any]
+        spectrum : dict[str, Any]
             Dictionary with data and metadata for one spectrum.
-        template_key_map : Dict[str, str]
-            Mapping to NXmpes terms.
 
         Returns
         -------
@@ -255,7 +246,11 @@ class SleMapperSpecs(XPSMapper):
         """
         # pylint: disable=too-many-locals,duplicate-code
         entry_parts = []
-        for part in ["group_name", "spectrum_type"]:
+
+        parts_to_use = ["group_name"] * bool(self.multiple_spectra_groups) + [
+            "spectrum_type"
+        ]
+        for part in parts_to_use:
             val = spectrum.get(part, None)
             if val:
                 entry_parts += [val]
@@ -264,21 +259,15 @@ class SleMapperSpecs(XPSMapper):
         entry_parent = f"/ENTRY[{entry}]"
 
         for key, value in spectrum.items():
-            if key.startswith("entry"):
-                entry_parent = "/ENTRY[entry]"
-                key = key.replace("entry/", "", 1)
             mpes_key = f"{entry_parent}/{key}"
-            if "units" in key:
-                value = convert_units(value)
             self._xps_dict[mpes_key] = value
-            units = convert_units(get_units_for_key(key, UNITS))
+
+            units = get_units_for_key(key, UNITS)
             if units is not None:
                 self._xps_dict[f"{mpes_key}/@units"] = units
 
-        analyzer_path = f"{entry_parent}/instrument/electronanalyzer"
-
-        self._xps_dict[f"{entry_parent}/electronanalyzer/name"] = spectrum["devices"][0]
-        self._xps_dict[f"{entry_parent}/'source/name"] = spectrum["devices"][1]
+        # self._xps_dict[f'{path_map["electronanalyser"]}/name'] = spectrum["devices"][0]
+        # self._xps_dict[f'{path_map["source"]}/name'] = spectrum["devices"][1]
 
         # Create keys for writing to data
         scan_key = construct_data_key(spectrum)
@@ -301,46 +290,51 @@ class SleMapperSpecs(XPSMapper):
             warnings.simplefilter("ignore", category=RuntimeWarning)
             averaged_scans = np.mean(all_scan_data, axis=0)
 
-        if averaged_scans.size == 1:
-            # on first scan in cycle
-            averaged_scans = spectrum["data"]["cps_calib"]
+        print(spectrum["data"].keys())
 
-        if averaged_scans.shape == energy.shape:
-            # TODO: fix this hotfix so that all data can be written
+        # if averaged_scans.size == 1:
+        #     # on first scan in cycle
+        #     averaged_scans = spectrum["data"]["cps_calib"]
 
-            self._xps_dict["data"][entry][scan_key.split("_")[0]] = xr.DataArray(
-                data=averaged_scans,
-                coords={"energy": energy},
-            )
+        # if averaged_scans.shape == energy.shape:
+        #     # TODO: fix this hotfix so that all data can be written
 
-            # Write scan data to 'data'.
-            self._xps_dict["data"][entry][scan_key] = xr.DataArray(
-                data=spectrum["data"]["cps_calib"], coords={"energy": energy}
-            )
+        #     # Add energy axis to energy_calibration
+        #     calib_energy_key = f"{entry}/process/energy_calibration/energy"
+        #     self._xps_dict[calib_energy_key] = energy
 
-            channels = [key for key in spectrum["data"] if "cps_ch_" in key]
-            for channel in channels:
-                ch_no = channel.rsplit("_")[-1]
-                channel_key = f"{scan_key}_chan{ch_no}"
-                # detector_data_key = (
-                #     f"{path_map['detector']}/{detector_data_key_child}"
-                #     f"_channels_Channel_{ch_no}/counts"
-                # )
-                cps = np.array(spectrum["data"][channel])
+        #     self._xps_dict["data"][entry][scan_key.split("_")[0]] = xr.DataArray(
+        #         data=averaged_scans,
+        #         coords={"energy": energy},
+        #     )
 
-                # # Write raw data to detector.
-                # self._xps_dict[detector_data_key] = spectrum["data"]["cps_calib"]
-                # Write channel data to 'data'.
-                self._xps_dict["data"][entry][channel_key] = xr.DataArray(
-                    data=cps, coords={"energy": energy}
-                )
+        #     # Write scan data to 'data'.
+        #     self._xps_dict["data"][entry][scan_key] = xr.DataArray(
+        #         data=spectrum["data"]["cps_calib"], coords={"energy": energy}
+        #     )
 
-            # Add unit for detector data
-            detector_data_unit_key = f"{entry_parent}/detector/raw_data/raw/@units"
+        #     channels = [key for key in spectrum["data"] if "cps_ch_" in key]
+        #     for channel in channels:
+        #         ch_no = channel.rsplit("_")[-1]
+        #         channel_key = f"{scan_key}_chan{ch_no}"
+        #         # detector_data_key = (
+        #         #     f"{path_map['detector']}/{detector_data_key_child}"
+        #         #     f"_channels_Channel_{ch_no}/counts"
+        #         # )
+        #         cps = np.array(spectrum["data"][channel])
 
-            detector_data_units = get_units_for_key("detector/raw_data/raw", UNITS)
-            if detector_data_units is not None:
-                self._xps_dict[detector_data_unit_key] = detector_data_units
+        #         # # Write raw data to detector.
+        #         # Write channel data to 'data'.
+        #         self._xps_dict["data"][entry][channel_key] = xr.DataArray(
+        #             data=cps, coords={"energy": energy}
+        #         )
+
+        #     # Add unit for detector data
+        #     detector_data_unit_key = f"{entry}/raw_data/raw/@units"
+
+        #     detector_data_units = get_units_for_key("raw_data/raw", UNITS)
+        #     if detector_data_units is not None:
+        #         self._xps_dict[detector_data_unit_key] = detector_data_units
 
 
 class SleProdigyParser:
@@ -357,13 +351,14 @@ class SleProdigyParser:
     ]
 
     def __init__(self):
-        self.con = ""
-        self.spectra: List[Dict[str, Any]] = []
+        self.con: sqlite3.Conncetion = None
+        self.cur = sqlite3.Cursor = None
+
+        self.spectra: list[dict[str, Any]] = []
         self.xml_schedule: ET.Element = None
         self.xml_context: ET.Element = None
         self.xml_metainfo: ET.Element = None
 
-        self.sum_channels: bool = False
         self.remove_align: bool = True
 
         self.encodings_dtype = {
@@ -373,13 +368,7 @@ class SleProdigyParser:
         }
         self.encoding = np.float32
 
-        encodings_map: Dict[str, List[str, float]] = {
-            "short": ["h", 2],
-            "double": ["d", 8],
-            "float": ["f", 4],
-        }
-
-    def parse_file(self, file: str, **kwargs: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def parse_file(self, file: str, **kwargs: dict[str, Any]) -> list[dict[str, Any]]:
         """
         Parse the file's data and metadata into a flat list of dictionaries.
 
@@ -387,7 +376,7 @@ class SleProdigyParser:
         ----------
         filepath : str
             Filepath of the SLE file to be read.
-        **kwargs : Dict[str, Any]
+        **kwargs : dict[str, Any]
             Additional keyword arguments:
                remove_align(bool):
                    Whether or not alignment spectra shall be removed.
@@ -396,7 +385,7 @@ class SleProdigyParser:
 
         Returns
         -------
-        List[Dict[str, Any]]
+        list[dict[str, Any]]
             Flat list of dictionaries containing one spectrum each.
 
         """
@@ -405,6 +394,9 @@ class SleProdigyParser:
 
         # initiate connection to sql file
         self.initiate_file_connection(file)
+
+        self.version = self._get_version()
+        self.app_version = self._get_app_version()
 
         # read and parse sle file
         self._get_xml_schedule()
@@ -418,9 +410,10 @@ class SleProdigyParser:
             update_dict_without_overwrite(spectrum, flatten_metainfo(self.xml_metainfo))
 
         self._attach_node_ids()
+        self._get_spectrum_metadata_from_sql()
         self._remove_empty_nodes()
         self._attach_device_protocols()
-        self._get_spectrum_metadata_from_sql()
+
         self._check_encoding()
 
         self._append_scan_data()
@@ -432,7 +425,7 @@ class SleProdigyParser:
             self._remove_fixed_energies()
 
         self._remove_syntax()
-        self._remove_snapshot()
+        # self._remove_snapshot()
         self._reindex_spectra()
         self._reindex_groups()
 
@@ -442,17 +435,19 @@ class SleProdigyParser:
         """Set the sqllite connection of the file to be opened."""
         sql_connection = file
         self.con = sqlite3.connect(sql_connection)
+        self.cur = self.con.cursor()
 
     def _execute_sql_query(self, query: str):
-        return execute_sql_query_on_con(self.con, query)
+        """Excute a query on the file."""
+        return execute_sql_query_with_cur(self.cur, query)
 
     def _get_version(self):
         query = 'SELECT Value FROM Configuration WHERE Key="Version"'
-        self.version = self._execute_sql_query(query)[0][0]
+        return self._execute_sql_query(query)[0][0]
 
     def _get_app_version(self):
         query = 'SELECT Value FROM Configuration WHERE Key="AppVersion"'
-        self.app_version = self._execute_sql_query(query)[0][0]
+        return self._execute_sql_query(query)[0][0]
 
     def _get_xml_from_key(self, key: str):
         query = f"SELECT Value FROM Configuration WHERE Key='{key}'"
@@ -485,60 +480,114 @@ class SleProdigyParser:
 
         """
         # pylint: disable=too-many-locals
-        individual_scans = []
-        scan_id = 0
+
         for spectrum in self.spectra:
+            spectrum["data"]: dict[str, Any] = {}
+
             # copy node to new instance
+            group_node_id = self._get_sql_node_id(spectrum["group_id"])
+
+            spectrum["detector_calib"] = self._get_detector_calibration(group_node_id)
+            try:
+                pass_energy = spectrum["pass_energy_or_retardation_ratio"]
+
+                detector_shifts = [
+                    item["shift"]
+                    for key, item in spectrum["detector_calib"].items()
+                    if key.startswith("detector")
+                ]
+                spectrum["detector_calib"]["shifts"] = (
+                    np.array(detector_shifts) * pass_energy
+                )
+            except KeyError:
+                pass
+
+            n_channels = spectrum["energy_channels"]
             node_id = self._get_sql_node_id(spectrum["spectrum_id"])
-            n_channels = self._check_energy_channels(node_id)
             raw_ids = self._get_raw_ids(node_id)
-            n_scans = len(raw_ids)
 
+            # Add transmission function
             transmission_data = self._get_transmission(node_id)
+            spectrum["transmission_function/relative_intensity"] = np.array(
+                transmission_data
+            )
 
-            for scan_no in range(n_scans):
-                scan = copy.copy(spectrum)
+            spectrum["abscissa_info"] = self._get_sql_abscissa_info(node_id)
 
-                scan["scan_id"] = scan_id
-                # get signal data for each scan
-                signal_data = self._get_one_scan(raw_ids[scan_no])
+            for scan_id, raw_id in enumerate(raw_ids):
+                scan = {"scan_id": scan_id}
 
-                # extract the individual channel data
-                signal_data = self._separate_channels(signal_data, n_channels)
+                raw_data = self._get_one_scan(raw_id)
+                data = self._separate_channels(raw_data, n_channels)
 
-                # average channels if required
-                if self.sum_channels:
-                    signal_data = self._sum_channels(signal_data)
+                raw_x = np.arange(data.shape[0]) * spectrum["step_size"]
+                scan["x"] = raw_x
 
-                # convert to counts per second
-                signal_data_cps = self._convert_to_counts_per_sec(
-                    signal_data, float(scan["dwell_time"])
-                )
+                if spectrum["energy_scan_mode"] == "fixed_analyzer_transmission":
+                    shifts = spectrum["detector_calib"]["shifts"]
+                    num_values = spectrum["num_values"]
 
-                # attach individual channel data to scan
-                for ch_no, channel_data in enumerate(signal_data_cps):
-                    scan[f"cps_ch_{ch_no}"] = list(channel_data)
-                # no_of_scans_avg['scans'] = 1
+                    raw_spectrum = [
+                        np.vstack((raw_x + shifts[i], data[:, i])).T
+                        for i in range(n_channels)
+                    ]
 
-                # scan['cps_calib'] = self._get_calibrated_data(spectrum)
-                # """ This is wrong and needs to be corrected!!!"""
-                scan["cps_calib"] = copy.copy(scan["cps_ch_0"])
+                    xmin = max(raw_spectrum[n][:, 0].min() for n in range(n_channels))
+                    xmax = min(raw_spectrum[n][:, 0].max() for n in range(n_channels))
 
-                # Add transmission function
-                scan["transmission_function/relative_intensity"] = np.array(
-                    transmission_data
-                )
+                    new_x = np.linspace(xmin, xmax, num_values)
+
+                    new_spectrum = []
+                    for i in range(n_channels):
+                        f = interp1d(
+                            raw_spectrum[i][:, 0], raw_spectrum[i][:, 1], kind="linear"
+                        )
+                        new_spectrum.append(f(new_x))
+
+                    data = np.array(new_spectrum).T
+                    scan["x"] = new_x
+
+                scan["raw"] = raw_data
+                scan["channels"] = data
+                scan["merged"] = np.sum(data, axis=1)
 
                 # add metadata including scan, loop no and datetime
-                scan_metadata = self._get_scan_metadata(raw_ids[scan_no])
+                scan_metadata = self._get_scan_metadata(raw_id)
                 for key, values in scan_metadata.items():
                     scan[key] = values
 
-                individual_scans += [scan]
-                scan_id += 1
+                spectrum["data"] = scan
 
-        # update self.spectra with the scan data
-        self.spectra = individual_scans
+                # TODO: make this working
+                # extension_channels =  self._get_extension_channel_info(node_id)
+
+                # setattr(extension_channels, self._format_name(
+                #     extension_channel.detector), extension_channel)
+                # if len(extension_channels)-1 == len(n_spectrum_channels):
+                #     for extension_channel in extension_channel
+                #         for channel in spectrum.channels:
+                #             if getattr(extension_channels, k).name == channel.name:
+                #                 for attr in channel.__members__():
+                #                     setattr(getattr(extension_channels, k),
+                #                             attr, getattr(channel, attr))
+                # spectrum.channels = extension_channels
+
+    def _get_detector_calibration(self, node_id: int):
+        """Extract detector calibration for given node_id."""
+        query = f'SELECT Data FROM NodeData WHERE Node="{node_id}"'
+        elem = ET.fromstring(self._execute_sql_query(query)[0][0])
+
+        detectors = {}
+
+        detectors["info"] = iterate_xml_at_tag(elem, "DetectorCalibration")
+
+        for detector_no, subelem in enumerate(elem.iter("Detector")):
+            detector = {}
+            for key, value in subelem.attrib.items():
+                key, value = format_key_and_value(key, value)
+                detector[key] = value
+            detectors[f"detector{detector_no}"] = detector
+        return detectors
 
     def _get_transmission(self, node_id: int) -> np.ndarray:
         """
@@ -554,31 +603,90 @@ class SleProdigyParser:
         transmission_data : array
             Array of TF values for the spectrum at node ID.
         """
-        cur = self.con.cursor()
-        query = (
-            f'SELECT Data, SAMPLES, Ekin FROM TransmissionData WHERE Node="{node_id}"'
-        )
-        cur.execute(query)
-        results = cur.fetchall()
-        buffer = self.encoding[1]
-        encoding = self.encoding[0]
+        query = f'SELECT Ekin, NonEnergyChns, Samples, Data FROM TransmissionData WHERE Node="{node_id}"'
+        try:
+            results = self._execute_sql_query(query)[0]
+        except (IndexError, sqlite3.OperationalError):
+            logger.info(f"No transmission function data found for node {node_id}.")
+            return None
 
-        stream = []
-        for result in results:
-            length = result[1] * buffer
-            data = result[0]
-            for i in range(0, length, buffer):
-                stream.append(struct.unpack(encoding, data[i : i + buffer])[0])
+        transmission_data = np.frombuffer(results[-1], dtype=np.float64)
 
-        return stream
+        return transmission_data
 
-    def _separate_channels(self, data: List[float], n_channels: int) -> np.ndarray:
+    def _get_sql_abscissa_info(self, node_id: int):
+        """
+        Get the Abscissa Info.
+        """
+        query = f'SELECT * FROM AbscissaInfo WHERE Node="{node_id}"'
+        try:
+            results = self._execute_sql_query(query)[0]
+        except (IndexError, sqlite3.OperationalError):
+            logger.info(f"No AbscissaInfo found for node {node_id}.")
+            return None
+
+        abscissa_info: dict[str, Any] = {}
+
+        for idx, key in enumerate(self._get_column_names("AbscissaInfo")):
+            abscissa_info[key] = results[idx]
+
+        return abscissa_info
+
+    def _get_extension_channel_info(self, node_id):
+        def _parse_channel_name(channel_name):
+            device = re.findall(r"\((.*?)\)", channel_name)[0]
+            unit = re.findall(r"\[(.*?)\]", channel_name)[0]
+            detector = channel_name.split("(")[0].split("[")[0].strip()
+            return {"device": device, "unit": unit, "detector": detector}
+
+        query = f'SELECT Node, Channel, Name FROM ExtensionChannelInfo WHERE Node="{node_id}"'
+        try:
+            info = self._execute_sql_query(query)[0]
+        except (IndexError, sqlite3.OperationalError):
+            logger.info(f"No ExtensionChannelInfo found for node {node_id}.")
+            return None
+
+        if info:
+            extension_channels: list[dict[str, Any]] = []
+            # detectors = [entry[2] for entry in info]
+            # extract detector names from ()
+            # device = [re.findall(r'\((.*?)\)', detector)[0] for detector in detectors]
+            # unit = [re.findall(r'\[(.*?)\]', detector)[0] for detector in detectors]
+            # # remove content inside () and []
+            # detector = [detector.split('(')[0].split('[')[0].strip() for detector in detectors]
+
+            for entry in info:
+                extension_channel: dict[str, Any] = {}
+                extension_channel["node_id"] = entry[0]
+                extension_channel["channel"] = entry[1]
+                extension_channel["name"] = entry[2]
+                name_info = _parse_channel_name(entry[2])
+                for key, value in name_info.items():
+                    extension_channel[key] = value
+
+                extension_channels.append(extension_channel)
+
+            return extension_channels
+
+        logger.info(f"No ExtensionChannelInfo found for node {node_id}.")
+        return None
+
+    # def _add_extension_data(self):
+    #     for channel in spectrum.channels.values()[1:]:
+    #         # TODO: this is a temporary fix, could add __iter__ to DataSet
+    #         channel.signal = []
+    #         for raw_id in spectrum.scans.raw_ids:
+    #             channel.signal.append(np.frombuffer(self._getExtensionData(
+    #                 raw_id, channel=channel.channel)[-1], dtype=np.float64))
+    #         channel.signal = np.array(channel.signal)
+
+    def _separate_channels(self, data: list[float], n_channels: int) -> np.ndarray:
         """
         Separate energy channels.
 
         Parameters
         ----------
-        data : List[float]
+        data : list[float]
             List of measured data.
         n_channels : int
             Number of channels to be summed.
@@ -589,224 +697,7 @@ class SleProdigyParser:
             Separate data across n_channels.
 
         """
-        n_points = int(len(data) / n_channels)
-        return np.reshape(np.array(data), (n_channels, n_points))
-
-    # """ NEED TO UPDATE THIS METHOD"""
-    # def _get_calibrated_data(self, raw_data):
-    #     """
-    #
-    #
-    #     Parameters
-    #     ----------
-    #     raw_data : List
-    #         DESCRIPTION.
-    #
-    #     Returns
-    #     -------
-    #     channel_dict : TYPE
-    #         DESCRIPTION.
-    #
-    #     """
-    #     mcd_num = int(raw_data["mcd_num"])
-    #
-    #     curves_per_scan = raw_data["curves_per_scan"]
-    #     values_per_curve = raw_data["values_per_curve"]
-    #     values_per_scan = int(curves_per_scan * values_per_curve)
-    #     mcd_head = int(raw_data["mcd_head"])
-    #     mcd_tail = int(raw_data["mcd_tail"])
-    #     excitation_energy = raw_data["excitation_energy"]
-    #     energy_scan_mode = raw_data["energy_scan_mode"]
-    #     kinetic_energy = raw_data["kinetic_energy"]
-    #     scan_delta = raw_data["scan_delta"]
-    #     pass_energy = raw_data["pass_energy"]
-    #     kinetic_energy_base = raw_data["kinetic_energy_base"]
-    #     # Adding one unit to the binding_energy_upper is added as
-    #     # electron comes out if energy is one unit higher
-    #     binding_energy_upper = excitation_energy - \
-    #         kinetic_energy + kinetic_energy_base + 1
-    #
-    #     mcd_energy_shifts = raw_data["mcd_shifts"]
-    #     mcd_energy_offsets = []
-    #     offset_ids = []
-    #
-    #     # consider offset values for detector with respect to
-    #     # position at +16 which is usually large and positive value
-    #     for mcd_shift in mcd_energy_shifts:
-    #         mcd_energy_offset = (
-    #             mcd_energy_shifts[-1] - mcd_shift) * pass_energy
-    #         mcd_energy_offsets.append(mcd_energy_offset)
-    #         offset_id = round(mcd_energy_offset / scan_delta)
-    #         offset_ids.append(
-    #             int(offset_id - 1 if offset_id > 0 else offset_id))
-    #
-    #     # Skiping entry without count data
-    #     if not mcd_energy_offsets:
-    #         continue
-    #     mcd_energy_offsets = np.array(mcd_energy_offsets)
-    #     # Putting energy of the last detector as a highest energy
-    #     starting_eng_pnts = binding_energy_upper - mcd_energy_offsets
-    #     ending_eng_pnts = (starting_eng_pnts
-    #                        - values_per_scan * scan_delta)
-    #
-    #     channeltron_eng_axes = np.zeros((mcd_num, values_per_scan))
-    #     for ind in np.arange(len(channeltron_eng_axes)):
-    #         channeltron_eng_axes[ind, :] = \
-    #             np.linspace(starting_eng_pnts[ind],
-    #                         ending_eng_pnts[ind],
-    #                         values_per_scan)
-    #
-    #     channeltron_eng_axes = np.round_(channeltron_eng_axes,
-    #                                      decimals=8)
-    #     # construct ultimate or incorporated energy axis from
-    #     # lower to higher energy
-    #     scans = list(raw_data["scans"].keys())
-    #
-    #     # Check whether array is empty or not
-    #     if not scans:
-    #         continue
-    #     if not raw_data["scans"][scans[0]].any():
-    #         continue
-    #     # Sorting in descending order
-    #     binding_energy = channeltron_eng_axes[-1, :]
-    #
-    #     self._xps_dict["data"][entry] = xr.Dataset()
-    #
-    #     for scan_nm in scans:
-    #         channel_counts = np.zeros((mcd_num + 1,
-    #                                    values_per_scan))
-    #         # values for scan_nm corresponds to the data for each
-    #         # "scan" in individual CountsSeq
-    #         scan_counts = raw_data["scans"][scan_nm]
-    #
-    #         if energy_scan_mode == "fixed_analyzer_transmission":
-    #             for row in np.arange(mcd_num):
-    #
-    #                 count_on_row = scan_counts[row::mcd_num]
-    #                 # Reverse counts from lower to higher
-    #                 # BE as in BE_eng_axis
-    #                 count_on_row = \
-    #                     count_on_row[mcd_head:-mcd_tail]
-    #
-    #                 channel_counts[row + 1, :] = count_on_row
-    #                 channel_counts[0, :] += count_on_row
-    #
-    #                 # Storing detector's raw counts
-    #                 self._xps_dict["data"][entry][f"{scan_nm}_chan_{row}"] = \
-    #                     xr.DataArray(data=channel_counts[row + 1, :],
-    #                                  coords={"BE": binding_energy})
-    #
-    #                 # Storing callibrated and after accumulated each scan counts
-    #                 if row == mcd_num - 1:
-    #                     self._xps_dict["data"][entry][scan_nm] = \
-    #                         xr.DataArray(data=channel_counts[0, :],
-    #                                      coords={"BE": binding_energy})
-    #         else:
-    #             for row in np.arange(mcd_num):
-    #
-    #                 start_id = offset_ids[row]
-    #                 count_on_row = scan_counts[start_id::mcd_num]
-    #                 count_on_row = count_on_row[0:values_per_scan]
-    #                 channel_counts[row + 1, :] = count_on_row
-    #
-    #                 # shifting and adding all the curves.
-    #                 channel_counts[0, :] += count_on_row
-    #
-    #                 # Storing detector's raw counts
-    #                 self._xps_dict["data"][entry][f"{scan_nm}_chan{row}"] = \
-    #                     xr.DataArray(data=channel_counts[row + 1, :],
-    #                                  coords={"BE": binding_energy})
-    #
-    #                 # Storing callibrated and after accumulated each scan counts
-    #                 if row == mcd_num - 1:
-    #                     self._xps_dict["data"][entry][scan_nm] = \
-    #                         xr.DataArray(data=channel_counts[0, :],
-    #                                      coords={"BE": binding_energy})
-    #
-    #     # Skiping entry without count data
-    #     if not mcd_energy_offsets:
-    #         continue
-    #     mcd_energy_offsets = np.array(mcd_energy_offsets)
-    #     # Putting energy of the last detector as a highest energy
-    #     starting_eng_pnts = binding_energy_upper - mcd_energy_offsets
-    #     ending_eng_pnts = (starting_eng_pnts
-    #                        - values_per_scan * scan_delta)
-    #
-    #     channeltron_eng_axes = np.zeros((mcd_num, values_per_scan))
-    #     for ind in np.arange(len(channeltron_eng_axes)):
-    #         channeltron_eng_axes[ind, :] = \
-    #             np.linspace(starting_eng_pnts[ind],
-    #                         ending_eng_pnts[ind],
-    #                         values_per_scan)
-    #
-    #     channeltron_eng_axes = np.round_(channeltron_eng_axes,
-    #                                      decimals=8)
-    #     # construct ultimate or incorporated energy axis from
-    #     # lower to higher energy
-    #     scans = list(raw_data["scans"].keys())
-    #
-    #     # Check whether array is empty or not
-    #     if not scans:
-    #         continue
-    #     if not raw_data["scans"][scans[0]].any():
-    #         continue
-    #     # Sorting in descending order
-    #     binding_energy = channeltron_eng_axes[-1, :]
-    #
-    #     self._xps_dict["data"][entry] = xr.Dataset()
-    #
-    #     for scan_nm in scans:
-    #         channel_counts = np.zeros((mcd_num + 1,
-    #                                    values_per_scan))
-    #         # values for scan_nm corresponds to the data for each
-    #         # "scan" in individual CountsSeq
-    #         scan_counts = raw_data["scans"][scan_nm]
-    #
-    #         if energy_scan_mode == "fixed_analyzer_transmission":
-    #             for row in np.arange(mcd_num):
-    #
-    #                 count_on_row = scan_counts[row::mcd_num]
-    #                 # Reverse counts from lower to higher
-    #                 # BE as in BE_eng_axis
-    #                 count_on_row = \
-    #                     count_on_row[mcd_head:-mcd_tail]
-    #
-    #                 channel_counts[row + 1, :] = count_on_row
-    #                 channel_counts[0, :] += count_on_row
-    #
-    #                 # Storing detector's raw counts
-    #                 self._xps_dict["data"][entry][f"{scan_nm}_chan_{row}"] = \
-    #                     xr.DataArray(data=channel_counts[row + 1, :],
-    #                                  coords={"BE": binding_energy})
-    #
-    #                 # Storing callibrated and after accumulated each scan counts
-    #                 if row == mcd_num - 1:
-    #                     self._xps_dict["data"][entry][scan_nm] = \
-    #                         xr.DataArray(data=channel_counts[0, :],
-    #                                      coords={"BE": binding_energy})
-    #         else:
-    #             for row in np.arange(mcd_num):
-    #
-    #                 start_id = offset_ids[row]
-    #                 count_on_row = scan_counts[start_id::mcd_num]
-    #                 count_on_row = count_on_row[0:values_per_scan]
-    #                 channel_counts[row + 1, :] = count_on_row
-    #
-    #                 # shifting and adding all the curves.
-    #                 channel_counts[0, :] += count_on_row
-    #
-    #                 # Storing detector's raw counts
-    #                 self._xps_dict["data"][entry][f"{scan_nm}_chan{row}"] = \
-    #                     xr.DataArray(data=channel_counts[row + 1, :],
-    #                                  coords={"BE": binding_energy})
-    #
-    #                 # Storing callibrated and after accumulated each scan counts
-    #                 if row == mcd_num - 1:
-    #                     self._xps_dict["data"][entry][scan_nm] = \
-    #                         xr.DataArray(data=channel_counts[0, :],
-    #                                      coords={"BE": binding_energy})
-    #
-    #     return channel_dict
+        return data.reshape(data.size // n_channels, n_channels)
 
     def _check_energy_channels(self, node_id: int) -> int:
         """
@@ -825,15 +716,13 @@ class SleProdigyParser:
         n_channels : int
             Number of separate energy channels for the spectrum at node ID.
         """
-        cur = self.con.cursor()
         query = f'SELECT EnergyChns FROM Spectrum WHERE Node="{node_id}"'
-        cur.execute(query)
-        result = cur.fetchall()
+        result = self._execute_sql_query(query)[0][0]
         if len(result) != 0:
             n_channels = result[0][0]
         return n_channels
 
-    def _get_raw_ids(self, node_id: int) -> List[int]:
+    def _get_raw_ids(self, node_id: int) -> list[int]:
         """
         Get the raw IDs from SQL.
 
@@ -849,15 +738,12 @@ class SleProdigyParser:
 
         Returns
         -------
-        List[int]
+        list[int]
             List of raw IDs for the given note ID.
 
         """
-        cur = self.con.cursor()
         query = f'SELECT RawId FROM RawData WHERE Node="{node_id}"'
-        cur.execute(query)
-
-        return [i[0] for i in cur.fetchall()]
+        return [i[0] for i in self._execute_sql_query(query)]
 
     def _check_number_of_scans(self, node_id: int) -> int:
         """
@@ -874,12 +760,10 @@ class SleProdigyParser:
             Number of separate scans for the spectrum.
 
         """
-        cur = self.con.cursor()
         query = f'SELECT RawId FROM RawData WHERE Node="{node_id}"'
-        cur.execute(query)
-        return len(cur.fetchall())
+        return len(self._execute_sql_query(query))
 
-    def _get_detector_data(self, node_id: int) -> List[float]:
+    def _get_detector_data(self, node_id: int) -> list[np.ndarray[float, float]]:
         """
         Get the detector data from sle file.
 
@@ -894,18 +778,17 @@ class SleProdigyParser:
 
         Returns
         -------
-        detector_data : List[float]
-            List of lists with measured data.
+        detector_data : list[ndarray[float, float]]
+            List of numpy arrays with measured data.
 
         """
-        cur = self.con.cursor()
         query = f'SELECT RawID FROM RawData WHERE Node="{node_id}"'
-        cur.execute(query)
-        raw_ids = [i[0] for i in cur.fetchall()]
-        detector_data = []
+        raw_ids = [i[0] for i in self._execute_sql_query(query)]
+
         if len(raw_ids) > 1:
+            detector_data = []
             for raw_id in raw_ids:
-                detector_data += [self._get_one_scan(raw_id)]
+                detector_data += np.array([self._get_one_scan(raw_id)])
         else:
             raw_id = raw_ids[0]
             detector_data = self._get_one_scan(raw_id)
@@ -914,8 +797,8 @@ class SleProdigyParser:
 
     def _attach_device_protocols(self):
         """
-        Get the device protocol for each node and add the paramaters of
-        the Phoibos to the spectra table. Occassionally these are not
+        Get the device protocol for each node and add the paramaters to
+        the spectra table. Occassionally these are not
         recorded, if this is the case just skip the group.
 
         Returns
@@ -926,12 +809,11 @@ class SleProdigyParser:
         # iterate through each spectrum
         for spectrum in self.spectra:
             # conver the xml xps id to the node ID and get the device protocol
-            cur = self.con.cursor()
             protocol_node_id = self._get_sql_node_id(spectrum["device_group_id"])
             query = (
                 f'SELECT Protocol FROM DeviceProtocol WHERE Node="{protocol_node_id}"'
             )
-            result = cur.execute(query).fetchone()
+            result = self._execute_sql_query(query)[0]
 
             # if a record was accessed then parse, if not skip
             if result:
@@ -939,7 +821,7 @@ class SleProdigyParser:
                 protocal_params = self._get_one_device_protocol(protocol)
                 spectrum.update(protocal_params)
 
-    def _get_one_device_protocol(self, protocol: ET.Element) -> Dict[str, Any]:
+    def _get_one_device_protocol(self, protocol: ET.Element) -> dict[str, Any]:
         """
          Get all parameters for one device protocol
 
@@ -950,32 +832,24 @@ class SleProdigyParser:
 
         Returns
         -------
-        protocal_params:  Dict[str, Any]
+        protocal_params:  dict[str, Any]
             All parameters given in the device protocol.
 
         """
-        protocol_params: Dict[str, Any] = {}
-        for device in protocol.iter("Command"):
-            if "Phoibos" in device.attrib["UniqueDeviceName"]:
-                # iterate through the parameters and add to spectrum
-                # dict
-                for parameter in device.iter("Parameter"):
-                    if parameter.attrib["type"] == "double":
-                        param_text = float(parameter.text)
-                    else:
-                        param_text = parameter.text
-                    protocol_params[parameter.attrib["name"]] = param_text
-            elif "XRC1000" in device.attrib["UniqueDeviceName"]:
-                for parameter in device.iter("Parameter"):
-                    if parameter.attrib["type"] == "double":
-                        param_text = float(parameter.text)
-                    else:
-                        param_text = parameter.text
-                    protocol_params[parameter.attrib["name"]] = param_text
+        protocol_params: dict[str, dict[str, Any]] = {}
+        for elem in protocol.iter("Command"):
+            unique_device_name = elem.attrib["UniqueDeviceName"]
+            protocol_params[unique_device_name]: dict[str, Any] = {}
+
+            for parameter in elem.iter("Parameter"):
+                key, value = format_key_and_value(
+                    parameter.attrib["name"], parameter.text
+                )
+                protocol_params[unique_device_name][key] = value
 
         return protocol_params
 
-    def _get_one_scan(self, raw_id: int) -> List[float]:
+    def _get_one_scan(self, raw_id: int) -> np.ndarray[float, float]:
         """
         Get the detector data for a single scan and convert it to float.
 
@@ -990,23 +864,16 @@ class SleProdigyParser:
 
         Returns
         -------
-        List[float]
+        list[float]
             List with measured data.
 
         """
-        cur = self.con.cursor()
-        query = f'SELECT Data, ChunkSize FROM CountRateData WHERE RawId="{raw_id}"'
-        cur.execute(query)
-        results = cur.fetchall()
-        buffer = self.encoding[1]
-        encoding = self.encoding[0]
-        stream = []
-        for result in results:
-            length = result[1] * buffer
-            data = result[0]
-            for i in range(0, length, buffer):
-                stream.append(struct.unpack(encoding, data[i : i + buffer])[0])
-        return stream
+        query = f'SELECT Data FROM CountRateData WHERE RawId="{raw_id}"'
+        data = self._execute_sql_query(query)[0][0]
+
+        data = self._decompress_data(data)
+
+        return np.frombuffer(data, dtype=self.encoding)
 
     def _parse_external_channels(self, channel: int):
         """
@@ -1022,7 +889,7 @@ class SleProdigyParser:
         None.
 
         """
-        if len(channel) != 0:
+        if channel != 0:
             pass
 
     def _get_spectrum_metadata_from_sql(self):
@@ -1036,10 +903,9 @@ class SleProdigyParser:
         """
         for spectrum in self.spectra:
             node_id = self._get_sql_node_id(spectrum["spectrum_id"])
-            cur = self.con.cursor()
             query = f'SELECT * FROM Spectrum WHERE Node="{node_id}"'
-            cur.execute(query)
-            results = cur.fetchall()
+            results = self._execute_sql_query(query)
+
             if len(results) != 0:
                 results = results[0]
 
@@ -1047,22 +913,15 @@ class SleProdigyParser:
             combined = {
                 k: v
                 for k, v in dict(zip(column_names, results)).items()
-                if k in self.sql_metadata_map
+                if k in KEY_MAP
             }
             combined = copy.copy(combined)
             if "EnergyType" not in combined.keys():
                 combined["EnergyType"] = "Binding"
             for key, value in combined.items():
-                spectrum[key] = value
+                spectrum[KEY_MAP[key]] = value
 
-            query = f'SELECT Data FROM NodeData WHERE Node="{node_id}"'
-            cur.execute(query)
-            results = ET.fromstring(cur.fetchall()[0][0])
-            for i in results.iter("AnalyzerSpectrumParameters"):
-                spectrum["work_function"] = i.attrib["Workfunction"]
-                spectrum["step_size"] = float(i.attrib["ScanDelta"])
-
-    def _get_scan_metadata(self, raw_id: int) -> Dict[str, Any]:
+    def _get_scan_metadata(self, raw_id: int) -> dict[str, Any]:
         """
         Get metadata for each scan.
 
@@ -1076,22 +935,21 @@ class SleProdigyParser:
 
         Returns
         -------
-        Dict[str, Any]
+        dict[str, Any]
             dictionary containing scan metadata.
 
         """
         # get string Trace from RawData
-        cur = self.con.cursor()
         query = f'SELECT ScanDate, Trace FROM RawData WHERE RawID="{raw_id}"'
-        result = cur.execute(query).fetchone()
+        result = self._execute_sql_query(query)[0]
         # process metadata into a dictionary
-        scan_meta: Dict[str, Any] = {}
+        scan_meta: dict[str, Any] = {}
         scan_meta["time_stamp_trace"] = result[0]
         scan_meta.update(self._process_trace(result[1]))
 
         return scan_meta
 
-    def _process_trace(self, trace: str) -> Dict[str, Any]:
+    def _process_trace(self, trace: str) -> dict[str, Any]:
         """
         Parse Trace string to determine the scan, loop, and iteration
         for the given trace.
@@ -1103,11 +961,11 @@ class SleProdigyParser:
 
         Returns
         -------
-        Dict[str, Any]
+        dict[str, Any]
             Dictionary containing scan loop and iteration params
 
         """
-        trace_dict: Dict[str, Any] = {}
+        trace_dict: dict[str, Any] = {}
         loop = re.findall(r"Loop=([0-9]+)u", trace)
         if len(loop) != 0:
             trace_dict["loop_no"] = loop[0]
@@ -1164,11 +1022,11 @@ class SleProdigyParser:
             ID in the SQL tables.
 
         """
-        cur = self.con.cursor()
         query = f'SELECT Node FROM NodeMapping WHERE InternalID="{xml_id}"'
-        cur.execute(query)
-        node_id = cur.fetchall()[0][0]
-        return node_id
+        try:
+            return self._execute_sql_query(query)[0][0]
+        except IndexError:
+            return None
 
     def _attach_node_ids(self):
         """
@@ -1196,20 +1054,19 @@ class SleProdigyParser:
             idx = j[0]
             spectrum = j[1]
             node_id = spectrum["node_id"]
-            cur = self.con.cursor()
             query = f'SELECT Node FROM Spectrum WHERE Node="{node_id}"'
-            cur.execute(query)
-            result = cur.fetchall()
+            result = self._execute_sql_query(query)
+
             if len(result) == 0:
                 del self.spectra[idx]
 
-    def _get_energy_data(self, spectrum: Dict[str, Any]) -> np.ndarray:
+    def _get_energy_data(self, spectrum: dict[str, Any]) -> np.ndarray:
         """
         Create an array of energy values.
 
         Parameters
         ----------
-        spectrum : Dict[str, Any]
+        spectrum : dict[str, Any]
             Dictionary with spectrum data and metadata.
 
         Returns
@@ -1219,32 +1076,31 @@ class SleProdigyParser:
 
         """
         if spectrum["energy/@type"] == "binding":
-            start = spectrum["start_energy"]
+            start = spectrum["binding_energy"]
             step = spectrum["step_size"]
             points = spectrum["n_values"]
             energy = [start - i * step for i in range(points)]
         elif spectrum["energy/@type"] == "kinetic":
-            start = spectrum["start_energy"]
+            start = spectrum["kinetic_energy"]
             step = spectrum["step_size"]
             points = spectrum["n_values"]
             energy = [start + i * step for i in range(points)]
         return np.array(energy)
 
-    def _get_table_names(self) -> List[str]:
+    def _get_table_names(self) -> list[str]:
         """
         Get a list of table names in the current database file.
 
         Returns
         -------
-        List[str]
+        list[str]
             List of spectrum names.
 
         """
-        cur = self.con.cursor()
-        cur.execute('SELECT name FROM sqlite_master WHERE type= "table"')
-        return [i[0] for i in cur.fetchall()]
+        query = 'SELECT name FROM sqlite_master WHERE type= "table"'
+        return [i[0] for i in self._execute_sql_query(query)]
 
-    def _get_column_names(self, table_name: str) -> List[str]:
+    def _get_column_names(self, table_name: str) -> list[str]:
         """
         Get the names of the columns in the table.
 
@@ -1255,13 +1111,12 @@ class SleProdigyParser:
 
         Returns
         -------
-        List[str]
+        list[str]
             List of column names.
 
         """
-        cur = self.con.cursor()
-        cur.execute((f"SELECT * FROM {table_name}"))
-        names = [description[0] for description in cur.description]
+        self.cur.execute((f"SELECT * FROM {table_name}"))
+        names = [description[0] for description in self.cur.description]
         return names
 
     def _close_con(self):
@@ -1275,25 +1130,7 @@ class SleProdigyParser:
         """
         self.con.close()
 
-    def _sum_channels(self, data: List[float]) -> np.ndarray:
-        """
-        Sum together energy channels.
-
-        Parameters
-        ----------
-        data : List[float]
-            List of measured data.
-
-        Returns
-        -------
-        np.ndarray
-            Summed energy channels.
-
-        """
-        summed = np.sum(data, axis=0)
-        return np.reshape(summed, (1, -1))
-
-    def _check_encoding(self):
+    def _check_encoding(self) -> None:
         """
         Check whether the binary data should be decoded float or double.
 
@@ -1302,17 +1139,38 @@ class SleProdigyParser:
         None.
 
         """
-        cur = self.con.cursor()
-        query = "SELECT LENGTH(Data),ChunkSize FROM CountRateData LIMIT 1"
-        cur.execute(query)
-        data, chunksize = cur.fetchall()[0]
+        query = "SELECT Data, ChunkSize FROM CountRateData LIMIT 1"
+        binary_data, chunksize = self._execute_sql_query(query)[0]
 
-        if data / chunksize == 4:
-            self.encoding = encodings_map["float"]
-        elif data / chunksize == 8:
-            self.encoding = encodings_map["double"]
+        binary_data = self._decompress_data(binary_data)
+
+        length_ratio = len(binary_data) / chunksize
+        if length_ratio == 2:
+            self.encoding = self.encodings_dtype["double"]
+        elif length_ratio == 4:
+            self.encoding = self.encodings_dtype["float"]
+        elif length_ratio == 8:
+            self.encoding = self.encodings_dtype["double"]
         else:
-            logger.error("This binary encoding is not supported.")
+            logger.error(
+                "Unsupported binary encoding for length ratio: %s", length_ratio
+            )
+
+    def _decompress_data(self, binary_data: Union[bytes, bytearray]) -> bytes:
+        """
+        Attempts to decompress binary data using zlib. If decompression fails,
+        returns the original data.
+
+        Args:
+            binary_data (bytes | bytearray): Compressed binary data to decompress.
+
+        Returns:
+            bytes: Decompressed data if successful, otherwise the original binary data.
+        """
+        try:
+            return zlib.decompress(binary_data)
+        except zlib.error:  # Catch only zlib-specific decompression errors
+            return binary_data
 
     def _reindex_spectra(self):
         """Re-number the spectrum_id."""
@@ -1334,8 +1192,7 @@ class SleProdigyParser:
         for spec in self.spectra:
             re_map_keys(spec, KEY_MAP)
             re_map_values(spec, VALUE_MAP)
-            drop_unused_keys(spec, self.keys_to_drop)
-            spec["data"] = {}
+            # spec["data"] = {}
             spec["data"]["x"] = self._get_energy_data(spec)
 
             channels = [
@@ -1353,14 +1210,19 @@ class SleProdigyParser:
             spec["intensity/@units"] = "counts_per_second"
 
             # Add energy axis for TF data.
-            if spec["energy/@type"] == "binding":
-                tf_energy = np.array(
-                    [spec["excitation_energy"] - x for x in spec["data"]["x"]]
-                )
-            elif spec["energy/@type"] == "kinetic":
-                tf_energy = spec["data"]["x"]
+            if spec["energy_scan_mode"] != "fixed_energy":
+                if spec["energy/@type"] == "binding":
+                    excitation_energy = spec.get("excitation_energy")
+                    if excitation_energy:
+                        tf_energy = np.array(
+                            [excitation_energy - x for x in spec["data"]["x"]]
+                        )
+                    else:
+                        tf_energy = spec["data"]["x"]
+                elif spec["energy/@type"] == "kinetic":
+                    tf_energy = spec["data"]["x"]
 
-            spec["transmission_function/kinetic_energy"] = tf_energy
+                spec["transmission_function/kinetic_energy"] = tf_energy
 
     def _remove_fixed_energies(self):
         """
@@ -1386,19 +1248,3 @@ class SleProdigyParser:
         self.spectra = [
             spec for spec in self.spectra if "snapshot" not in spec["energy_scan_mode"]
         ]
-
-    def get_sle_version(self) -> str:
-        """
-        Get the Prodigy SLE version from the file.
-
-        Returns
-        -------
-        version : str
-            Prodigy SLE version of SLE file.
-
-        """
-        cur = self.con.cursor()
-        query = 'SELECT Value FROM Configuration WHERE Key=="Version"'
-        cur.execute(query)
-        version = cur.fetchall()[0][0]
-        return version

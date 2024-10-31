@@ -21,9 +21,9 @@ Utility function for mapping keys and values in the pynxtools template.
 
 import re
 import datetime
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Tuple
 
-ENERGY_TYPE_MAP = {
+ENERGY_TYPE_MAP: Dict[str, str] = {
     "BE": "binding",
     "KE": "kinetic",
     "Binding": "binding",
@@ -34,7 +34,7 @@ ENERGY_TYPE_MAP = {
     "kinetic energy": "kinetic",
 }
 
-ENERGY_SCAN_MODE_MAP = {
+ENERGY_SCAN_MODE_MAP: Dict[str, str] = {
     "Fixed": "fixed_energy",
     "fixed": "fixed_energy",
     "FixedEnergies": "fixed_energy",
@@ -47,15 +47,15 @@ ENERGY_SCAN_MODE_MAP = {
     "SnapshotFAT": "snapshot",
 }
 
-MEASUREMENT_METHOD_MAP = {
-    "XPS": "X-ray photoelectron spectroscopy (XPS)",
-    "UPS": "ultraviolet photoelectron spectroscopy (UPS)",
-    "ElectronSpectroscopy": "electron spectroscopy for chemical analysis (ESCA)",
-    "NAPXPS": "near ambient pressure X-ray photoelectron spectroscopy (NAPXPS)",
-    "ARXPS": "angle-resolved X-ray photoelectron spectroscopy (ARXPS)",
+MEASUREMENT_METHOD_MAP: Dict[str, Tuple[str, str]] = {
+    "XPS": ("XPS", "X-ray photoelectron spectroscopy"),
+    "UPS": ("UPS", "ultraviolet photoelectron spectroscopy"),
+    "ESCA": ("XPS", "electron spectroscopy for chemical analysis"),
+    "NAPXPS": ("NAPXPS", "near ambient pressure X-ray photoelectron spectroscopy"),
+    "ARXPS": ("ARXPS", "angle-resolved X-ray photoelectron spectroscopy"),
 }
 
-BOOL_MAP = {
+BOOL_MAP: Dict[str, bool] = {
     "yes": True,
     "Yes": True,
     "no": False,
@@ -64,7 +64,7 @@ BOOL_MAP = {
     "Off": False,
 }
 
-UNIT_MAP = {
+UNIT_MAP: Dict[str, str] = {
     "Counts": "counts",
     "counts/s": "counts_per_second",
     "CPS": "counts_per_second",
@@ -114,7 +114,7 @@ def convert_measurement_method(measurement_method: str):
     the allowed values in NXmpes.
 
     """
-    return _replace_from_map(measurement_method, MEASUREMENT_METHOD_MAP)
+    return _replace_from_map(measurement_method, MEASUREMENT_METHOD_MAP)[0]
 
 
 def convert_bool(bool_like: str):

@@ -312,9 +312,13 @@ def re_map_values(
         dictionary (dict[str, Any]): Dictionary with changed values.
 
     """
-    for key, map_fn in map_functions.items():
+    for key, value in map_functions.items():
+        if isinstance(value, tuple):
+            map_fn, kwargs = value
+        else:
+            map_fn, kwargs = value, {}
         if key in dictionary:
-            dictionary[key] = map_fn(dictionary[key])
+            dictionary[key] = map_fn(dictionary[key], **kwargs)
     return dictionary
 
 

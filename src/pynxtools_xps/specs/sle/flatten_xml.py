@@ -278,23 +278,28 @@ def flatten_schedule(xml: ET.Element) -> List[Dict[str, Any]]:
         List of dictionary with spectra metadata.
 
     """
-    collect = []
+    collect: list[dict[str, Any]] = []
 
     for measurement_type in MEASUREMENT_METHOD_MAP:
         for group in xml.iter(measurement_type):
             data: Dict[str, Any] = {}
 
-            measurement_type = convert_measurement_method(measurement_type)
-            data["analysis_method"] = measurement_type
-            data["analysis_method_long_name"] = MEASUREMENT_METHOD_MAP.get(
-                measurement_type
-            )[1]
+            try:
+                analyis_method, analyis_method_long = convert_measurement_method(
+                    measurement_type
+                )
+            except ValueError:
+                analyis_method = convert_measurement_method(measurement_type)
+                analysis_method_long = "X-ray photoelectron spectroscopy"
+
+            data["analysis_method"] = analyis_method
+            data["analysis_method_long_name"] = analyis_method_long
 
             data["device_group_id"] = group.attrib["ID"]
 
             process_xml_element(group, data, collect)
 
-            # collect += [copy.copy(data)]
+            collect += [copy.copy(data)]
 
     return collect
 

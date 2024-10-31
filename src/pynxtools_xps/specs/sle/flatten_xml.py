@@ -1,80 +1,54 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jul 15 13:17:23 2024
+# Copyright The NOMAD Authors.
+#
+# This file is part of NOMAD. See https://nomad-lab.eu for further info.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
-@author: pielsticker
+"""
+Flatten the internal XML representation of the experimental schedule
+to a list of dictionaries, with each dictionary representing one spectrum.
 """
 
 import copy
-from typing import Tuple, Dict, Any, List, Union
-
+from typing import Dict, Any, List
 from lxml import etree as ET
 
-from pynxtools_xps.reader_utils import (
-    convert_pascal_to_snake,
-    _re_map_single_value,
-    _format_value,
-    extract_unit,
-)
+
 from pynxtools_xps.value_mappers import (
-    convert_units,
     MEASUREMENT_METHOD_MAP,
     convert_measurement_method,
 )
 
-from pynxtools_xps.specs.sle.specs_sle_mapping import KEY_MAP, VALUE_MAP
-
-
-def format_key_and_value(key: str, value_str: str) -> Tuple[Any, str]:
-    key = KEY_MAP.get(key, key)
-    key = convert_pascal_to_snake(key)
-    value, unit = extract_unit(key, value_str)
-    value = _format_value(value)
-    value = _re_map_single_value(key, value, VALUE_MAP)
-
-    return key, value
-
-
-def iterate_xml_at_tag(
-    xml_elem: ET.Element, tag: str
-) -> Dict[str, Union[str, float, int]]:
-    """
-    Iterates through XML elements at the specified tag and formats their attributes.
-
-    Parameters
-    ----------
-    xml_elem : ET.Element
-        The XML element to search within.
-
-    tag : str
-        The tag name to find in the XML structure.
-
-    Returns
-    -------
-    Dict[str, Union[str, float, int]]
-        A dictionary containing formatted attribute values keyed by their corresponding names.
-    """
-
-    subelem = xml_elem.find(tag)
-
-    settings = {}
-
-    # print(f"tag: {tag}")
-    # print(subelem)
-
-    special_key_map = KEY_MAP.get(tag, {})
-
-    if subelem is not None:
-        for param in subelem.iter():
-            for key, value in param.attrib.items():
-                key = special_key_map.get(key, key)
-                key, value = format_key_and_value(key, value)
-                settings[key] = value
-
-    return settings
+from pynxtools_xps.specs.sle.utils import format_key_and_value, iterate_xml_at_tag
 
 
 def extract_devices(elem: ET.Element) -> Dict[str, Any]:
+    """
+    Extract all device settings.
+
+    Parameters
+    ----------
+    elem : ET.Element
+        XML element containing one DeviceCommand or DeviceInfo group.
+
+    Returns
+    -------
+    device_settings: Dict[str, Any]
+        Dictionary containing all metadata for
+        the device.
+
+    """
     device_settings = {}
 
     for key, value in elem.attrib.items():
@@ -85,12 +59,29 @@ def extract_devices(elem: ET.Element) -> Dict[str, Any]:
 
     for param in elem.iter("Parameter"):
         key, value = format_key_and_value(param.attrib["name"], param.text)
+
         device_settings[key] = value
 
     return device_settings
 
 
 def extract_device_commands(elem: ET.Element) -> Dict[str, Any]:
+    """
+    Retrieve device commands.
+
+    Parameters
+    ----------
+    elem : lxml.etree._Element
+         XML element containing one DeviceCommand group.
+
+    Returns
+    -------
+    device_settings: Dict[str, Any]
+        Dictionary containing all information metadata for
+        the device.
+
+    """
+
     unique_device_name = elem.attrib["UniqueDeviceName"]
 
     device_settings = extract_devices(elem)
@@ -99,6 +90,21 @@ def extract_device_commands(elem: ET.Element) -> Dict[str, Any]:
 
 
 def extract_device_info(elem: ET.Element) -> Dict[str, Any]:
+    """
+    Retrieve device information.
+
+    Parameters
+    ----------
+    elem : lxml.etree._Element
+         XML element containing one DeviceInfo group.
+
+    Returns
+    -------
+    device_settings: Dict[str, Any]
+        Dictionary containing all command metadata for
+        the device.
+
+    """
     unique_name = elem.attrib["UniqueName"]
 
     device_settings = extract_devices(elem)
@@ -107,18 +113,29 @@ def extract_device_info(elem: ET.Element) -> Dict[str, Any]:
 
 
 def step_profiling(elem: ET.Element) -> Dict[str, Any]:
-    settings: Dict[str, Any] = {}
+    """
+    Retrieve metadata for one StepProfiling group.
 
+    Parameters
+    ----------
+    elem : lxml.etree._Element
+         XML element containing one StepProfiling group.
+
+    Returns
+    -------
+    profiling_settings: Dict[str, Any]
+        Dictionary containing all metadata for
+        the spectrum group.
+
+    """
     profiling_settings = iterate_xml_at_tag(xml_elem=elem, tag="ProfilingParams")
 
     return profiling_settings
 
-    return settings
-
 
 def _get_group_metadata(spectrum_group: ET.Element) -> Dict[str, Any]:
     """
-    Iteratively retrieve metadata for one spectrum group.
+    Retrieve metadata for one spectrum group.
 
     Parameters
     ----------
@@ -127,7 +144,7 @@ def _get_group_metadata(spectrum_group: ET.Element) -> Dict[str, Any]:
 
     Returns
     -------
-    settings: dict
+    settings: Dict[str, Any]
         Dictionary containing all metadata for
         the spectrum group.
 
@@ -141,7 +158,7 @@ def _get_group_metadata(spectrum_group: ET.Element) -> Dict[str, Any]:
 
 def _extract_comm_settings(elem: ET.Element) -> Dict[str, Any]:
     """
-    Iteratively retrieve metadata for common settings of one spectrum group.
+    Retrieve metadata for common settings of one spectrum group.
 
     Parameters
     ----------
@@ -150,7 +167,7 @@ def _extract_comm_settings(elem: ET.Element) -> Dict[str, Any]:
 
     Returns
     -------
-    settings: dict
+    common_settings: Dict[str, Any]
         Dictionary containing all common metadata for
         the spectrum group.
 
@@ -180,7 +197,7 @@ def _extract_comm_settings(elem: ET.Element) -> Dict[str, Any]:
 
 def _get_spectrum_metadata(elem: ET.Element) -> Dict[str, Any]:
     """
-    Iteratively retrieve metadata for one spectrum.
+    Retrieve metadata for one spectrum.
 
     Parameters
     ----------
@@ -189,7 +206,7 @@ def _get_spectrum_metadata(elem: ET.Element) -> Dict[str, Any]:
 
     Returns
     -------
-    spectrum_ settings: dict
+    spectrum_ settings: Dict[str, Any]
         Dictionary containing all metadata for
         the spectrum.
 
@@ -201,7 +218,7 @@ def _get_spectrum_metadata(elem: ET.Element) -> Dict[str, Any]:
 
     spectrum_types = {
         "FixedEnergiesSettings": "Alignment",
-        "FixedAnalyzerTransmissionSettings": "fixed_analyer_transmission",
+        "FixedAnalyzerTransmissionSettings": "fixed_analyzer_transmission",
         "ConstantFinalStateSettings": "constant_final_state",
     }
 
@@ -228,14 +245,20 @@ FUNC_MAP = {
 }
 
 
-def process_xml_element(elem: ET.Element, settings: Dict[str, Any]):
+def process_xml_element(
+    elem: ET.Element, settings: Dict[str, Any], collect: List[Dict[str, Any]]
+):
     if elem.tag in FUNC_MAP:
         elem_settings = FUNC_MAP[elem.tag](elem)
         settings.update(elem_settings)
 
+        if elem.tag == "Spectrum":
+            collect.append(copy.copy(settings))
+            return
+
     # Recursively process each child element
     for child in elem:
-        process_xml_element(child, settings)
+        process_xml_element(child, settings, collect)
 
     return settings
 
@@ -260,10 +283,18 @@ def flatten_schedule(xml: ET.Element) -> List[Dict[str, Any]]:
     for measurement_type in MEASUREMENT_METHOD_MAP:
         for group in xml.iter(measurement_type):
             data: Dict[str, Any] = {}
-            data["analysis_method"] = convert_measurement_method(measurement_type)
-            process_xml_element(group, data)
 
-            collect += [copy.copy(data)]
+            measurement_type = convert_measurement_method(measurement_type)
+            data["analysis_method"] = measurement_type
+            data["analysis_method_long_name"] = MEASUREMENT_METHOD_MAP.get(
+                measurement_type
+            )[1]
+
+            data["device_group_id"] = group.attrib["ID"]
+
+            process_xml_element(group, data, collect)
+
+            # collect += [copy.copy(data)]
 
     return collect
 
@@ -283,18 +314,18 @@ def flatten_context(xml: ET.Element) -> Dict[str, Any]:
         Dictionary with device metadata.
 
     """
-    if xml is not None:
+    if xml is None:
         return {}
 
     device_metadata: Dict[str, Any] = {}
 
     for elem in xml.iter("DeviceContext"):
-        process_xml_element(elem, device_metadata)
+        process_xml_element(elem, device_metadata, [])
 
     return device_metadata
 
 
-def flatten_metainfo(xml: ET.Element) -> List[Dict[str, Any]]:
+def flatten_metainfo(xml: ET.Element) -> Dict[str, Any]:
     """
     Flatten the nested XML metainfo, keeping only the needed metadata.
 
@@ -309,12 +340,12 @@ def flatten_metainfo(xml: ET.Element) -> List[Dict[str, Any]]:
         Dictionary with metainfo.
 
     """
-    if xml is not None:
+    if xml is None:
         return {}
 
     metainfo: Dict[str, Any] = {}
 
     for elem in xml.iter("Parameter"):
-        process_xml_element(elem, metainfo)
+        process_xml_element(elem, metainfo, [])
 
     return metainfo

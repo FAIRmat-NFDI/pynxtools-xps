@@ -112,14 +112,23 @@ def convert_snake_to_pascal(str_value: str):
 
 
 def convert_pascal_to_snake(str_value: str):
-    """Convert pascal case text to snake case."""
-    # Convert CamelCase to snake_case
-    snake_case = re.sub(r"(?<!^)(?=[A-Z])", "_", str_value)
+    """Convert PascalCase text to snake_case, preserving bracketed content."""
 
-    # Convert whitespace to underscores and remove extra underscores
-    snake_case_cleaned = re.sub(r"\s+", "_", snake_case).replace("__", "_")
+    def replace_non_bracketed(match):
+        content = match.group(0)
+        snake_case = re.sub(r"(?<!^)(?=[A-Z])", "_", content)
+        return re.sub(r"\s+", "_", snake_case).replace("__", "_")
 
-    return snake_case_cleaned.lower()
+    pattern = r"(\[.*?\]|[^[]+)"
+    parts = re.sub(
+        pattern,
+        lambda m: m.group(0)
+        if m.group(0).startswith("[")
+        else replace_non_bracketed(m),
+        str_value,
+    )
+
+    return parts.lower()
 
 
 def safe_arange_with_edges(start: float, stop: float, step: float) -> np.ndarray:
@@ -499,6 +508,9 @@ def extract_unit(
             - If no unit is found in either, returns an empty string for the unit.
 
     """
+    if not value_str:
+        return "", ""
+
     value, unit = split_value_and_unit(value_str)
 
     if not unit:

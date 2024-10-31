@@ -28,6 +28,7 @@ dependencies = [
     "numpy>=1.21.2",
     "pint>=0.17",
     "pynxtools>=0.7.0",
+    "scipy",
 ]
 
 [project.entry-points."pynxtools.reader"]

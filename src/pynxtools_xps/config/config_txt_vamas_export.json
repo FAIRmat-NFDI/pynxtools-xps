@@ -11,6 +11,7 @@
       "duration":"@eln",
       "duration/@units":"@eln",
       "method":"@eln",
+      "method/@long_name":"@eln:method/long_name",
       "program_name":"@eln"
     },
     "/ENTRY/USER[user]":{

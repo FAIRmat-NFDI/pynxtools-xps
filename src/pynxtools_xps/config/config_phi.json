@@ -9,6 +9,7 @@
     "experiment_facility":"@eln",
     "experiment_laboratory":"@eln",
     "method":"@attrs:region/technique",
+    "method/@long_name":"@attrs:region/technique_long_name",
     "program_name":"@attrs:file_info/software_version",
     "acquisition_filename":"@attrs:file_info/acquisition_filename"
   },

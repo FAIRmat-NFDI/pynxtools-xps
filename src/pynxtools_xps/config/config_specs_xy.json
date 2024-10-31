@@ -5,6 +5,7 @@
     "start_time":"@attrs:time_stamp",
     "end_time":"@eln",
     "method":"@attrs:region/analysis_method",
+    "method/@long_name":"@attrs:region/analysis_method_long_name",
     "experiment_institution":"@eln",
     "experiment_facility":"@eln",
     "experiment_laboratory":"@eln",

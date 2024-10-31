@@ -9,6 +9,7 @@
       "experiment_laboratory":"@eln",
       "entry_identifier":"@eln",
       "method":"@attrs:region/analysis_method",
+      "method/@long_name":"@attrs:region/analysis_method_long_name",
       "program_name":"@eln"
     },
     "/ENTRY/USER[user]":{

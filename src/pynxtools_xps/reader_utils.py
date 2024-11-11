@@ -435,6 +435,7 @@ def align_name_part(name_part: str):
         ".": "_",
         "-": "_",
         ":": "_",
+        "+": "_",
     }
 
     for original, replacement in replacements.items():

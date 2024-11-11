@@ -429,18 +429,18 @@ def construct_data_key(spectrum: Dict[str, Any]) -> str:
 
 def align_name_part(name_part: str):
     """Make one part of the entry name compliant with NeXus standards."""
-    replacements = {
-        " ": "_",
-        ",": "",
-        ".": "_",
-        "-": "_",
-        ":": "_",
-    }
+    translation_table = str.maketrans(
+        {
+            " ": "_",
+            ",": "",
+            ".": "_",
+            "-": "_",
+            ":": "_",
+            "+": "_",
+        }
+    )
 
-    for original, replacement in replacements.items():
-        name_part = name_part.replace(original, replacement)
-
-    return name_part
+    return name_part.translate(translation_table)
 
 
 def construct_entry_name(parts: List[str]) -> str:

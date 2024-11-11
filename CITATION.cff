@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 title: 'pynxtools-xps: A pynxtools reader plugin for X-ray photoelectron spectroscopy (XPS) data'
-version: 0.4.4
+version: 0.4.6
 message:
   If you use this software, please cite it using the
   metadata from this file.

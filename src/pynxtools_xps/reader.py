@@ -359,11 +359,15 @@ class XPSReader(MultiFormatReader):
             parser.parse_file(file_path, **self.kwargs)
             data_dict = parser.data_dict
 
+            if isinstance(config_file, dict):
+                config_file = config_file.get(file_ext)
+            
             self.set_config_file(
-                XPSReader.reader_dir.joinpath("config", parser.config_file),
+                XPSReader.reader_dir.joinpath("config", config_file),
                 replace=False,
             )
-            self.xps_data_dicts += [data_dict]
+
+            self.xps_data_dicts += [parser.data_dict]
 
         elif file_ext in XPSReader.__prmt_metadata_file_ext__:
             vendor = _check_for_vendors(file_path)

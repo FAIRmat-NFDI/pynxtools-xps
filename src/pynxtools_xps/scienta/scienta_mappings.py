@@ -32,6 +32,7 @@ from pynxtools_xps.reader_utils import (
 from pynxtools_xps.value_mappers import (
     convert_energy_type,
     convert_energy_scan_mode,
+    parse_datetime,
 )
 
 
@@ -153,6 +154,11 @@ VALUE_MAP = {
     "time_per_spectrum_channel": float,
     "manipulator_r1": float,
     "manipulator_r2": float,
+    "start_time": parse_datetime,
+    "stop_time": parse_datetime,
+    "preset_type": lambda x: x.lower(),
+    "source_type": lambda x: x.lower(),
+    "energy_mode": convert_energy_type,
 }
 
 UNITS: dict = {

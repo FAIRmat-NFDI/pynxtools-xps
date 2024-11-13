@@ -142,6 +142,8 @@ class XPSReader(MultiFormatReader):
     )
 
     __prmt_file_ext__ = [
+        ".h5",
+        ".hdf5",
         ".ibw",
         ".npl",
         ".pro",
@@ -159,6 +161,8 @@ class XPSReader(MultiFormatReader):
     __vendors__ = ["kratos", "phi", "scienta", "specs", "unkwown"]
     __prmt_vndr_cls: Dict[str, Dict] = {
         ".csv": {"unknown": CsvMapperVamasResult},
+        ".h5": {"scienta": MapperScienta},
+        ".hdf5": {"scienta": MapperScienta},
         ".ibw": {"scienta": MapperScienta},
         ".npl": {"unkwown": VamasMapper},
         ".pro": {"phi": MapperPhi},

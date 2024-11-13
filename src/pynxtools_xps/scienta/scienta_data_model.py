@@ -63,7 +63,7 @@ class ScientaRegion(XpsDataclass):
     sample_name: str = ""
     spectrum_comment: str = ""
     start_date: str = ""
-    start_time: str = ""
+    time: str = ""
     time_stamp: str = ""
     time_per_spectrum_channel: float = 0.0
     detector_mode: str = ""

@@ -426,7 +426,7 @@ class ScientaTxtParser:
                     pass
 
         # Convert date and time to ISO8601 date time.
-        region.time_stamp = _construct_date_time(region.start_date, region.start_time)
+        region.time_stamp = _construct_date_time(region.start_date, region.time)
 
         region.validate_types()
 
@@ -505,6 +505,7 @@ class ScientaIgorParser(ABC):
             spectrum["data"][label] = data
             spectrum["data_labels"].append(label)
             spectrum["units"][label] = convert_units(unit)
+            # Convert date and time to ISO8601 date time.
 
         spectrum["igor_binary_wave_format_version"] = ibw_version
 

@@ -127,7 +127,6 @@ KEY_MAP: Dict[str, str] = {
     "sample": "sample_name",
     "comments": "spectrum_comment",
     "date": "start_date",
-    "time": "start_time",
 }
 
 VALUE_MAP = {
@@ -204,6 +203,7 @@ def _get_key_value_pair(line: str):
         if "dimension" in key:
             key_part = f"dimension_{key.rsplit('_')[-1]}"
             key = KEY_MAP.get(key_part, key_part)
+
         value = _re_map_single_value(key, value, VALUE_MAP)
 
     except ValueError:

@@ -271,9 +271,9 @@ class MapperScienta(XPSMapper):
         ]
 
         for key in data_keys:
-            value = spectrum[f"acquisition/spectrum/{key}"]
-
-            self._xps_dict["data"][entry][key] = value
+            value = spectrum.get(f"acquisition/spectrum/{key}")
+            if value is not None:
+                self._xps_dict["data"][entry][key] = value
 
 
 class ScientaTxtParser:

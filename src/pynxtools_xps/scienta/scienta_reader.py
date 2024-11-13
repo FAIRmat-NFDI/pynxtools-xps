@@ -111,7 +111,12 @@ class MapperScienta(XPSMapper):
         """
 
         entry_parts = []
-        for part in ["spectrum_type", "region_name", "acquisition/spectrum/name"]:
+        for part in [
+            "spectrum_type",
+            "region_name",
+            "acquisition/spectrum/name",
+            "title",
+        ]:
             val = spectrum.get(part, None)
             if val:
                 entry_parts += [val]
@@ -120,6 +125,9 @@ class MapperScienta(XPSMapper):
         entry_parent = f"/ENTRY[{entry}]"
 
         for key, value in spectrum.items():
+            if key.startswith("entry"):
+                entry_parent = f"/ENTRY[entry]"
+                key = key.replace("entry/", "", 1)
             mpes_key = f"{entry_parent}/{key}"
             self._xps_dict[mpes_key] = value
 
@@ -189,9 +197,9 @@ class MapperScienta(XPSMapper):
         ]
 
         for key in data_keys:
-            value = spectrum[f"acquisition/spectrum/{key}"]
-
-            self._xps_dict["data"][entry][key] = value
+            value = spectrum.get(f"acquisition/spectrum/{key}")
+            if value is not None:
+                self._xps_dict["data"][entry][key] = value
 
 
 class ScientaTxtParser:

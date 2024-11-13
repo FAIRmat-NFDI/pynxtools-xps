@@ -188,6 +188,10 @@ def parse_datetime(
         Datetime in ISO 8601 format.
     """
     for date_fmt in possible_date_formats:
+        if date_fmt == "%Y-%m-%dT%H:%M:%S.%f%z":
+            # strptime only supports six digits for microseconds
+            datetime_string = datetime_string[:-7] + datetime_string[-6:]
+
         try:
             datetime_obj = datetime.datetime.strptime(datetime_string, date_fmt)
 

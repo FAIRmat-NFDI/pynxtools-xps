@@ -755,7 +755,10 @@ class ScientaHdf5Parser:
             kwargs: Dict[str, Any] = {}
 
             if "_time" in key:
-                kwargs["possible_date_formats"] = ["%Y-%m-%dT%H:%M:%S"]
+                kwargs["possible_date_formats"] = [
+                    "%Y-%m-%dT%H:%M:%S",
+                    "%Y-%m-%dT%H:%M:%S.%f%z",
+                ]
 
             value = _re_map_single_value(key, value_str, VALUE_MAP, **kwargs)
 

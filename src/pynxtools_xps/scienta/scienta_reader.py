@@ -26,6 +26,7 @@ import warnings
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 
+import h5py
 import numpy as np
 import xarray as xr
 from igor2 import binarywave
@@ -36,6 +37,7 @@ from pynxtools_xps.reader_utils import (
     _re_map_single_value,
     construct_data_key,
     construct_entry_name,
+    _format_value,
 )
 from pynxtools_xps.scienta.scienta_data_model import ScientaHeader, ScientaRegion
 from pynxtools_xps.scienta.scienta_mappings import (
@@ -54,11 +56,18 @@ class MapperScienta(XPSMapper):
     dictionaries.
     """
 
-    config_file = "config_scienta.json"
+    config_file = {
+        ".h5": "config_scienta_hdf5.json",
+        ".hdf5": "config_scienta_hdf5.json",
+        ".ibw": "config_scienta.json",
+        ".txt": "config_scienta.json",
+    }
 
     __prmt_file_ext__ = [
-        "ibw",
-        "txt",
+        ".h5",
+        ".hdf5",
+        ".ibw",
+        ".txt",
     ]
 
     __file_err_msg__ = (
@@ -81,6 +90,8 @@ class MapperScienta(XPSMapper):
             return ScientaTxtParser()
         elif str(self.file).endswith(".ibw"):
             return ScientaIgorParser()
+        elif str(self.file).endswith((".h5", ".hdf5")):
+            return ScientaHdf5Parser()
         raise ValueError(MapperScienta.__file_err_msg__)
 
     def construct_data(self):
@@ -90,80 +101,17 @@ class MapperScienta(XPSMapper):
 
         self._xps_dict["data"]: dict = {}
 
-        template_key_map = {
-            "file_info": ["data_file", "sequence_file"],
-            "user": [
-                "user_name",
-            ],
-            "instrument": [
-                "instrument_name",
-                "vendor",
-            ],
-            "source_xray": [],
-            "beam_xray": [
-                "excitation_energy",
-            ],
-            "electronanalyser": [],
-            "collectioncolumn": [
-                "lens_mode",
-            ],
-            "energydispersion": [
-                "acquisition_mode",
-                "pass_energy",
-            ],
-            "detector": [
-                "detector_first_x_channel",
-                "detector_first_y_channel",
-                "detector_last_x_channel",
-                "detector_last_y_channel",
-                "detector_mode",
-                "dwell_time",
-                "time_per_spectrum_channel",
-            ],
-            "manipulator": [
-                "manipulator_r1",
-                "manipulator_r2",
-            ],
-            "calibration": [],
-            "sample": ["sample_name"],
-            "region": [
-                "center_energy",
-                "energy_axis",
-                "energy_scale",
-                "energy_scale_2",
-                "energy_size",
-                "no_of_scans",
-                "region_id",
-                "spectrum_comment",
-                "start_energy",
-                "step_size",
-                "stop_energy",
-                "time_stamp",
-                "intensity/@units",
-            ],
-            # 'unused': [
-            #     'energy_unit',
-            #     'number_of_slices',
-            #     'software_version',
-            #     'spectrum_comment',
-            #     'start_date',
-            #     'start_time',
-            #     'time_per_spectrum_channel'
-            # ]
-        }
-
         for spectrum in spectra:
-            self._update_xps_dict_with_spectrum(spectrum, template_key_map)
+            self._update_xps_dict_with_spectrum(spectrum)
 
-    def _update_xps_dict_with_spectrum(
-        self, spectrum: Dict[str, Any], template_key_map: Dict[str, List[str]]
-    ):
+    def _update_xps_dict_with_spectrum(self, spectrum: Dict[str, Any]):
         """
         Map one spectrum from raw data to NXmpes-ready dict.
 
         """
+
         entry_parts = []
-        for part in ["spectrum_type", "region_name"]:
+        for part in ["spectrum_type", "region_name", "acquisition/spectrum/name"]:
             val = spectrum.get(part, None)
             if val:
                 entry_parts += [val]
@@ -171,49 +119,27 @@ class MapperScienta(XPSMapper):
         entry = construct_entry_name(entry_parts)
         entry_parent = f"/ENTRY[{entry}]"
 
-        file_parent = f"{entry_parent}/file_info"
-        instrument_parent = f"{entry_parent}/instrument"
-        analyser_parent = f"{instrument_parent}/electronanalyser"
+        for key, value in spectrum.items():
+            mpes_key = f"{entry_parent}/{key}"
+            self._xps_dict[mpes_key] = value
 
-        path_map = {
-            "file_info": f"{file_parent}",
-            "user": f"{entry_parent}/user",
-            "instrument": f"{instrument_parent}",
-            "source_xray": f"{instrument_parent}/source_xray",
-            "beam_xray": f"{instrument_parent}/beam_xray",
-            "electronanalyser": f"{analyser_parent}",
-            "collectioncolumn": f"{analyser_parent}/collectioncolumn",
-            "energydispersion": f"{analyser_parent}/energydispersion",
-            "detector": f"{analyser_parent}/detector",
-            "manipulator": f"{instrument_parent}/manipulator",
-            "calibration": f"{instrument_parent}/calibration",
-            "sample": f"{entry_parent}/sample",
-            "data": f"{entry_parent}/data",
-            "region": f"{entry_parent}/region",
-        }
+            units = get_units_for_key(key, UNITS)
+            if units is not None:
+                self._xps_dict[f"{mpes_key}/@units"] = units
 
-        for grouping, spectrum_keys in template_key_map.items():
-            root = path_map[str(grouping)]
+        try:
+            self._fill_with_data_txt_ibw(spectrum, entry)
+        except (IndexError, KeyError):
+            self._fill_with_data_hdf5(spectrum, entry)
 
-            for spectrum_key in spectrum_keys:
-                mpes_key = spectrum_key.rsplit(" ", 1)[0]
-                try:
-                    self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
-                except KeyError:
-                    pass
-
-                unit_key = f"{grouping}/{spectrum_key}"
-                units = get_units_for_key(unit_key, UNITS)
-                if units is not None:
-                    self._xps_dict[f"{root}/{mpes_key}/@units"] = units
-
-        # Create key for writing to data
-        scan_key = construct_data_key(spectrum)
-
+    def _fill_with_data_txt_ibw(self, spectrum: Dict[str, Any], entry: str):
         # If multiple spectra exist to entry, only create a new
         # xr.Dataset if the entry occurs for the first time.
         if entry not in self._xps_dict["data"]:
             self._xps_dict["data"][entry] = xr.Dataset()
+
+        # Create key for writing to data
+        scan_key = construct_data_key(spectrum)
 
         energy = np.array(spectrum["data"]["energy"])
         intensity = spectrum["data"]["intensity"]
@@ -249,6 +175,23 @@ class MapperScienta(XPSMapper):
         self._xps_dict["data"][entry][channel_key] = xr.DataArray(
             data=intensity, coords={"energy": energy}
         )
+
+    def _fill_with_data_hdf5(self, spectrum: Dict[str, Any], entry: str):
+        self._xps_dict["data"][entry] = {}
+
+        data_keys = [
+            "data/data",
+            "data/sum",
+            "data/x_axis",
+            "data/y_axis",
+            "data_reduced_1d/data",
+            "data_reduced_1d/x_axis",
+        ]
+
+        for key in data_keys:
+            value = spectrum[f"acquisition/spectrum/{key}"]
+
+            self._xps_dict["data"][entry][key] = value
 
 
 class ScientaTxtParser:
@@ -614,3 +557,81 @@ class ScientaIgorParser:
             unit += elem.decode("utf-8")
 
         return unit
+
+
+class ScientaHdf5Parser:
+    def __init__(self):
+        self.spectra: List[Dict[str, Any]] = []
+
+    def parse_file(self, file: Union[str, Path], **kwargs):
+        """
+        Reads the igor binarywave files and returns a list of
+        dictionary containing the wave data.
+
+        Parameters
+        ----------
+        file : str
+            Filepath of the TXT file to be read.
+
+        Returns
+        -------
+        self.spectra
+            Flat list of dictionaries containing one spectrum each.
+
+        """
+
+        def format_value(key: str, value_str: str) -> Tuple[Any, str]:
+            """
+            Formats a value string (to a corresponding key) according to a series of transformations.
+            This function:
+            1. Formats the numeric part of the value according to its expected type.
+            2. Remaps the value to a new format if specified in `VALUE_MAP`.
+            Args:
+                key (str): The key associated with the value, which may need mapping and formatting.
+                value_str (str): The value string to format and separate into numeric value and unit.
+            Returns:
+                Tuple[Any, str]:
+                    - The formatted key (converted to snake_case and remapped if needed).
+                    - The formatted value, with numeric value processed and remapped according to `VALUE_MAP`.
+            """
+            kwargs: Dict[str, Any] = {}
+
+            if "_time" in key:
+                kwargs["possible_date_formats"] = ["%Y-%m-%dT%H:%M:%S"]
+
+            value = _re_map_single_value(key, value_str, VALUE_MAP, **kwargs)
+
+            value = _format_value(value)
+
+            return value
+
+        def recursively_read_group(group, path=""):
+            result = {}
+            for key, item in group.items():
+                new_path = f"{path}/{key}" if path else key
+                if isinstance(item, h5py.Group):
+                    # Recursively read subgroups
+                    result.update(recursively_read_group(item, new_path))
+                elif isinstance(item, h5py.Dataset):
+                    # Read datasets
+                    data = item[()]
+                    if isinstance(data, bytes):
+                        data = data.decode("utf-8")
+                        data = format_value(key, data)
+                    result[new_path] = data
+            return result
+
+        # Open the HDF5 file and read its contents
+        with h5py.File(file, "r") as hdf:
+            hdf5_data = recursively_read_group(hdf)
+
+        try:
+            length, width = (
+                hdf5_data["instrument/analyser/slit/length"],
+                hdf5_data["instrument/analyser/slit/width"],
+            )
+            hdf5_data["instrument/analyser/slit/size"] = np.array([length, width])
+        except KeyError:
+            pass
+
+        return [hdf5_data]

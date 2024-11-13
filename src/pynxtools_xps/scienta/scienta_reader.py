@@ -346,7 +346,7 @@ class ScientaTxtParser:
         region.data = {"energy": np.array(energies), "intensity": np.array(intensities)}
 
         # Convert date and time to ISO8601 date time.
-        region.time_stamp = _construct_date_time(region.start_date, region.start_time)
+        region.time_stamp = _construct_date_time(region.start_date, region.time)
 
         region.validate_types()
 
@@ -428,9 +428,7 @@ class ScientaIgorParser:
                 intensities = data[region_id]
 
             # Convert date and time to ISO8601 date time.
-            region.time_stamp = _construct_date_time(
-                region.start_date, region.start_time
-            )
+            region.time_stamp = _construct_date_time(region.start_date, region.time)
 
             region.energy_size = len(energies)
             region.energy_axis = energies

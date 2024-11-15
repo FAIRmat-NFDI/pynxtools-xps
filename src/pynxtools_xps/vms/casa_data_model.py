@@ -366,7 +366,7 @@ class CasaRegion(XpsDataclass):
     rsf_effective: float = 0.0
 
     def calculate_background(self, x: np.array, y: np.array):
-        backgrounds: Dict[str, Peak] = {
+        backgrounds: Dict[str, Any] = {
             "Shirley": Shirley,
             # "Step Down": StepDown,
             "U 3 Tougaard": TougaardU3,
@@ -429,7 +429,7 @@ class CasaComponent(XpsDataclass):
     const: str = ""  # CONST
 
     def calculate_lineshape(self, x: np.array):
-        lineshapes: Dict[str, Peak] = {
+        lineshapes: Dict[str, Any] = {
             "GL": GaussianLorentzianProduct,
             "SGL": GaussianLorentzianSum,
             "LA": LorentzianAsymmetric,

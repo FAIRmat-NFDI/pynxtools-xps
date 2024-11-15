@@ -88,37 +88,37 @@ ALLOWED_TECHNIQUES = [
 ]
 
 UNITS: dict = {
-    "beam_xray/excitation_energy": "eV",
-    "beam_xray/extent": "um",
-    "beam_xray/particle_charge": "C",
-    "beam_xray/source_beam_width_x": "um",
-    "beam_xray/source_beam_width_y": "um",
-    "beam_xray/source_polar_angle": "degree",
-    "beam_xray/source_azimuth_angle": "degree",
-    "source_xray/source_power": "W",
-    "source_sputter/sputter_ion_charge": "C",
-    "source_sputter/sputter_source_energy": "eV",
-    "source_sputter/sputter_source_beam_current": "A",
-    "source_sputter/sputter_source_width_x": "um",
-    "source_sputter/sputter_source_width_y": "um",
-    "source_sputter/sputter_source_incidence_polar_angle": "degree",
-    "source_sputter/sputter_source_azimuth_angle": "degree",
-    "electronanalyser/analyser_take_off_polar_angle": "degree",
-    "electronanalyser/analyser_take_off_azimuth_angle": "degree",
-    "electronanalyser/analysis_width_x": "m",
-    "electronanalyser/analysis_width_y": "m",
-    "electronanalyser/target_bias": "V",
-    "electronanalyser/time_correction": "s",
-    "electronanalyser/work_function": "eV",
-    "collectioncolumn/spatial_acceptance": "um",
-    "energydispersion/pass_energy": "eV",
-    "energydispersion/differential_width_aes": "eV",
-    "detector/dwell_time": "s",
-    "sample/sample_normal_polar_angle_of_tilt": "degree ",
-    "sample/sample_normal_tilt_azimuth_angle": "degree",
-    "sample/sample_rotation_angle": "degree",
-    "data/start_energy": "eV",
-    "data/step_size": "eV",
+    "excitation_energy": "eV",
+    "extent": "um",
+    "particle_charge": "C",
+    "source_beam_width_x": "um",
+    "source_beam_width_y": "um",
+    "source_polar_angle": "degree",
+    "source_azimuth_angle": "degree",
+    "source_power": "W",
+    "sputter_ion_charge": "C",
+    "sputter_source_energy": "eV",
+    "sputter_source_beam_current": "A",
+    "sputter_source_width_x": "um",
+    "sputter_source_width_y": "um",
+    "sputter_source_incidence_polar_angle": "degree",
+    "sputter_source_azimuth_angle": "degree",
+    "analyser_take_off_polar_angle": "degree",
+    "analyser_take_off_azimuth_angle": "degree",
+    "analysis_width_x": "m",
+    "analysis_width_y": "m",
+    "target_bias": "V",
+    "time_correction": "s",
+    "work_function": "eV",
+    "spatial_acceptance": "um",
+    "pass_energy": "eV",
+    "differential_width_aes": "eV",
+    "dwell_time": "s",
+    "sample_normal_polar_angle_of_tilt": "degree ",
+    "sample_normal_tilt_azimuth_angle": "degree",
+    "sample_rotation_angle": "degree",
+    "start_energy": "eV",
+    "step_size": "eV",
 }
 
 
@@ -150,111 +150,14 @@ class VamasMapper(XPSMapper):
 
         self._xps_dict["data"]: Dict[str, Any] = {}
 
-        template_key_map = {
-            "user": [],
-            "instrument": [],
-            "beam_xray": [
-                "excitation_energy",
-                "extent",
-                "particle_charge",
-                "source_polar_angle",
-                "source_azimuth_angle",
-            ],
-            "source_xray": [
-                "source_label",
-                "source_power",
-                "field_of_view_x",
-                "field_of_view_y",
-            ],
-            "source_sputter": [
-                "sputter_ion_atomic_number",
-                "sputter_ion_num_atoms",
-                "sputter_ion_charge",
-                "sputter_source_energy",
-                "sputter_source_beam_current",
-                "sputter_source_width_x",
-                "sputter_source_width_y",
-                "sputter_source_incidence_polar_angle",
-                "sputter_source_azimuth_angle",
-            ],
-            "electronanalyser": [
-                "analyser_take_off_polar_angle",
-                "analyser_take_off_azimuth_angle",
-                "analysis_width_x",
-                "analysis_width_y",
-                "target_bias",
-                "time_correction",
-                "work_function",
-            ],
-            "collectioncolumn": [
-                "magnification",
-                "spatial_acceptance",
-            ],
-            "energydispersion": [
-                "scan_mode",
-                "pass_energy",
-                "differential_width_aes",
-            ],
-            "detector": [
-                "signal_mode",
-                "dwell_time",
-            ],
-            "manipulator": [],
-            "sample": [
-                "sample_name",
-                "sample_normal_polar_angle_of_tilt",
-                "sample_normal_tilt_azimuth_angle",
-                "sample_rotation_angle",
-            ],
-            "data": [
-                "energy_label",
-                "energy_units",
-                "y_labels_1",
-                "y_units_1",
-                "y_labels_2",
-                "y_units_2",
-                "n_values",
-                "start_energy",
-                "step_size",
-            ],
-            "profiling": [
-                "first_linescan_x_start",
-                "first_linescan_y_start",
-                "first_linescan_x_end",
-                "first_linescan_y_end",
-                "last_linescan_x_end",
-                "last_linescan_y_end",
-            ],
-            "region": [
-                "format_id",
-                "institute_id",
-                "instrument_model_id",
-                "operator_id",
-                "experiment_id",
-                "analysis_method",
-                "element",
-                "group_id",
-                "group_name",
-                "region",
-                "scan_no",
-                "scans",
-                "spectrum_id",
-                "spectrum_type",
-                "transition",
-                "time_stamp",
-                "x_coord",
-                "y_coord",
-            ],
-        }
-
         for spectrum in spectra:
-            self._update_xps_dict_with_spectrum(spectrum, template_key_map)
+            self._update_xps_dict_with_spectrum(spectrum)
 
-    def _update_xps_dict_with_spectrum(
-        self, spectrum: Dict[str, Any], template_key_map: Dict[str, str]
-    ):
-        """Map one spectrum from raw data to NXmpes-ready dict."""
-        # pylint: disable=too-many-locals,duplicate-code
+    def _update_xps_dict_with_spectrum(self, spectrum: Dict[str, Any]):
+        """
+        Map one spectrum from raw data to NXmpes-ready dict.
+        """
+
         entry_parts = []
         for part in ["group_name", "spectrum_type"]:
             val = spectrum.get(part, None)
@@ -267,63 +170,16 @@ class VamasMapper(XPSMapper):
         entry = construct_entry_name(entry_parts)
         entry_parent = f"/ENTRY[{entry}]"
 
-        instrument_parent = f"{entry_parent}/instrument"
-        analyser_parent = f"{instrument_parent}/electronanalyser"
+        for key, value in spectrum.items():
+            if key.startswith("entry"):
+                entry_parent = "/ENTRY[entry]"
+                key = key.replace("entry/", "", 1)
+            mpes_key = f"{entry_parent}/{key}"
+            self._xps_dict[mpes_key] = value
 
-        path_map: Dict[str, str] = {
-            "user": f"{entry_parent}/user",
-            "instrument": f"{instrument_parent}",
-            "beam_xray": f"{instrument_parent}/beam_xray",
-            "source_xray": f"{instrument_parent}/source_xray",
-            "source_sputter": f"{instrument_parent}/source_sputter",
-            "electronanalyser": f"{analyser_parent}",
-            "collectioncolumn": f"{analyser_parent}/collectioncolumn",
-            "energydispersion": f"{analyser_parent}/energydispersion",
-            "detector": f"{analyser_parent}/detector",
-            "manipulator": f"{instrument_parent}/manipulator",
-            "sample": f"{entry_parent}/sample",
-            "data": f"{entry_parent}/data",
-            "process": f"{entry_parent}/process",
-            "peak_fitting": f"{entry_parent}/peak_fitting",
-            "profiling": f"{entry_parent}/profiling",
-            "region": f"{entry_parent}/region",
-        }
-
-        used_keys = []
-
-        for grouping, spectrum_keys in template_key_map.items():
-            root = path_map[grouping]
-            for spectrum_key in spectrum_keys:
-                mpes_key = spectrum_key.rsplit(" ", 1)[0]
-                try:
-                    self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
-                except KeyError:
-                    pass
-
-                unit_key = f"{grouping}/{spectrum_key}"
-                units = get_units_for_key(unit_key, UNITS)
-                if units is not None:
-                    self._xps_dict[f"{root}/{mpes_key}/@units"] = units
-                used_keys += [spectrum_key]
-
-        # Write process data
-        process_key_map: Dict[str, List[str]] = {
-            "process": ["energy_calibrations", "intensity_calibrations", "smoothings"],
-            "peak_fitting": ["regions", "components"],
-        }
-
-        for grouping, process_key_list in process_key_map.items():
-            root = path_map[grouping]
-
-            for spectrum_key in process_key_list:
-                process_keys = [key for key in spectrum if key.startswith(spectrum_key)]
-                for process_key in process_keys:
-                    try:
-                        process_key = process_key.replace("_units", "/@units")
-                        self._xps_dict[f"{root}/{process_key}"] = spectrum[process_key]
-                        used_keys += [process_key]
-                    except KeyError:
-                        pass
+            units = get_units_for_key(key, UNITS)
+            if units is not None:
+                self._xps_dict[f"{mpes_key}/@units"] = units
 
         # Create key for writing to data.
         scan_key = construct_data_key(spectrum)
@@ -360,17 +216,11 @@ class VamasMapper(XPSMapper):
         self._xps_dict["data"][entry][scan_key] = xr.DataArray(
             data=intensity_cps, coords={"energy": energy}
         )
-        used_keys += ["data"]
 
         # Write raw intensities to 'cycle0'.
         self._xps_dict["data"][entry][f"{scan_key}_chan0"] = xr.DataArray(
             data=intensity_raw, coords={"energy": energy}
         )
-
-        # Write additional keys to region parent.
-        for spectrum_key, value in spectrum.items():
-            if spectrum_key not in used_keys:
-                self._xps_dict[f"{entry_parent}/misc/{spectrum_key}"] = value
 
 
 KEY_MAP = {

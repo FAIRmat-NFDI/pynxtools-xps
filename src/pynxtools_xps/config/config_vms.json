@@ -2,10 +2,10 @@
   "/ENTRY":{
     "@default":"data",
     "title":"@eln",
-    "start_time":"@attrs:region/time_stamp",
+    "start_time":"@attrs:time_stamp",
     "end_time":"@eln",
-    "experiment_institution":"@attrs:region/institute_id",
-    "experiment_identifier":"@attrs:region/experiment_id",
+    "experiment_institution":"@attrs:institute_id",
+    "experiment_identifier":"@attrs:experiment_id",
     "experiment_facility":"@eln",
     "experiment_laboratory":"@eln",
     "entry_identifier":"@eln",
@@ -26,8 +26,8 @@
       "z":[0, 0 , 1],
       "z/@units":"m",
       "coordinate_system_transformations":{
-        "AXISNAME[z_rotation]":"@attrs:beam_xray/source_azimuth_angle",
-        "AXISNAME[z_rotation]/@units":"@attrs:beam_xray/source_azimuth_angle/@units",
+        "AXISNAME[z_rotation]":"@attrs:source_azimuth_angle",
+        "AXISNAME[z_rotation]/@units":"@attrs:source_azimuth_angle/@units",
         "AXISNAME[z_rotation]/@transformation_type":"rotation",
         "AXISNAME[z_rotation]/@vector":[0, 0, 1],
         "AXISNAME[z_rotation]/@depends_on":"y_flip",
@@ -38,8 +38,8 @@
         "AXISNAME[y_flip]/@vector":[0, 1, 0],
         "AXISNAME[y_flip]/@depends_on":"y_rotation",
 
-        "AXISNAME[y_rotation]":"@attrs:beam_xray/source_polar_angle",
-        "AXISNAME[y_rotation]/@units":"@attrs:beam_xray/source_polar_angle/@units",
+        "AXISNAME[y_rotation]":"@attrs:source_polar_angle",
+        "AXISNAME[y_rotation]/@units":"@attrs:source_polar_angle/@units",
         "AXISNAME[y_rotation]/@transformation_type":"rotation",
         "AXISNAME[y_rotation]/@vector":[0, -1, 0],
         "AXISNAME[y_rotation]/@depends_on":"."
@@ -71,12 +71,12 @@
     "energy_resolution":{
       "physical_quantity":"energy",
       "type":"derived",
-      "resolution":"@attrs:data/step_size",
-      "resolution/@units":"@attrs:data/step_size/@units"
+      "resolution":"@attrs:step_size",
+      "resolution/@units":"@attrs:step_size/@units"
     },
     "sourceTYPE[source_xray]":{
       "type":"@eln",
-      "name":"@attrs:source_xray/source_label",
+      "name":"@attrs:source_label",
       "probe":"photon",
       "device_information":{
         "vendor":"@eln",
@@ -92,9 +92,9 @@
     "beamTYPE[beam_xray]":{
       "distance":"@eln",
       "distance/@units":"@eln",
-      "extent":"@attrs:beam_xray/extent",
-      "extent/@units":"@attrs:beam_xray/extent/@units",
-      "incident_energy":"@attrs:beam_xray/excitation_energy",
+      "extent":"@attrs:extent",
+      "extent/@units":"@attrs:extent/@units",
+      "incident_energy":"@attrs:excitation_energy",
       "incident_energy/@units":"eV",
       "incident_energy_spread":null,
       "incident_energy_spread/@units":null,
@@ -103,14 +103,14 @@
       "associated_source":"/entry/instrument/source_xray",
       "depends_on":"/entry/instrument/beam_xray/transformations/beam_polar_angle_of_incidence",
       "transformations":{
-        "beam_polar_angle_of_incidence":"@attrs:beam_xray/source_polar_angle",
-        "beam_polar_angle_of_incidence/@units":"@attrs:beam_xray/source_polar_angle/@units",
+        "beam_polar_angle_of_incidence":"@attrs:source_polar_angle",
+        "beam_polar_angle_of_incidence/@units":"@attrs:source_polar_angle/@units",
         "beam_polar_angle_of_incidence/@transformation_type":"rotation",
         "beam_polar_angle_of_incidence/@vector":[0, -1, 0],
         "beam_polar_angle_of_incidence/@depends_on":"beam_azimuth_angle",
 
-        "beam_azimuth_angle":"@attrs:beam_xray/source_azimuth_angle",
-        "beam_azimuth_angle/@units":"@attrs:beam_xray/source_azimuth_angle/@units",
+        "beam_azimuth_angle":"@attrs:source_azimuth_angle",
+        "beam_azimuth_angle/@units":"@attrs:source_azimuth_angle/@units",
         "beam_azimuth_angle/@transformation_type":"rotation",
         "beam_azimuth_angle/@vector":[0, 0, -1],
         "beam_azimuth_angle/@depends_on":"/entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation"
@@ -120,11 +120,11 @@
       "@default":"detector",
       "name":"@eln",
       "description":"@eln",
-      "work_function":"@attrs:electronanalyser/work_function",
+      "work_function":"@attrs:work_function",
       "work_function/@units":"eV",
       "fast_axes":null,
       "slow_axes":"energy",
-      "target_bias":"@attrs:electronanalyser/target_bias",
+      "target_bias":"@attrs:target_bias",
       "target_bias/@units":"V",
       "device_information":{
         "vendor":"@eln",
@@ -138,7 +138,7 @@
       "energy_resolution":{
         "physical_quantity":"energy",
         "type":"estimated",
-        "resolution":"@attrs:data/step_size",
+        "resolution":"@attrs:step_size",
         "resolution/@units":"eV"
       },
       "transmission_function":null,
@@ -147,8 +147,8 @@
         "lens_mode":"@eln",
         "projection":null,
         "angular_acceptance":null,
-        "spatial_acceptance":"@attrs:collectioncolumn/spatial_acceptance",
-        "spatial_acceptance/@units":"@attrs:collectioncolumn/spatial_acceptance/@units",
+        "spatial_acceptance":"@attrs:spatial_acceptance",
+        "spatial_acceptance/@units":"@attrs:spatial_acceptance/@units",
         "field_aperture":null,
         "contrast_aperture":null,
         "device_information":{
@@ -163,9 +163,9 @@
       },
       "ENERGYDISPERSION[energydispersion]":{
         "scheme":"@eln",
-        "pass_energy":"@attrs:energydispersion/pass_energy",
-        "pass_energy/@units":"@attrs:energydispersion/pass_energy/@units",
-        "energy_scan_mode":"@attrs:energydispersion/scan_mode",
+        "pass_energy":"@attrs:pass_energy",
+        "pass_energy/@units":"@attrs:pass_energy/@units",
+        "energy_scan_mode":"@attrs:scan_mode",
         "radius":"@eln",
         "radius/@units":"@eln",
         "device_information":{
@@ -184,9 +184,9 @@
         "detector_type":"@eln",
         "detector_voltage":"@eln",
         "detector_voltage/@units":"@eln",
-        "count_time":"@attrs:detector/dwell_time",
-        "count_time/@units":"@attrs:detector/dwell_time/@units",
-        "acquisition_mode":"@attrs:detector/signal_mode",
+        "count_time":"@attrs:dwell_time",
+        "count_time/@units":"@attrs:dwell_time/@units",
+        "acquisition_mode":"@attrs:signal_mode",
         "device_information":{
           "vendor":"@eln",
           "model":"@eln",
@@ -206,14 +206,14 @@
       },
       "depends_on":"/entry/instrument/electronanalyser/transformations/analyser_take_off_polar_angle",
       "transformations":{
-        "analyser_take_off_polar_angle":"@attrs:electronanalyser/analyser_take_off_polar_angle",
-        "analyser_take_off_polar_angle/@units":"@attrs:electronanalyser/analyser_take_off_polar_angle/@units",
+        "analyser_take_off_polar_angle":"@attrs:analyser_take_off_polar_angle",
+        "analyser_take_off_polar_angle/@units":"@attrs:analyser_take_off_polar_angle/@units",
         "analyser_take_off_polar_angle/@transformation_type":"rotation",
         "analyser_take_off_polar_angle/@vector":[0, -1, 0],
         "analyser_take_off_polar_angle/@depends_on":"analyser_take_off_azimuth_angle",
 
-        "analyser_take_off_azimuth_angle":"@attrs:electronanalyser/analyser_take_off_azimuth_angle",
-        "analyser_take_off_azimuth_angle/@units":"@attrs:electronanalyser/analyser_take_off_azimuth_angle/@units",
+        "analyser_take_off_azimuth_angle":"@attrs:analyser_take_off_azimuth_angle",
+        "analyser_take_off_azimuth_angle/@units":"@attrs:analyser_take_off_azimuth_angle/@units",
         "analyser_take_off_azimuth_angle/@transformation_type":"rotation",
         "analyser_take_off_azimuth_angle/@vector":[0, 0, -1],
         "analyser_take_off_azimuth_angle/@depends_on":"/entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation"
@@ -307,7 +307,7 @@
     }
   },
   "/ENTRY/SAMPLE[sample]":{
-    "name":"@attrs:sample/sample_name",
+    "name":"@attrs:sample_name",
     "identifier":{
       "identifier":"@eln"
     },
@@ -348,14 +348,14 @@
     },
     "depends_on":"/entry/sample/transformations/sample_rotation_angle",
     "transformations":{
-      "sample_rotation_angle":"@attrs:sample/sample_rotation_angle",
-      "sample_rotation_angle/@units":"@attrs:sample/sample_rotation_angle/@units",
+      "sample_rotation_angle":"@attrs:sample_rotation_angle",
+      "sample_rotation_angle/@units":"@attrs:sample_rotation_angle/@units",
       "sample_rotation_angle/@transformation_type":"rotation",
       "sample_rotation_angle/@vector":[0, 0, -1],
       "sample_rotation_angle/@depends_on":"sample_normal_tilt_azimuth_angle",
 
-      "sample_normal_polar_angle_of_tilt":"@attrs:sample/sample_normal_polar_angle_of_tilt",
-      "sample_normal_polar_angle_of_tilt/@units":"@attrs:sample/sample_normal_polar_angle_of_tilt/@units",
+      "sample_normal_polar_angle_of_tilt":"@attrs:sample_normal_polar_angle_of_tilt",
+      "sample_normal_polar_angle_of_tilt/@units":"@attrs:sample_normal_polar_angle_of_tilt/@units",
       "sample_normal_polar_angle_of_tilt/@transformation_type":"rotation",
       "sample_normal_polar_angle_of_tilt/@vector":[0, -1, 0],
       "sample_normal_polar_angle_of_tilt/@depends_on":"sample_normal_tilt_azimuth_angle",
@@ -372,12 +372,12 @@
     "@signal":"data",
     "data":"@data:average",
     "data_errors":"@data:errors",
-    "data/@units":"@attrs:data/y_units_1",
+    "data/@units":"@attrs:y_units_1",
     "DATA[*]":"@data:*.scans",
-    "DATA[*]/@units":"@attrs:data/y_units_1",
+    "DATA[*]/@units":"@attrs:y_units_1",
     "energy":"@data:energy",
-    "energy/@type":"@attrs:data/energy_label",
-    "energy/@units":"@attrs:data/energy_units",
+    "energy/@type":"@attrs:energy_label",
+    "energy/@units":"@attrs:energy_units",
     "energy/@reference":null,
     "@energy_indices":0
   }

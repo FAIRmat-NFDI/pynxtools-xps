@@ -22,6 +22,7 @@ template.
 """
 
 from copy import deepcopy
+import logging
 import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Union
@@ -57,6 +58,9 @@ from pynxtools_xps.value_mappers import (
     convert_energy_scan_mode,
     get_units_for_key,
 )
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 EXP_MODES = [
     "MAP",
@@ -737,6 +741,20 @@ class VamasParser:
             re_map_values(settings, VALUE_MAP)
 
             comment_dict = handle_comments(block.comment_lines, comment_type="block")
+
+            if "casa" in comment_dict:
+                casa_process = comment_dict["casa"]
+
+                for region in casa_process.casa_data["regions"]:
+                    region.calculate_background(block.x, block.y)
+
+                for component in casa_process.casa_data["components"]:
+                    component.calculate_lineshape(block.x)
+
+                flattened_casa_data = casa_process.flatten_metadata()
+
+                comment_dict.update(flattened_casa_data)
+                del comment_dict["casa"]
 
             re_map_keys(comment_dict, KEY_MAP)
             re_map_values(comment_dict, VALUE_MAP)

@@ -19,11 +19,56 @@ Data model for CasaXPS.
 """
 
 import re
-from typing import List, Dict, Any
+import logging
+from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
+import numpy as np
 
 from pynxtools_xps.reader_utils import XpsDataclass
 from pynxtools_xps.value_mappers import convert_energy_type
+
+from pynxtools_xps.models.lineshapes import (
+    Peak,
+    LorentzianAsymmetric,
+    LorentzianFinite,
+    GaussianLorentzianSum,
+    GaussianLorentzianProduct,
+    DoniachSunjic,
+)
+
+from pynxtools_xps.models.backgrounds import (
+    LinearBackground,
+    Shirley,
+    TougaardU3,
+    TougaardU4,
+)
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+
+def split_after_letters(string: str):
+    """
+    Splits the part of the string after the leading letters by commas.
+
+    Parameters:
+        string (str): The input string.
+
+    Returns:
+        tuple: A tuple with the leading letters and the list of values after splitting by commas.
+    """
+    # Extract the leading letters
+    match = re.match(r"([A-Za-z\s]+)", string)
+    leading_letters = match.group(0) if match else ""
+
+    # Remove the leading letters and split the remaining part by commas
+    remaining_part = string[len(leading_letters) :]
+    split_values = remaining_part.split(",")
+
+    if split_values == [""]:
+        return leading_letters, []
+
+    return leading_letters, [float(val) for val in split_values]
 
 
 class CasaProcess:
@@ -320,6 +365,30 @@ class CasaRegion(XpsDataclass):
     unknown_1: float = 0.0
     rsf_effective: float = 0.0
 
+    def calculate_background(self, x: np.array, y: np.array):
+        backgrounds: Dict[str, Peak] = {
+            "Shirley": Shirley,
+            # "Step Down": StepDown,
+            "U 3 Tougaard": TougaardU3,
+            "U 4 Tougaard": TougaardU4,
+        }
+
+        leading_letters, background_parameters = split_after_letters(self.bg_type)
+
+        try:
+            background_class = backgrounds[leading_letters]
+
+            background = background_class(*background_parameters)
+
+            self.lineshape = background.calc_background(x, y)
+            self.formula = background.formula()
+            self.description = str(background)
+
+        except KeyError:
+            logger.warning(
+                f"Background {self.name} (type {self.bg_type}) could not be parsed because no model exists for it."
+            )
+
 
 @dataclass
 class CasaComponent(XpsDataclass):
@@ -358,3 +427,30 @@ class CasaComponent(XpsDataclass):
     mass: float = 0.0
     tag: str = ""
     const: str = ""  # CONST
+
+    def calculate_lineshape(self, x: np.array):
+        lineshapes: Dict[str, Peak] = {
+            "GL": GaussianLorentzianProduct,
+            "SGL": GaussianLorentzianSum,
+            "LA": LorentzianAsymmetric,
+            "LF": LorentzianFinite,
+            "DS": DoniachSunjic,
+        }
+
+        leading_letters, params = split_after_letters(self.lineshape)
+
+        try:
+            peak_class = lineshapes[leading_letters]
+
+            peak_parameters = [self.position, self.width, self.area] + params
+
+            peak = peak_class(*peak_parameters)
+
+            self.lineshape = peak.calc_lineshape(x)
+            self.formula = peak.formula()
+            self.description = str(peak)
+
+        except KeyError:
+            logger.warning(
+                f"Component {self.name} (index {self.index}) could not be parsed because no model exists for it."
+            )

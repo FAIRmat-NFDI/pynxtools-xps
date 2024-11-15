@@ -116,13 +116,10 @@ def _handle_casa_header_comments(comment_list: List[str]) -> Tuple[Dict[str, Any
 
 def _handle_casa_block_comments(comment_list: List[str]) -> Tuple[Dict[str, Any], int]:
     """Get all processing and fitting data from CasaXPS comments."""
-    comments = {}
-
     casa = CasaProcess()
     casa.process_comments(comment_list)
-    casa_data = casa.flatten_metadata()
 
-    comments.update(casa_data)
+    comments = {"casa": casa}
 
     return comments, casa.no_of_casa_lines
 

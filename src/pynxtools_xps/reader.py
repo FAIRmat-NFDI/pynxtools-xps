@@ -124,6 +124,8 @@ class XPSReader(MultiFormatReader):
     )
 
     __prmt_file_ext__ = [
+        ".h5",
+        ".hdf5",
         ".ibw",
         ".npl",
         ".pro",
@@ -137,6 +139,8 @@ class XPSReader(MultiFormatReader):
     ]
     __vendors__ = ["kratos", "phi", "scienta", "specs", "unkwown"]
     __prmt_vndr_cls: Dict[str, Dict] = {
+        ".h5": {"scienta": MapperScienta},
+        ".hdf5": {"scienta": MapperScienta},
         ".ibw": {"scienta": MapperScienta},
         ".npl": {"unkwown": VamasMapper},
         ".pro": {"phi": MapperPhi},
@@ -307,9 +311,13 @@ class XPSReader(MultiFormatReader):
                 parser = XPSReader.__prmt_vndr_cls[file_ext][vendor]()
 
                 parser.parse_file(file_path, **self.kwargs)
-                self.config_file = XPSReader.reader_dir.joinpath(
-                    "config", parser.config_file
-                )
+
+                config_file = parser.config_file
+
+                if isinstance(config_file, dict):
+                    config_file = config_file.get(file_ext)
+
+                self.config_file = XPSReader.reader_dir.joinpath("config", config_file)
                 data_dict = parser.data_dict
 
             except ValueError as val_err:
@@ -687,7 +695,7 @@ class XPSReader(MultiFormatReader):
                 try:
                     return np.array(xr_data.coords[path].values)
                 except KeyError:
-                    pass
+                    return None
 
     def set_root_default(self, template):
         """Set the default for automatic plotting."""

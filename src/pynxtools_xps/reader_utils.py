@@ -342,6 +342,7 @@ def _re_map_single_value(
     input_key: str,
     value: Optional[Union[str, int, float, bool, np.ndarray]],
     map_functions: Dict[str, Any],
+    **kwargs,
 ):
     """
     Map the values returned from the file to the preferred format for
@@ -354,7 +355,7 @@ def _re_map_single_value(
     for key in map_functions:
         if key in input_key:
             map_method = map_functions[key]
-            value = map_method(value)  # type: ignore[operator]
+            value = map_method(value, **kwargs)  # type: ignore[operator]
     return value
 
 

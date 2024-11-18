@@ -12,7 +12,7 @@ Example data for this file format is available [here](https://github.com/FAIRmat
 
 The example conversion can be run with the following command:
 ```console_
-user@box:~$ dataconverter SnO2_10nm.spe eln_data_phi.yaml --reader xps --nxdl NXmpes --output SnO2_10nm.spe.nxs
+user@box:~$ dataconverter SnO2_10nm.spe eln_data_phi.yaml --reader xps --nxdl NXxps --output SnO2_10nm.spe.nxs
 ```
 
 ### .pro data (profiling):
@@ -21,7 +21,7 @@ Example data for this file format is available [here](https://github.com/FAIRmat
 The example conversion can be run with the following command:
 
 ```console_
-user@box:~$ dataconverter SnO2_10nm_1.pro eln_data_phi.yaml --reader xps --nxdl NXmpes --output SnO2_10nm_1.pro.nxs
+user@box:~$ dataconverter SnO2_10nm_1.pro eln_data_phi.yaml --reader xps --nxdl NXxps --output SnO2_10nm_1.pro.nxs
 ```
 
 ## Acknowledgments

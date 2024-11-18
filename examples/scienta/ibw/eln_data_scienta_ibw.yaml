@@ -37,6 +37,9 @@ instrument:
   analyser:
     name: Hemispherical Analyser dummy
     description: hemispherical
+    work_function:
+      value: 4.01
+      unit: eV
     device_information:
       vendor: Scienta Omicron
       model: null

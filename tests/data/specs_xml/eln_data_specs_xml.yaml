@@ -32,6 +32,9 @@ instrument:
   analyser:
     description: hemispherical
     name: PHOIBOS 150
+    work_function:
+      value: 4.512
+      unit: eV
     device_information:
       vendor: SPECS GmbH
       model: PHOIBOS 150

@@ -33,7 +33,7 @@ from pynxtools_xps.vms.vamas_comment_handler import handle_comments
 READER_NAME = "xps"
 READER_CLASS = get_reader(READER_NAME)
 # ToDo: make tests for all supported application definitions possible
-NXDLS = ["NXxps"] # READER_CLASS.supported_nxdls
+NXDLS = ["NXxps"]  # READER_CLASS.supported_nxdls
 
 test_cases = [
     ("phi_spe", "Phi .spe reader"),

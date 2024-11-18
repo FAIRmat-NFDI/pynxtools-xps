@@ -70,7 +70,7 @@ class ScientaRegion(XpsDataclass):
     data: dict = field(default_factory=dict)
 
 
-##FLORIAN CHANGES
+#New dataclass for PEAK version
 @dataclass
 class ExcitationSourceEnergyInformation:
     SourceType: str = ""

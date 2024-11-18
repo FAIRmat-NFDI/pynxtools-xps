@@ -2,6 +2,7 @@ title: XPS Experiment
 start_time: 2022-04-08T11:47:02.0200Z
 end_time: 2022-04-08T12:32:06.0200Z
 program_name: SpecsLab 2
+method: XPS
 user:
   name: Lukas Pielsticker
   affiliation: Max Planck Institute for Chemical Energy Conversion
@@ -30,6 +31,9 @@ instrument:
   analyser:
     description: hemispherical
     name: PHOIBOS 150
+    work_function:
+      value: 3.989
+      unit: eV
     device_information:
       vendor: SPECS GmbH
       model: PHOIBOS 150

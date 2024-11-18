@@ -84,7 +84,7 @@ class MapperScienta(XPSMapper):
         if str(self.file).endswith(".txt"):
             return ScientaTxtParser()
         elif str(self.file).endswith(".ibw"):
-            with open(str(self.file),'rb') as f: 
+            with open(str(self.file),'rb') as f:
                 data_ibw = binarywave.load(f)
                 try:
                     check_note = json.loads(data_ibw['wave']['note'].decode('utf-8'))["Version"]
@@ -430,7 +430,7 @@ class ScientaIgorParser:
             self.spectra.append(spectrum_dict)
 
         return self.spectra
-    
+
     def _parse_note(self, bnote: bytes) -> Dict[str, Any]:
         """
         Parses the note field of the igor binarywave file.
@@ -571,8 +571,8 @@ class ScientaIgorParserPEAK:
         wave_header = wave["wave_header"]
         data = wave["wData"]
 
-        ##FLORIAN INSERT
         #Create 1d reduced data on the 2D image
+        #NOTE: This should be removed we want a 2D image displayed as shown in the PEKA software
         data = np.sum(data,axis=1)
 
         # Not needed at the moment.
@@ -587,7 +587,7 @@ class ScientaIgorParserPEAK:
             self.no_of_regions = 1
         else:
             #self.no_of_regions = data.shape[0]
-            ##FLORIAN INSERT
+            #NOTE: Changed due to data shape change
             self.no_of_regions = len(data.shape)
 
         for region_id in range(0, self.no_of_regions):
@@ -638,7 +638,7 @@ class ScientaIgorParserPEAK:
             self.spectra.append(spectrum_dict)
 
         return self.spectra
-    
+
 
     def _parse_note(self, bnote: bytes) -> Dict[str, Any]:
         """

@@ -143,6 +143,17 @@ class VamasBlock(XpsDataclass):
     num_ord_values: int = 0
     future_upgrade_block_entries: list = field(default_factory=list)
 
+    def convert_to_binding_energy_scale(self):
+        """
+        Convert from kinetic to binding energy.
+
+        ToDo: check that components are also converted.
+        """
+        self.abscissa_label = "binding energy"
+
+        self.x = self.source_energy - self.x
+        self.abscissa_start = float(min(self.x))
+
 
 @dataclass
 class ExpVariable(XpsDataclass):

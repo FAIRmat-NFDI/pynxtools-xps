@@ -46,6 +46,7 @@ test_cases = [
     ("vms_irregular", "Irregular VAMAS reader"),
     ("vms_regular", "Regular VAMAS reader"),
     ("vms_txt_export", "Vamas txt export"),
+    ("vms_analysis", "Vamas analysis export"),
 ]
 
 test_params = []

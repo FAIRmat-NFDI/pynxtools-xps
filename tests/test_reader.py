@@ -126,7 +126,7 @@ COMMENT_LENGHTS = {
     "kratos.vms": 51,
     "phi.vms": 312,
     "casa_header.vms": 1,
-    "casa_process.vms": 144,
+    "casa_process.vms": 147,
     "specs_header.vms": 3,
     "specs_block.vms": 11,
 }
@@ -153,6 +153,10 @@ def test_vms_comment_handler(file: str, comment_type: Literal["header", "block"]
 
     comments = handle_comments(comment_lines, comment_type=comment_type)
 
+    if file == "casa_process.vms":
+        casa_process = comments["casa"]
+        comments = casa_process.flatten_metadata()
+
     for key, val in comments.items():
         if isinstance(val, np.ndarray):
             comments[key] = val.tolist()
@@ -160,5 +164,7 @@ def test_vms_comment_handler(file: str, comment_type: Literal["header", "block"]
     with open(ref_json_filepath, "r") as json_file:
         ref_comments = json.load(json_file)
 
-    assert len(comments) == COMMENT_LENGHTS[file]
+    assert (
+        len(comments) == COMMENT_LENGHTS[file]
+    ), f"Comments ({len(comments)} do not have the same number of lines as the reference ({COMMENT_LENGHTS[file]})."
     assert comments == ref_comments

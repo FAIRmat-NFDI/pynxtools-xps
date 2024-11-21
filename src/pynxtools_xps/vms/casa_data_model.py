@@ -386,15 +386,17 @@ class CasaRegion(XpsDataclass):
             "Shirley": Shirley,
             "Step Up": StepUp,
             "Step Down": StepDown,
+            "U 2 Tougaard": TougaardU3,
             "U 3 Tougaard": TougaardU3,
             "U 4 Tougaard": TougaardU4,
         }
 
-        leading_letters, _ = split_after_letters(self.bg_type)
-        background_params = [float(param) for param in self.cross_section]
+        background_params = [
+            float(param) for param in self.cross_section if float(param)
+        ]
 
         try:
-            background_class = backgrounds[leading_letters]
+            background_class = backgrounds[self.bg_type]
 
             try:
                 background = background_class(*background_params)

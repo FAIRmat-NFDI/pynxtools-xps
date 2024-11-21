@@ -26,7 +26,7 @@ import scipy
 class LinearBackground:
     """Linear background model for XPS spectra that connects the first and last points in the y array."""
 
-    def __init__(self):
+    def __init__(self, *args):
         """
         Initialize the linear background model without predefined parameters.
         The slope and intercept will be calculated based on the input data.
@@ -76,7 +76,7 @@ class LinearBackground:
 class StepUp:
     """Step Up background model for XPS spectra, based on the complementary error function."""
 
-    def __init__(self, a0: float, a1: float, a2: float, a3: float):
+    def __init__(self, a0: float, a1: float, a2: float, a3: float, *args):
         """
         Initialize the Step Up background model without predefined parameters.
         """
@@ -122,7 +122,7 @@ class StepUp:
 class StepDown:
     """Step Down background model for XPS spectra, the reflection of Step Up around the edge position."""
 
-    def __init__(self, a0: float, a1: float, a2: float, a3: float):
+    def __init__(self, a0: float, a1: float, a2: float, a3: float, *args):
         """
         Initialize the Step Up background model without predefined parameters.
         """
@@ -176,7 +176,7 @@ class Shirley:
     tolerance and maximum iterations.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, *args) -> None:
         """Initialize the Shirley background subtraction object."""
         pass
 
@@ -288,7 +288,7 @@ class TougaardU3:
         C (float): Shape parameter that determines the background curvature.
     """
 
-    def __init__(self, E0: float, A: float, C: float):
+    def __init__(self, E0: float, A: float, C: float, *args):
         """
         Initialize the U3 Tougaard model with the required parameters.
 
@@ -343,7 +343,9 @@ class TougaardU3:
 class TougaardU4:
     """U4 Tougaard background model for XPS spectra."""
 
-    def __init__(self, B: float, C: float, D: float, Eg: float, temp: float = 300.0):
+    def __init__(
+        self, B: float, C: float, D: float, Eg: float, temp: float = 300.0, *args
+    ):
         """
         Initialize the U4 Tougaard model with the required parameters.
 

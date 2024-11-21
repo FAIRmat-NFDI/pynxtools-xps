@@ -74,6 +74,13 @@ function update_vms_txt_export_ref {
   cd ..
 }
 
+function update_vms_analysis_ref {
+  cd vms_analysis/
+  echo "Update Vamas data anaylsis export reference"
+  dataconverter dataconverter FeO* eln.yaml --reader $READER --nxdl $NXDL --ignore-undocumented --output vms_analysis.nxs
+  cd ..
+}
+
 project_dir=$(dirname $(dirname $(realpath $0)))
 cd $project_dir/tests/data
 
@@ -87,3 +94,4 @@ update_specs_xy_ref
 update_vms_irregular_ref
 update_vms_regular_ref
 update_vms_txt_export_ref
+update_vms_analysis_ref

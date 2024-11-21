@@ -42,7 +42,7 @@ from pynxtools_xps.scienta.scienta_reader import MapperScienta
 from pynxtools_xps.specs.sle.sle_specs import SleMapperSpecs
 from pynxtools_xps.specs.xml.xml_specs import XmlMapperSpecs
 from pynxtools_xps.specs.xy.xy_specs import XyMapperSpecs
-from pynxtools_xps.vms.txt_vamas_export import TxtMapperVamasExport
+from pynxtools_xps.vms.vamas_export import TxtMapperVamasExport, CsvMapperVamasResult
 from pynxtools_xps.vms.vamas import VamasMapper
 
 logger = logging.getLogger(__name__)
@@ -109,6 +109,29 @@ def concatenate_values(value1, value2):
     return concatenated
 
 
+def _check_multiple_extensions(file_paths: Tuple[str] = None) -> bool:
+    """
+    Determines if a list of file paths contains more than one unique file extension.
+
+    This method accepts a list of file paths (as strings or `Path` objects) and checks
+    if there are multiple unique file extensions present in the list. A file extension
+    is identified as the substring after the last period (`.`) in the file name.
+
+    Parameters:
+        file_paths (Tuple[str]): A tuple of file paths, which can be strings or
+                                 `Path` objects. Defaults to None.
+
+    Returns:
+        bool: True if more than one unique file extension is found, False otherwise.
+
+    Raises:
+        TypeError: If `file_paths` is not a tuple of strings or `Path` objects.
+    """
+    extensions = {str(path).split(".")[-1] for path in file_paths if "." in str(path)}
+
+    return len(extensions) > 1
+
+
 # pylint: disable=too-few-public-methods
 class XPSReader(MultiFormatReader):
     """Reader for XPS."""
@@ -130,13 +153,17 @@ class XPSReader(MultiFormatReader):
         ".spe",
         ".sle",
         ".slh",
-        ".txt",
         ".vms",
         ".xml",
         ".xy",
+        ".txt",  # This is last because of the processing_order
     ]
+
+    __prmt_metadata_file_ext__ = {".csv": ".txt"}
+
     __vendors__ = ["kratos", "phi", "scienta", "specs", "unkwown"]
     __prmt_vndr_cls: Dict[str, Dict] = {
+        ".csv": {"unknown": CsvMapperVamasResult},
         ".ibw": {"scienta": MapperScienta},
         ".npl": {"unkwown": VamasMapper},
         ".pro": {"phi": MapperPhi},
@@ -153,7 +180,7 @@ class XPSReader(MultiFormatReader):
 
     __file_err_msg__ = (
         "Need an XPS data file with one of the following extensions: "
-        f"{__prmt_file_ext__}"
+        f"data files: {__prmt_file_ext__}, metadata files: {__prmt_metadata_file_ext__}."
     )
 
     __vndr_err_msg__ = (
@@ -173,7 +200,15 @@ class XPSReader(MultiFormatReader):
             ".json": self.set_config_file,
         }
 
-        for ext in XPSReader.__prmt_file_ext__:
+        self.processing_order = (
+            XPSReader.__prmt_file_ext__
+            + list(XPSReader.__prmt_metadata_file_ext__.keys())
+            + list(self.extensions.keys())
+        )
+
+        for ext in XPSReader.__prmt_file_ext__ + list(
+            XPSReader.__prmt_metadata_file_ext__.keys()
+        ):
             self.extensions[ext] = self.handle_data_file
 
         self.processing_order = XPSReader.__prmt_file_ext__ + [
@@ -272,7 +307,7 @@ class XPSReader(MultiFormatReader):
                 return list(vendor_dict.keys())[0]
             if file_ext == ".txt":
                 return _check_for_vendors_txt(file_path)
-            return None
+            raise ValueError(XPSReader.__vndr_err_msg__)
 
         def _check_for_vendors_txt(file_path: str) -> str:
             """
@@ -300,7 +335,7 @@ class XPSReader(MultiFormatReader):
                 if any(vendor_opt in contents for vendor_opt in vendor_options):
                     return vendor
                 if contents[:6] == "[Info]":
-                    # This is for picking the Scienta reader is "scienta"
+                    # This is for picking the Scienta reader if "scienta"
                     # is not in the file
                     return vendor
             return "unknown"
@@ -309,23 +344,29 @@ class XPSReader(MultiFormatReader):
 
         if file_ext in XPSReader.__prmt_file_ext__:
             vendor = _check_for_vendors(file_path)
-            try:
-                parser = XPSReader.__prmt_vndr_cls[file_ext][vendor]()
 
-                parser.parse_file(file_path, **self.kwargs)
-                self.config_file = XPSReader.reader_dir.joinpath(
-                    "config", parser.config_file
-                )
-                data_dict = parser.data_dict
+            parser = XPSReader.__prmt_vndr_cls[file_ext][vendor]()
+            parser.parse_file(file_path, **self.kwargs)
+            data_dict = parser.data_dict
 
-            except ValueError as val_err:
-                raise ValueError(XPSReader.__vndr_err_msg__) from val_err
-            except KeyError as key_err:
-                raise KeyError(XPSReader.__vndr_err_msg__) from key_err
-        else:
-            raise ValueError(XPSReader.__file_err_msg__)
+            self.config_file = XPSReader.reader_dir.joinpath(
+                "config", parser.config_file
+            )
+            self.xps_data_dicts += [data_dict]
 
-        self.xps_data_dicts += [data_dict]
+        elif file_ext in XPSReader.__prmt_metadata_file_ext__:
+            vendor = _check_for_vendors(file_path)
+
+            metadata_parser = XPSReader.__prmt_vndr_cls[file_ext][vendor]()
+            metadata_parser.parse_file(file_path, **self.kwargs)
+
+            main_file_ext = XPSReader.__prmt_metadata_file_ext__[file_ext]
+
+            main_file_dicts = [
+                d for d in self.xps_data_dicts if d.get("file_ext") == main_file_ext
+            ]
+
+            metadata_parser.update_main_file_dict(main_file_dicts)
 
         return {}
 
@@ -428,23 +469,28 @@ class XPSReader(MultiFormatReader):
         common_entries, dict_indices = check_for_same_entries(self.xps_data_dicts)
 
         if common_entries:
-            for entry, indices in zip(common_entries, dict_indices):
-                dicts_with_common_entries = [self.xps_data_dicts[i] for i in indices]
+            if not self.overwrite_keys:
+                for entry, indices in zip(common_entries, dict_indices):
+                    dicts_with_common_entries = [
+                        self.xps_data_dicts[i] for i in indices
+                    ]
 
-                for i, data_dict in enumerate(dicts_with_common_entries):
-                    for key, value in data_dict.copy().items():
-                        new_key = key.replace(f"/ENTRY[{entry}]", f"/ENTRY[{entry}{i}]")
-                        if key == "data":
-                            for entry_name, xarr in value.copy().items():
-                                if entry_name == entry:
-                                    new_entry_name = entry_name.replace(
-                                        f"{entry}", f"{entry}{i}"
-                                    )
-                                    value[new_entry_name] = xarr
-                                    del value[entry_name]
-                        if new_key != key:
-                            data_dict[new_key] = value
-                            del data_dict[key]
+                    for i, data_dict in enumerate(dicts_with_common_entries):
+                        for key, value in data_dict.copy().items():
+                            new_key = key.replace(
+                                f"/ENTRY[{entry}]", f"/ENTRY[{entry}{i}]"
+                            )
+                            if key == "data":
+                                for entry_name, xarr in value.copy().items():
+                                    if entry_name == entry:
+                                        new_entry_name = entry_name.replace(
+                                            f"{entry}", f"{entry}{i}"
+                                        )
+                                        value[new_entry_name] = xarr
+                                        del value[entry_name]
+                            if new_key != key:
+                                data_dict[new_key] = value
+                                del data_dict[key]
 
         for data_dict in self.xps_data_dicts:
             # If there are multiple input data files of the same type,
@@ -455,8 +501,9 @@ class XPSReader(MultiFormatReader):
             ]
 
             self.xps_data = {**self.xps_data, **data_dict}
-            for key, value1, value2 in existing:
-                self.xps_data[key] = concatenate_values(value1, value2)
+            if not self.overwrite_keys:
+                for key, value1, value2 in existing:
+                    self.xps_data[key] = concatenate_values(value1, value2)
 
     def _get_analyser_names(self) -> List[str]:
         """
@@ -633,12 +680,31 @@ class XPSReader(MultiFormatReader):
 
             return list(map(str, data_vars))
 
-        if path.startswith("@data:*"):
-            return get_signals(key=path.split(":*.")[-1])
+        def get_processes(process_key: str) -> List[str]:
+            # pattern = re.compile(rf"/ENTRY\[{self.callbacks.entry_name}]/({process_key}\d+)/")
+            pattern = re.compile(
+                rf"/ENTRY\[{self.callbacks.entry_name}]\.*/{process_key}([a-zA-Z0-9_]+)"
+            )
 
-        # if any(x in path for x in ["counts", "raw/@units"]):
-        if re.search(r"\bcounts\b", path) or "raw/@units" in path:
-            return get_signals(key="channels")
+            process_names = {
+                match for key in self.xps_data for match in pattern.findall(key)
+            }
+
+            return sorted(process_names)
+
+        patterns: Dict[str, Any] = {
+            r"data/DATA": lambda: get_signals(path.split(":*.")[-1]),
+            r"DETECTOR\[[a-zA-Z0-9_]+\]/raw_data": lambda: get_signals("channels"),
+            "peak": lambda: get_processes("component"),
+            "background": lambda: get_processes("region"),
+        }
+
+        for pattern, func in patterns.items():
+            if re.search(pattern, key):
+                return func()
+            
+        # if re.search(r"\bcounts\b", path) or "raw/@units" in path:
+        #     return get_signals(key="channels")
 
         return get_signals(key="scans")
 
@@ -718,6 +784,8 @@ class XPSReader(MultiFormatReader):
         objects: Tuple[Any] = None,
         **kwargs,
     ) -> dict:
+        self.overwrite_keys = _check_multiple_extensions(file_paths)
+
         template = super().read(template, file_paths, objects, suppress_warning=True)
         self.set_root_default(template)
 

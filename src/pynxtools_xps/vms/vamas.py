@@ -134,6 +134,12 @@ class VamasMapper(XPSMapper):
 
     config_file = "config_vms.json"
 
+    def __init__(self):
+        self.multiple_spectra_groups: bool = True
+        self.same_spectrum_names: bool = False
+
+        super().__init__()
+
     def _select_parser(self):
         """
         Select parser based on the structure of the Vamas file,
@@ -149,10 +155,29 @@ class VamasMapper(XPSMapper):
 
     def construct_data(self):
         """Map VMS format to NXmpes-ready dict."""
-        # pylint: disable=duplicate-code
+
+        def has_duplicate_spectrum_type(spectra: list[dict]) -> bool:
+            """
+            Check if any two or more spectra in the list have the same 'spectrum_type'.
+            """
+            seen = set()
+            return any(
+                spectrum.get("spectrum_type") in seen
+                or seen.add(spectrum["spectrum_type"])
+                for spectrum in spectra
+                if spectrum.get("spectrum_type")
+            )
+
         spectra = deepcopy(self.raw_data)
 
         self._xps_dict["data"]: Dict[str, Any] = {}
+
+        if len({spectrum.get("group_name") for spectrum in spectra}) == 1:
+            self.multiple_spectra_groups = False
+
+        if not self.multiple_spectra_groups:
+            if has_duplicate_spectrum_type(spectra):
+                self.same_spectrum_names = True
 
         for spectrum in spectra:
             self._update_xps_dict_with_spectrum(spectrum)
@@ -163,12 +188,17 @@ class VamasMapper(XPSMapper):
         """
 
         entry_parts = []
-        for part in ["group_name", "spectrum_type"]:
+
+        parts_to_use = ["group_name"] * bool(self.multiple_spectra_groups) + [
+            "spectrum_type"
+        ]
+
+        for part in parts_to_use:
             val = spectrum.get(part, None)
             if val:
                 entry_parts += [val]
 
-        if len(entry_parts) == 1:
+        if len(entry_parts) == 1 and self.same_spectrum_names:
             entry_parts += [spectrum["time_stamp"]]
 
         entry = construct_entry_name(entry_parts)
@@ -745,13 +775,21 @@ class VamasParser:
             if "casa" in comment_dict:
                 casa_process = comment_dict["casa"]
 
+                for energy_calibration in casa_process.casa_data["energy_calibrations"]:
+                    block.x = energy_calibration.apply_energy_shift(block.x)
+
                 for region in casa_process.casa_data["regions"]:
                     region.calculate_background(block.x, block.y)
+                    region.data_cps = region.data / block.dwell_time
 
                 for component in casa_process.casa_data["components"]:
                     component.calculate_lineshape(block.x)
+                    component.data_cps = component.data / block.dwell_time
 
                 flattened_casa_data = casa_process.flatten_metadata()
+
+                if casa_process.casa_data["components"]:
+                    flattened_casa_data["fit_label"] = spectrum_type
 
                 comment_dict.update(flattened_casa_data)
                 del comment_dict["casa"]

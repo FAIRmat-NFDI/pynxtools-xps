@@ -18,7 +18,7 @@
 Line shapes for peak fitting.
 """
 
-from typing import Optional, final
+from typing import Optional
 import numpy as np
 
 
@@ -46,7 +46,6 @@ class Gaussian(Peak):
     Gaussian peak with specified position, width, and area.
     """
 
-    @final
     def calc_lineshape(self, x: float) -> Optional[float]:
         """
         Calculate the Gaussian lineshape at a given energy value x.
@@ -64,7 +63,6 @@ class Gaussian(Peak):
             return intensity * np.exp(exponent)
         return None
 
-    @final
     def formula(self) -> str:
         """
         Returns a string representation of the Gaussian formula.
@@ -72,9 +70,8 @@ class Gaussian(Peak):
         Returns:
         - str: The formula used for the Gaussian lineshape.
         """
-        return "G(x) = (area / (sqrt(2 * pi) * width)) * exp[-(4 * ln(2) * (x - position)^2) / width^2]"
+        return "G(x; position, width, area) = (area / (sqrt(2 * pi) * width)) * exp[-(4 * ln(2) * (x - position)^2) / width^2]"
 
-    @final
     def __repr__(self) -> str:
         return (
             f"Gaussian(position={self.position}, width={self.width}, area={self.area})"
@@ -84,7 +81,6 @@ class Gaussian(Peak):
 class Lorentzian(Peak):
     """Lorentzian peak with specified position, width, and area."""
 
-    @final
     def calc_lineshape(self, x: float) -> Optional[float]:
         """
         Calculate the Lorentzian lineshape at a given energy value x.
@@ -101,7 +97,6 @@ class Lorentzian(Peak):
             return intensity / (1 + (4 * (x - self.position) ** 2) / self.width**2)
         return None
 
-    @final
     def formula(self) -> str:
         """
         Returns a string representation of the Lorentzian formula.
@@ -109,9 +104,8 @@ class Lorentzian(Peak):
         Returns:
         - str: The formula used for the Lorentzian lineshape.
         """
-        return "L(x) = (area / (pi * width)) / (1 + (4 * (x - position)^2) / width^2)"
+        return "L(x; position, width, area) = (area / (pi * width)) / (1 + (4 * (x - position)^2) / width^2)"
 
-    @final
     def __repr__(self) -> str:
         return f"Lorentzian(position={self.position}, width={self.width}, area={self.area})"
 
@@ -136,7 +130,6 @@ class LorentzianAsymmetric:
         self.alpha = alpha
         self.beta = beta
 
-    @final
     def calc_lineshape(self, x: np.ndarray) -> np.ndarray:
         """
         Calculate the asymmetric Lorentzian lineshape for an array of energy values x.
@@ -158,7 +151,6 @@ class LorentzianAsymmetric:
         # Calculate the Lorentzian lineshape for each value in x
         return intensity / (1 + (4 * (x - self.position) ** 2) / width**2)
 
-    @final
     def formula(self) -> str:
         """
         Returns a string representation of the asymmetric Lorentzian formula.
@@ -167,11 +159,10 @@ class LorentzianAsymmetric:
         - str: The formula used for the asymmetric Lorentzian lineshape.
         """
         return (
-            "L(x) = (area / (pi * width)) / (1 + ((x - position) / (width / alpha))^2) for x <= position, "
+            "LA(x; position, width, area, alpha, beta) = (area / (pi * width)) / (1 + ((x - position) / (width / alpha))^2) for x <= position, "
             "(area / (pi * width)) / (1 + ((x - position) / (width / beta))^2) for x > position"
         )
 
-    @final
     def __repr__(self) -> str:
         """
         Return a string representation of the LorentzianAsymmetric object.
@@ -201,7 +192,6 @@ class LorentzianFinite(LorentzianAsymmetric):
         self.gauss_contribution = gauss_contribution
         self.no_of_convolutions = no_of_convolutions
 
-    @final
     def calc_lineshape(self, x: np.ndarray) -> Optional[np.ndarray]:
         """
         Calculate the finite Lorentzian lineshape with damping for an array of energy values x.
@@ -223,7 +213,6 @@ class LorentzianFinite(LorentzianAsymmetric):
         # Return None if lorentzian is None
         return None
 
-    @final
     def formula(self) -> str:
         """
         Returns a string representation of the finite Lorentzian formula with damping.
@@ -232,11 +221,10 @@ class LorentzianFinite(LorentzianAsymmetric):
         - str: The formula used for the finite Lorentzian lineshape.
         """
         return (
-            "L(x) = (area / (pi * width)) / (1 + (4 * (x - position)^2) / width^2) * "
+            "LF(x; position, width, w) = (area / (pi * width)) / (1 + (4 * (x - position)^2) / width^2) * "
             "(1 / (1 + 4 * ((x - position) / w)^2))"
         )
 
-    @final
     def __repr__(self) -> str:
         """
         Return a string representation of the LorentzianFinite object.
@@ -250,7 +238,6 @@ class LorentzianFinite(LorentzianAsymmetric):
 class GaussianLorentzianSum(Peak):
     """Combined Gaussian and Lorentzian peak using the existing Gaussian and Lorentzian classes."""
 
-    @final
     def __init__(
         self, position: float, width: float, area: float, fraction_gauss: float = 0.5
     ) -> None:
@@ -264,9 +251,11 @@ class GaussianLorentzianSum(Peak):
         - fraction_gauss (float): Fraction of the Gaussian contribution (between 0 and 1).
         """
         super().__init__(position, width, area)
+
+        if fraction_gauss > 1.0:
+            fraction_gauss /= 100
         self.fraction_gauss = fraction_gauss
 
-    @final
     def calc_lineshape(self, x: float) -> Optional[float]:
         """
         Calculate the combined lineshape of the Gaussian and Lorentzian at x.
@@ -292,7 +281,6 @@ class GaussianLorentzianSum(Peak):
             return gauss_part + lorentz_part
         return None
 
-    @final
     def formula(self) -> str:
         """
         Returns a detailed string representation of the combined Gaussian-Lorentzian formula.
@@ -301,17 +289,16 @@ class GaussianLorentzianSum(Peak):
         - str: The formula used for the combined lineshape.
         """
         # Using the formula for both Gaussian and Lorentzian
-        gauss_formula = "G(x) = (area / (pi * width)) * exp[-(4 * ln(2) * (x - position)^2) / width^2]"
-        lorentz_formula = (
-            "L(x) = area / (pi * width) / (1 + (4 * (x - position)^2) / width^2)"
+        gauss_formula = (
+            "(area / (pi * width)) * exp[-(4 * ln(2) * (x - position)^2) / width^2]"
         )
+        lorentz_formula = "area / (pi * width) / (1 + (4 * (x - position)^2) / width^2)"
         combined_formula = (
-            f"SGL(x): G(x) + L(x) = (1 - fraction_gauss) * ({gauss_formula}) + "
-            f"fraction_gauss * ({lorentz_formula})"
+            f"SGL(x; position, width, area, fraction_gauss): fraction_gauss * G(x) + (1 - fraction_gauss) * L(x) =  fraction_gauss * ({gauss_formula}) + "
+            f"(1 - fraction_gauss) * ({lorentz_formula})"
         )
         return combined_formula
 
-    @final
     def __repr__(self) -> str:
         """
         Returns a string representation of the GaussianLorentzianSum object, including details
@@ -340,9 +327,11 @@ class GaussianLorentzianProduct(Peak):
         - fraction_gauss (float): Fraction of the Gaussian contribution.
         """
         super().__init__(position, width, area)
+
+        if fraction_gauss > 1.0:
+            fraction_gauss /= 100
         self.fraction_gauss = fraction_gauss
 
-    @final
     def calc_lineshape(self, x: float) -> Optional[float]:
         """
         Calculate the combined lineshape of the Gaussian and Lorentzian product at x.
@@ -358,17 +347,16 @@ class GaussianLorentzianProduct(Peak):
             intensity = self.area / (np.pi * self.width)
 
             # Gaussian part (1 - fraction_gauss) contribution
-            gauss_part = (1 - self.fraction_gauss) * Gaussian(
+            gauss_part = self.fraction_gauss * Gaussian(
                 self.position, self.width, intensity
             ).calc_lineshape(x)
             # Lorentzian part (fraction_gauss) contribution
-            lorentz_part = self.fraction_gauss * Lorentzian(
+            lorentz_part = (1 - self.fraction_gauss) * Lorentzian(
                 self.position, self.width, intensity
             ).calc_lineshape(x)
             return gauss_part * lorentz_part
         return None
 
-    @final
     def formula(self) -> str:
         """
         Returns a detailed string representation of the combined Gaussian-Lorentzian formula.
@@ -377,17 +365,16 @@ class GaussianLorentzianProduct(Peak):
         - str: The formula used for the combined lineshape.
         """
         # Using the formula for both Gaussian and Lorentzian
-        gauss_formula = "G(x) = (area / (pi * width)) * exp[-(4 * ln(2) * (x - position)^2) / width^2]"
-        lorentz_formula = (
-            "L(x) = area / (pi * width) / (1 + (4 * (x - position)^2) / width^2)"
+        gauss_formula = (
+            "(area / (pi * width)) * exp[-(4 * ln(2) * (x - position)^2) / width^2]"
         )
+        lorentz_formula = "area / (pi * width) / (1 + (4 * (x - position)^2) / width^2)"
         combined_formula = (
-            f"GL(x): G(x) * L(x) = (1 - fraction_gauss) * ({gauss_formula}) * "
-            f"fraction_gauss * ({lorentz_formula})"
+            f"GL(x; position, width, area, fraction_gauss): fraction_gauss * G(x) * (1 - fraction_gauss) * L(x) = fraction_gauss * ({gauss_formula}) * "
+            f"(1 - fraction_gauss) * ({lorentz_formula})"
         )
         return combined_formula
 
-    @final
     def __repr__(self) -> str:
         """
         Returns a string representation of the GaussianLorentzianProduct object, including details
@@ -419,7 +406,6 @@ class DoniachSunjic(Peak):
         super().__init__(position, width, area)
         self.beta = beta
 
-    @final
     def calc_lineshape(self, x: np.ndarray) -> np.ndarray:
         """
         Calculate the Doniach-Sunjic profile at each energy point.
@@ -436,7 +422,6 @@ class DoniachSunjic(Peak):
         # Calculate the Doniach-Sunjic profile
         return intensity / ((1 + ((x - self.position) / self.width) ** 2) ** self.beta)
 
-    @final
     def formula(self) -> str:
         """
         Returns the formula used for the Doniach-Sunjic profile.
@@ -446,16 +431,15 @@ class DoniachSunjic(Peak):
         """
         return (
             "Doniach-Sunjic Profile Formula:\n"
-            "f(x) = area / (pi * Gamma) * ((1 + ((x - x0) / Gamma)^2)^beta)\n"
+            "f(x; area, position, width, beta, fraction_gauss)) = area / (pi * width) * ((1 + ((x - position) / width)^2)^beta)\n"
             "Where:\n"
             "  area: Area under the peak\n"
-            "  x0: Peak position (center)\n"
-            "  Gamma: FWHM (full width at half maximum)\n"
+            "  position: Peak position (center)\n"
+            "  width: FWHM (full width at half maximum)\n"
             "  beta: Asymmetry parameter (1 for symmetric Lorentzian)\n"
             "  x: Energy values\n"
         )
 
-    @final
     def __repr__(self) -> str:
         """
         Returns a string representation of the DoniachSunjic object, including details

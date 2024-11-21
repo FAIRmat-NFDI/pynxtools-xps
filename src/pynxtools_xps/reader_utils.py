@@ -18,6 +18,7 @@
 Helper functions for populating NXmpes template
 """
 
+import os
 import logging
 import re
 from abc import ABC, abstractmethod
@@ -62,7 +63,6 @@ class XPSMapper(ABC):
         self.file: Union[str, Path] = ""
         self.raw_data: List[str] = []
         self._xps_dict: Dict[str, Any] = {}
-        self._root_path = ""
 
         self.parser = None
 
@@ -93,8 +93,8 @@ class XPSMapper(ABC):
         self.parser = self._select_parser()
         self.raw_data = self.parser.parse_file(file, **kwargs)
 
-        file_key = f"{self._root_path}/File"
-        self._xps_dict[file_key] = file
+        self._xps_dict["File"] = file
+        self._xps_dict["file_ext"] = os.path.splitext(file)[1]
 
         self.construct_data()
 
@@ -436,6 +436,7 @@ def align_name_part(name_part: str):
             "-": "_",
             ":": "_",
             "+": "_",
+            "/": "_",
         }
     )
 

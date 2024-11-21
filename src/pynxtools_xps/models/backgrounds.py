@@ -18,8 +18,9 @@
 Backgrounds for peak fitting.
 """
 
-from typing import Optional, final
+from typing import Optional
 import numpy as np
+import scipy
 
 
 class LinearBackground:
@@ -33,7 +34,6 @@ class LinearBackground:
         self.slope = None
         self.intercept = None
 
-    @final
     def calc_background(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
         """
         Calculate the linear background based on the first and last points of the y array.
@@ -55,7 +55,6 @@ class LinearBackground:
         # Return the background values using the linear equation
         return self.slope * x + self.intercept
 
-    @final
     def formula(self) -> str:
         """
         Returns the formula used for the linear background model.
@@ -74,6 +73,99 @@ class LinearBackground:
         )
 
 
+class StepUp:
+    """Step Up background model for XPS spectra, based on the complementary error function."""
+
+    def __init__(self, a0: float, a1: float, a2: float, a3: float):
+        """
+        Initialize the Step Up background model without predefined parameters.
+        """
+        self.a0 = a0  # Step magnitude
+        self.a1 = a1  # Edge position
+        self.a2 = a2  # FWHM-related parameter
+        self.a3 = a3  # Constant offset
+
+    def calc_background(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
+        """
+        Calculate the Step Up background based on the complementary error function.
+
+        Parameters:
+            x (np.ndarray): The energy values at which to evaluate the background.
+            a0 (float): Magnitude of the step.
+            a1 (float): Location of the step (edge position).
+            a2 (float): Parameter related to FWHM (2 * sqrt(ln(2)) * a2 = FWHM).
+            a3 (float): Constant offset.
+
+        Returns:
+            np.ndarray: The background intensity at each energy point.
+        """
+        return (self.a0 / 2) * scipy.special.erfc((self.a1 - x) / self.a2) + self.a3
+
+    def formula(self) -> str:
+        """
+        Returns the formula used for the Step Up background model.
+
+        Returns:
+            str: The formula for the Step Up background.
+        """
+        return (
+            "Step Up Background Formula:\n"
+            "B(x; a0, a1, a2, a3) = (a0 / 2) * erfc((a1 - x) / a2) + a3\n"
+            "Where:\n"
+            "  a0: Magnitude of the step\n"
+            "  a1: Edge position\n"
+            "  a2: FWHM-related parameter (FWHM = 2 * sqrt(ln(2)) * a2)\n"
+            "  a3: Constant offset\n"
+        )
+
+
+class StepDown:
+    """Step Down background model for XPS spectra, the reflection of Step Up around the edge position."""
+
+    def __init__(self, a0: float, a1: float, a2: float, a3: float):
+        """
+        Initialize the Step Up background model without predefined parameters.
+        """
+        self.a0 = a0  # Step magnitude
+        self.a1 = a1  # Edge position
+        self.a2 = a2  # FWHM-related parameter
+        self.a3 = a3  # Constant offset
+
+    def calc_background(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
+        """
+        Calculate the Step Down background as the reflection of the Step Up background.
+
+        Parameters:
+            x (np.ndarray): 1D array of energy values at which to evaluate the background.
+            a0 (float): Magnitude of the step.
+            a1 (float): Location of the step (edge position).
+            a2 (float): Parameter related to FWHM (2 * sqrt(ln(2)) * a2 = FWHM).
+            a3 (float): Constant offset.
+
+        Returns:
+            np.ndarray: 1D array of background intensity at each energy point.
+        """
+
+        return (self.a0 / 2) * scipy.special.erfc((x - self.a1) / self.a2) + self.a3
+
+    def formula(self) -> str:
+        """
+        Returns the formula used for the Step Down background model.
+
+        Returns:
+            str: The formula for the Step Down background.
+        """
+        return (
+            "Step Down Background Formula:\n"
+            "B(x) = (a0 / 2) * erfc((x - a1) / a2) + a3\n"
+            "Where:\n"
+            "  a0: Magnitude of the step\n"
+            "  a1: Edge position\n"
+            "  a2: FWHM-related parameter (FWHM = 2 * sqrt(ln(2)) * a2)\n"
+            "  a3: Constant offset\n"
+        )
+
+
 class Shirley:
     """
     Shirley background subtraction using the Sherwood method.
@@ -88,7 +180,6 @@ class Shirley:
         """Initialize the Shirley background subtraction object."""
         pass
 
-    @final
     def calc_background(
         self, x: np.ndarray, y: np.ndarray, tol: float = 1e-5, maxit: int = 15
     ) -> np.ndarray:
@@ -107,7 +198,6 @@ class Shirley:
         Returns:
         - np.ndarray: The calculated Shirley background.
         """
-
         # Validate input
         if not isinstance(x, np.ndarray) or not isinstance(y, np.ndarray):
             raise ValueError(
@@ -211,7 +301,6 @@ class TougaardU3:
         self.A = A
         self.C = C
 
-    @final
     def calc_background(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
         """Calculate the Tougaard background at each energy point.
 
@@ -223,7 +312,6 @@ class TougaardU3:
         """
         return self.A / ((x - self.E0) ** 2 + self.C)
 
-    @final
     def formula(self) -> str:
         """
         Returns the formula used for the Tougaard background model.
@@ -233,7 +321,7 @@ class TougaardU3:
         """
         return (
             "Tougaard U3 Background Formula:\n"
-            "B(x) = A / ((x - E0)^2 + C)\n"
+            "B(x; A, E0, C) = A / ((x - E0)^2 + C)\n"
             "Where:\n"
             "  B(x): Background at energy x\n"
             "  A: Scaling factor\n"
@@ -241,7 +329,6 @@ class TougaardU3:
             "  C: Shape parameter (determines background curvature)\n"
         )
 
-    @final
     def __repr__(self) -> str:
         """
         Returns a string representation of the GaussianLorentzianSum object, including details
@@ -273,7 +360,6 @@ class TougaardU4:
         self.Eg = Eg
         self.temp = temp
 
-    @final
     def calc_background(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
         """
         Calculate the modified Tougaard background at each energy point using a modified expression.
@@ -293,7 +379,6 @@ class TougaardU4:
             / (np.exp((self.Eg - x) / (self.temp * kb)) + 1)
         )
 
-    @final
     def formula(self) -> str:
         """
         Returns the formula used for the U4 Tougaard background model.
@@ -303,7 +388,7 @@ class TougaardU4:
         """
         return (
             "U4 Tougaard Background Formula:\n"
-            "B(x) = (B * x) / ((C - x^2)^2 + D * x^2) * 1 / (exp((Eg - x) / (kB * T)) + 1)\n"
+            "B(x; B, C, D, E_g, T) = (B * x) / ((C - x^2)^2 + D * x^2) * 1 / (exp((Eg - x) / (kB * T)) + 1)\n"
             "Where:\n"
             "  B: Scaling factor\n"
             "  C: Shape parameter (affects width of energy decay region)\n"
@@ -314,7 +399,6 @@ class TougaardU4:
             "  x: Energy values\n"
         )
 
-    @final
     def __repr__(self) -> str:
         """
         Returns a string representation of the GaussianLorentzianSum object, including details

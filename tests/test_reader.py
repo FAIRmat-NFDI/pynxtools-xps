@@ -44,6 +44,7 @@ test_cases = [
     ("specs_xy", "SPECS .xy reader"),
     ("scienta_ibw", "Scienta .ibw reader"),
     ("scienta_txt", "Scienta .txt export reader"),
+    ("vms_analysis", "VAMAS reader with data analysis"),
     ("vms_irregular", "Irregular VAMAS reader"),
     ("vms_regular", "Regular VAMAS reader"),
     ("vms_txt_export", "Vamas txt export"),

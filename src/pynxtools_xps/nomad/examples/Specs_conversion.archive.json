@@ -4,7 +4,7 @@
         "reader":"xps",
         "nxdl":"NXmpes",
         "input_files":[
-            "EX439_S718_Au.sle",
+            "EX439_S718_Au_in_25_mbar_O2.sle",
             "eln_data.yaml"
         ],
         "output": "Au_25_mbar_O2_no_align.nxs",

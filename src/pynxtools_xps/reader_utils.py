@@ -351,9 +351,8 @@ def _re_map_single_value(
     if isinstance(value, str) and value is not None:
         value = value.rstrip("\n")
 
-    for key in map_functions:
+    for key, map_method in map_functions.items():
         if key in input_key:
-            map_method = map_functions[key]
             value = map_method(value)  # type: ignore[operator]
     return value
 

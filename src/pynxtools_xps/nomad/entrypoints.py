@@ -33,5 +33,5 @@ xps_example = ExampleUploadEntryPoint(
         [NXmpes](https://manual.nexusformat.org/classes/contributed_definitions/NXmpes.html#nxmpes)
         application definition from an example measurement file and a subseqeuent analysis of that data set.
     """,
-    resources=['nomad/examples/*']
+    resources=["nomad/examples/*"],
 )

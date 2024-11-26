@@ -38,33 +38,38 @@ from pynxtools.testing.nomad_example import (
 from pynxtools_xps.nomad.entrypoints import xps_example
 
 
+EXAMPLE_PATH = os.path.join(
+    os.path.dirname(__file__),
+    "..",
+    "src",
+    "pynxtools_xps",
+    "nomad",
+    "examples",
+)
+
+
 @pytest.mark.parametrize(
     "mainfile",
-    get_file_parameter(
-        os.path.join(
-            os.path.dirname(__file__), "..", "src", "pynxtools_xps", "nomad", "examples"
-        )
-    ),
+    get_file_parameter(EXAMPLE_PATH),
 )
 def test_parse_nomad_examples(mainfile):
     """Test if NOMAD examples work."""
-    parse_nomad_examples(mainfile)
+    archive_dict = parse_nomad_examples(mainfile)
 
 
 @pytest.mark.parametrize(
-    ("entrypoint", "expected_local_path"),
+    ("entrypoint", "example_path"),
     [
         pytest.param(
             xps_example,
-            "examples/data/uploads/xps.zip",
+            EXAMPLE_PATH,
             id="xps_example",
         ),
     ],
 )
-def test_nomad_example_upload_entry_point_valid(entrypoint, expected_local_path):
+def test_example_upload_entry_point_valid(entrypoint, example_path):
     """Test if NOMAD ExampleUploadEntryPoint works."""
     example_upload_entry_point_valid(
         entrypoint=entrypoint,
-        plugin_package="pynxtools-xps",
-        expected_local_path=expected_local_path,
+        example_path=example_path,
     )

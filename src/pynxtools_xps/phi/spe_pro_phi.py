@@ -1115,7 +1115,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
                 region_and_areas: Dict[str, Any] = {}
 
-                for key in concatenated:
+                for key, value in concatenated.items():
                     replacement_map = {
                         "_units": "/@units",
                         "energy_type": "energy/@type",
@@ -1127,7 +1127,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
                         if suffix in key:
                             new_key = key.replace(suffix, replacement)
 
-                    region_and_areas[new_key] = concatenated[key]
+                    region_and_areas[new_key] = value
 
                 self.spectra += [region_and_areas]
 

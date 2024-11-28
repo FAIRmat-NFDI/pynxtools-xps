@@ -1,0 +1,100 @@
+name: Update CITATION.cff version and create a new PR
+
+permissions:
+  contents: write
+  pull-requests: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'New version tag (e.g., v0.4.3)'
+        required: true
+
+env:
+  UV_SYSTEM_PYTHON: true
+
+jobs:
+  update-version-and-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"         
+
+      - name: Check if branch is main
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "This workflow can only be run from the main branch."
+          exit 1
+
+      - name: Get the latest release version from GitHub
+        run: |
+          LATEST_RELEASE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${{ github.repository }}/releases/latest" | \
+          jq -r .tag_name)
+          echo "LATEST_RELEASE=${LATEST_RELEASE}" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          uv pip install semver
+
+      - name: Validate new tag against SemVer using Python semver
+        run: |
+          NEW_TAG="${{ github.event.inputs.tag }}"
+          LATEST_RELEASE="${{ env.LATEST_RELEASE }}"
+
+          # Strip the 'v' prefix for comparison
+          NEW_TAG_NO_V=${NEW_TAG#v}
+          LATEST_RELEASE_NO_V=${LATEST_RELEASE#v}
+
+          # Python script for version comparison
+          python3 -c "
+          import semver
+          new_tag = '${NEW_TAG_NO_V}'
+          latest_release = '${LATEST_RELEASE_NO_V}'
+
+          # Check if new tag is valid semver
+          if not semver.VersionInfo.is_valid(new_tag):
+              print(f'New tag ({new_tag}) is not a valid semantic version!')
+              exit(1)
+
+          # Compare versions
+          if semver.compare(new_tag, latest_release) > 0:
+              print(f'New tag ({new_tag}) is greater than latest release ({latest_release})')
+          else:
+              print(f'New tag ({new_tag}) is not greater than latest release ({latest_release})!')
+              exit(1)
+          "
+      - name: Update version in CITATION.cff
+        run: |
+          NEW_VERSION="${{ github.event.inputs.tag }}"
+          NEW_VERSION_NO_V=${NEW_VERSION#v}
+          sed -i "s/^version: .*/version: ${NEW_VERSION_NO_V}/" CITATION.cff
+
+      - name: Commit changes to a new branch
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git checkout -b update-version-${{ github.event.inputs.tag }}
+          git commit -am "Update CITATION.cff version to ${{ github.event.inputs.tag }}"
+          git push origin update-version-${{ github.event.inputs.tag }}
+
+      - name: Create pull request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag=${{ github.event.inputs.tag }}
+          gh pr create \
+              --repo "${{ github.repository }}" \
+              --title "Update CITATION.cff version to '${tag}' [ci skip release]" \
+              --head "update-version-${tag}" \
+              --base "main" \
+              --body "This PR updates the CITATION.cff version to '${tag}'"

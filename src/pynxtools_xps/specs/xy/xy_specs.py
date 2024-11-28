@@ -45,6 +45,7 @@ from pynxtools_xps.value_mappers import (
     convert_measurement_method,
     convert_energy_scan_mode,
     convert_units,
+    parse_datetime,
 )
 
 SETTINGS_MAP: Dict[str, str] = {
@@ -846,8 +847,6 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
             date = date.strip()
             tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo  # type: ignore[assignment]
 
-        date_object = datetime.datetime.strptime(date, "%m/%d/%y %H:%M:%S").replace(
-            tzinfo=tz
-        )
+        possible_time_formats = ["%m/%d/%y %H:%M:%S"]
 
-        return date_object.isoformat()
+        return parse_datetime(date, possible_time_formats, tz)

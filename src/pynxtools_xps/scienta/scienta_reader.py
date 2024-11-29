@@ -21,12 +21,14 @@ MPES nxdl (NeXus Definition Language) template.
 """
 
 import re
-import json
 import copy
 import logging
 import warnings
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
+import json
+import jsonschema
+from abc import ABC, abstractmethod
 
 import numpy as np
 import xarray as xr
@@ -44,17 +46,42 @@ from pynxtools_xps.value_mappers import get_units_for_key, convert_units
 from pynxtools_xps.scienta.scienta_data_model import (
     ScientaHeader,
     ScientaRegion,
-    ScientaRegionIgorPEAK,
+    scienta_igor_peak_schema,
 )
+
 from pynxtools_xps.scienta.scienta_mappings import (
     UNITS,
     VALUE_MAP,
-    _construct_date_time,
     _get_key_value_pair,
+    _construct_date_time,
 )
 from pynxtools_xps.value_mappers import convert_units, get_units_for_key
 
 logger = logging.getLogger(__name__)
+
+
+def flatten_dict(
+    d: Dict[str, Any], parent_key: str = "", sep: str = "/"
+) -> Dict[str, Any]:
+    """
+    Flattens a nested dictionary into a single level with keys representing the hierarchy.
+
+    Args:
+        d (Dict[str, Any]): The dictionary to flatten.
+        parent_key (str): The base key to prepend (used for recursion).
+        sep (str): The separator to use for flattened keys.
+
+    Returns:
+        Dict[str, Any]: The flattened dictionary.
+    """
+    items = []
+    for k, v in d.items():
+        new_key = f"{parent_key}{sep}{k}" if parent_key else k
+        if isinstance(v, dict):
+            items.extend(flatten_dict(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
 
 
 class MapperScienta(XPSMapper):
@@ -90,7 +117,16 @@ class MapperScienta(XPSMapper):
         if str(self.file).endswith(".txt"):
             return ScientaTxtParser()
         elif str(self.file).endswith(".ibw"):
-            return ScientaIgorParser()
+            try:
+                with open(str(self.file), "rb") as f:
+                    data_ibw = binarywave.load(f)
+                check_note = json.loads(data_ibw["wave"]["note"].decode("utf-8"))[
+                    "Version"
+                ]
+                return ScientaIgorParserPEAK()
+            except Exception as e:
+                print(e)
+                return ScientaIgorParserOld()
         raise ValueError(MapperScienta.__file_err_msg__)
 
     def construct_data(self):
@@ -325,7 +361,7 @@ class ScientaTxtParser:
         region.data = {"energy": np.array(energies), "intensity": np.array(intensities)}
 
         # Convert date and time to ISO8601 date time.
-        region.time_stamp = _construct_date_time(region.start_date, region.start_time)
+        self.time_stamp = _construct_date_time(self.start_date, self.start_time)
 
         region.validate_types()
 
@@ -335,7 +371,7 @@ class ScientaTxtParser:
         self.spectra.append(region_dict)
 
 
-class ScientaIgorParser:
+class ScientaIgorParser(ABC):
     """Parser for Scienta IBW exports."""
 
     def __init__(self):
@@ -376,34 +412,14 @@ class ScientaIgorParser:
         # bin_header = wave["bin_header"]
 
         notes: Dict[str, Any] = {}
+        use_region_dataclass = False
 
-        try:
-            notes = self._parse_note_peak(wave["note"])
-            region_dataclass = ScientaRegionIgorPEAK
-        except json.JSONDecodeError:
-            notes = self._parse_note_v1(wave["note"])
-            region_dataclass = ScientaRegion
+        notes = self._parse_note(wave["note"])
 
         self.no_of_regions = len(data.shape)
 
-        # if len(data.shape) == 1:
-        #     self.no_of_regions = 1
-        # else:
-        #     self.no_of_regions = data.shape[0]
-
         for region_id in range(0, self.no_of_regions):
-            region = region_dataclass(region_id=region_id)
-            region_fields = list(region.__dataclass_fields__.keys())
-            overwritten_fields = ["region_id", "time_stamp", "data"]
-            unused_notes_keys = []
-
-            for key, note in notes.items():
-                if _check_valid_value(note):
-                    if key in region_fields:
-                        setattr(region, key, note)
-                        overwritten_fields += [key]
-                    else:
-                        unused_notes_keys += [key]
+            spectrum: Dict[str, Any] = {}
 
             energies = self.axis_for_dim(wave_header, dim=region_id)
             axs_unit = self.axis_units_for_dim(wave_header, dim=region_id)
@@ -413,32 +429,30 @@ class ScientaIgorParser:
             else:
                 intensities = data[region_id]
 
-            # Convert date and time to ISO8601 date time.
-            region.time_stamp = _construct_date_time(
-                region.start_date, region.start_time
-            )
-
-            region.energy_size = len(energies)
-            region.energy_axis = energies
-
-            region.data = {
+            spectrum["data"] = {
                 "energy": np.array(energies),
                 "intensity": np.array(intensities),
             }
 
-            region.validate_types()
+            spectrum["igor_binary_wave_format_version"] = ibw_version
+            spectrum["intensity/@units"] = convert_units(data_unit_label)
 
-            spectrum_dict = region.dict()
+            region_metadata = self._parse_region_metadata(region_id, notes, energies)
+            spectrum.update(region_metadata)
 
-            for key in unused_notes_keys:
-                spectrum_dict[key] = notes[key]
-
-            spectrum_dict["igor_binary_wave_format_version"] = ibw_version
-            spectrum_dict["intensity/@units"] = convert_units(data_unit_label)
-
-            self.spectra.append(spectrum_dict)
+            self.spectra.append(spectrum)
 
         return self.spectra
+
+    @abstractmethod
+    def _parse_note(self, bnote: bytes) -> Dict[str, Any]:
+        pass
+
+    @abstractmethod
+    def _parse_region_metadata(
+        self, region_id: int, notes: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        return {}
 
     def _parse_unit(self, bunit: bytes) -> Tuple[str, object]:
         """
@@ -516,12 +530,13 @@ class ScientaIgorParser:
 
         return unit
 
-    def _parse_note_v1(self, bnote: bytes) -> Dict[str, Any]:
+
+class ScientaIgorParserOld(ScientaIgorParser):
+    """Parser version for the old Scienta exporter (i.e., not the one used by the PEAK software)."""
+
+    def _parse_note(self, bnote: bytes) -> Dict[str, Any]:
         """
         Parses the note field of the igor binarywave file.
-
-        This is the _parse_note version of the old Scienta exporter
-        (i.e., not the one used by the PEAK software).
 
         It assumes that the note field contains key-value pairs
         of the form 'key=value' separated by newlines.
@@ -548,12 +563,48 @@ class ScientaIgorParser:
 
         return notes
 
-    def _parse_note_peak(self, bnote: bytes) -> Dict[str, Any]:
+    def _parse_region_metadata(
+        self, region_id: int, notes: Dict[str, Any], energies: np.ndarray
+    ) -> Dict[str, Any]:
+        region = ScientaRegion(region_id=region_id)
+        region_fields = list(region.__dataclass_fields__.keys())
+        overwritten_fields = ["region_id", "time_stamp", "data"]
+        unused_notes_keys = []
+
+        for key, note in notes.items():
+            if _check_valid_value(note):
+                if key in region_fields:
+                    setattr(region, key, note)
+                    overwritten_fields += [key]
+                else:
+                    unused_notes_keys += [key]
+
+        # Convert date and time to ISO8601 date time.
+        region.time_per_spectrum_channel = _construct_date_time(
+            region.date, region.time
+        )
+
+        region.energy_size = len(energies)
+        region.energy_axis = energies
+
+        region.validate_types()
+
+        region_dict = region.dict()
+
+        for key in unused_notes_keys:
+            region_dict[key] = notes[key]
+
+        return region_dict
+
+
+class ScientaIgorParserPEAK(ScientaIgorParser):
+    """Parser version for data exported by Scienta's PEAK software."""
+
+    def _parse_note(self, bnote: bytes) -> Dict[str, Any]:
         """
         Parses the note field of the igor binarywave file.
 
-        This is the _parse_note version for the data exported by Scienta's
-        PEAK software.
+        This is the _parse_note version for the
 
         It assumes that the note field contains a JSON string.
 
@@ -570,5 +621,26 @@ class ScientaIgorParser:
         # Decode the byte string to UTF-8
         note_str = bnote.decode("utf-8")
 
-        # Parse the JSON string into a dictionary
-        return json.loads(note_str)
+        data = json.loads(note_str)
+
+        try:
+            # Validate against the defined schema
+            jsonschema.validate(instance=data, schema=scienta_igor_peak_schema)
+            return data
+        except jsonschema.ValidationError as err:
+            raise jsonschema.ValidationError(
+                f"JSON with metadata is invalid: {err.message}"
+            ) from err
+
+    def _parse_region_metadata(
+        self, region_id: int, notes: Dict[str, Any], energies: np.ndarray
+    ) -> Dict[str, Any]:
+        region: Dict[str, Any] = {}
+        region["region_id"] = region_id
+        region.update(flatten_dict(notes))
+        region["timestamp"] = _construct_date_time(region["Date"], region["Time"])
+
+        region["energy_size"] = len(energies)
+        region["energy_axis"] = energies
+
+        return region

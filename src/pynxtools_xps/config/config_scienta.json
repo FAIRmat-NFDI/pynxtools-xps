@@ -9,11 +9,11 @@
     "experiment_institution":"@eln",
     "experiment_facility":"@eln",
     "experiment_laboratory":"@eln",
-    "data_file":"@attrs:file_info/data_file",
-    "sequence_file":"@attrs:file_info/sequence_file"
+    "data_file":"@attrs:data_file",
+    "sequence_file":"@attrs:sequence_file"
   },
   "/ENTRY/USER[user]":{
-    "name":"@attrs:user/user_name",
+    "name":"@attrs:user_name",
     "affiliation":"@eln",
     "address":"@eln",
     "email":"@eln",
@@ -22,7 +22,7 @@
   },
   "/ENTRY/INSTRUMENT[instrument]":{
     "@default":"electronanalyzer",
-    "name":"@attrs:instrument/instrument_name",
+    "name":"@attrs:instrument_name",
     "device_information":{
       "vendor":"@eln",
       "model":"@eln",
@@ -32,8 +32,8 @@
     "energy_resolution":{
       "physical_quantity":"energy",
       "type":"derived",
-      "resolution":"@attrs:region/step_size",
-      "resolution/@units":"@attrs:region/step_size/@units"
+      "resolution":"@attrs:step_size",
+      "resolution/@units":"@attrs:step_size/@units"
     },
     "source_probe":{
       "type":"@eln",
@@ -50,8 +50,8 @@
     "beam_probe":{
       "distance":"@eln",
       "distance/@units":"@eln",
-      "incident_energy":"@attrs:beam_xray/excitation_energy",
-      "incident_energy/@units":"@attrs:beam_xray/excitation_energy/@units",
+      "incident_energy":"@attrs:excitation_energy",
+      "incident_energy/@units":"@attrs:excitation_energy/@units",
       "incident_energy_spread":null,
       "incident_energy_spread/@units":null,
       "incident_polarization":null,
@@ -76,13 +76,13 @@
       "energy_resolution":{
         "physical_quantity":"energy",
         "type":"derived",
-        "resolution":"@attrs:region/step_size",
-        "resolution/@units":"@attrs:region/step_size/@units"
+        "resolution":"@attrs:step_size",
+        "resolution/@units":"@attrs:step_size/@units"
       },
       "transmission_function":null,
       "COLLECTIONCOLUMN[collectioncolumn]":{
         "scheme":"@eln",
-        "lens_mode":"@attrs:collectioncolumn/lens_mode",
+        "lens_mode":"@attrs:lens_mode",
         "projection":null,
         "angular_acceptance":null,
         "spatial_acceptance":null,
@@ -98,9 +98,9 @@
       },
       "ENERGYDISPERSION[energydispersion]":{
         "scheme":"@eln",
-        "pass_energy":"@attrs:energydispersion/pass_energy",
-        "pass_energy/@units":"@attrs:energydispersion/pass_energy/@units",
-        "energy_scan_mode":"@attrs:energydispersion/acquisition_mode",
+        "pass_energy":"@attrs:pass_energy",
+        "pass_energy/@units":"@attrs:pass_energy/@units",
+        "energy_scan_mode":"@attrs:acquisition_mode",
         "APERTURE[entrance_slit]":{
           "description":"@eln",
           "shape":"@eln",
@@ -118,8 +118,8 @@
       "ELECTRON_DETECTOR[detector]":{
         "@default":"raw_data",
         "amplifier_type":"@eln",
-        "count_time":"@attrs:detector/dwell_time",
-        "count_time/@units":"@attrs:detector/dwell_time/@units",
+        "count_time":"@attrs:dwell_time",
+        "count_time/@units":"@attrs:dwell_time/@units",
         "detector_type":"@eln",
         "device_information":{
           "vendor":"@eln",
@@ -222,7 +222,7 @@
   "/ENTRY/energy_referencing":null,
   "/ENTRY/transmission_correction":null,
   "/ENTRY/SAMPLE[sample]":{
-    "name":"@attrs:sample/sample_name",
+    "name":"@attrs:sample_name",
     "identifier":"@eln",
     "identifier/@type":"@eln",
     "atom_types":"@eln",
@@ -261,12 +261,12 @@
     "@signal":"data",
     "data":"@data:average",
     "FIELDNAME_errors[data_errors]":"@data:errors",
-    "data/@units":"@attrs:region/intensity/@units",
+    "data/@units":"@attrs:intensity/@units",
     "DATA[*]":"@data:*.scans",
-    "DATA[*]/@units":"@attrs:region/intensity/@units",
+    "DATA[*]/@units":"@attrs:intensity/@units",
     "energy":"@data:energy",
-    "energy/@type":"@attrs:region/energy_scale",
-    "energy/@units":"@attrs:region/energy_axis/@units",
+    "energy/@type":"@attrs:energy_scale",
+    "energy/@units":"@attrs:energy_axis/@units",
     "@energy_indices":0
   }
 }

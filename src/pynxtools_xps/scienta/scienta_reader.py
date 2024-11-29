@@ -23,7 +23,7 @@ MPES nxdl (NeXus Definition Language) template.
 import re
 import json
 import copy
-import re
+import logging
 import warnings
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
@@ -41,7 +41,11 @@ from pynxtools_xps.reader_utils import (
 )
 from pynxtools_xps.value_mappers import get_units_for_key, convert_units
 
-from pynxtools_xps.scienta.scienta_data_model import ScientaHeader, ScientaRegion, ScientaRegionIgorPEAK
+from pynxtools_xps.scienta.scienta_data_model import (
+    ScientaHeader,
+    ScientaRegion,
+    ScientaRegionIgorPEAK,
+)
 from pynxtools_xps.scienta.scienta_mappings import (
     UNITS,
     VALUE_MAP,
@@ -49,6 +53,8 @@ from pynxtools_xps.scienta.scienta_mappings import (
     _get_key_value_pair,
 )
 from pynxtools_xps.value_mappers import convert_units, get_units_for_key
+
+logger = logging.getLogger(__name__)
 
 
 class MapperScienta(XPSMapper):
@@ -84,14 +90,7 @@ class MapperScienta(XPSMapper):
         if str(self.file).endswith(".txt"):
             return ScientaTxtParser()
         elif str(self.file).endswith(".ibw"):
-            with open(str(self.file),'rb') as f:
-                data_ibw = binarywave.load(f)
-                try:
-                    check_note = json.loads(data_ibw['wave']['note'].decode('utf-8'))["Version"]
-                    print(check_note)
-                    return ScientaIgorParserPEAK()
-                except:
-                    return ScientaIgorParser()
+            return ScientaIgorParser()
         raise ValueError(MapperScienta.__file_err_msg__)
 
     def construct_data(self):
@@ -119,11 +118,14 @@ class MapperScienta(XPSMapper):
         entry_parent = f"/ENTRY[{entry}]"
 
         for key, value in spectrum.items():
+            if key.startswith("entry"):
+                entry_parent = f"/ENTRY[entry]"
+                key = key.replace("entry/", "", 1)
             mpes_key = f"{entry_parent}/{key}"
             if "units" in key:
                 value = convert_units(value)
             self._xps_dict[mpes_key] = value
-            units = convert_units(get_units_for_key(key, UNITS))
+            units = convert_units(get_units_for_key(key, UNITS))            
             if units is not None:
                 self._xps_dict[f"{mpes_key}/@units"] = units
 
@@ -334,9 +336,7 @@ class ScientaTxtParser:
 
 
 class ScientaIgorParser:
-    """Parser for Scienta TXT exports."""
-
-    # pylint: disable=too-few-public-methods
+    """Parser for Scienta IBW exports."""
 
     def __init__(self):
         self.lines: List[str] = []
@@ -361,8 +361,6 @@ class ScientaIgorParser:
         ibw = binarywave.load(file)
         ibw_version, wave = ibw["version"], ibw["wave"]
 
-        notes = self._parse_note(wave["note"])
-
         data_unit_label, data_unit = self._parse_unit(wave["data_units"])
         dimension_unit_label, dimension_unit = self._parse_unit(wave["dimension_units"])
 
@@ -377,13 +375,24 @@ class ScientaIgorParser:
         # spectrum_indices = wave["sIndices"]
         # bin_header = wave["bin_header"]
 
-        if len(data.shape) == 1:
-            self.no_of_regions = 1
-        else:
-            self.no_of_regions = data.shape[0]
+        notes: Dict[str, Any] = {}
+
+        try:
+            notes = self._parse_note_peak(wave["note"])
+            region_dataclass = ScientaRegionIgorPEAK
+        except json.JSONDecodeError:
+            notes = self._parse_note_v1(wave["note"])
+            region_dataclass = ScientaRegion
+
+        self.no_of_regions = len(data.shape)
+
+        # if len(data.shape) == 1:
+        #     self.no_of_regions = 1
+        # else:
+        #     self.no_of_regions = data.shape[0]
 
         for region_id in range(0, self.no_of_regions):
-            region = ScientaRegion(region_id=region_id)
+            region = region_dataclass(region_id=region_id)
             region_fields = list(region.__dataclass_fields__.keys())
             overwritten_fields = ["region_id", "time_stamp", "data"]
             unused_notes_keys = []
@@ -431,34 +440,6 @@ class ScientaIgorParser:
 
         return self.spectra
 
-    def _parse_note(self, bnote: bytes) -> Dict[str, Any]:
-        """
-        Parses the note field of the igor binarywave file.
-        It assumes that the note field contains key-value pairs
-        of the form 'key=value' separated by newlines.
-
-        Parameters
-        ----------
-        bnote : bytes
-            The bytes of the binarywave note field.
-
-        Returns
-        -------
-        Dict[str, Any]
-            The dictionary of the parsed note field.
-
-        """
-        note = bnote.decode("utf-8").replace("\r", "\n")
-
-        notes = {}
-
-        for line in note.split("\n"):
-            key, value = _get_key_value_pair(line)
-            if key:
-                notes[key] = value
-
-        return notes
-
     def _parse_unit(self, bunit: bytes) -> Tuple[str, object]:
         """
         Extracts the label and unit from a string containing a label
@@ -535,114 +516,45 @@ class ScientaIgorParser:
 
         return unit
 
-class ScientaIgorParserPEAK:
-    """Parser for Scienta TXT exports."""
-
-    # pylint: disable=too-few-public-methods
-
-    def __init__(self):
-        self.lines: List[str] = []
-        self.spectra: List[Dict[str, Any]] = []
-
-    def parse_file(self, file: Union[str, Path], **kwargs):
+    def _parse_note_v1(self, bnote: bytes) -> Dict[str, Any]:
         """
-        Reads the igor binarywave files and returns a list of
-        dictionary containing the wave data.
+        Parses the note field of the igor binarywave file.
+
+        This is the _parse_note version of the old Scienta exporter
+        (i.e., not the one used by the PEAK software).
+
+        It assumes that the note field contains key-value pairs
+        of the form 'key=value' separated by newlines.
 
         Parameters
         ----------
-        file : str
-            Filepath of the TXT file to be read.
+        bnote : bytes
+            The bytes of the binarywave note field.
 
         Returns
         -------
-        self.spectra
-            Flat list of dictionaries containing one spectrum each.
+        Dict[str, Any]
+            The dictionary of the parsed note field.
 
         """
-        ibw = binarywave.load(file)
-        ibw_version, wave = ibw["version"], ibw["wave"]
+        note = bnote.decode("utf-8").replace("\r", "\n")
 
-        notes = self._parse_note(wave["note"])
+        notes = {}
 
-        data_unit_label, data_unit = self._parse_unit(wave["data_units"])
-        dimension_unit_label, dimension_unit = self._parse_unit(wave["dimension_units"])
+        for line in note.split("\n"):
+            key, value = _get_key_value_pair(line)
+            if key:
+                notes[key] = value
 
-        wave_header = wave["wave_header"]
-        data = wave["wData"]
+        return notes
 
-        #Create 1d reduced data on the 2D image
-        #NOTE: This should be removed we want a 2D image displayed as shown in the PEKA software
-        data = np.sum(data,axis=1)
-
-        # Not needed at the moment.
-        # TODO: Add support for formulas if they are written by the
-        # measurement software.
-        # formula = wave["formula"]
-        # labels = wave["labels"]
-        # spectrum_indices = wave["sIndices"]
-        # bin_header = wave["bin_header"]
-
-        if len(data.shape) == 1:
-            self.no_of_regions = 1
-        else:
-            #self.no_of_regions = data.shape[0]
-            #NOTE: Changed due to data shape change
-            self.no_of_regions = len(data.shape)
-
-        for region_id in range(0, self.no_of_regions):
-            region = ScientaRegionIgorPEAK(region_id=region_id)
-            region_fields = list(region.__dataclass_fields__.keys())
-            overwritten_fields = ["region_id", "time_stamp", "data"]
-            unused_notes_keys = []
-
-            for key, note in notes.items():
-                if _check_valid_value(note):
-                    if key in region_fields:
-                        setattr(region, key, note)
-                        overwritten_fields += [key]
-                    else:
-                        unused_notes_keys += [key]
-
-            energies = self.axis_for_dim(wave_header, dim=region_id)
-            axs_unit = self.axis_units_for_dim(wave_header, dim=region_id)
-
-            if data.ndim == 1:
-                intensities = data
-            else:
-                intensities = data[region_id]
-
-            # Convert date and time to ISO8601 date time.
-            region.time_stamp = _construct_date_time(
-                region.Date, region.Time
-            )
-
-            region.energy_size = len(energies)
-            region.energy_axis = energies
-
-            region.data = {
-                "energy": np.array(energies),
-                "intensity": np.array(intensities),
-            }
-
-            region.validate_types()
-
-            spectrum_dict = region.dict()
-
-            for key in unused_notes_keys:
-                spectrum_dict[key] = notes[key]
-
-            spectrum_dict["igor_binary_wave_format_version"] = ibw_version
-            spectrum_dict["intensity/@units"] = convert_units(data_unit_label)
-
-            self.spectra.append(spectrum_dict)
-
-        return self.spectra
-
-
-    def _parse_note(self, bnote: bytes) -> Dict[str, Any]:
+    def _parse_note_peak(self, bnote: bytes) -> Dict[str, Any]:
         """
         Parses the note field of the igor binarywave file.
+
+        This is the _parse_note version for the data exported by Scienta's
+        PEAK software.
+
         It assumes that the note field contains a JSON string.
 
         Parameters
@@ -659,114 +571,4 @@ class ScientaIgorParserPEAK:
         note_str = bnote.decode("utf-8")
 
         # Parse the JSON string into a dictionary
-        try:
-            notes = json.loads(note_str)
-        except json.JSONDecodeError as e:
-            print(f"Error decoding JSON: {e}")
-            notes = {}
-
-        return notes
-
-    #def _parse_note(self, bnote: bytes) -> Dict[str, Any]:
-        """
-        Parses the note field of the igor binarywave file.
-        It assumes that the note field contains key-value pairs
-        of the form 'key=value' separated by newlines.
-
-        Parameters
-        ----------
-        bnote : bytes
-            The bytes of the binarywave note field.
-
-        Returns
-        -------
-        Dict[str, Any]
-            The dictionary of the parsed note field.
-
-        """
-        note = bnote.decode("utf-8").replace("\r", "\n")
-
-        notes = {}
-
-        for line in note.split("\n"):
-            key, value = _get_key_value_pair(line)
-            if key:
-                notes[key] = value
-
-        return notes
-
-    def _parse_unit(self, bunit: bytes) -> Tuple[str, object]:
-        """
-        Extracts the label and unit from a string containing a label
-        followed by a unit enclosed in square brackets.
-
-        Parameters
-        ----------
-        bunit: bytes
-            The input string containing the label and unit.
-
-        Returns
-        -------
-        tuple
-            A tuple containing:
-            - unit_label : str
-                The extracted label.
-            - unit : str
-                The extracted unit.
-        """
-        unit = bunit.decode("utf-8").replace("\r", "\n")
-
-        pattern = r"([\w\s]+)\s*\[([\w\s.]+)\]"
-        matches = re.match(pattern, unit)
-        if matches is not None:
-            label = matches.group(1).strip()
-            unit = matches.group(2).strip()
-            return label, unit
-        return "", ""
-
-    def axis_for_dim(self, wave_header: Dict[str, Any], dim: int) -> np.ndarray:
-        """
-        Returns the axis values for a given dimension from the wave header.
-
-        Parameters
-        ----------
-        wave_header : Dict[str, Any]
-            The wave_header of the ibw file.
-        dim : int
-            The dimension to return the axis for..
-
-        Returns
-        -------
-        np.ndarray
-            Axis values for a given dimension.
-
-        """
-        return (
-            wave_header["sfA"][dim] * np.arange(wave_header["nDim"][dim])
-            + wave_header["sfB"][dim]
-        )
-
-    def axis_units_for_dim(self, wave_header: Dict[str, Any], dim: int) -> str:
-        """
-        Returns the unit for a given dimension from the wave header.
-
-        Parameters
-        ----------
-        wave_header : Dict[str, Any]
-            The wave_header of the ibw file.
-        dim : int
-            The dimension to return the axis for..
-
-        Returns
-        -------
-        str:
-            The axis units.
-
-        """
-        unit_arr = wave_header["dimUnits"][dim]
-
-        unit = ""
-        for elem in unit_arr:
-            unit += elem.decode("utf-8")
-
-        return unit
+        return json.loads(note_str)

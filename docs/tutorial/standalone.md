@@ -25,11 +25,25 @@ An example script to run the XPS reader in `pynxtools`:
 user@box:~$ dataconverter $<xps-file path> $<xps-file path> $<eln-file path> --reader xps --nxdl NXxps --output <output-file path>.nxs
 ```
 
-Note that none of the supported file format have data/values for all required and recommended fields and attributes in NXxps. In order for the validation step of the XPS reader to pass, you need to provide an ELN file that contains the missing values. Example raw and converted data can be found in  [*pynxtools_xps/examples*](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples).
+Note that none of the supported file format have data/values for all required and recommended fields and attributes in ``NXxps``. In order for the validation step of the XPS reader to pass, you need to provide an ELN file that contains the missing values.
+
+### Examples
+
+You can find examples how to use `pynxtools-xps` for your XPS research data pipeline in [`src/pynxtools-xps/nomad/examples`](../../src/pynxtools_xps/nomad/examples/). These are designed for working with [`NOMAD`](https://nomad-lab.eu/) and its [`NOMAD Remote Tools Hub (NORTH)`](https://nomad-lab.eu/prod/v1/gui/analyze/north). Feel invited to try out the respective tutorial [here](tutorial/nomad.md).
+
+There are also small example files with raw and converted data for using the `pynxtools` dataconverter with the `mpes` reader and the `NXmpes` application definition in the [`examples`](../../examples/) folder.
+
+For this tutorial, we will work with the example data for the VAMAS reader (see here [](../../examples/vms/)). You can run the conversion as
+```shell
+dataconverter \\
+    --reader xps \\
+    --nxdl NXmpes \\
+    regular.vms \\
+    eln_data_vms.yaml \\
+    -c  config_file.json \\
+    --output regular.vms.nxs 
+```
 
 TODO: add more steps! <!--[The Jupyter notebook is available here](https://github.com/FAIRmat-NFDI/pynxtools-em/blob/main/examples/HowToUseTutorial.ipynb) TODO!-->
 
 **Congrats! You now have a FAIR NeXus file!**
-
-The above-mentioned parsing is also integrated into the NOMAD research data management system.
-Feel invited to try out the respective tutorial [here]((tutorial/nomad.md)

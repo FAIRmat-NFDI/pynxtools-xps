@@ -25,18 +25,10 @@ dependencies = [
     "h5py>=3.6.0",
     "igor2",
     "xarray>=0.20.2",
-    "numpy>=1.21.2",
+    'numpy>=1.22.4,<2.0.0',
     "pint>=0.17",
-    "pynxtools>=0.7.0",
+    "pynxtools>=0.9.0",
 ]
-
-[project.entry-points."pynxtools.reader"]
-xps = "pynxtools_xps.reader:XPSReader"
-
-[project.urls]
-"Homepage" = "https://github.com/FAIRmat-NFDI/pynxtools-xps"
-"Bug Tracker" = "https://github.com/FAIRmat-NFDI/pynxtools-xps/issues"
-
 [project.optional-dependencies]
 dev = [
     "mypy",
@@ -60,6 +52,16 @@ docs = [
     "mkdocs-click"
 ]
 
+[project.urls]
+"Homepage" = "https://github.com/FAIRmat-NFDI/pynxtools-xps"
+"Bug Tracker" = "https://github.com/FAIRmat-NFDI/pynxtools-xps/issues"
+
+[project.entry-points."pynxtools.reader"]
+xps = "pynxtools_xps.reader:XPSReader"
+
+[project.entry-points.'nomad.plugin']
+xps_example = "pynxtools_xps.nomad.entrypoints:xps_example"
+
 [tool.setuptools.packages.find]
 where = [
     "src",
@@ -82,7 +84,7 @@ select = [
     "E", # pycodestyle
     "W", # pycodestyle
     "PL", # pylint
-    "NPY201",
+    # "NPY201",
 ]
 ignore = [
     "E501", # Line too long ({width} > {limit} characters)

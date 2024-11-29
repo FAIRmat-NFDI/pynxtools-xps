@@ -70,7 +70,6 @@ class ScientaRegion(XpsDataclass):
     data: dict = field(default_factory=dict)
 
 
-#New dataclass for PEAK version
 @dataclass
 class ExcitationSourceEnergyInformation:
     SourceType: str = ""
@@ -78,6 +77,7 @@ class ExcitationSourceEnergyInformation:
     TargetEnergy: float = 0.0
     EnergyStatus: str = ""
     EnergyStatusMessage: str = ""
+
 
 @dataclass
 class ScientaRegionIgorPEAK(XpsDataclass):
@@ -90,7 +90,9 @@ class ScientaRegionIgorPEAK(XpsDataclass):
     LensMode: str = ""
     PassEnergy: float = 0.0
     no_of_scans: int = 0
-    Energy: ExcitationSourceEnergyInformation = field(default_factory=ExcitationSourceEnergyInformation)
+    Energy: ExcitationSourceEnergyInformation = field(
+        default_factory=ExcitationSourceEnergyInformation
+    )
     acquisition_mode: str = ""
     energy_units: str = "kinetic"  # ???
     center_energy: float = 0.0
@@ -117,4 +119,3 @@ class ScientaRegionIgorPEAK(XpsDataclass):
     time_per_spectrum_channel: float = 0.0
     detector_mode: str = ""
     Data: dict = field(default_factory=dict)
-

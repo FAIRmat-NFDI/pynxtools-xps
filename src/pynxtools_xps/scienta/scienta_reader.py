@@ -25,7 +25,7 @@ import copy
 import logging
 import warnings
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union, Optional
 import json
 import jsonschema
 from abc import ABC, abstractmethod
@@ -145,7 +145,7 @@ class MapperScienta(XPSMapper):
 
         """
         entry_parts = []
-        for part in ["spectrum_type", "region_name"]:
+        for part in ["spectrum_type", "region_name", "Name"]:
             val = spectrum.get(part, None)
             if val:
                 entry_parts += [val]
@@ -173,8 +173,12 @@ class MapperScienta(XPSMapper):
         if entry not in self._xps_dict["data"]:
             self._xps_dict["data"][entry] = xr.Dataset()
 
-        energy = np.array(spectrum["data"]["energy"])
-        intensity = spectrum["data"]["intensity"]
+        axes = {
+            key: value
+            for key, value in spectrum["data"].items()
+            if key in spectrum["axis_labels"]
+        }
+        intensities = spectrum["data"][spectrum["data_labels"]]
 
         # Write to data in order: scan, cycle, channel
 
@@ -190,22 +194,22 @@ class MapperScienta(XPSMapper):
 
         if averaged_scans.size == 1:
             # on first scan in cycle
-            averaged_scans = intensity
+            averaged_scans = intensities
 
         self._xps_dict["data"][entry][scan_key.split("_")[0]] = xr.DataArray(
             data=averaged_scans,
-            coords={"energy": energy},
+            coords=axes,
         )
 
         # Write scan data to 'data'.
         self._xps_dict["data"][entry][scan_key] = xr.DataArray(
-            data=intensity, coords={"energy": energy}
+            data=intensities, coords=axes
         )
 
         # Write channel data to 'data'.
         channel_key = f"{scan_key}_chan0"
         self._xps_dict["data"][entry][channel_key] = xr.DataArray(
-            data=intensity, coords={"energy": energy}
+            data=intensities, coords=axes
         )
 
 
@@ -397,8 +401,8 @@ class ScientaIgorParser(ABC):
         ibw = binarywave.load(file)
         ibw_version, wave = ibw["version"], ibw["wave"]
 
-        data_unit_label, data_unit = self._parse_unit(wave["data_units"])
-        dimension_unit_label, dimension_unit = self._parse_unit(wave["dimension_units"])
+        axes_labels_with_units = self._parse_unit(wave["dimension_units"])
+        data_labels_with_units = self._parse_unit(wave["data_units"])
 
         wave_header = wave["wave_header"]
         data = wave["wData"]
@@ -412,35 +416,34 @@ class ScientaIgorParser(ABC):
         # bin_header = wave["bin_header"]
 
         notes: Dict[str, Any] = {}
-        use_region_dataclass = False
 
         notes = self._parse_note(wave["note"])
 
         self.no_of_regions = len(data.shape)
 
-        for region_id in range(0, self.no_of_regions):
-            spectrum: Dict[str, Any] = {}
+        spectrum: Dict[str, Any] = {}
+        spectrum["data"]: Dict[str, Any] = {}
+        spectrum["axis_labels"]: List[str] = []
+        spectrum["data_labels"]: List[str] = []
+        spectrum["units"]: Dict[str, Any] = {}
 
-            energies = self.axis_for_dim(wave_header, dim=region_id)
-            axs_unit = self.axis_units_for_dim(wave_header, dim=region_id)
+        for i, (dim, unit) in enumerate(axes_labels_with_units):
+            spectrum["data"][dim] = self.axis_for_dim(wave_header, dim=i)
+            spectrum["axis_labels"] = dim
+            spectrum["units"][dim] = convert_units(unit)
 
-            if data.ndim == 1:
-                intensities = data
-            else:
-                intensities = data[region_id]
+        for i, (label, unit) in enumerate(data_labels_with_units):
+            spectrum["data"][dim] = self.axis_for_dim(wave_header, dim=i)
+            spectrum["data_labels"] = dim
+            spectrum["units"][dim] = convert_units(unit)
 
-            spectrum["data"] = {
-                "energy": np.array(energies),
-                "intensity": np.array(intensities),
-            }
+        spectrum["igor_binary_wave_format_version"] = ibw_version
+        # spectrum["intensity/@units"] = convert_units(data_unit_label)
 
-            spectrum["igor_binary_wave_format_version"] = ibw_version
-            spectrum["intensity/@units"] = convert_units(data_unit_label)
+        region_metadata = self._parse_region_metadata(region_id=0, notes=notes)
+        spectrum.update(region_metadata)
 
-            region_metadata = self._parse_region_metadata(region_id, notes, energies)
-            spectrum.update(region_metadata)
-
-            self.spectra.append(spectrum)
+        self.spectra.append(spectrum)
 
         return self.spectra
 
@@ -454,34 +457,38 @@ class ScientaIgorParser(ABC):
     ) -> Dict[str, Any]:
         return {}
 
-    def _parse_unit(self, bunit: bytes) -> Tuple[str, object]:
+    def _parse_unit(self, bunit: bytes) -> List[Tuple[str, Optional[str]]]:
         """
-        Extracts the label and unit from a string containing a label
-        followed by a unit enclosed in square brackets.
+        Extracts labels and units from a string containing one or more label-unit pairs.
+        If no unit is present, it returns just the label.
 
         Parameters
         ----------
         bunit: bytes
-            The input string containing the label and unit.
+            The input string containing the label and unit(s).
 
         Returns
         -------
-        tuple
-            A tuple containing:
+        list of tuple
+            A list of tuples, each containing:
             - unit_label : str
                 The extracted label.
-            - unit : str
-                The extracted unit.
+            - unit : str or None
+                The extracted unit (None if no unit is present).
         """
+        # Decode the bytes to a string
         unit = bunit.decode("utf-8").replace("\r", "\n")
 
-        pattern = r"([\w\s]+)\s*\[([\w\s.]+)\]"
-        matches = re.match(pattern, unit)
-        if matches is not None:
-            label = matches.group(1).strip()
-            unit = matches.group(2).strip()
-            return label, unit
-        return "", ""
+        # Regex to match "Label [Unit]" patterns
+        pattern = r"([\w\s]+?)\s*\[([\w\s.]+)\]"
+        matches = re.findall(pattern, unit)
+
+        if matches:
+            # Process each match into a tuple of (label, unit)
+            return [(label.strip(), unit.strip()) for label, unit in matches]
+
+        # If no matches, return the entire string as a label with no unit
+        return [(unit.strip(), None)]
 
     def axis_for_dim(self, wave_header: Dict[str, Any], dim: int) -> np.ndarray:
         """
@@ -564,7 +571,7 @@ class ScientaIgorParserOld(ScientaIgorParser):
         return notes
 
     def _parse_region_metadata(
-        self, region_id: int, notes: Dict[str, Any], energies: np.ndarray
+        self, region_id: int, notes: Dict[str, Any]
     ) -> Dict[str, Any]:
         region = ScientaRegion(region_id=region_id)
         region_fields = list(region.__dataclass_fields__.keys())
@@ -583,9 +590,6 @@ class ScientaIgorParserOld(ScientaIgorParser):
         region.time_per_spectrum_channel = _construct_date_time(
             region.date, region.time
         )
-
-        region.energy_size = len(energies)
-        region.energy_axis = energies
 
         region.validate_types()
 
@@ -633,14 +637,13 @@ class ScientaIgorParserPEAK(ScientaIgorParser):
             ) from err
 
     def _parse_region_metadata(
-        self, region_id: int, notes: Dict[str, Any], energies: np.ndarray
+        self,
+        region_id: int,
+        notes: Dict[str, Any],
     ) -> Dict[str, Any]:
         region: Dict[str, Any] = {}
         region["region_id"] = region_id
         region.update(flatten_dict(notes))
         region["timestamp"] = _construct_date_time(region["Date"], region["Time"])
-
-        region["energy_size"] = len(energies)
-        region["energy_axis"] = energies
 
         return region

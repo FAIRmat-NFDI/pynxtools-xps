@@ -11,6 +11,7 @@ definitions:
           nxdl: NXmpes
         eln:
           hide: []
+      quantities:
         title:
           type: str
           m_annotations:

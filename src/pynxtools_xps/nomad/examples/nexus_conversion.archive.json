@@ -1,0 +1,13 @@
+{
+    "data": {
+        "m_def": "pynxtools.nomad.dataconverter.NexusDataConverter",
+        "input_files": [
+            "EX439_S718_Au_in_25_mbar_O2.sle",
+            "eln_data.yaml"
+        ],
+        "reader": "xps",
+        "nxdl": "NXxps",
+        "output": "Au_25_mbar_O2_no_align.nxs"
+    },
+    "m_ref_archives": {}
+}

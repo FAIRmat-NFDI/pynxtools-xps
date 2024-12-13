@@ -1,0 +1,158 @@
+{
+  "data":{
+    "m_def":"../upload/raw/xps.scheme.archive.yaml#/definitions/section_definitions/0",
+    "output":"eln_data.yaml",
+    "title":"EX439_S718_Au in 25 mbar O2",
+    "start_time":"2022-04-08T09:47:00.000Z",
+    "end_time":"2022-04-08T10:32:00.000Z",
+    "entry_identifier":"EX439",
+    "experiment_institution":"Max Planck Institute for Chemical Energy Conversion",
+    "experiment_facility":"Surface and Interface Analysis Group",
+    "experiment_laboratory":"Near-Ambient Pressure XPS Lab",
+    "user":{
+      "name":"Lukas Pielsticker",
+      "affiliation":"MPI CEC",
+      "address":"Lukas Pielsticker",
+      "email":"lukas.pielsticker@cec.mpg.de",
+      "orcid":{
+         "service":"orcid",
+         "identifier":"0000-0001-9361-8333"
+      }
+    },
+    "instrument":{
+      "device_information":{
+        "vendor":"SPECS GmbH",
+        "model":"Custom NAP-XPS instrument",
+        "identifier":"null"
+      },
+      "energy_resolution":{
+        "type":"calibrated",
+        "resolution":0.2,
+        "physical_quantity":"energy"
+      },
+      "source_probe":{
+        "type":"Fixed Tube X-ray",
+        "probe":"photon",
+        "device_information":{
+           "vendor":"SPECS GmbH",
+           "model":"µFOCUS 500",
+           "identifier":"null"
+        }
+      },
+      "beam_probe":{
+        "distance":0.0
+      },
+      "analyser":{
+        "description":"hemispherical",
+        "device_information":{
+          "vendor":"SPECS GmbH",
+          "model":"PHOIBOS 150 NAP",
+          "identifier":"null"
+        },
+        "collectioncolumn":{
+          "scheme":"angular dispersive",
+          "device_information":{
+            "vendor":"SPECS GmbH",
+            "model":"PHOIBOS 150 NAP",
+            "identifier":"null"
+          }
+        },
+        "energydispersion":{
+          "scheme":"hemispherical",
+          "diameter":150,
+          "device_information":{
+            "vendor":"SPECS GmbH",
+            "model":"PHOIBOS 150 NAP",
+            "identifier":"null"
+          }
+        },
+        "detector":{
+          "amplifier_type":"channeltron",
+          "detector_type":"Multi-anode",
+          "device_information":{
+            "vendor":"Surface Concept GmbH",
+            "model":"1D-DLD detector",
+            "identifier":"null"
+          }
+        }
+      },
+      "manipulator":{
+        "device_information":{
+          "vendor":"SPECS GmbH",
+          "model":"5-axis manipulator",
+          "identifier":"null"
+        },
+        "temperature_sensor":{
+          "name":"type K thermocouple",
+          "measurement":"temperature",
+          "attached_to":"sample",
+          "type":"type K thermocouple",
+          "value":298.0
+        },
+        "sample_heater":{
+          "name":"Coherent Compact Evolution IR Diode LASER (DILAS)",
+          "physical_quantity":"temperature",
+          "type":"IR diode laser",
+          "heater_power":0.0,
+          "pid":{
+            "setpoint":298.0
+          }
+        },
+        "drain_current_amperemeter":{
+          "name":"Amperemeter 1.0",
+          "measurement":"current",
+          "type":"wire",
+          "value":0.1
+        },
+        "sample_bias_voltmeter":{
+          "name":"XPS sample voltmeter",
+          "measurement":"voltage",
+          "attached_to":"sample",
+          "type":"oscilloscope",
+          "value":0.0
+        },
+        "sample_bias_potentiostat":{
+          "name":"XPS sample potentiostat",
+          "physical_quantity":"voltage",
+          "type":"potentiostat",
+          "pid":{
+            "setpoint":0.0
+          }
+        }
+      },
+      "pressure_gauge":{
+        "name":"Atmion",
+        "measurement":"pressure",
+        "type":"hot-filament ionization gauge",
+        "value":1e-9
+      },
+      "flood_gun":{
+        "name":"FG 22/35",
+        "physical_quantity":"current",
+        "type":"hot-filament ionization gauge",
+        "current":0.0
+      }
+    },
+    "sample":{
+      "name":"Polycristalline Au foil",
+      "sample_id":"S718",
+      "atom_types":"Au",
+      "physical_form":"foil",
+      "situation":"vacuum",
+      "substance":{
+        "name":"Au",
+        "molecular_mass":196.96657,
+        "cas_number":"7440-57-5",
+        "molecular_formula_hill":"Au"
+      },
+      "history":{
+        "sample_preparation":{
+          "start_time":"2022-04-08T11:25:00.200Z",
+          "end_time":"2022-04-08T11:45:00.200Z",
+          "description":"sputter cleaned with Ar ions for 20 min",
+          "method":"Ar sputtering"
+        }
+      }
+    }
+  }
+}

@@ -267,6 +267,8 @@
     "energy":"@data:energy",
     "energy/@type":"@attrs:energy_scale",
     "energy/@units":"@attrs:energy_axis/@units",
-    "@energy_indices":0
+    "@energy_indices":0,
+    "AXISNAME[*]":"@data:*.axis",
+    "AXISNAME[*]/@units":"@attrs:*.scans"
   }
 }

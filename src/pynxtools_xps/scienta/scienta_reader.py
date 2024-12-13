@@ -41,7 +41,11 @@ from pynxtools_xps.reader_utils import (
     construct_data_key,
     construct_entry_name,
 )
-from pynxtools_xps.value_mappers import get_units_for_key, convert_units
+from pynxtools_xps.value_mappers import (
+    get_units_for_key,
+    convert_units,
+    convert_energy_type,
+)
 
 from pynxtools_xps.scienta.scienta_data_model import (
     ScientaHeader,
@@ -125,7 +129,6 @@ class MapperScienta(XPSMapper):
                 ]
                 return ScientaIgorParserPEAK()
             except Exception as e:
-                print(e)
                 return ScientaIgorParserOld()
         raise ValueError(MapperScienta.__file_err_msg__)
 
@@ -178,7 +181,11 @@ class MapperScienta(XPSMapper):
             for key, value in spectrum["data"].items()
             if key in spectrum["axis_labels"]
         }
-        intensities = spectrum["data"][spectrum["data_labels"]]
+        intensities = {
+            key: value
+            for key, value in spectrum["data"].items()
+            if key in spectrum["data_labels"]
+        }
 
         # Write to data in order: scan, cycle, channel
 
@@ -195,6 +202,11 @@ class MapperScienta(XPSMapper):
         if averaged_scans.size == 1:
             # on first scan in cycle
             averaged_scans = intensities
+
+        print(averaged_scans)
+        #     print(axis_name, arr.shape)
+        # for data_name, arr in intensities.items():
+        #     print(data_name, arr.shape)
 
         self._xps_dict["data"][entry][scan_key.split("_")[0]] = xr.DataArray(
             data=averaged_scans,
@@ -428,17 +440,19 @@ class ScientaIgorParser(ABC):
         spectrum["units"]: Dict[str, Any] = {}
 
         for i, (dim, unit) in enumerate(axes_labels_with_units):
+            if dim in ("Kinetic Energy", "Binding Energy"):
+                spectrum["energy_scale"] = convert_energy_type(dim)
+                dim = "energy"
             spectrum["data"][dim] = self.axis_for_dim(wave_header, dim=i)
-            spectrum["axis_labels"] = dim
+            spectrum["axis_labels"].append(dim)
             spectrum["units"][dim] = convert_units(unit)
 
         for i, (label, unit) in enumerate(data_labels_with_units):
-            spectrum["data"][dim] = self.axis_for_dim(wave_header, dim=i)
-            spectrum["data_labels"] = dim
-            spectrum["units"][dim] = convert_units(unit)
+            spectrum["data"][label] = data
+            spectrum["data_labels"].append(label)
+            spectrum["units"][label] = convert_units(unit)
 
         spectrum["igor_binary_wave_format_version"] = ibw_version
-        # spectrum["intensity/@units"] = convert_units(data_unit_label)
 
         region_metadata = self._parse_region_metadata(region_id=0, notes=notes)
         spectrum.update(region_metadata)

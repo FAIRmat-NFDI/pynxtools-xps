@@ -802,7 +802,7 @@ class XPSReader(MultiFormatReader):
                 try:
                     return np.array(xr_data.coords[path].values)
                 except KeyError:
-                    pass
+                    return None
 
     def set_nxdata_defaults(self, template):
         """Set the default for automatic plotting."""

@@ -176,6 +176,12 @@ class XPSReader(MultiFormatReader):
         for ext in XPSReader.__prmt_file_ext__:
             self.extensions[ext] = self.handle_data_file
 
+        self.processing_order = [ext for ext in XPSReader.__prmt_file_ext__] + [
+            ".yml",
+            ".yaml",
+            ".json",
+        ]
+
     def set_config_file(self, file_path: str) -> Dict[str, Any]:
         if self.config_file is not None:
             logger.info(

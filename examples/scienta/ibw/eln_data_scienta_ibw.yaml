@@ -150,7 +150,12 @@ instrument:
       value: 0.0
       unit: A
 sample:
+<<<<<<< HEAD
   identifier: Sample 0001
+=======
+  identifier:
+    identifier: Sample25
+>>>>>>> 1e9f4d7 (use different data in example)
   description: Cu-HHTP/Glass on standard sample holder
   chemical_formula: Cu
   physical_form: pellet

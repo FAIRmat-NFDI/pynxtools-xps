@@ -80,16 +80,16 @@ def test_extract_unit(
 ):
     result_value, result_unit = extract_unit(key, value, unit_missing)
 
-    assert isinstance(
-        result_value, type(expected_value)
-    ), f"Expected type {type(expected_value)} but got type {type(result_value)}"
+    assert isinstance(result_value, type(expected_value)), (
+        f"Expected type {type(expected_value)} but got type {type(result_value)}"
+    )
 
-    assert (
-        result_value == expected_value
-    ), f"Expected {expected_value} but got {result_value}"
-    assert (
-        result_unit == expected_unit
-    ), f"Expected {expected_unit} but got {result_unit}"
+    assert result_value == expected_value, (
+        f"Expected {expected_value} but got {result_value}"
+    )
+    assert result_unit == expected_unit, (
+        f"Expected {expected_unit} but got {result_unit}"
+    )
 
 
 @pytest.mark.parametrize(

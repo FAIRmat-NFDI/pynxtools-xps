@@ -414,12 +414,12 @@ def construct_data_key(spectrum: Dict[str, Any]) -> str:
 
     """
     if "loop_no" in spectrum:
-        cycle_key = f'cycle{spectrum["loop_no"]}'
+        cycle_key = f"cycle{spectrum['loop_no']}"
     else:
         cycle_key = "cycle0"
 
     if "scan_no" in spectrum:
-        scan_key = f'scan{spectrum["scan_no"]}'
+        scan_key = f"scan{spectrum['scan_no']}"
     else:
         scan_key = "scan0"
 

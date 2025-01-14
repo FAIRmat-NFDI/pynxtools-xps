@@ -266,8 +266,8 @@ class SleMapperSpecs(XPSMapper):
                 if units is not None:
                     self._xps_dict[f"{root}/{mpes_key}/@units"] = units
 
-        self._xps_dict[f'{path_map["electronanalyser"]}/name'] = spectrum["devices"][0]
-        self._xps_dict[f'{path_map["source"]}/name'] = spectrum["devices"][1]
+        self._xps_dict[f"{path_map['electronanalyser']}/name"] = spectrum["devices"][0]
+        self._xps_dict[f"{path_map['source']}/name"] = spectrum["devices"][1]
 
         # Create keys for writing to data
         scan_key = construct_data_key(spectrum)
@@ -298,7 +298,7 @@ class SleMapperSpecs(XPSMapper):
             # TODO: fix this hotfix so that all data can be written
 
             # Add energy axis to energy_calibration
-            calib_energy_key = f'{path_map["process/energy_calibration"]}/energy'
+            calib_energy_key = f"{path_map['process/energy_calibration']}/energy"
             self._xps_dict[calib_energy_key] = energy
 
             self._xps_dict["data"][entry][scan_key.split("_")[0]] = xr.DataArray(

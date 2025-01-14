@@ -400,9 +400,7 @@ class XmlParserSpecs:
         for unit in units:
             if f"_[{unit}]" in section_nm_reslvr:
                 section_nm_reslvr, _ = section_nm_reslvr.split("_")
-                self.metadata_dict[f"{parent_path}/" f"{section_nm_reslvr}/@units"] = (
-                    unit
-                )
+                self.metadata_dict[f"{parent_path}/{section_nm_reslvr}/@units"] = unit
 
         parent_path, self.tail_part_frm_struct = self.check_last_part_repetition(
             parent_path, self.tail_part_frm_struct, section_nm_reslvr
@@ -513,7 +511,7 @@ class XmlParserSpecs:
 
         if child_num == 0:
             if "name" in elmt_attr.keys():
-                section_nm_reslvr = f'{elmt_attr["name"]}'
+                section_nm_reslvr = f"{elmt_attr['name']}"
                 value = self.restructure_value(element_.text, element_.tag)
 
                 parent_path, self.tail_part_frm_othr = self.check_last_part_repetition(

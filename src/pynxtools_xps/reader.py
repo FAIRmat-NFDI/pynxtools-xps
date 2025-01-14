@@ -157,7 +157,7 @@ class XPSReader(MultiFormatReader):
     )
 
     __vndr_err_msg__ = (
-        "Need an XPS data file from one of the following vendors: " f"{__vendors__}"
+        f"Need an XPS data file from one of the following vendors: {__vendors__}"
     )
 
     def __init__(self, *args, **kwargs):

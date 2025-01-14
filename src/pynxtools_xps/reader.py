@@ -176,7 +176,7 @@ class XPSReader(MultiFormatReader):
         for ext in XPSReader.__prmt_file_ext__:
             self.extensions[ext] = self.handle_data_file
 
-        self.processing_order = [ext for ext in XPSReader.__prmt_file_ext__] + [
+        self.processing_order = XPSReader.__prmt_file_ext__ + [
             ".yml",
             ".yaml",
             ".json",

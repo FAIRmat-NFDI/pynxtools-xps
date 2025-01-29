@@ -270,7 +270,7 @@
       "data_errors":"@data:errors",
       "data/@units":"counts",
       "DATA[*]":"@data:*.scans",
-      "DATA[*]/@units":"counts",
+      "DATA[*]/@units":"counts_per_second",
       "energy":"@data:energy",
       "energy/@type":"kinetic",
       "energy/@units":"eV",

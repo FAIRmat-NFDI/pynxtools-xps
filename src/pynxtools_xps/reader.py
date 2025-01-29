@@ -636,7 +636,8 @@ class XPSReader(MultiFormatReader):
         if path.startswith("@data:*"):
             return get_signals(key=path.split(":*.")[-1])
 
-        if any(x in path for x in ["counts", "raw/@units"]):
+        # if any(x in path for x in ["counts", "raw/@units"]):
+        if re.search(r"\bcounts\b", path) or "raw/@units" in path:
             return get_signals(key="channels")
 
         return get_signals(key="scans")

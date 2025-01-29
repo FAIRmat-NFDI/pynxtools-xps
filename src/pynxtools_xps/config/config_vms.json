@@ -10,7 +10,6 @@
     "experiment_laboratory":"@eln",
     "entry_identifier":"@eln",
     "duration":null,
-    "duration/@units":"s",
     "method":"@attrs:region/analysis_method",
     "program_name":"@eln"
   },

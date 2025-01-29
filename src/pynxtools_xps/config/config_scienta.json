@@ -152,7 +152,7 @@
           "raw":"@data:raw_data",
           "raw/@units":"counts",
           "DATA[*]":"@data:*.channels",
-          "DATA[*]/@units":"counts_per_second"
+          "DATA[*]/@units":"counts"
         }
       }
     },

@@ -77,7 +77,7 @@ function update_vms_txt_export_ref {
 function update_vms_analysis_ref {
   cd vms_analysis/
   echo "Update Vamas data anaylsis export reference"
-  dataconverter dataconverter FeO* eln.yaml --reader $READER --nxdl $NXDL --ignore-undocumented --output vms_analysis.nxs
+  dataconverter FeO* eln.yaml --reader $READER --nxdl $NXDL --ignore-undocumented --output vms_analysis_ref.nxs
   cd ..
 }
 

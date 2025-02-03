@@ -764,11 +764,12 @@ class XPSReader(MultiFormatReader):
             """Extract unique 'ENTRY[<some-name>]/FIT[<some-other-name>]' pairs from template keys."""
             pattern = re.compile(r"^/?ENTRY\[(?P<entry>[^]]+)\]/FIT\[(?P<fit>[^]]+)\]/")
 
-            return {
-                f"{m.group('entry')}/{m.group('fit')}"
-                for key in template
-                if (m := pattern.match(key))
-            }
+            result = set()
+            for key in template:
+                m = pattern.match(key)
+                if m:
+                    result.add(f"{m.group('entry')}/{m.group('fit')}")
+            return result
 
         def get_first_matching_fit(
             entry_name: str, unique_fits: Set[str]

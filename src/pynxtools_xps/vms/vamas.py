@@ -136,7 +136,7 @@ class VamasMapper(XPSMapper):
 
     def __init__(self):
         self.multiple_spectra_groups: bool = True
-        self.same_spectrum_names: bool = False
+        self.duplicate_spectrum_types: List[str] = []
 
         super().__init__()
 
@@ -156,18 +156,23 @@ class VamasMapper(XPSMapper):
     def construct_data(self):
         """Map VMS format to NXmpes-ready dict."""
 
-        def has_duplicate_spectrum_type(spectra: List[Dict]) -> bool:
+        def get_duplicate_spectrum_types(spectra: list[dict]) -> set:
             """
-            Check if any two or more spectra in the list have the same 'spectrum_type'.
+            Find all duplicate 'spectrum_type' values in the given list of spectra.
+
+            Returns a set of duplicate spectrum types.
             """
             seen = set()
+            duplicates = set()
+
             for spectrum in spectra:
                 spectrum_type = spectrum.get("spectrum_type")
-                if spectrum_type:
+                if spectrum_type:  # Ensure it's not None or empty
                     if spectrum_type in seen:
-                        return True
+                        duplicates.add(spectrum_type)
                     seen.add(spectrum_type)
-            return False
+
+            return duplicates
 
         spectra = deepcopy(self.raw_data)
 
@@ -176,8 +181,8 @@ class VamasMapper(XPSMapper):
         if len({spectrum.get("group_name") for spectrum in spectra}) == 1:
             self.multiple_spectra_groups = False
 
-        if not self.multiple_spectra_groups and has_duplicate_spectrum_type(spectra):
-            self.same_spectrum_names = True
+        if not self.multiple_spectra_groups:
+            self.duplicate_spectrum_types = get_duplicate_spectrum_types(spectra)
 
         for spectrum in spectra:
             self._update_xps_dict_with_spectrum(spectrum)
@@ -198,7 +203,10 @@ class VamasMapper(XPSMapper):
             if val:
                 entry_parts += [val]
 
-        if len(entry_parts) == 1 and self.same_spectrum_names:
+        if (
+            len(entry_parts) == 1
+            and spectrum["spectrum_type"] in self.duplicate_spectrum_types
+        ):
             entry_parts += [spectrum["time_stamp"]]
 
         entry = construct_entry_name(entry_parts)

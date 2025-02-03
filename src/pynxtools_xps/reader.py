@@ -759,46 +759,49 @@ class XPSReader(MultiFormatReader):
 
     def set_root_default(self, template):
         """Set the default for automatic plotting."""
-        survey_count_ = 0
-        count = 0
+        survey_count, count = 0, 0
 
-        def get_first_fit_structure_names(template: Template) -> Optional[str]:
-            """
-            Returns '<some-name>/<some-other-name>' for the first key that matches the structure:
-            ENTRY[<some-name>]/FIT[<some-other-name>]/<something>
+        def get_unique_nxfit_names(template) -> Set[str]:
+            """Extract unique 'ENTRY[<some-name>]/FIT[<some-other-name>]' pairs from template keys."""
+            pattern = re.compile(r"^/?ENTRY\[(?P<entry>[^]]+)\]/FIT\[(?P<fit>[^]]+)\]/")
 
-            Args:
-                dtemplate (Template): The dictionary with keys as paths.
+            return {
+                f"{m.group('entry')}/{m.group('fit')}"
+                for key in template
+                if (m := pattern.match(key))
+            }
 
-            Returns:
-                Optional[str]: The extracted names or None if no match is found.
-            """
-            pattern = re.compile(
-                r"^/?ENTRY\[(?P<entry>[^]]+)\]/FIT\[(?P<fit>[^]]+)\]/[^/]+"
-            )
-
-            for key in template:
-                match = pattern.match(key)
-                if match:
-                    return f"{match.group('entry')}/{match.group('fit')}"
-
+        def get_first_matching_fit(
+            entry_name: str, unique_fits: Set[str]
+        ) -> Optional[str]:
+            """Return the first '<fit>' name that matches the given entry name, if any."""
+            for fit in unique_fits:
+                if fit.startswith(f"{entry_name}/"):
+                    return fit.split("/", 1)[1]  # Extract only the fit name
             return None
 
-        fit_name = get_first_fit_structure_names(template)
-
-        if fit_name:
-            template["/@default"] = fit_name
-            return
+        unique_fits = sorted(
+            get_unique_nxfit_names(template)
+        )  # Sorting for deterministic ordering
 
         for entry in self.get_entry_names():
-            if "Survey" in entry and survey_count_ == 0:
-                survey_count_ += 1
-                template["/@default"] = entry
+            if unique_fits:
+                template["/@default"] = unique_fits[0]
+                match = get_first_matching_fit(entry, unique_fits)
+                if match:
+                    template[f"/{entry}/@default"] = match
+                else:
+                    template[f"/{entry}/@default"] = "data"
 
-            # If no Survey set any scan for default
-            if survey_count_ == 0 and count == 0:
-                count += 1
-                template["/@default"] = entry
+            else:
+                if "Survey" in entry and survey_count == 0:
+                    survey_count += 1
+                    template["/@default"] = entry
+
+                # If no Survey, set any scan for default
+                elif survey_count == 0 and count == 0:
+                    count += 1
+                    template["/@default"] = entry
 
     def read(
         self,

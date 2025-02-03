@@ -167,7 +167,7 @@ class VamasMapper(XPSMapper):
 
             for spectrum in spectra:
                 spectrum_type = spectrum.get("spectrum_type")
-                if spectrum_type:  # Ensure it's not None or empty
+                if spectrum_type:
                     if spectrum_type in seen:
                         duplicates.add(spectrum_type)
                     seen.add(spectrum_type)

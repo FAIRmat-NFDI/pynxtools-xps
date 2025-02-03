@@ -702,7 +702,7 @@ class XPSReader(MultiFormatReader):
         for pattern, func in patterns.items():
             if re.search(pattern, key):
                 return func()
-            
+
         # if re.search(r"\bcounts\b", path) or "raw/@units" in path:
         #     return get_signals(key="channels")
 
@@ -766,6 +766,34 @@ class XPSReader(MultiFormatReader):
         """Set the default for automatic plotting."""
         survey_count_ = 0
         count = 0
+
+        def get_first_fit_structure_names(template: Template) -> Optional[str]:
+            """
+            Returns '<some-name>/<some-other-name>' for the first key that matches the structure:
+            ENTRY[<some-name>]/FIT[<some-other-name>]/<something>
+
+            Args:
+                dtemplate (Template): The dictionary with keys as paths.
+
+            Returns:
+                Optional[str]: The extracted names or None if no match is found.
+            """
+            pattern = re.compile(
+                r"^/?ENTRY\[(?P<entry>[^]]+)\]/FIT\[(?P<fit>[^]]+)\]/[^/]+"
+            )
+
+            for key in template:
+                match = pattern.match(key)
+                if match:
+                    return f"{match.group('entry')}/{match.group('fit')}"
+
+            return None
+
+        fit_name = get_first_fit_structure_names(template)
+
+        if fit_name:
+            template["/@default"] = fit_name
+            return
 
         for entry in self.get_entry_names():
             if "Survey" in entry and survey_count_ == 0:

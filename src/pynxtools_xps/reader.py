@@ -496,6 +496,7 @@ class XPSReader(MultiFormatReader):
             ]
 
             self.xps_data = {**self.xps_data, **data_dict}
+
             if not self.overwrite_keys:
                 for key, value1, value2 in existing:
                     self.xps_data[key] = concatenate_values(value1, value2)
@@ -755,7 +756,7 @@ class XPSReader(MultiFormatReader):
                 except KeyError:
                     pass
 
-    def set_root_default(self, template):
+    def set_nxdata_defaults(self, template):
         """Set the default for automatic plotting."""
         survey_count, count = 0, 0
 
@@ -787,9 +788,10 @@ class XPSReader(MultiFormatReader):
                 template["/@default"] = unique_fits[0]
                 match = get_first_matching_fit(entry, unique_fits)
                 if match:
-                    template[f"/{entry}/@default"] = match
+                    template[f"/ENTRY[{entry}]/@default"] = match
+
                 else:
-                    template[f"/{entry}/@default"] = "data"
+                    template[f"/ENTRY[{entry}]/@default"] = "data"
 
             else:
                 if "Survey" in entry and survey_count == 0:
@@ -811,7 +813,7 @@ class XPSReader(MultiFormatReader):
         self.overwrite_keys = _check_multiple_extensions(file_paths)
 
         template = super().read(template, file_paths, objects, suppress_warning=True)
-        self.set_root_default(template)
+        self.set_nxdata_defaults(template)
 
         final_template = Template()
         for key, val in template.items():

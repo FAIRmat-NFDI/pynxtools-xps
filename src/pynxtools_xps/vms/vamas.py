@@ -775,21 +775,27 @@ class VamasParser:
             if "casa" in comment_dict:
                 casa_process = comment_dict["casa"]
 
+                fit_aux_signals = ["envelope"]
+
                 for energy_calibration in casa_process.casa_data["energy_calibrations"]:
                     block.x = energy_calibration.apply_energy_shift(block.x)
 
-                for region in casa_process.casa_data["regions"]:
+                for i, region in enumerate(casa_process.casa_data["regions"]):
                     region.calculate_background(block.x, block.y)
                     region.data_cps = region.data / block.dwell_time
+                    fit_aux_signals += [f"background{i}_intensity"]
 
-                for component in casa_process.casa_data["components"]:
+                for i, component in enumerate(casa_process.casa_data["components"]):
                     component.calculate_lineshape(block.x)
                     component.data_cps = component.data / block.dwell_time
+                    fit_aux_signals += [f"peak{i}_intensity"]
 
                 flattened_casa_data = casa_process.flatten_metadata()
 
                 if casa_process.casa_data["components"]:
                     flattened_casa_data["fit_label"] = spectrum_type
+
+                flattened_casa_data["fit_aux_signals"] = fit_aux_signals
 
                 comment_dict.update(flattened_casa_data)
                 del comment_dict["casa"]

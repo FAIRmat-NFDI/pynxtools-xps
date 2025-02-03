@@ -315,12 +315,14 @@
     "data":{
       "@axes":["input_independent"],
       "@signal":"input_dependent",
-      "@auxiliary_signals":["envelope"],
+      "@auxiliary_signals":"!@attrs:fit_aux_signals",
       "input_independent":"@link:/entry/data/energy",
       "input_dependent":"@link:/entry/data/data",
       "envelope":"['@attrs:fit_envelope_cps/data', '@attrs:fit_envelope/data']",
       "envelope/@units":"counts_per_second",
-      "residual": null
+      "residual": null,
+      "peak*_intensity":"@link:/entry/fit/peak*/data/intensity",
+      "background*_intensity":"@link:/entry/fit/background*/data/intensity"
     },
     "peakPEAK[peak*]":{
       "@default":"data",
@@ -368,7 +370,7 @@
       "data":{
         "@axes":["position"],
         "@signal":"intensity",
-        "intensity":"['@attrs:background_intensity/data_cps', '@attrs:background_intensity/data', '@attrs:region*/data_cps', '@attrs:region*/data']",
+        "intensity":"['@attrs:background_intensity_cps/data', '@attrs:background_intensity/data', '@attrs:region*/data_cps', '@attrs:region*/data']",
         "intensity/@units":"counts_per_second",
         "position":"@data:energy",
         "position/@units":"@attrs:energy_units"
@@ -457,12 +459,14 @@
     "data":"@data:average",
     "data_errors":"@data:errors",
     "data/@units":"['@attrs:y_units_1','@attrs:y_units', 'counts_per_second']",
+    "data/@long_name":"intensity",
     "DATA[*]":"@data:*.scans",
     "DATA[*]/@units":"['@attrs:y_units_1','@attrs:y_units', 'counts_per_second']",
     "energy":"@data:energy",
     "energy/@type":"@attrs:energy_label",
     "energy/@units":"['@attrs:energy_units', 'eV']",
     "energy/@reference":null,
+    "energy/@long_name":"energy",
     "@energy_indices":0
   }
 }

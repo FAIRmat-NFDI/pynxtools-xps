@@ -217,11 +217,11 @@ class TxtMapperVamasExport(XPSMapper):
 
         # Create key for writing to data.
         scan_key = construct_data_key(spectrum)
-        # energy = np.array(spectrum["binding_energy/data"])
-        # intensity = np.array(spectrum["counts_per_second/data"])
 
         energy = np.array(spectrum["kinetic_energy/data"])
-        intensity = np.array(spectrum["counts/data"])
+        # energy = np.array(spectrum["binding_energy/data"])
+        intensity = np.array(spectrum["counts_per_second/data"])
+        # intensity = np.array(spectrum["counts/data"])
 
         # If multiple spectra exist to entry, only create a new
         # xr.Dataset if the entry occurs for the first time.

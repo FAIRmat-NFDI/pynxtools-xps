@@ -338,11 +338,12 @@ class CasaEnergyCalibration(XpsDataclass):
     range_calibration: bool = False
 
     def apply_energy_shift(self, x: float):
-        if self.operation == "addition" and self.energy_type == "binding":
-            return x - self.energy_offset
+        if self.operation == "addition":
+            if self.energy_type == "binding":
+                return x - self.energy_offset
 
-        elif self.operation == "addition" and self.energy_type == "kinetic":
-            return x + self.energy_offset
+            elif self.energy_type == "kinetic":
+                return x + self.energy_offset
 
         if self.range_calibration:
             pass  # ToDo: apply range calibration

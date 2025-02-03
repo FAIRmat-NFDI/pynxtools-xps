@@ -176,9 +176,8 @@ class VamasMapper(XPSMapper):
         if len({spectrum.get("group_name") for spectrum in spectra}) == 1:
             self.multiple_spectra_groups = False
 
-        if not self.multiple_spectra_groups:
-            if has_duplicate_spectrum_type(spectra):
-                self.same_spectrum_names = True
+        if not self.multiple_spectra_groups and has_duplicate_spectrum_type(spectra):
+            self.same_spectrum_names = True
 
         for spectrum in spectra:
             self._update_xps_dict_with_spectrum(spectrum)

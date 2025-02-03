@@ -468,29 +468,24 @@ class XPSReader(MultiFormatReader):
 
         common_entries, dict_indices = check_for_same_entries(self.xps_data_dicts)
 
-        if common_entries:
-            if not self.overwrite_keys:
-                for entry, indices in zip(common_entries, dict_indices):
-                    dicts_with_common_entries = [
-                        self.xps_data_dicts[i] for i in indices
-                    ]
+        if common_entries and not self.overwrite_keys:
+            for entry, indices in zip(common_entries, dict_indices):
+                dicts_with_common_entries = [self.xps_data_dicts[i] for i in indices]
 
-                    for i, data_dict in enumerate(dicts_with_common_entries):
-                        for key, value in data_dict.copy().items():
-                            new_key = key.replace(
-                                f"/ENTRY[{entry}]", f"/ENTRY[{entry}{i}]"
-                            )
-                            if key == "data":
-                                for entry_name, xarr in value.copy().items():
-                                    if entry_name == entry:
-                                        new_entry_name = entry_name.replace(
-                                            f"{entry}", f"{entry}{i}"
-                                        )
-                                        value[new_entry_name] = xarr
-                                        del value[entry_name]
-                            if new_key != key:
-                                data_dict[new_key] = value
-                                del data_dict[key]
+                for i, data_dict in enumerate(dicts_with_common_entries):
+                    for key, value in data_dict.copy().items():
+                        new_key = key.replace(f"/ENTRY[{entry}]", f"/ENTRY[{entry}{i}]")
+                        if key == "data":
+                            for entry_name, xarr in value.copy().items():
+                                if entry_name == entry:
+                                    new_entry_name = entry_name.replace(
+                                        f"{entry}", f"{entry}{i}"
+                                    )
+                                    value[new_entry_name] = xarr
+                                    del value[entry_name]
+                        if new_key != key:
+                            data_dict[new_key] = value
+                            del data_dict[key]
 
         for data_dict in self.xps_data_dicts:
             # If there are multiple input data files of the same type,

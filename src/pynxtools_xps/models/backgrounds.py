@@ -248,9 +248,7 @@ class Shirley:
             )
 
         # Reverse back the result if the data was originally reversed
-        if is_reversed:
-            return np.flip(y[-1] + background)
-        return y[-1] + background
+        return np.flip(y[-1] + background) if is_reversed else y[-1] + background
 
     def formula(self) -> str:
         """

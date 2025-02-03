@@ -195,7 +195,7 @@ class TxtMapperVamasExport(XPSMapper):
         # pylint: disable=too-many-locals,duplicate-code
         entry_parts = []
         for part in ["group_name", "spectrum_type"]:
-            val = spectrum.get(part, None)
+            val = spectrum.get(part)
             if val:
                 entry_parts += [val]
 
@@ -325,9 +325,7 @@ class TextParser(ABC):  # pylint: disable=too-few-public-methods
             data and metadata.
 
         """
-        blocks = []
-
-        return blocks
+        return []
 
     @abstractmethod
     def _build_list_of_dicts(self, blocks):
@@ -348,9 +346,7 @@ class TextParser(ABC):  # pylint: disable=too-few-public-methods
             List of dicts with spectrum data and metadata.
 
         """
-        spectra = []
-
-        return spectra
+        return []
 
     def _separate_header_and_data(self, block):
         """
@@ -402,15 +398,14 @@ class TextParserRows(TextParser):
             List of dicts with spectrum data and metadata.
 
         """
-        spectra = []
-
         header, data_lines = self._separate_header_and_data(blocks)
         settings = self._parse_header(header)
         data = self._parse_data(data_lines)
-        for spec_settings, spec_data in zip(settings, data):
-            spectra += [{**spec_settings, **spec_data}]
 
-        return spectra
+        return [
+            {**spec_settings, **spec_data}
+            for spec_settings, spec_data in zip(settings, data)
+        ]
 
     def _parse_header(self, header):
         """
@@ -653,11 +648,10 @@ class TextParserColumns(TextParser):
                     flattened[f"{supkey}/{subkey}"] = value
 
             for param in ("Area", "FWHM", "Position", "data"):
-                if param in fit_data:
-                    if param in fit_data and i < len(fit_data[param]):
-                        param_value = _format_value(fit_data[param][i])
-                        if param_value:
-                            flattened[f"{supkey}/{param.lower()}"] = param_value
+                if param in fit_data and i < len(fit_data[param]):
+                    param_value = _format_value(fit_data[param][i])
+                    if param_value:
+                        flattened[f"{supkey}/{param.lower()}"] = param_value
 
         if self.uniform_energy_steps:
             uniform = False
@@ -784,7 +778,7 @@ class CsvMapperVamasResult(XPSMapper):
                 if (match := pattern.search(key))
             }
 
-            for key, prefix in filtered_keys.items():
+            for key in filtered_keys:
                 value = existing_dict[key]
                 if value in self.data_dict:
                     subdict = self.data_dict[value]
@@ -826,7 +820,7 @@ class CsvResultParser:
                 # Process rows of the table
                 if reading_table:
                     table_data[row[0]] = {}
-                    for i, (header, value) in enumerate(zip(headers, row[1:])):
+                    for header, value in zip(headers, row[1:]):
                         if value:
                             formatted_value = _format_value(value)
                             if header == "atomic_concentration" and isinstance(

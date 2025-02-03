@@ -293,11 +293,10 @@ class GaussianLorentzianSum(Peak):
             "(area / (pi * width)) * exp[-(4 * ln(2) * (x - position)^2) / width^2]"
         )
         lorentz_formula = "area / (pi * width) / (1 + (4 * (x - position)^2) / width^2)"
-        combined_formula = (
+        return (
             f"SGL(x; position, width, area, fraction_gauss): fraction_gauss * G(x) + (1 - fraction_gauss) * L(x) =  fraction_gauss * ({gauss_formula}) + "
             f"(1 - fraction_gauss) * ({lorentz_formula})"
         )
-        return combined_formula
 
     def __repr__(self) -> str:
         """
@@ -369,11 +368,10 @@ class GaussianLorentzianProduct(Peak):
             "(area / (pi * width)) * exp[-(4 * ln(2) * (x - position)^2) / width^2]"
         )
         lorentz_formula = "area / (pi * width) / (1 + (4 * (x - position)^2) / width^2)"
-        combined_formula = (
+        return (
             f"GL(x; position, width, area, fraction_gauss): fraction_gauss * G(x) * (1 - fraction_gauss) * L(x) = fraction_gauss * ({gauss_formula}) * "
             f"(1 - fraction_gauss) * ({lorentz_formula})"
         )
-        return combined_formula
 
     def __repr__(self) -> str:
         """

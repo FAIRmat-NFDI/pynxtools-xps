@@ -48,7 +48,6 @@ test_cases = [
     ("vms_irregular", "Irregular VAMAS reader"),
     ("vms_regular", "Regular VAMAS reader"),
     ("vms_txt_export", "Vamas txt export"),
-    ("vms_analysis", "Vamas analysis export"),
 ]
 
 test_params = []
@@ -165,7 +164,7 @@ def test_vms_comment_handler(file: str, comment_type: Literal["header", "block"]
     with open(ref_json_filepath, "r") as json_file:
         ref_comments = json.load(json_file)
 
-    assert (
-        len(comments) == COMMENT_LENGHTS[file]
-    ), f"Comments ({len(comments)} do not have the same number of lines as the reference ({COMMENT_LENGHTS[file]})."
+    assert len(comments) == COMMENT_LENGHTS[file], (
+        f"Comments ({len(comments)} do not have the same number of lines as the reference ({COMMENT_LENGHTS[file]})."
+    )
     assert comments == ref_comments

@@ -337,7 +337,7 @@ class TougaardU3:
         Returns:
         - str: The string representation of the object.
         """
-        return f"TougaardU3(E0={self.E0}, A={self.A}, " f"C={self.C})"
+        return f"TougaardU3(E0={self.E0}, A={self.A}, C={self.C})"
 
 
 class TougaardU4:

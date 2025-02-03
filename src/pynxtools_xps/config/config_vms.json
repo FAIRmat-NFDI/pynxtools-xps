@@ -318,10 +318,9 @@
       "@auxiliary_signals":["envelope"],
       "input_independent":"@link:/entry/data/energy",
       "input_dependent":"@link:/entry/data/data",
-      "envelope":"['@attrs:fit_envelope_cps/data', '@attrs:fit_envelope_cps/data']",
+      "envelope":"['@attrs:fit_envelope_cps/data', '@attrs:fit_envelope/data']",
       "envelope/@units":"counts_per_second",
-      "residual": null,
-      "residual/@units":"counts_per_second"
+      "residual": null
     },
     "peakPEAK[peak*]":{
       "@default":"data",

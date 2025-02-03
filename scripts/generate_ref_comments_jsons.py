@@ -62,6 +62,10 @@ def generate_ref_comment_jsons():
 
         comments = handle_comments(comment_lines, comment_type=comment_type)
 
+        if file == "casa_process.vms":
+            casa_process = comments["casa"]
+            comments = casa_process.flatten_metadata()
+
         for key, val in comments.items():
             if isinstance(val, np.ndarray):
                 comments[key] = val.tolist()

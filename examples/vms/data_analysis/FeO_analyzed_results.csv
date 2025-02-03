@@ -1,0 +1,46 @@
+C:\Users\pielsticker\Lukas\FAIRMat\code\pynxtools-xps\tests\data\vms_analysis\FeO_analyzed.vms	
+
+Name	Position	FWHM	Raw Area	Area/(RSF*T*MFP)	%At Conc	Goodness of Fit	
+Fe 2p	709.03	3.86	63400.62	1430.56	41.89	-1.#IND	
+Fe 2p	715.73	7.89	29867.34	671.00	19.65	-1.#IND	
+Fe 2p	722.18	4.73	42839.74	958.37	28.06	-1.#IND	
+Fe 2p	730.22	7.88	15954.51	355.03	10.40	-1.#IND	
+
+
+Peak Area Results Compact form (Atomic Concentrations)
+Name	%Conc	Sample Identifier
+	St.Dev.
+Fe 2p	41.89	FeO
+	 
+Fe 2p	19.65	
+	 
+Fe 2p	28.06	
+	 
+Fe 2p	10.40	
+	 
+
+
+Peak Area Results Compact form (RSF Corrected Peak Intensities and St.Dev.)
+Name	Area	Sample Identifier
+	St.Dev.
+Fe 2p	1430.56	FeO
+	 
+Fe 2p	670.996	
+	 
+Fe 2p	958.374	
+	 
+Fe 2p	355.028	
+	 
+
+
+Peak Area Results
+
+FeO	Fe 2p	Fe 2p	Fe 2p	Fe 2p	
+%Conc	41.89	19.65	28.06	10.40	
+St.Dev.	 	 	 	 	
+
+Peak Area Results (RSF Corrected Intensities and St.Dev.)
+
+FeO	Fe 2p	Fe 2p	Fe 2p	Fe 2p	
+Area	1430.56	670.996	958.374	355.028	
+St.Dev.	 	 	 	 	

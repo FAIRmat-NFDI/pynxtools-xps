@@ -19,11 +19,59 @@ Data model for CasaXPS.
 """
 
 import re
-from typing import List, Dict, Any
+import logging
+from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
+import numpy as np
 
 from pynxtools_xps.reader_utils import XpsDataclass
 from pynxtools_xps.value_mappers import convert_energy_type
+
+from pynxtools_xps.models.lineshapes import (
+    Peak,
+    LorentzianAsymmetric,
+    LorentzianFinite,
+    GaussianLorentzianSum,
+    GaussianLorentzianProduct,
+    DoniachSunjic,
+)
+
+from pynxtools_xps.models.backgrounds import (
+    LinearBackground,
+    Shirley,
+    StepUp,
+    StepDown,
+    TougaardU3,
+    TougaardU4,
+)
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+
+def split_after_letters(string: str):
+    """
+    Splits the part of the string after the leading letters by commas.
+
+    Parameters:
+        string (str): The input string.
+
+    Returns:
+        tuple: A tuple with the leading letters and the list of values after splitting by commas.
+    """
+    # Extract the leading letters
+    match = re.match(r"([A-Za-z\s]+)", string)
+    leading_letters = match.group(0) if match else ""
+
+    # Remove the leading letters and split the remaining part by commas
+    remaining_part = string[len(leading_letters) :]
+    split_values = remaining_part.split(",")
+
+    if split_values == [""]:
+        return leading_letters, []
+
+    return leading_letters, [float(val) for val in split_values]
 
 
 class CasaProcess:
@@ -69,21 +117,23 @@ class CasaProcess:
 
     def flatten_metadata(self):
         # Write process data
-        process_key_map: Dict[str, List[str]] = {
-            "process": ["energy_calibrations", "intensity_calibrations", "smoothings"],
-            "peak_fitting": ["regions", "components"],
-        }
+        process_keys: List[str] = [
+            "energy_calibrations",
+            "intensity_calibrations",
+            "smoothings",
+            "regions",
+            "components",
+        ]
 
         flattened_dict: Dict[str, Any] = {}
 
-        for grouping, process_key_list in process_key_map.items():
-            for spectrum_key in process_key_list:
-                processes = self.casa_data[spectrum_key]
-                for i, process in enumerate(processes):
-                    process_key = f"{spectrum_key}/{spectrum_key.rstrip('s')}{i}"
-                    for key, value in process.dict().items():
-                        key = key.replace("_units", "/@units")
-                        flattened_dict[f"{process_key}/{key}"] = value
+        for process_key in process_keys:
+            processes = self.casa_data[process_key]
+            for i, process in enumerate(processes):
+                spectrum_key = f"{process_key.rstrip('s')}{i}"
+                for key, value in process.dict().items():
+                    key = key.replace("_units", "/@units")
+                    flattened_dict[f"{spectrum_key}/{key}"] = value
 
         return flattened_dict
 
@@ -284,8 +334,19 @@ class CasaEnergyCalibration(XpsDataclass):
     measured_energies_units: str = "eV"
     aligned_energy: float = 0.0
     aligned_energy_units: str = "eV"
-    operation: str = "eV"
+    operation: str = "ADD"
     range_calibration: bool = False
+
+    def apply_energy_shift(self, x: float):
+        if self.operation == "addition":
+            if self.energy_type == "binding":
+                return x - self.energy_offset
+
+            elif self.energy_type == "kinetic":
+                return x + self.energy_offset
+
+        if self.range_calibration:
+            pass  # ToDo: apply range calibration
 
 
 @dataclass
@@ -311,14 +372,66 @@ class CasaRegion(XpsDataclass):
     av_width: float = 0.0
     av_width_units: str = "eV"
     start_offset: float = 0.0
-    start_offset_units: str = "counts_per_second"
+    start_offset_units: str = ""
     end_offset: float = 0.0
-    end_offset_units: str = "counts_per_second"
+    end_offset_units: str = ""
     cross_section: list = field(default_factory=list)
     tag: str = ""
     unknown_0: float = 0.0
     unknown_1: float = 0.0
     rsf_effective: float = 0.0
+
+    def calculate_background(self, x: np.ndarray, y: np.ndarray):
+        backgrounds: Dict[str, Any] = {
+            "Linear": LinearBackground,
+            "Shirley": Shirley,
+            "Step Up": StepUp,
+            "Step Down": StepDown,
+            "U 2 Tougaard": TougaardU3,
+            "U 3 Tougaard": TougaardU3,
+            "U 4 Tougaard": TougaardU4,
+        }
+
+        background_params = [
+            float(param) for param in self.cross_section if float(param)
+        ]
+
+        try:
+            background_class = backgrounds[self.bg_type]
+
+            try:
+                background = background_class(*background_params)
+            except TypeError:
+                background = background_class()
+
+            if self.end > self.start:
+                min_x = self.start
+                max_x = self.end
+            else:
+                min_x = self.end
+                max_x = self.start
+
+            region = np.argwhere((x >= min_x) & (x <= max_x))
+            fit_region = slice(region[0, 0], region[-1, 0], 1)
+
+            self.start_offset = 100
+
+            y_start_offset = y[0] * (self.start_offset / 100.0)
+            y_end_offset = y[-1] * (self.end_offset / 100.0)
+            y[0] -= y_start_offset
+            y[-1] -= y_end_offset
+
+            x, y = x[fit_region], y[fit_region]
+
+            self.data = background.calc_background(x, y)
+
+            self.formula = background.formula()
+            self.description = str(background)
+
+        except KeyError:
+            logger.warning(
+                f"Background {self.name} (type {self.bg_type}) could not be parsed because no model exists for it."
+            )
 
 
 @dataclass
@@ -358,3 +471,32 @@ class CasaComponent(XpsDataclass):
     mass: float = 0.0
     tag: str = ""
     const: str = ""  # CONST
+
+    atomic_concentration: float = 0.0
+
+    def calculate_lineshape(self, x: np.ndarray):
+        lineshapes: Dict[str, Any] = {
+            "GL": GaussianLorentzianProduct,
+            "SGL": GaussianLorentzianSum,
+            "LA": LorentzianAsymmetric,
+            "LF": LorentzianFinite,
+            "DS": DoniachSunjic,
+        }
+
+        leading_letters, params = split_after_letters(self.lineshape)
+
+        try:
+            peak_class = lineshapes[leading_letters]
+
+            peak_parameters = [self.position, self.width, self.area] + params
+
+            peak = peak_class(*peak_parameters)
+
+            self.data = peak.calc_lineshape(x)
+            self.formula = peak.formula()
+            self.description = str(peak)
+
+        except KeyError:
+            logger.warning(
+                f"Component {self.name} (index {self.index}) could not be parsed because no model exists for it."
+            )

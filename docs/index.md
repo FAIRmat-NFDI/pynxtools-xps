@@ -42,10 +42,10 @@ How-to guides provide step-by-step instructions for a wide range of tasks, with 
 The explanation section provides background knowledge on the implementation design, how the data is structured, how data processing can be incorporated, how the integration works in NOMAD, and more.
 
 - [Design principles and implementation](explanation/implementation.md)
-- [NXmpes and NXxps](explanation/appdefs.md) -->
+- [NXmpes and NXxps](explanation/appdefs.md)
 - [The XPS coordinate system](explanation/coordinate_system.md)
 - [How to map pieces of information to NeXus](explanation/contextualization.md)
-<!-- - [Data processing](explanation/data_processing.md) -->
+- [Mapping of data processing performed in CasaXPS](explanation/data_processing.md)
 <!-- - - [NOMAD integration](explanation/nomad_integration.md) -->
 
 </div>

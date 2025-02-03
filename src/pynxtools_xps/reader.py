@@ -42,7 +42,7 @@ from pynxtools_xps.scienta.scienta_reader import MapperScienta
 from pynxtools_xps.specs.sle.sle_specs import SleMapperSpecs
 from pynxtools_xps.specs.xml.xml_specs import XmlMapperSpecs
 from pynxtools_xps.specs.xy.xy_specs import XyMapperSpecs
-from pynxtools_xps.vms.txt_vamas_export import TxtMapperVamasExport
+from pynxtools_xps.vms.vamas_export import TxtMapperVamasExport, CsvMapperVamasResult
 from pynxtools_xps.vms.vamas import VamasMapper
 
 logger = logging.getLogger(__name__)
@@ -109,6 +109,29 @@ def concatenate_values(value1, value2):
     return concatenated
 
 
+def _check_multiple_extensions(file_paths: Tuple[str] = None) -> bool:
+    """
+    Determines if a list of file paths contains more than one unique file extension.
+
+    This method accepts a list of file paths (as strings or `Path` objects) and checks
+    if there are multiple unique file extensions present in the list. A file extension
+    is identified as the substring after the last period (`.`) in the file name.
+
+    Parameters:
+        file_paths (Tuple[str]): A tuple of file paths, which can be strings or
+                                 `Path` objects. Defaults to None.
+
+    Returns:
+        bool: True if more than one unique file extension is found, False otherwise.
+
+    Raises:
+        TypeError: If `file_paths` is not a tuple of strings or `Path` objects.
+    """
+    extensions = {str(path).split(".")[-1] for path in file_paths if "." in str(path)}
+
+    return len(extensions) > 1
+
+
 # pylint: disable=too-few-public-methods
 class XPSReader(MultiFormatReader):
     """Reader for XPS."""
@@ -130,13 +153,17 @@ class XPSReader(MultiFormatReader):
         ".spe",
         ".sle",
         ".slh",
-        ".txt",
         ".vms",
         ".xml",
         ".xy",
+        ".txt",  # This is last because of the processing_order
     ]
+
+    __prmt_metadata_file_ext__ = {".csv": ".txt"}
+
     __vendors__ = ["kratos", "phi", "scienta", "specs", "unkwown"]
     __prmt_vndr_cls: Dict[str, Dict] = {
+        ".csv": {"unknown": CsvMapperVamasResult},
         ".ibw": {"scienta": MapperScienta},
         ".npl": {"unkwown": VamasMapper},
         ".pro": {"phi": MapperPhi},
@@ -153,7 +180,7 @@ class XPSReader(MultiFormatReader):
 
     __file_err_msg__ = (
         "Need an XPS data file with one of the following extensions: "
-        f"{__prmt_file_ext__}"
+        f"data files: {__prmt_file_ext__}, metadata files: {__prmt_metadata_file_ext__}."
     )
 
     __vndr_err_msg__ = (
@@ -173,7 +200,15 @@ class XPSReader(MultiFormatReader):
             ".json": self.set_config_file,
         }
 
-        for ext in XPSReader.__prmt_file_ext__:
+        self.processing_order = (
+            XPSReader.__prmt_file_ext__
+            + list(XPSReader.__prmt_metadata_file_ext__.keys())
+            + list(self.extensions.keys())
+        )
+
+        for ext in XPSReader.__prmt_file_ext__ + list(
+            XPSReader.__prmt_metadata_file_ext__.keys()
+        ):
             self.extensions[ext] = self.handle_data_file
 
         self.processing_order = XPSReader.__prmt_file_ext__ + [
@@ -272,7 +307,7 @@ class XPSReader(MultiFormatReader):
                 return list(vendor_dict.keys())[0]
             if file_ext == ".txt":
                 return _check_for_vendors_txt(file_path)
-            return None
+            raise ValueError(XPSReader.__vndr_err_msg__)
 
         def _check_for_vendors_txt(file_path: str) -> str:
             """
@@ -300,7 +335,7 @@ class XPSReader(MultiFormatReader):
                 if any(vendor_opt in contents for vendor_opt in vendor_options):
                     return vendor
                 if contents[:6] == "[Info]":
-                    # This is for picking the Scienta reader is "scienta"
+                    # This is for picking the Scienta reader if "scienta"
                     # is not in the file
                     return vendor
             return "unknown"
@@ -309,23 +344,29 @@ class XPSReader(MultiFormatReader):
 
         if file_ext in XPSReader.__prmt_file_ext__:
             vendor = _check_for_vendors(file_path)
-            try:
-                parser = XPSReader.__prmt_vndr_cls[file_ext][vendor]()
 
-                parser.parse_file(file_path, **self.kwargs)
-                self.config_file = XPSReader.reader_dir.joinpath(
-                    "config", parser.config_file
-                )
-                data_dict = parser.data_dict
+            parser = XPSReader.__prmt_vndr_cls[file_ext][vendor]()
+            parser.parse_file(file_path, **self.kwargs)
+            data_dict = parser.data_dict
 
-            except ValueError as val_err:
-                raise ValueError(XPSReader.__vndr_err_msg__) from val_err
-            except KeyError as key_err:
-                raise KeyError(XPSReader.__vndr_err_msg__) from key_err
-        else:
-            raise ValueError(XPSReader.__file_err_msg__)
+            self.config_file = XPSReader.reader_dir.joinpath(
+                "config", parser.config_file
+            )
+            self.xps_data_dicts += [data_dict]
 
-        self.xps_data_dicts += [data_dict]
+        elif file_ext in XPSReader.__prmt_metadata_file_ext__:
+            vendor = _check_for_vendors(file_path)
+
+            metadata_parser = XPSReader.__prmt_vndr_cls[file_ext][vendor]()
+            metadata_parser.parse_file(file_path, **self.kwargs)
+
+            main_file_ext = XPSReader.__prmt_metadata_file_ext__[file_ext]
+
+            main_file_dicts = [
+                d for d in self.xps_data_dicts if d.get("file_ext") == main_file_ext
+            ]
+
+            metadata_parser.update_main_file_dict(main_file_dicts)
 
         return {}
 
@@ -427,7 +468,7 @@ class XPSReader(MultiFormatReader):
 
         common_entries, dict_indices = check_for_same_entries(self.xps_data_dicts)
 
-        if common_entries:
+        if common_entries and not self.overwrite_keys:
             for entry, indices in zip(common_entries, dict_indices):
                 dicts_with_common_entries = [self.xps_data_dicts[i] for i in indices]
 
@@ -455,8 +496,10 @@ class XPSReader(MultiFormatReader):
             ]
 
             self.xps_data = {**self.xps_data, **data_dict}
-            for key, value1, value2 in existing:
-                self.xps_data[key] = concatenate_values(value1, value2)
+
+            if not self.overwrite_keys:
+                for key, value1, value2 in existing:
+                    self.xps_data[key] = concatenate_values(value1, value2)
 
     def _get_analyser_names(self) -> List[str]:
         """
@@ -633,12 +676,29 @@ class XPSReader(MultiFormatReader):
 
             return list(map(str, data_vars))
 
-        if path.startswith("@data:*"):
-            return get_signals(key=path.split(":*.")[-1])
+        def get_processes(process_key: str) -> List[str]:
+            escaped_entry_name = re.escape(self.callbacks.entry_name)
 
-        # if any(x in path for x in ["counts", "raw/@units"]):
-        if re.search(r"\bcounts\b", path) or "raw/@units" in path:
-            return get_signals(key="channels")
+            pattern = re.compile(
+                rf"/ENTRY\[{escaped_entry_name}]\.*/{process_key}([a-zA-Z0-9_]+)"
+            )
+
+            process_names = {
+                match for key in self.xps_data for match in pattern.findall(key)
+            }
+
+            return sorted(process_names)
+
+        patterns: Dict[str, Any] = {
+            r"data/DATA": lambda: get_signals(path.split(":*.")[-1]),
+            r"DETECTOR\[[a-zA-Z0-9_]+\]/raw_data": lambda: get_signals("channels"),
+            "peak": lambda: get_processes("component"),
+            "background": lambda: get_processes("region"),
+        }
+
+        for pattern, func in patterns.items():
+            if re.search(pattern, key):
+                return func()
 
         return get_signals(key="scans")
 
@@ -696,20 +756,53 @@ class XPSReader(MultiFormatReader):
                 except KeyError:
                     pass
 
-    def set_root_default(self, template):
+    def set_nxdata_defaults(self, template):
         """Set the default for automatic plotting."""
-        survey_count_ = 0
-        count = 0
+        survey_count, count = 0, 0
+
+        def get_unique_nxfit_names(template) -> Set[str]:
+            """Extract unique 'ENTRY[<some-name>]/FIT[<some-other-name>]' pairs from template keys."""
+            pattern = re.compile(r"^/?ENTRY\[(?P<entry>[^]]+)\]/FIT\[(?P<fit>[^]]+)\]/")
+
+            result = set()
+            for key in template:
+                m = pattern.match(key)
+                if m:
+                    result.add(f"{m.group('entry')}/{m.group('fit')}")
+            return result
+
+        def get_first_matching_fit(
+            entry_name: str, unique_fits: Set[str]
+        ) -> Optional[str]:
+            """Return the first '<fit>' name that matches the given entry name, if any."""
+            for fit in unique_fits:
+                if fit.startswith(f"{entry_name}/"):
+                    return fit.split("/", 1)[1]  # Extract only the fit name
+            return None
+
+        unique_fits = sorted(
+            get_unique_nxfit_names(template)
+        )  # Sorting for deterministic ordering
 
         for entry in self.get_entry_names():
-            if "Survey" in entry and survey_count_ == 0:
-                survey_count_ += 1
-                template["/@default"] = entry
+            if unique_fits:
+                template["/@default"] = unique_fits[0]
+                match = get_first_matching_fit(entry, unique_fits)
+                if match:
+                    template[f"/ENTRY[{entry}]/@default"] = match
 
-            # If no Survey set any scan for default
-            if survey_count_ == 0 and count == 0:
-                count += 1
-                template["/@default"] = entry
+                else:
+                    template[f"/ENTRY[{entry}]/@default"] = "data"
+
+            else:
+                if "Survey" in entry and survey_count == 0:
+                    survey_count += 1
+                    template["/@default"] = entry
+
+                # If no Survey, set any scan for default
+                elif survey_count == 0 and count == 0:
+                    count += 1
+                    template["/@default"] = entry
 
     def read(
         self,
@@ -718,11 +811,17 @@ class XPSReader(MultiFormatReader):
         objects: Tuple[Any] = None,
         **kwargs,
     ) -> dict:
+        self.overwrite_keys = _check_multiple_extensions(file_paths)
+
         template = super().read(template, file_paths, objects, suppress_warning=True)
-        self.set_root_default(template)
+        self.set_nxdata_defaults(template)
 
         final_template = Template()
         for key, val in template.items():
+            if key.endswith("@units"):
+                parent = key.replace("/@units", "")
+                if parent not in template:
+                    continue
             if val is not None:
                 if "@units" in key:
                     check_units(key, val)

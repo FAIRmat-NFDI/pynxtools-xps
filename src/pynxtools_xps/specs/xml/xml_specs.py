@@ -84,9 +84,6 @@ class XmlMapperSpecs(XPSMapper):
 
         self._xps_dict = {**self._xps_dict, **metadata_dict}
 
-        file_key = f"{self._root_path}/File"
-        self._xps_dict[file_key] = file
-
         self.construct_data()
 
         return self.data_dict

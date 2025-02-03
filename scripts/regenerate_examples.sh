@@ -55,9 +55,13 @@ function update_vms_examples {
   echo
   echo "Update REGULAR file conversion example"
   dataconverter irregular.vms eln_data_vms.yaml --reader $READER --nxdl $NXDL --output irregular.vms.nxs
+  cd txt_export/
   echo "Update txt export example"
   dataconverter vms_txt_export.txt eln_data_vms_txt_export.yaml --reader $READER --nxdl $NXDL --output vms_txt_export.nxs
-  cd ..
+  cd ../data_analysis
+  echo "Update data analysis example"
+  dataconverter FeO* eln.yaml --reader $READER --nxdl $NXDL --ignore-undocumented --output vms_data_analysis.nxs
+  cd ../..
 }
 
 project_dir=$(dirname $(dirname $(realpath $0)))

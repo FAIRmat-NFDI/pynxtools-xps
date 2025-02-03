@@ -676,9 +676,10 @@ class XPSReader(MultiFormatReader):
             return list(map(str, data_vars))
 
         def get_processes(process_key: str) -> List[str]:
-            # pattern = re.compile(rf"/ENTRY\[{self.callbacks.entry_name}]/({process_key}\d+)/")
+            escaped_entry_name = re.escape(self.callbacks.entry_name)
+
             pattern = re.compile(
-                rf"/ENTRY\[{self.callbacks.entry_name}]\.*/{process_key}([a-zA-Z0-9_]+)"
+                rf"/ENTRY\[{escaped_entry_name}]\.*/{process_key}([a-zA-Z0-9_]+)"
             )
 
             process_names = {
@@ -697,9 +698,6 @@ class XPSReader(MultiFormatReader):
         for pattern, func in patterns.items():
             if re.search(pattern, key):
                 return func()
-
-        # if re.search(r"\bcounts\b", path) or "raw/@units" in path:
-        #     return get_signals(key="channels")
 
         return get_signals(key="scans")
 

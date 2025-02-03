@@ -210,6 +210,7 @@ class VamasMapper(XPSMapper):
             entry_parts += [spectrum["time_stamp"]]
 
         entry = construct_entry_name(entry_parts)
+
         entry_parent = f"/ENTRY[{entry}]"
 
         for key, value in spectrum.items():

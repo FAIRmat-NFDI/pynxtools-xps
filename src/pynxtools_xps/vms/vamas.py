@@ -156,7 +156,7 @@ class VamasMapper(XPSMapper):
     def construct_data(self):
         """Map VMS format to NXmpes-ready dict."""
 
-        def has_duplicate_spectrum_type(spectra: list[dict]) -> bool:
+        def has_duplicate_spectrum_type(spectra: List[Dict]) -> bool:
             """
             Check if any two or more spectra in the list have the same 'spectrum_type'.
             """

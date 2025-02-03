@@ -819,6 +819,10 @@ class XPSReader(MultiFormatReader):
 
         final_template = Template()
         for key, val in template.items():
+            if key.endswith("@units"):
+                parent = key.replace("/@units", "")
+                if parent not in template:
+                    continue
             if val is not None:
                 if "@units" in key:
                     check_units(key, val)

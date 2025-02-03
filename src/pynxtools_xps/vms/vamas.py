@@ -161,12 +161,13 @@ class VamasMapper(XPSMapper):
             Check if any two or more spectra in the list have the same 'spectrum_type'.
             """
             seen = set()
-            return any(
-                spectrum.get("spectrum_type") in seen
-                or seen.add(spectrum["spectrum_type"])
-                for spectrum in spectra
-                if spectrum.get("spectrum_type")
-            )
+            for spectrum in spectra:
+                spectrum_type = spectrum.get("spectrum_type")
+                if spectrum_type:
+                    if spectrum_type in seen:
+                        return True
+                    seen.add(spectrum_type)
+            return False
 
         spectra = deepcopy(self.raw_data)
 

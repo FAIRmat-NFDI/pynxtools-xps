@@ -804,9 +804,9 @@ class CsvResultParser:
         Returns:
             dict: Parsed data including the file path, header, and rows.
         """
-        table_data = {}
-        headers = []
-        reading_table = False
+        table_data: Dict[str, Any] = {}
+        headers: List[str] = []
+        reading_table: bool = False
 
         with open(file, "r") as f:
             reader = csv.reader(f, delimiter="\t")
@@ -828,9 +828,11 @@ class CsvResultParser:
                     table_data[row[0]] = {}
                     for i, (header, value) in enumerate(zip(headers, row[1:])):
                         if value:
-                            value = _format_value(value)
-                            if header == "atomic_concentration":
-                                value /= 100
-                            table_data[row[0]].update({header: value})
+                            formatted_value = _format_value(value)
+                            if header == "atomic_concentration" and isinstance(
+                                value, (int, float)
+                            ):
+                                formatted_value /= 100
+                            table_data[row[0]].update({header: formatted_value})
 
         return table_data

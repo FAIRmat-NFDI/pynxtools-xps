@@ -25,12 +25,12 @@ import copy
 import logging
 import warnings
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Union, Optional
+from typing import Any, Dict, List, Tuple, Union, Optional, cast
 import json
-import jsonschema
 from abc import ABC, abstractmethod
 
 import numpy as np
+import jsonschema
 import xarray as xr
 from igor2 import binarywave
 
@@ -135,9 +135,10 @@ class MapperScienta(XPSMapper):
     def construct_data(self):
         """Map Parser data to NXmpes-ready dict."""
         # pylint: disable=duplicate-code
+
         spectra = copy.deepcopy(self.raw_data)
 
-        self._xps_dict["data"]: dict = {}
+        self._xps_dict["data"] = cast(Dict[str, Any], {})
 
         for spectrum in spectra:
             self._update_xps_dict_with_spectrum(spectrum)
@@ -181,11 +182,13 @@ class MapperScienta(XPSMapper):
             for key, value in spectrum["data"].items()
             if key in spectrum["axis_labels"]
         }
-        intensities = {
-            key: value
-            for key, value in spectrum["data"].items()
-            if key in spectrum["data_labels"]
-        }
+        intensities = np.array(
+            [
+                value
+                for key, value in spectrum["data"].items()
+                if key in spectrum["data_labels"]
+            ]
+        ).squeeze(axis=0)
 
         # Write to data in order: scan, cycle, channel
 
@@ -195,6 +198,7 @@ class MapperScienta(XPSMapper):
             for key, value in self._xps_dict["data"][entry].items()
             if scan_key.split("_")[0] in key
         ]
+
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
             averaged_scans = np.mean(all_scan_data, axis=0)
@@ -203,14 +207,8 @@ class MapperScienta(XPSMapper):
             # on first scan in cycle
             averaged_scans = intensities
 
-        print(averaged_scans)
-        #     print(axis_name, arr.shape)
-        # for data_name, arr in intensities.items():
-        #     print(data_name, arr.shape)
-
         self._xps_dict["data"][entry][scan_key.split("_")[0]] = xr.DataArray(
-            data=averaged_scans,
-            coords=axes,
+            data=averaged_scans, coords=axes, dims=list(axes.keys())
         )
 
         # Write scan data to 'data'.
@@ -377,12 +375,15 @@ class ScientaTxtParser:
         region.data = {"energy": np.array(energies), "intensity": np.array(intensities)}
 
         # Convert date and time to ISO8601 date time.
-        self.time_stamp = _construct_date_time(self.start_date, self.start_time)
+        region.time_stamp = _construct_date_time(region.start_date, region.start_time)
 
         region.validate_types()
 
         region_dict = {**self.header.dict(), **region.dict()}
         region_dict["intensity/@units"] = "counts_per_second"
+
+        region_dict["axis_labels"] = ["energy"]
+        region_dict["data_labels"] = ["intensity"]
 
         self.spectra.append(region_dict)
 
@@ -419,13 +420,9 @@ class ScientaIgorParser(ABC):
         wave_header = wave["wave_header"]
         data = wave["wData"]
 
-        # Not needed at the moment.
         # TODO: Add support for formulas if they are written by the
         # measurement software.
         # formula = wave["formula"]
-        # labels = wave["labels"]
-        # spectrum_indices = wave["sIndices"]
-        # bin_header = wave["bin_header"]
 
         notes: Dict[str, Any] = {}
 
@@ -434,10 +431,10 @@ class ScientaIgorParser(ABC):
         self.no_of_regions = len(data.shape)
 
         spectrum: Dict[str, Any] = {}
-        spectrum["data"]: Dict[str, Any] = {}
-        spectrum["axis_labels"]: List[str] = []
-        spectrum["data_labels"]: List[str] = []
-        spectrum["units"]: Dict[str, Any] = {}
+        spectrum["data"] = cast(Dict[str, Any], {})
+        spectrum["axis_labels"] = cast(List[str], [])
+        spectrum["data_labels"] = cast(List[str], [])
+        spectrum["units"] = cast(Dict[str, Any], {})
 
         for i, (dim, unit) in enumerate(axes_labels_with_units):
             if dim in ("Kinetic Energy", "Binding Energy"):
@@ -601,9 +598,7 @@ class ScientaIgorParserOld(ScientaIgorParser):
                     unused_notes_keys += [key]
 
         # Convert date and time to ISO8601 date time.
-        region.time_per_spectrum_channel = _construct_date_time(
-            region.date, region.time
-        )
+        region.time_stamp = _construct_date_time(region.start_date, region.start_time)
 
         region.validate_types()
 

@@ -264,11 +264,11 @@
     "data/@units":"@attrs:intensity/@units",
     "DATA[*]":"@data:*.scans",
     "DATA[*]/@units":"@attrs:intensity/@units",
-    "energy":"@data:energy",
-    "energy/@type":"@attrs:energy_scale",
-    "energy/@units":"@attrs:energy_axis/@units",
+    "AXISNAME[energy]":"@data:energy",
+    "AXISNAME[energy]/@type":"@attrs:energy_scale",
+    "AXISNAME[energy]/@units":"@attrs:energy_axis/@units",
     "@energy_indices":0,
-    "AXISNAME[*]":"@data:*.axis",
-    "AXISNAME[*]/@units":"@attrs:*.scans"
+    "AXISNAME[*]":"@data:*.axes",
+    "AXISNAME[*]/@units":"@attrs:*.axes"
   }
 }

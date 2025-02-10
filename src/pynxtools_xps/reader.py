@@ -682,6 +682,8 @@ class XPSReader(MultiFormatReader):
                 data_vars = _get_channel_vars(xr_data.data_vars)
                 if not data_vars:
                     data_vars = _get_scan_vars(xr_data.data_vars)
+            elif key == "axes":
+                data_vars = list(xr_data.coords)
             else:
                 data_vars = [""]
 
@@ -711,6 +713,7 @@ class XPSReader(MultiFormatReader):
             "peak": lambda: get_all_keys("component"),
             "background": lambda: get_all_keys("region"),
             r"DATA\[data]/DATA\[[^\]]+\](?:/@units)?": data_func,
+            r"DATA\[data]/AXIS\[[^\]]+\]":  data_func,
             r"DETECTOR\[[a-zA-Z0-9_]+\]/raw_data": lambda: get_signals("channels"),
         }
 
@@ -762,6 +765,7 @@ class XPSReader(MultiFormatReader):
         elif path.endswith("channels"):
             return np.array(xr_data[path.split(".channels")[0]])
 
+<<<<<<< HEAD
         elif path.endswith((".external", "external_units")):
             channel_name = path.split(".external")[0]
             escaped_entry_name = re.escape(self.callbacks.entry_name)
@@ -788,6 +792,10 @@ class XPSReader(MultiFormatReader):
                         if (match := pattern.search(key))
                     ]
                 ).squeeze()
+=======
+        elif path.endswith("axes"):
+            return np.array(xr_data.coords[path.split(".axes")[0]].values)
+>>>>>>> ced9a839 (clean up scienta config)
 
         elif "energy" in path:
             try:

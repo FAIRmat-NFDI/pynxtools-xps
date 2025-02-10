@@ -671,6 +671,8 @@ class XPSReader(MultiFormatReader):
                 data_vars = _get_channel_vars(xr_data.data_vars)
                 if not data_vars:
                     data_vars = _get_scan_vars(xr_data.data_vars)
+            elif key == "axes":
+                data_vars = list(xr_data.coords)
             else:
                 data_vars = [""]
 
@@ -691,6 +693,7 @@ class XPSReader(MultiFormatReader):
 
         patterns: Dict[str, Any] = {
             r"data/DATA": lambda: get_signals(path.split(":*.")[-1]),
+            r"data/AXIS": lambda: get_signals(path.split(":*.")[-1]),
             r"DETECTOR\[[a-zA-Z0-9_]+\]/raw_data": lambda: get_signals("channels"),
             "peak": lambda: get_processes("component"),
             "background": lambda: get_processes("region"),
@@ -743,6 +746,9 @@ class XPSReader(MultiFormatReader):
 
         elif path.endswith("channels"):
             return np.array(xr_data[path.split(".channels")[0]])
+
+        elif path.endswith("axes"):
+            return np.array(xr_data.coords[path.split(".axes")[0]].values)
 
         elif "energy" in path:
             return np.array(xr_data.coords["energy"].values)

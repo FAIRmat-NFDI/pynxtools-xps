@@ -147,6 +147,8 @@ class XPSReader(MultiFormatReader):
     )
 
     __prmt_file_ext__ = [
+        ".h5",
+        ".hdf5",
         ".ibw",
         ".npl",
         ".pro",
@@ -164,6 +166,8 @@ class XPSReader(MultiFormatReader):
     __vendors__ = ["kratos", "phi", "scienta", "specs", "unkwown"]
     __prmt_vndr_cls: Dict[str, Dict] = {
         ".csv": {"unknown": CsvMapperVamasResult},
+        ".h5": {"scienta": MapperScienta},
+        ".hdf5": {"scienta": MapperScienta},
         ".ibw": {"scienta": MapperScienta},
         ".npl": {"unkwown": VamasMapper},
         ".pro": {"phi": MapperPhi},
@@ -347,12 +351,15 @@ class XPSReader(MultiFormatReader):
 
             parser = XPSReader.__prmt_vndr_cls[file_ext][vendor]()
             parser.parse_file(file_path, **self.kwargs)
-            data_dict = parser.data_dict
 
-            self.config_file = XPSReader.reader_dir.joinpath(
-                "config", parser.config_file
-            )
-            self.xps_data_dicts += [data_dict]
+            config_file = parser.config_file
+
+            if isinstance(config_file, dict):
+                config_file = config_file.get(file_ext)
+
+            self.config_file = XPSReader.reader_dir.joinpath("config", config_file)
+
+            self.xps_data_dicts += [parser.data_dict]
 
         elif file_ext in XPSReader.__prmt_metadata_file_ext__:
             vendor = _check_for_vendors(file_path)
@@ -754,7 +761,7 @@ class XPSReader(MultiFormatReader):
                 try:
                     return np.array(xr_data.coords[path].values)
                 except KeyError:
-                    pass
+                    return None
 
     def set_nxdata_defaults(self, template):
         """Set the default for automatic plotting."""

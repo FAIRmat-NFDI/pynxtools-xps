@@ -356,7 +356,7 @@ class XPSReader(MultiFormatReader):
 
             if isinstance(config_file, dict):
                 config_file = config_file.get(file_ext)
-            
+
             self.config_file = XPSReader.reader_dir.joinpath("config", config_file)
 
             self.xps_data_dicts += [parser.data_dict]

@@ -23,7 +23,7 @@ instrument:
       vendor: Helmholtz-Zentrum Berlin
       model: BESSY II
       identifier:
-        identifier: "2.0"
+        identifier: Bessy2
     current:
       value: 298
       unit: mA
@@ -153,7 +153,7 @@ instrument:
       unit: A
 sample:
   identifier:
-    identifier: 1
+    identifier: Sample25
   description: Cu-HHTP/Glass on standard sample holder
   physical_form: pellet
   situation: vacuum

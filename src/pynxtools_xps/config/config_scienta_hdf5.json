@@ -10,10 +10,10 @@
     "experiment_laboratory":"@eln",
     "duration":"@attrs:acquisition/spectrum_log/duration",
     "duration/@units":"s",
-    "sequence_counter":"acquisition/spectrum_log/sequence_counter",
-    "sequence_name":"acquisition/spectrum_log/sequence_name",
-    "spectrum_counter":"acquisition/spectrum_log/spectrum_counter",
-    "storage_name":"acquisition/spectrum_log/storage_name"
+    "sequence_counter":"@attrs:acquisition/spectrum_log/sequence_counter",
+    "sequence_name":"@attrs:acquisition/spectrum_log/sequence_name",
+    "spectrum_counter":"@attrs:acquisition/spectrum_log/spectrum_counter",
+    "storage_name":"@attrs:acquisition/spectrum_log/storage_name"
   },
   "/ENTRY/USER[user]":{
     "name":"@attrs:user/name",
@@ -119,6 +119,7 @@
         "scheme":"@eln",
         "pass_energy":"@attrs:acquisition/spectrum_definition/pass_energy",
         "pass_energy/@units":"eV",
+        "energy_scan_mode":"@eln",
         "radius":"@attrs:/ENTRY[Fix_2D_Trans]/instrument/analyser/radius",
         "radius/@units":"mm",
         "APERTURE[slit]":{
@@ -288,7 +289,7 @@
     }
   },
   "/ENTRY/data":{
-    "@axes":["y_axis", "energy"],
+    "@axes":["energy", "y_axis"],
     "@signal":"data",
     "data":"@data:data/data",
     "data/@units":"counts_per_second",

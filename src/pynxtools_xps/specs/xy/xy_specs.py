@@ -245,7 +245,6 @@ class XyMapperSpecs(XPSMapper):
         # Create key for writing to data.
         scan_key = construct_data_key(spectrum)
 
-        x_units = spectrum["x_units"]
         energy = np.array(spectrum["data"]["x"])
         intensity = np.array(spectrum["data"]["y"])
 
@@ -688,6 +687,8 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
                 if key == "ColumnLabels":
                     if not self.export_settings["Transmission Function"]:
                         x_units, y_units = val.split(" ")
+                        if x_units == "energy":
+                            x_units = "binding"
                         scan_settings["x_units"] = x_units
                         scan_settings["y_units"] = convert_units(y_units)
 

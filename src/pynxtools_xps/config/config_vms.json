@@ -438,7 +438,7 @@
       "sample_rotation_angle/@units":"@attrs:sample_rotation_angle/@units",
       "sample_rotation_angle/@transformation_type":"rotation",
       "sample_rotation_angle/@vector":[0, 0, -1],
-      "sample_rotation_angle/@depends_on":"sample_normal_tilt_azimuth_angle",
+      "sample_rotation_angle/@depends_on":"sample_normal_polar_angle_of_tilt",
 
       "sample_normal_polar_angle_of_tilt":"!@attrs:sample_normal_polar_angle_of_tilt",
       "sample_normal_polar_angle_of_tilt/@units":"@attrs:sample_normal_polar_angle_of_tilt/@units",

@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pynxtools_versions: ["master"]
+        pynxtools_versions: ["fix_attribute_enum_check"]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -34,7 +34,7 @@ jobs:
           uv pip install ".[dev]"
       - name: Install pynxtools version ${{ matrix.pynxtools_versions }}
         run: |
-         if [ "${{ matrix.pynxtools_versions }}" == "master" ]; then
+         if [ "${{ matrix.pynxtools_versions }}" == "fix_attribute_enum_check" ]; then
            uv pip install pynxtools@git+https://github.com/FAIRmat-NFDI/pynxtools@${{ matrix.pynxtools_versions }}
          else
           uv pip install pynxtools==${{ matrix.pynxtools_versions }}

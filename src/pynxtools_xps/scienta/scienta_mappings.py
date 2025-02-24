@@ -32,6 +32,7 @@ from pynxtools_xps.reader_utils import (
 from pynxtools_xps.value_mappers import (
     convert_energy_type,
     convert_energy_scan_mode,
+    parse_datetime,
 )
 
 
@@ -126,7 +127,6 @@ KEY_MAP: Dict[str, str] = {
     "sample": "sample_name",
     "comments": "spectrum_comment",
     "date": "start_date",
-    "time": "start_time",
 }
 
 VALUE_MAP = {
@@ -153,18 +153,23 @@ VALUE_MAP = {
     "time_per_spectrum_channel": float,
     "manipulator_r1": float,
     "manipulator_r2": float,
+    "start_time": parse_datetime,
+    "stop_time": parse_datetime,
+    "preset_type": lambda x: x.lower(),
+    "source_type": lambda x: x.lower(),
+    "energy_mode": convert_energy_type,
 }
 
 UNITS: dict = {
-    "energydispersion/pass_energy": "eV",
-    "beam_xray/excitation_energy": "eV",
-    "region/energy_axis": "eV",
-    "region/center_energy": "eV",
-    "region/start_energy": "eV",
-    "region/stop_energy": "eV",
-    "region/step_size": "eV",
-    "detector/dwell_time": "eV",
-    "region/time_per_spectrum_channel": "s",
+    "pass_energy": "eV",
+    "excitation_energy": "eV",
+    "energy_axis": "eV",
+    "center_energy": "eV",
+    "start_energy": "eV",
+    "stop_energy": "eV",
+    "step_size": "eV",
+    "dwell_time": "s",
+    "time_per_spectrum_channel": "s",
 }
 
 
@@ -198,6 +203,7 @@ def _get_key_value_pair(line: str):
         if "dimension" in key:
             key_part = f"dimension_{key.rsplit('_')[-1]}"
             key = KEY_MAP.get(key_part, key_part)
+
         value = _re_map_single_value(key, value, VALUE_MAP)
 
     except ValueError:

@@ -690,10 +690,10 @@ class XPSReader(MultiFormatReader):
             return sorted(process_names)
 
         patterns: Dict[str, Any] = {
-            r"data/DATA": lambda: get_signals(path.split(":*.")[-1]),
-            r"DETECTOR\[[a-zA-Z0-9_]+\]/raw_data": lambda: get_signals("channels"),
             "peak": lambda: get_processes("component"),
             "background": lambda: get_processes("region"),
+            r"data/DATA": lambda: get_signals(path.split(":*.")[-1]),
+            r"DETECTOR\[[a-zA-Z0-9_]+\]/raw_data": lambda: get_signals("channels"),
         }
 
         for pattern, func in patterns.items():

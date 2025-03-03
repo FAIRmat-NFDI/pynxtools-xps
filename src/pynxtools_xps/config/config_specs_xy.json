@@ -278,7 +278,7 @@
     "@axes":["energy"],
     "@signal":"data",
     "data":"@data:average",
-    "data_errors":"@data:errors",
+    "FIELDNAME_errors[data_errors]":"@data:errors",
     "data/@units":"@attrs:data/y_units",
     "DATA[*]":"@data:*.scans",
     "DATA[*]/@units":"@attrs:data/y_units",

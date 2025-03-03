@@ -321,8 +321,8 @@
       "envelope":"['@attrs:fit_envelope_cps/data', '@attrs:fit_envelope/data']",
       "envelope/@units":"counts_per_second",
       "residual": null,
-      "peak*_intensity":"@link:/entry/fit/peak*/data/intensity",
-      "background*_intensity":"@link:/entry/fit/background*/data/intensity"
+      "DATA[peak*_intensity]":"@link:/entry/fit/peak*/data/intensity",
+      "DATA[background*_intensity]":"@link:/entry/fit/background*/data/intensity"
     },
     "peakPEAK[peak*]":{
       "@default":"data",
@@ -457,7 +457,7 @@
     "@axes":["energy"],
     "@signal":"data",
     "data":"@data:average",
-    "data_errors":"@data:errors",
+    "FIELDNAME_errors[data_errors]":"@data:errors",
     "data/@units":"['@attrs:y_units_1','@attrs:y_units', 'counts_per_second']",
     "data/@long_name":"intensity",
     "DATA[*]":"@data:*.scans",

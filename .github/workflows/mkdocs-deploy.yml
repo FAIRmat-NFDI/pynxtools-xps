@@ -5,9 +5,6 @@ on:
     branches:
       - main  # Triggers deployment on push to the main branch
 
-env:
-  UV_SYSTEM_PYTHON: true
-
 permissions:
    contents: write
 jobs:
@@ -22,11 +19,11 @@ jobs:
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+     
+      - name: Install uv and set the python version to 3.12
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: '3.x'
+          python-version: 3.12
 
       - name: Cache mkdocs-material enviroment
         uses: actions/cache@v3
@@ -38,7 +35,6 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
           uv pip install ".[docs]"
 
       - name: Build and Deploy

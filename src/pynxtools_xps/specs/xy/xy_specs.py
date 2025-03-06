@@ -50,7 +50,7 @@ from pynxtools_xps.value_mappers import (
 SETTINGS_MAP: Dict[str, str] = {
     "Acquisition Date": "time_stamp",
     "Analysis Method": "analysis_method",
-    "Analyzer": "analyser_name",
+    "Analyzer": "analyzer_name",
     "Analyzer Lens": "lens_mode",
     "Analyzer Slit": "entrance_slit",
     "Bias Voltage": "bias_voltage_electrons",
@@ -149,7 +149,7 @@ class XyMapperSpecs(XPSMapper):
                 "source_label",
             ],
             "beam_xray": ["excitation_energy"],
-            "analyser": ["analyser_name"],
+            "analyzer": ["analyzer_name"],
             "collectioncolumn": ["lens_mode"],
             "energydispersion": [
                 "scan_mode",
@@ -204,7 +204,7 @@ class XyMapperSpecs(XPSMapper):
 
         file_parent = f"{entry_parent}/file_info"
         instrument_parent = f"{entry_parent}/instrument"
-        analyser_parent = f"{instrument_parent}/analyser"
+        analyzer_parent = f"{instrument_parent}/analyzer"
 
         path_map = {
             "file_info": f"{file_parent}",
@@ -212,10 +212,10 @@ class XyMapperSpecs(XPSMapper):
             "instrument": f"{instrument_parent}",
             "source_xray": f"{instrument_parent}/source_xray",
             "beam_xray": f"{instrument_parent}/beam_xray",
-            "analyser": f"{analyser_parent}",
-            "collectioncolumn": f"{analyser_parent}/collectioncolumn",
-            "energydispersion": f"{analyser_parent}/energydispersion",
-            "detector": f"{analyser_parent}/detector",
+            "analyzer": f"{analyzer_parent}",
+            "collectioncolumn": f"{analyzer_parent}/collectioncolumn",
+            "energydispersion": f"{analyzer_parent}/energydispersion",
+            "detector": f"{analyzer_parent}/detector",
             "manipulator": f"{instrument_parent}/manipulator",
             "calibration": f"{instrument_parent}/calibration",
             "sample": f"{entry_parent}/sample",

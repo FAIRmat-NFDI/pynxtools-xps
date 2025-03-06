@@ -4,49 +4,46 @@
     "title":"@eln",
     "start_time":"['@attrs:time_stamp', '@eln']",
     "end_time":"@eln",
+    "method":"['@attrs:analysis_method', '@eln']",
+    "transitions":"@attrs:transitions",
+    "program_name":"@eln",
     "experiment_institution":"@attrs:institute_id",
-    "experiment_identifier":{
-      "identifier":"['@attrs:experiment_id', '@eln']"
-    },
+    "identifier_experiment":"['@attrs:experiment_id', '@eln']",
     "experiment_facility":"@eln",
     "experiment_laboratory":"@eln",
-    "entry_identifier":"@eln",
+    "identifier_entry":"@eln",
     "duration":"@eln",
     "duration/@units":"s",
-    "method":"['@attrs:analysis_method', '@eln']",
-    "program_name":"@eln"
   },
-  "/ENTRY/geometries":{
-    "COORDINATE_SYSTEM[xps_coordinate_system]":{
-      "origin":"sample stage",
-      "handedness":"left_handed",
-      "z_direction":"sample stage normal",
-      "depends_on":"/entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation",
-      "x":[-1, 0 , 0],
-      "x/@units":"m",
-      "y":[0, 1, 0],
-      "y/@units":"m",
-      "z":[0, 0 , 1],
-      "z/@units":"m",
-      "coordinate_system_transformations":{
-        "AXISNAME[z_rotation]":"!@attrs:source_azimuth_angle",
-        "AXISNAME[z_rotation]/@units":"@attrs:source_azimuth_angle/@units",
-        "AXISNAME[z_rotation]/@transformation_type":"rotation",
-        "AXISNAME[z_rotation]/@vector":[0, 0, 1],
-        "AXISNAME[z_rotation]/@depends_on":"y_flip",
+  "/ENTRY/xps_coordinate_system":{
+    "origin":"sample stage",
+    "handedness":"left_handed",
+    "z_direction":"sample stage normal",
+    "depends_on":"/entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation",
+    "x":[-1, 0 , 0],
+    "x/@units":"m",
+    "y":[0, 1, 0],
+    "y/@units":"m",
+    "z":[0, 0 , 1],
+    "z/@units":"m",
+    "coordinate_system_transformations":{
+      "AXISNAME[z_rotation]":"!@attrs:source_azimuth_angle",
+      "AXISNAME[z_rotation]/@units":"@attrs:source_azimuth_angle/@units",
+      "AXISNAME[z_rotation]/@transformation_type":"rotation",
+      "AXISNAME[z_rotation]/@vector":[0, 0, 1],
+      "AXISNAME[z_rotation]/@depends_on":"y_flip",
 
-        "AXISNAME[y_flip]":180,
-        "AXISNAME[y_flip]/@units":"degree",
-        "AXISNAME[y_flip]/@transformation_type":"rotation",
-        "AXISNAME[y_flip]/@vector":[0, 1, 0],
-        "AXISNAME[y_flip]/@depends_on":"y_rotation",
+      "AXISNAME[y_flip]":180,
+      "AXISNAME[y_flip]/@units":"degree",
+      "AXISNAME[y_flip]/@transformation_type":"rotation",
+      "AXISNAME[y_flip]/@vector":[0, 1, 0],
+      "AXISNAME[y_flip]/@depends_on":"y_rotation",
 
-        "AXISNAME[y_rotation]":"!@attrs:source_polar_angle",
-        "AXISNAME[y_rotation]/@units":"@attrs:source_polar_angle/@units",
-        "AXISNAME[y_rotation]/@transformation_type":"rotation",
-        "AXISNAME[y_rotation]/@vector":[0, -1, 0],
-        "AXISNAME[y_rotation]/@depends_on":"."
-      }
+      "AXISNAME[y_rotation]":"!@attrs:source_polar_angle",
+      "AXISNAME[y_rotation]/@units":"@attrs:source_polar_angle/@units",
+      "AXISNAME[y_rotation]/@transformation_type":"rotation",
+      "AXISNAME[y_rotation]/@vector":[0, -1, 0],
+      "AXISNAME[y_rotation]/@depends_on":"."
     }
   },
   "/ENTRY/USER[user]":{
@@ -54,22 +51,16 @@
     "affiliation":"@eln",
     "address":"@eln",
     "email":"@eln",
-    "IDENTIFIER[orcid]":{
-      "service":"@eln",
-      "identifier":"@eln",
-      "is_persistent":"@eln"
-    }
+    "identifier_orcid":"@eln",
+    "identifier_orcid/@type": "ORCID"
   },
   "/ENTRY/INSTRUMENT[instrument]":{
-    "@default":"electronanalyser",
+    "@default":"electronanalyzer",
     "device_information":{
       "vendor":"@eln",
       "model":"@eln",
-      "identifier":{
-        "service":"@eln",
-        "identifier":"@eln",
-        "is_persistent":"@eln"
-      }
+      "identifier":"@eln",
+      "identifier/@type":"@eln"
     },
     "energy_resolution":{
       "physical_quantity":"energy",
@@ -77,22 +68,19 @@
       "resolution":"!['@attrs:step_size', '@eln']",
       "resolution/@units":"['@attrs:step_size@units', '@eln']"
     },
-    "sourceTYPE[source_xray]":{
+    "source_probe":{
       "type":"@eln",
       "name":"['@attrs:source_label', '@eln']",
       "probe":"photon",
       "device_information":{
         "vendor":"@eln",
         "model":"@eln",
-        "identifier":{
-          "service":"@eln",
-          "identifier":"@eln",
-          "is_persistent":"@eln"
-        }
+        "identifier":"@eln",
+        "identifier/@type":"@eln"
       },
       "associated_beam":"/entry/instrument/beam_xray"
     },
-    "beamTYPE[beam_xray]":{
+    "beam_xray":{
       "distance":"@eln",
       "distance/@units":"@eln",
       "extent":"@attrs:extent",
@@ -103,7 +91,7 @@
       "incident_energy_spread/@units":null,
       "incident_polarization":null,
       "incident_polarization/@units":null,
-      "associated_source":"/entry/instrument/source_xray",
+      "associated_source":"/entry/instrument/source_probe",
       "depends_on":"/entry/instrument/beam_xray/transformations/beam_polar_angle_of_incidence",
       "transformations":{
         "beam_polar_angle_of_incidence":"!@attrs:source_polar_angle",
@@ -119,7 +107,7 @@
         "beam_azimuth_angle/@depends_on":"/entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation"
       }
     },
-    "ELECTRONANALYSER[electronanalyser]":{
+    "ELECTRONANALYZER[electronanalyzer]":{
       "@default":"detector",
       "name":"@eln",
       "description":"@eln",
@@ -132,11 +120,8 @@
       "device_information":{
         "vendor":"@eln",
         "model":"@eln",
-        "identifier":{
-          "service":"@eln",
-          "identifier":"@eln",
-          "is_persistent":"@eln"
-        }
+        "identifier":"@eln",
+        "identifier/@type":"@eln"
       },
       "energy_resolution":{
         "physical_quantity":"energy",
@@ -157,11 +142,8 @@
         "device_information":{
           "vendor":"@eln",
           "model":"@eln",
-          "identifier":{
-            "service":"@eln",
-            "identifier":"@eln",
-            "is_persistent":"@eln"
-          }
+          "identifier":"@eln",
+          "identifier/@type":"@eln"
         }
       },
       "ENERGYDISPERSION[energydispersion]":{
@@ -174,14 +156,11 @@
         "device_information":{
           "vendor":"@eln",
           "model":"@eln",
-          "identifier":{
-            "service":"@eln",
-            "identifier":"@eln",
-            "is_persistent":"@eln"
-          }
+          "identifier":"@eln",
+          "identifier/@type":"@eln"
         }
       },
-      "DETECTOR[detector]":{
+      "ELECTRON_DETECTOR[detector]":{
         "@default":"raw_data",
         "amplifier_type":"@eln",
         "detector_type":"@eln",
@@ -193,11 +172,8 @@
         "device_information":{
           "vendor":"@eln",
           "model":"@eln",
-          "identifier":{
-            "service":"@eln",
-            "identifier":"@eln",
-            "is_persistent":"@eln"
-          }
+          "identifier":"@eln",
+          "identifier/@type":"@eln"
         },
         "raw_data":{
           "@signal":"raw",
@@ -207,31 +183,28 @@
           "DATA[*]/@units":"counts"
         }
       },
-      "depends_on":"/entry/instrument/electronanalyser/transformations/analyser_take_off_polar_angle",
+      "depends_on":"/entry/instrument/electronanalyzer/transformations/analyzer_take_off_polar_angle",
       "transformations":{
-        "analyser_take_off_polar_angle":"!@attrs:analyser_take_off_polar_angle",
-        "analyser_take_off_polar_angle/@units":"@attrs:analyser_take_off_polar_angle/@units",
-        "analyser_take_off_polar_angle/@transformation_type":"rotation",
-        "analyser_take_off_polar_angle/@vector":[0, -1, 0],
-        "analyser_take_off_polar_angle/@depends_on":"analyser_take_off_azimuth_angle",
+        "analyzer_take_off_polar_angle":"!@attrs:analyzer_take_off_polar_angle",
+        "analyzer_take_off_polar_angle/@units":"@attrs:analyzer_take_off_polar_angle/@units",
+        "analyzer_take_off_polar_angle/@transformation_type":"rotation",
+        "analyzer_take_off_polar_angle/@vector":[0, -1, 0],
+        "analyzer_take_off_polar_angle/@depends_on":"analyzer_take_off_azimuth_angle",
 
-        "analyser_take_off_azimuth_angle":"!@attrs:analyser_take_off_azimuth_angle",
-        "analyser_take_off_azimuth_angle/@units":"@attrs:analyser_take_off_azimuth_angle/@units",
-        "analyser_take_off_azimuth_angle/@transformation_type":"rotation",
-        "analyser_take_off_azimuth_angle/@vector":[0, 0, -1],
-        "analyser_take_off_azimuth_angle/@depends_on":"/entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation"
+        "analyzer_take_off_azimuth_angle":"!@attrs:analyzer_take_off_azimuth_angle",
+        "analyzer_take_off_azimuth_angle/@units":"@attrs:analyzer_take_off_azimuth_angle/@units",
+        "analyzer_take_off_azimuth_angle/@transformation_type":"rotation",
+        "analyzer_take_off_azimuth_angle/@vector":[0, 0, -1],
+        "analyzer_take_off_azimuth_angle/@depends_on":"/entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation"
       }
     },
     "MANIPULATOR[manipulator]":{
       "device_information":{
         "vendor":"@eln",
         "model":"@eln",
-        "identifier":{
-          "service":"@eln",
-          "identifier":"@eln",
-          "is_persistent":"@eln"
-        }
-      },
+        "identifier":"@eln",
+        "identifier/@type":"@eln"
+        },
       "temperature_sensor":{
         "name":"@eln",
         "measurement":"@eln",
@@ -287,26 +260,24 @@
       "current/@units":"@eln"
     }
   },
-  "/ENTRY/PROCESS_MPES[process]":{
-    "energy_calibration":{
-      "calibrated_axis":"@data:energy",
-      "calibrated_axis/@units":"eV"
-    },
-    "energy_referencing":{
-      "level":null,
-      "reference_peak":null,
-      "binding_energy":null,
-      "offset":null,
-      "calibrated_axis":null
-    },
-    "transmission_correction":{
-      "transmission_function":{
-        "@axes":null,
-        "@signal":null,
-        "kinetic_energy":null,
-        "kinetic_energy/@units":null,
-        "relative_intensity":null
-      }
+  "/ENTRY/energy_axis_calibration":{
+    "calibrated_axis":"@data:energy",
+    "calibrated_axis/@units":"eV"
+  },
+  "/ENTRY/energy_referencing":{
+    "level":null,
+    "reference_peak":null,
+    "binding_energy":null,
+    "offset":null,
+    "calibrated_axis":null
+  },
+  "/ENTRY/transmission_correction":{
+    "transmission_function":{
+      "@axes":null,
+      "@signal":null,
+      "kinetic_energy":null,
+      "kinetic_energy/@units":null,
+      "relative_intensity":null
     }
   },
   "/ENTRY/FIT[fit]":{
@@ -394,18 +365,12 @@
   },
   "/ENTRY/SAMPLE[sample]":{
     "name":"['@attrs:sample_name', '@eln']",
-    "identifier":{
-      "identifier":"@eln"
-    },
+    "identifier":"@eln",
+    "identifier/@type":"@eln",
     "atom_types":"@eln",
+    "chemical_formula":"@eln"
     "physical_form":"@eln",
     "situation":"@eln",
-    "SUBSTANCE[substance]":{
-      "name":"@eln",
-      "molecular_mass":"@eln",
-      "cas_number":"@eln",
-      "molecular_formula_hill":"@eln"
-    },
     "history":{
       "sample_preparation":{
         "start_time":"@eln",

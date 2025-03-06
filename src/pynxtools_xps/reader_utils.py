@@ -517,7 +517,7 @@ def extract_unit(
     `unit_missing` dictionary for a default unit.
 
     Example:
-        analyser_work_function: "4.506eV"
+        analyzer_work_function: "4.506eV"
         -> ("4.506", "eV")
 
     Parameters

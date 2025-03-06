@@ -107,8 +107,8 @@ UNITS: dict = {
     "sputter_source_width_y": "um",
     "sputter_source_incidence_polar_angle": "degree",
     "sputter_source_azimuth_angle": "degree",
-    "analyser_take_off_polar_angle": "degree",
-    "analyser_take_off_azimuth_angle": "degree",
+    "analyzer_take_off_polar_angle": "degree",
+    "analyzer_take_off_azimuth_angle": "degree",
     "analysis_width_x": "m",
     "analysis_width_y": "m",
     "target_bias": "V",
@@ -271,7 +271,7 @@ KEY_MAP = {
     "sample_id": "sample_name",
     "technique": "analysis_method",
     "source_energy": "excitation_energy",
-    "analyser_mode": "scan_mode",
+    "analyzer_mode": "scan_mode",
     "resolution": "pass_energy",
     "transition_label": "transition",
     "abscissa_label": "energy_label",
@@ -508,7 +508,7 @@ class VamasParser:
 
         block.source_polar_angle = float(self.data.pop(0).strip())
         block.source_azimuth_angle = float(self.data.pop(0).strip())
-        block.analyser_mode = self.data.pop(0).strip()
+        block.analyzer_mode = self.data.pop(0).strip()
         block.resolution = float(self.data.pop(0).strip())
 
         if block.technique == "AES diff":
@@ -521,8 +521,8 @@ class VamasParser:
         block.target_bias = float(self.data.pop(0).strip())
         block.analysis_width_x = float(self.data.pop(0).strip())
         block.analysis_width_y = float(self.data.pop(0).strip())
-        block.analyser_take_off_polar_angle = float(self.data.pop(0).strip())
-        block.analyser_take_off_azimuth_angle = float(self.data.pop(0).strip())
+        block.analyzer_take_off_polar_angle = float(self.data.pop(0).strip())
+        block.analyzer_take_off_azimuth_angle = float(self.data.pop(0).strip())
         block.species_label = self.data.pop(0).strip()
         block.transition_label = self.data.pop(0).strip()
         block.particle_charge = int(self.data.pop(0).strip())

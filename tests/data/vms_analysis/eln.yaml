@@ -15,18 +15,18 @@ instrument:
     resolution:
       value: 0.2
       unit: eV
-  source_xray:
+  source_probe:
     type: Synchrotron X-ray Source
     probe: x-ray
     device_information:
       vendor: null
       model: null
       identifier: null
-  beam_xray:
+  beam_probe:
     distance:
       value: 0.0
       unit: mm
-  analyser:
+  analyzer:
     description: hemispherical
     name: PHOIBOS 150
     device_information:
@@ -42,7 +42,7 @@ instrument:
         identifier: null
     energydispersion:
       scheme: hemispherical
-      energy_scan_mode: fixed_analyser_transmission
+      energy_scan_mode: fixed_analyzer_transmission
       radius:
         unit: mm
         value: 150
@@ -68,20 +68,20 @@ instrument:
         unit: K
     sample_heater:
       name: Coherent Compact Evolution IR Diode LASER (DILAS)
-      physical_quantity: temperature
+      actuation_target: temperature
       type: IR diode laser
       heater_power:
         value: 0.0
         unit: W
-      pid:
+      pid_controller:
         setpoint:
           value: 298.0
           unit: K
     cryostat:
       name: null
-      physical_quantity: null
+      actuation_target: null
       type: null
-      pid:
+      pid_controller:
         setpoint: null
     drain_current_amperemeter:
       name: Amperemeter 1.0
@@ -100,9 +100,9 @@ instrument:
         unit: V
     sample_bias_potentiostat:
       name: XPS sample potentiostat
-      physical_quantity: voltage
+      actuation_target: voltage
       type: potentiostat
-      pid:
+      pid_controller:
         setpoint:
           value: 0.0
           unit: V
@@ -119,7 +119,7 @@ instrument:
         unit: null
   flood_gun:
     name: FG 22/35
-    physical_quantity: current
+    actuation_target: current
     type: low energy electron source
     current:
       value: 0.0
@@ -130,6 +130,7 @@ instrument:
         unit: null
 sample:
   description: FeO powder
+  chemical_formula: FeO
   physical_form: powder
   substance:
     name: FeO

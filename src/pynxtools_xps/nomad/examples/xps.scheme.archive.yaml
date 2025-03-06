@@ -34,7 +34,7 @@ definitions:
           description: 'Datetime of the end of the measurement. Should be a ISO8601
             date/time stamp. It is recommended to add an explicit time zone, otherwise
             the local time zone is assumed per ISO8601.'
-        entry_identifier:
+        identifier_entry:
           type: str
           m_annotations:
             eln:
@@ -91,36 +91,12 @@ definitions:
                     component: StringEditQuantity
                 description: 'Name of the affiliation of the user at the time when
                               the experiment was performed.'
-            sub_sections:
-              orcid:
-                section:
-                  m_annotations:
-                    eln:
-                      overview: true
-                  quantities:
-                    service:
-                      type: str
-                      m_annotations:
-                        eln:
-                          component: StringEditQuantity
-                      description: 'The service by which the resouce can be resolved.
-                                    If the service is not in the list a simple url may be used.
-                                      The url can either be a resolving service for the identifier
-                                      or a fully qualified identification in itself.
-                                      Any of these values:
-                                      - doi
-                                      - urn
-                                      - hdl
-                                      - purl
-                                      - orcid
-                                      - iso
-                                      - url.'
-                    identifier:
-                      type: str
-                      m_annotations:
-                        eln:
-                          component: StringEditQuantity
-                      description: 'The unique code, IRI or hash to resolve this reference. Typically, this is stated by the service which is considered a complete identifier, e.g., for a DOI it’s something of the form 10.1107/S1600576714027575 or https://doi.org/10.1107/S1600576714027575, which are both resolvable.'
+              identifier_orcid:
+                type: str
+                m_annotations:
+                  eln:
+                    component: StringEditQuantity
+                description: 'ORCID identifier of the user.'              
         instrument:
           section:
             m_annotations:
@@ -174,7 +150,7 @@ definitions:
                           component: NumberEditQuantity
                           defaultDisplayUnit: 'eV'
                       description: 'Energy resolution'
-              source_xray:
+              source_probe:
                 section:
                   m_annotations:
                     eln:
@@ -239,7 +215,7 @@ definitions:
                               eln:
                                 component: StringEditQuantity
                             description: 'Ideally, (globally) unique persistent identifier, i.e. a serial number or hash identifier of the source.'
-              beam_xray:
+              beam_probe:
                 section:
                   m_annotations:
                     eln:
@@ -257,7 +233,7 @@ definitions:
                         point where the beam interacts with the sample. For photoemission,
                         the latter is the point where the the centre of the beam touches
                         the sample surface.'
-              analyser:
+              analyzer:
                 section:
                   m_annotations:
                     eln:
@@ -287,13 +263,13 @@ definitions:
                             m_annotations:
                               eln:
                                 component: StringEditQuantity
-                            description: 'Version or model of the analyser named by the manufacturer.'
+                            description: 'Version or model of the analyzer named by the manufacturer.'
                           identifier:
                             type: str
                             m_annotations:
                               eln:
                                 component: StringEditQuantity
-                            description: 'Ideally, (globally) unique persistent identifier, i.e. a serial number or hash identifier of the analyser.'
+                            description: 'Ideally, (globally) unique persistent identifier, i.e. a serial number or hash identifier of the analyzer.'
                     collectioncolumn:
                       section:
                         m_annotations:
@@ -500,7 +476,7 @@ definitions:
                               eln:
                                 component: StringEditQuantity
                             description: 'Name of the heater.'
-                          physical_quantity:
+                          actuation_target:
                             type: str
                             m_annotations:
                               eln:
@@ -522,7 +498,7 @@ definitions:
                             description: 'In case of a fixed or averaged heating power, this is the scalar heater power.
                                           It can also be a 1D array of heater powers (without time stamps).'
                         sub_sections:
-                          pid:
+                          pid_controller:
                             section:
                               m_annotations:
                                 eln:
@@ -549,7 +525,7 @@ definitions:
                               eln:
                                 component: StringEditQuantity
                             description: 'Name of the cryostat.'
-                          physical_quantity:
+                          actuation_target:
                             type: str
                             m_annotations:
                               eln:
@@ -562,7 +538,7 @@ definitions:
                                 component: StringEditQuantity
                             description: 'The type of hardware used for cooling.'
                         sub_sections:
-                          pid:
+                          pid_controller:
                             section:
                               m_annotations:
                                 eln:
@@ -661,7 +637,7 @@ definitions:
                               eln:
                                 component: StringEditQuantity
                             description: 'Name of the potentiostat.'
-                          physical_quantity:
+                          actuation_target:
                             type: str
                             m_annotations:
                               eln:
@@ -674,7 +650,7 @@ definitions:
                                 component: StringEditQuantity
                             description: 'The type of hardware used for applying the sample bias.'
                         sub_sections:
-                          pid:
+                          pid_controller:
                             section:
                               m_annotations:
                                 eln:
@@ -734,7 +710,7 @@ definitions:
                         eln:
                           component: StringEditQuantity
                       description: 'Name of the flood gun.'
-                    physical_quantity:
+                    actuation_target:
                       type: str
                       m_annotations:
                         eln:

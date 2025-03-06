@@ -166,7 +166,7 @@ class XmlMapperSpecs(XPSMapper):
                 # "scan" in individual CountsSeq
                 scan_counts = raw_data["scans"][scan_nm]
 
-                if scan_mode == "fixed_analyser_transmission":
+                if scan_mode == "fixed_analyzer_transmission":
                     for row in np.arange(mcd_num):
                         count_on_row = scan_counts[row::mcd_num]
                         # Reverse counts from lower to higher

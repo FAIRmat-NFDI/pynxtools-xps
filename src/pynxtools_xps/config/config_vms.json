@@ -13,7 +13,7 @@
     "experiment_laboratory":"@eln",
     "identifier_entry":"@eln",
     "duration":"@eln",
-    "duration/@units":"s",
+    "duration/@units":"s"
   },
   "/ENTRY/xps_coordinate_system":{
     "origin":"sample stage",

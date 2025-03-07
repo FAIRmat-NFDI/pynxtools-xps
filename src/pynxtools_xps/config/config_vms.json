@@ -368,7 +368,7 @@
     "identifier":"@eln",
     "identifier/@type":"@eln",
     "atom_types":"@eln",
-    "chemical_formula":"@eln"
+    "chemical_formula":"@eln",
     "physical_form":"@eln",
     "situation":"@eln",
     "history":{

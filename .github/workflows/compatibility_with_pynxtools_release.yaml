@@ -20,7 +20,7 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
-      - name: Install uv and set the python version to $3.12
+      - name: Install uv and set the python version to 3.12
         uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.12"
@@ -28,6 +28,9 @@ jobs:
         run: |
           uv pip install ".[dev]"
           uv pip install coverage coveralls
+      - name: Install nomad
+        run: |
+          uv pip install nomad-lab[infrastructure]@git+https://gitlab.mpcdf.mpg.de/nomad-lab/nomad-FAIR.git
       - name: Install pynxtools release version ${{ matrix.pynxtools_versions }}
         run: |
           if [ "${{ matrix.pynxtools_versions }}" == "latest" ]; then

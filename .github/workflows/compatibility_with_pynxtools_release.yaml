@@ -30,11 +30,11 @@ jobs:
           uv pip install coverage coveralls
       - name: Install pynxtools release version ${{ matrix.pynxtools_versions }}
         run: |
-         if [ "${{ matrix.pynxtools_versions }}" == "latest" ]; then
-           uv pip install pynxtools
-         else
-          uv pip install pynxtools==${{ matrix.pynxtools_versions }}
-         fi
+          if [ "${{ matrix.pynxtools_versions }}" == "latest" ]; then
+            uv pip install pynxtools
+          else
+           uv pip install pynxtools==${{ matrix.pynxtools_versions }}
+          fi
       - name: Run tests
         run: |
           pytest tests/.

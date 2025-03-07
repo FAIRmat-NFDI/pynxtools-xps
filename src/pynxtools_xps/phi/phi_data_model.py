@@ -44,9 +44,9 @@ class PhiMetadata(XpsDataclass):
     experiment_id: str = ""
     energy_reference: dict = field(default_factory=dict)
 
-    analyser_work_function: str = ""
-    analyser_work_function_units: str = "eV"
-    analyser_retardation_gain: float = 0.0
+    analyzer_work_function: str = ""
+    analyzer_work_function_units: str = "eV"
+    analyzer_retardation_gain: float = 0.0
     register_image: bool = False
     register_image_interval: int = 0
     register_image_mode: int = 0
@@ -54,10 +54,10 @@ class PhiMetadata(XpsDataclass):
     platen_id: str = ""  # what's that?
     photo_filename: str = ""  # what's that?
     sxi_filename: str = ""  # what's that?
-    source_analyser_angle: float = 0.0  # unit
-    source_analyser_angle_units: str = "degree"
-    analyser_solid_angle: float = 0.0  # unit
-    analyser_solid_angle_units: str = "degree"
+    source_analyzer_angle: float = 0.0  # unit
+    source_analyzer_angle_units: str = "degree"
+    analyzer_solid_angle: float = 0.0  # unit
+    analyzer_solid_angle_units: str = "degree"
     intensity_recalibration: bool = False
     intensity_calibration_coefficients: list = field(default_factory=list)
     energy_recalibration: bool = False

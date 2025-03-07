@@ -6,40 +6,39 @@ user:
   name: Sebastian Benz
   affiliation: Justus-Liebig-Universität Gießen, AG Spektroskopie und Optik
   email: null
-  IDENTIFIER[orcid]: null
+  identifier_orcid: null
 instrument:
   energy_resolution:
     type: calibrated
     resolution:
       value: 0.1
       unit: eV
-  source_xray:
+  source_probe:
     type: Fixed Tube X-ray
     name: VersaProbe 4 X-ray Source
     probe: photon
     device_information:
       vendor: PHI Electronics
       model: VersaProbe 4 X-ray Source
-      identifier:
-        identifier: v1.0
-  beam_xray:
+      identifier: v1.0
+  beam_probe:
     distance:
       value: 0.0
       unit: mm
-  sourceTYPE[source_gas_cluster_ion_beam]:
+  source_TYPE[source_gas_cluster_ion_beam]:
     type_other: argon gas cluster ion beam gun
     description: argon cluster GCIB
-  sourceTYPE[source_neutral_ion_gun]:
+  source_TYPE[source_neutral_ion_gun]:
     type_other: monoatomic neutral ion beam gun
     description: monoatomic ion source
-  sourceTYPE[source_sputter_gun]:
+  source_TYPE[source_sputter_gun]:
     type_other: ion sputter gun
     description: sputter gun
-  analyser:
+  analyzer:
     description: hemispherical
     device_information:
       vendor: PHI Electronics
-      model: VersaProbe 4 Hemispherical Analyser
+      model: VersaProbe 4 Hemispherical Analyzer
       identifier: null
     energy_resolution:
       type: calibrated
@@ -59,7 +58,7 @@ instrument:
         value: 150
       device_information:
         vendor: PHI Electronics
-        model: VersaProbe 4 Hemispherical Analyser
+        model: VersaProbe 4 Hemispherical Analyzer
         identifier: null
     detector:
       amplifier_type: channeltron
@@ -88,7 +87,7 @@ instrument:
       heater_power:
         value: 0.0
         unit: W
-      pid:
+      pid_controller:
         setpoint:
           value: 298.0
           unit: K
@@ -96,7 +95,7 @@ instrument:
       name: null
       physical_quantity: null
       type: null
-      pid:
+      pid_controller:
         setpoint: null
     drain_current_amperemeter:
       name: Amperemeter 1.0
@@ -117,7 +116,7 @@ instrument:
       name: XPS sample potentiostat
       physical_quantity: voltage
       type: potentiostat
-      pid:
+      pid_controller:
         setpoint:
           value: 0.0
           unit: V
@@ -145,8 +144,8 @@ instrument:
         unit: null
 sample:
   name: SnO2 10nnm
-  identifier:
-    identifier: 123456789
+  identifier: 123456789
+  chemical_formula: SnO2
   physical_form: pellet
   situation: vacuum
   substance:
@@ -162,7 +161,7 @@ sample:
       end_time: 2022-01-22T13:18:00.200Z
       description: sputter cleaned with Ar ions for 20 min
       method: Ar sputtering
-    PHYSICAL_PROCESS[sample_loading]:
+    ACTIVITY[sample_loading]:
       start_time: 2022-01-22T12:30:00.200Z
       end_time: 2022-01-22T12:31:00.200Z
       description: loaded into the VersaProbe 4

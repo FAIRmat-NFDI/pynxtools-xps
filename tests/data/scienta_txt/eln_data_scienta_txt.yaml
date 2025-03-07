@@ -15,27 +15,26 @@ instrument:
     resolution:
       value: 0.1
       unit: eV
-  source_xray:
+  source_probe:
     type: Synchrotron X-ray Source
     name: BESSY II
     probe: x-ray
     device_information:
       vendor: Helmholtz-Zentrum Berlin
       model: BESSY II
-      identifier:
-        identifier: "2.0"
+      identifier: "2.0"
     current:
       value: 298
       unit: mA
-  beam_xray:
+  beam_probe:
     distance:
       unit: mm
       value: 0.0
     current:
       value: 30
       unit: pA
-  analyser:
-    name: Hemispherical Analyser dummy
+  analyzer:
+    name: Hemispherical Analyzer dummy
     description: hemispherical
     work_function:
       value: 4.01
@@ -59,7 +58,7 @@ instrument:
       pass_energy:
         unit: eV
       APERTURE[entrance_slit]:
-        description: Analyser slit Nr. 3
+        description: Analyzer slit Nr. 3
         shape: curved slit
         size:
           value: 0.4
@@ -71,8 +70,7 @@ instrument:
     device_information:
       vendor: Scienta Omicron
       model: 5-axis manipulator
-      identifier:
-        identifier: v1.0
+      identifier: v1.0
     temperature_sensor:
       name: type K thermocouple
       measurement: temperature
@@ -83,20 +81,20 @@ instrument:
         unit: K
     sample_heater:
       name: Coherent Compact Evolution IR Diode LASER (DILAS)
-      physical_quantity: temperature
+      actuation_target: temperature
       type: IR diode laser
       heater_power:
         value: 0.0
         unit: W
-      pid:
+      pid_controller:
         setpoint:
           value: 298.0
           unit: K
     cryostat:
       name: null
-      physical_quantity: null
+      actuation_target: null
       type: null
-      pid:
+      pid_controller:
         setpoint: null
     drain_current_amperemeter:
       name: Amperemeter 1.0
@@ -115,9 +113,9 @@ instrument:
         unit: V
     sample_bias_potentiostat:
       name: XPS sample potentiostat
-      physical_quantity: voltage
+      actuation_target: voltage
       type: potentiostat
-      pid:
+      pid_controller:
         setpoint:
           value: 0.0
           unit: V
@@ -146,15 +144,15 @@ instrument:
       unit: mbar
   flood_gun:
     name: FG 22/35
-    physical_quantity: current
+    actuation_target: current
     type: low energy electron source
     current:
       value: 0.0
       unit: A
 sample:
-  identifier:
-    identifier: 0
+  identifier: 0
   description: Ag foil on standard sample holder
+  chemical_formula: Ag
   physical_form: foil
   substance:
     name: Ag
@@ -165,7 +163,7 @@ sample:
       end_time: 2022-04-08T11:45:00.200Z
       description: sputter cleaned with Ar ions for 20 min
       method: Ar sputtering
-    PHYSICAL_PROCESS[sample_loading]:
+    ACTIVITY[sample_loading]:
       start_time: 2023-03-08T10:49:12+01:00
       end_time: 2023-03-08T10:52:47+01:00
       description: loaded in the endstation and transferred to analysis chamber

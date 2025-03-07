@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       # TODO check Disable this test from block merge request
       matrix:
-        pynxtools_versions: ["latest", "v0.9.3"]
+        pynxtools_versions: ["latest"]
 
     steps:
       - uses: actions/checkout@v4

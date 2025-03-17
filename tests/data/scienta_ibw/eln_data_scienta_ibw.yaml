@@ -33,8 +33,8 @@ instrument:
     current:
       value: 30
       unit: pA
-  analyzer:
-    name: Hemispherical Analyser dummy
+  electronanalyzer:
+    name: Hemispherical Analyzer dummy
     description: hemispherical
     work_function:
       value: 4.01
@@ -58,7 +58,7 @@ instrument:
       pass_energy:
         unit: eV
       APERTURE[entrance_slit]:
-        description: Analyser slit Nr. 3
+        description: Analyzer slit Nr. 3
         shape: curved slit
         size:
           value: 0.4
@@ -83,7 +83,7 @@ instrument:
       name: Coherent Compact Evolution IR Diode LASER (DILAS)
       actuation_target: temperature
       type: IR diode laser
-      heater_power:
+      output_heater_power:
         value: 0.0
         unit: W
       pid_controller:
@@ -150,7 +150,7 @@ instrument:
       value: 0.0
       unit: A
 sample:
-  identifier: 0
+  identifier: Sample 0001
   description: Ag foil on standard sample holder
   chemical_formula: Ag
   physical_form: foil

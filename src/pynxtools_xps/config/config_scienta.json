@@ -18,7 +18,7 @@
     "address":"@eln",
     "email":"@eln",
     "identifier_orcid":"@eln",
-    "identifier_orcid/@type": "ORCID"
+    "identifier_orcid/@type":"@eln"
   },
   "/ENTRY/INSTRUMENT[instrument]":{
     "@default":"electronanalyzer",
@@ -113,6 +113,7 @@
           "model":"@eln",
           "identifier":"@eln",
           "identifier/@type":"@eln"
+        }
       },
       "ELECTRON_DETECTOR[detector]":{
         "@default":"raw_data",
@@ -214,12 +215,12 @@
     }
   },
   "/ENTRY/energy_axis_calibration":{
+    "physical_quantity":"energy",
     "calibrated_axis":"@data:energy",
     "calibrated_axis/@units":"eV"
   },
   "/ENTRY/energy_referencing":null,
-  "/ENTRY/transmission_correction":null
-  },
+  "/ENTRY/transmission_correction":null,
   "/ENTRY/SAMPLE[sample]":{
     "name":"@attrs:sample/sample_name",
     "identifier":"@eln",

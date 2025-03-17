@@ -110,7 +110,7 @@
           "identifier/@type":"@eln"
         }
       },
-      "DETECTOR[detector]":{
+      "ELECTRON_DETECTOR[detector]":{
         "@default":"raw_data",
         "amplifier_type":"@eln",
         "count_time":"@attrs:detector/dwell_time",
@@ -150,10 +150,10 @@
       },
       "sample_heater":{
         "name":"@eln",
-        "actual_target":"@eln",
+        "actuation_target":"@eln",
         "type":"@eln",
-        "heater_power":"@eln",
-        "heater_power/@units":"@eln",
+        "output_heater_power":"@eln",
+        "output_heater_power/@units":"@eln",
         "PID_CONTROLLER[pid_controller]/setpoint":"@eln",
         "PID_CONTROLLER[pid_controller]/setpoint/@units":"@eln"
       },
@@ -174,7 +174,7 @@
       },
       "sample_bias_potentiostat":{
         "name":"@eln",
-        "actual_target":"@eln",
+        "actuation_target":"@eln",
         "type":"@eln",
         "PID_CONTROLLER[pid_controller]/setpoint":"@eln",
         "PID_CONTROLLER[pid_controller]/setpoint/@units":"@eln"
@@ -189,7 +189,7 @@
     },
     "flood_gun":{
       "name":"@eln",
-      "actual_target":"@eln",
+      "actuation_target":"@eln",
       "type":"@eln",
       "current":"@eln",
       "current/@units":"@eln"

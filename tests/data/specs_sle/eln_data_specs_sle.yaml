@@ -33,7 +33,7 @@ instrument:
     distance:
       value: 0.0
       unit: mm
-  analyzer:
+  electronanalyzer:
     description: hemispherical
     device_information:
       vendor: SPECS GmbH
@@ -78,7 +78,7 @@ instrument:
       name: Coherent Compact Evolution IR Diode LASER (DILAS)
       actuation_target: temperature
       type: IR diode laser
-      heater_power:
+      output_heater_power:
         value: 0.0
         unit: W
       pid_controller:

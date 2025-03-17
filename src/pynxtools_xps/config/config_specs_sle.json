@@ -156,7 +156,7 @@
           "identifier/@type": "@eln"
         }
       },
-      "DETECTOR[detector]":{
+      "ELECTRON_DETECTOR[detector]":{
         "@default":"raw_data",
         "amplifier_type":"@eln",
         "detector_type":"@eln",

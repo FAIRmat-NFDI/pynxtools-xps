@@ -197,6 +197,7 @@
       }
     },
     "/ENTRY/energy_axis_calibration":{
+      "physical_quantity":"energy",
       "calibrated_axis":"@data:energy",
       "calibrated_axis/@units":"eV"
     },

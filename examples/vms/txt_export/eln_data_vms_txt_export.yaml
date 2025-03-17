@@ -7,6 +7,7 @@ user:
   name: Lukas Pielsticker
   affiliation: Max Planck Institute for Chemical Energy Conversion
   email: lukas.pielsticker@cec.mpg.de
+  identifier: 0000-0001-9361-8333
 instrument:
   device_information:
     vendor: SPECS GmbH
@@ -28,7 +29,7 @@ instrument:
     distance:
       value: 0.0
       unit: mm
-  analyzer:
+  electronanalyzer:
     description: hemispherical
     name: PHOIBOS 150
     work_function:
@@ -52,7 +53,7 @@ instrument:
         value: 150
         unit: mm
       pass_energy:
-        value: 20
+        value: 20.0
         unit: eV
       device_information:
         vendor: null
@@ -78,7 +79,7 @@ instrument:
       name: Coherent Compact Evolution IR Diode LASER (DILAS)
       actuation_target: temperature
       type: IR diode laser
-      heater_power:
+      output_heater_power:
         value: 0.0
         unit: W
       pid_controller:

@@ -26,15 +26,15 @@ instrument:
       value: 0.0
       unit: mm
   source_TYPE[source_gas_cluster_ion_beam]:
-    type_other: argon gas cluster ion beam gun
+    type: argon gas cluster ion beam gun
     description: argon cluster GCIB
   source_TYPE[source_neutral_ion_gun]:
-    type_other: monoatomic neutral ion beam gun
+    type: monoatomic neutral ion beam gun
     description: monoatomic ion source
   source_TYPE[source_sputter_gun]:
-    type_other: ion sputter gun
+    type: ion sputter gun
     description: sputter gun
-  analyzer:
+  electronanalyzer:
     description: hemispherical
     device_information:
       vendor: PHI Electronics
@@ -82,9 +82,9 @@ instrument:
         unit: K
     sample_heater:
       name: Sample heater
-      physical_quantity: temperature
+      actuation_target: temperature
       type: IR diode laser
-      heater_power:
+      output_heater_power:
         value: 0.0
         unit: W
       pid_controller:
@@ -93,7 +93,7 @@ instrument:
           unit: K
     cryostat:
       name: null
-      physical_quantity: null
+      actuation_target: null
       type: null
       pid_controller:
         setpoint: null
@@ -114,7 +114,7 @@ instrument:
         unit: V
     sample_bias_potentiostat:
       name: XPS sample potentiostat
-      physical_quantity: voltage
+      actuation_target: voltage
       type: potentiostat
       pid_controller:
         setpoint:
@@ -133,7 +133,7 @@ instrument:
         unit: null
   flood_gun:
     name: VersaProbe 4 flood gun
-    physical_quantity: current
+    actuation_target: current
     type: low energy electron source
     current:
       value: 0.0
@@ -144,7 +144,7 @@ instrument:
         unit: null
 sample:
   name: SnO2 10nnm
-  identifier: 123456789
+  identifier: "123456789"
   chemical_formula: SnO2
   physical_form: pellet
   situation: vacuum

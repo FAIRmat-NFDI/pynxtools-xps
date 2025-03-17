@@ -19,7 +19,7 @@
     "address":"@eln",
     "email":"@eln",
     "identifier_orcid":"@eln",
-    "identifier_orcid/@type": "ORCID"
+    "identifier_orcid/@type":"@eln"
   },
   "/ENTRY/INSTRUMENT[instrument]":{
     "@default":"electronanalyzer",
@@ -532,6 +532,7 @@
   "/ENTRY/energy_axis_calibration":null,
   "/ENTRY/energy_referencing":{
     "level":null,
+    "physical_quantity":"energy",
     "reference_peak":"@attrs:process/energy_reference_peak",
     "binding_energy":"@attrs:process/energy_reference_energy",
     "binding_energy/@units":"@attrs:process/energy_reference_energy/@units",

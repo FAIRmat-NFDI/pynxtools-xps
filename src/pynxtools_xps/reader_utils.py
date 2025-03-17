@@ -437,6 +437,7 @@ def align_name_part(name_part: str):
             ":": "_",
             "+": "_",
             "/": "_",
+            "=": "",
         }
     )
 

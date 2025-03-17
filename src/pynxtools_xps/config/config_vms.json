@@ -51,8 +51,8 @@
     "affiliation":"@eln",
     "address":"@eln",
     "email":"@eln",
-    "identifier_orcid":"@eln",
-    "identifier_orcid/@type": "ORCID"
+    "identifier":"@eln",
+    "identifier/@type": "ORCID"
   },
   "/ENTRY/INSTRUMENT[instrument]":{
     "@default":"electronanalyzer",
@@ -80,7 +80,7 @@
       },
       "associated_beam":"/entry/instrument/beam_xray"
     },
-    "beam_xray":{
+    "beam_probe":{
       "distance":"@eln",
       "distance/@units":"@eln",
       "extent":"@attrs:extent",
@@ -215,10 +215,10 @@
       },
       "sample_heater":{
         "name":"@eln",
-        "physical_quantity":"@eln",
+        "actuation_target":"@eln",
         "type":"@eln",
-        "heater_power":"@eln",
-        "heater_power/@units":"@eln",
+        "output_heater_power":"@eln",
+        "output_heater_power/@units":"@eln",
         "PID[pid]/setpoint":"@eln",
         "PID[pid]/setpoint/@units":"@eln"
       },
@@ -239,7 +239,7 @@
       },
       "sample_bias_potentiostat":{
         "name":"@eln",
-        "physical_quantity":"@eln",
+        "actuation_target":"@eln",
         "type":"@eln",
         "PID[pid]/setpoint":"@eln",
         "PID[pid]/setpoint/@units":"@eln"
@@ -254,13 +254,14 @@
     },
     "flood_gun":{
       "name":"@eln",
-      "physical_quantity":"@eln",
+      "actuation_target":"@eln",
       "type":"@eln",
       "current":"@eln",
       "current/@units":"@eln"
     }
   },
   "/ENTRY/energy_axis_calibration":{
+    "physical_quantity":"energy",
     "calibrated_axis":"@data:energy",
     "calibrated_axis/@units":"eV"
   },
@@ -288,6 +289,7 @@
       "@signal":"input_dependent",
       "@auxiliary_signals":"!@attrs:fit_aux_signals",
       "input_independent":"@link:/entry/data/energy",
+      "input_independent/@units":"eV",
       "input_dependent":"@link:/entry/data/data",
       "envelope":"['@attrs:fit_envelope_cps/data', '@attrs:fit_envelope/data']",
       "envelope/@units":"counts_per_second",
@@ -307,8 +309,9 @@
         "position/@units":"@attrs:energy_units"
       },
       "function":{
+        "function_type":"@attrs:component*/function_type",
         "description":"@attrs:component*/lineshape",
-        "formula":"@attrs:component*/formula",
+        "formula_description":"@attrs:component*/formula",
         "position":{
           "value":"@attrs:component*/position",
           "value/@units":"@attrs:component*/position/@units",
@@ -347,17 +350,20 @@
         "position/@units":"@attrs:energy_units"
       },
       "function":{
+        "function_type":"@attrs:region*/function_type",
         "description":"@attrs:region*/bg_type",
-        "formula":"@attrs:region*/formula"
+        "formula_description":"@attrs:region*/formula"
       }
     },
     "error_function":{
+      "function_type":null,
       "description": null,
-      "formula": null
+      "formula_description": null
      },
     "global_fit_function":{
+      "function_type":null,
       "description": null,
-      "formula": null
+      "formula_description": null
      },
     "figure_of_meritMETRIC[figure_of_merit]": null,
     "figure_of_meritMETRIC[figure_of_merit]/@metric": null,

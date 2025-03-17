@@ -34,11 +34,11 @@ instrument:
   source_TYPE[source_sputter_gun]:
     type_other: ion sputter gun
     description: sputter gun
-  analyzer:
+  electronanalyzer:
     description: hemispherical
     device_information:
       vendor: PHI Electronics
-      model: VersaProbe 4 Hemispherical Analyser
+      model: VersaProbe 4 Hemispherical Analyzer
       identifier: null
     energy_resolution:
       type: calibrated
@@ -58,7 +58,7 @@ instrument:
         value: 150
       device_information:
         vendor: PHI Electronics
-        model: VersaProbe 4 Hemispherical Analyser
+        model: VersaProbe 4 Hemispherical Analyzer
         identifier: null
     detector:
       amplifier_type: channeltron
@@ -84,7 +84,7 @@ instrument:
       name: Sample heater
       actuation_target: temperature
       type: IR diode laser
-      heater_power:
+      output_heater_power:
         value: 0.0
         unit: W
       pid_controller:
@@ -133,18 +133,14 @@ instrument:
         unit: null
   flood_gun:
     name: VersaProbe 4 flood gun
-    pid_controller: current
+    actuation_target: current
     type: low energy electron source
     current:
       value: 0.0
       unit: A
-    current_log:
-      value:
-        value: null
-        unit: null
 sample:
   name: SnO2 10nnm
-  identifier: 1
+  identifier: Sample1
   chemical_formula: SnO2
   physical_form: pellet
   situation: vacuum

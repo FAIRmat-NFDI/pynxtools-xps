@@ -31,8 +31,9 @@ instrument:
     distance:
       value: 0.0
       unit: mm
-  analyzer:
+  electronanalyzer:
     description: hemispherical
+    name: PHOIBOS 150 NAP-XPS analyzer
     device_information:
       vendor: SPECS GmbH
       model: PHOIBOS 150 NAP
@@ -76,7 +77,7 @@ instrument:
       name: Coherent Compact Evolution IR Diode LASER (DILAS)
       actuation_target: temperature
       type: IR diode laser
-      heater_power:
+      output_heater_power:
         value: 0.0
         unit: W
       pid_controller:

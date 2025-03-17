@@ -44,7 +44,7 @@ class PhiMetadata(XpsDataclass):
     experiment_id: str = ""
     energy_reference: dict = field(default_factory=dict)
 
-    analyzer_work_function: str = ""
+    analyzer_work_function: float = 0.0
     analyzer_work_function_units: str = "eV"
     analyzer_retardation_gain: float = 0.0
     register_image: bool = False
@@ -78,11 +78,11 @@ class PhiMetadata(XpsDataclass):
 
     ion_gun_mode: str = ""
     sputter_ion: str = ""
-    sputter_current: str = ""
+    sputter_current: float = 0.0
     sputter_current_units: str = "A"
-    sputter_rate: str = ""
+    sputter_rate: float = 0.0
     sputter_rate_units: str = "A/s"
-    sputter_energy: str = ""
+    sputter_energy: float = 0.0
     sputter_energy_units: str = "eV"
     float_voltage: float = 0.0
     float_voltage_units: str = "V"
@@ -207,7 +207,7 @@ class PhiMetadata(XpsDataclass):
     flood_gun_filament_current_units: str = "A"
     flood_gun_pulse_length: float = 0.0
     flood_gun_pulse_length_units: str = "s"
-    flood_gun_pulse_frequency: int = 0
+    flood_gun_pulse_frequency: float = 0.0
     flood_gun_pulse_frequency_units: str = "1/s"
     flood_gun_gain: int = 0
     flood_gun_time_per_step: float = 0.0

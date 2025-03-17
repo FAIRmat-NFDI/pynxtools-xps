@@ -95,7 +95,7 @@ SETTINGS_MAP: Dict[str, str] = {
     "sputter_mode": "profiling_sputter_mode",
     "no_depth_reg": "profiling_no_depth_regions",
     "depth_cal_def": "depth_calibration_definition",
-    "analyzer_mode": "energy_scan_mode",
+    "analyser_mode": "energy_scan_mode",
     "surv_num_cycles": "survey_num_of_cycles",
     "surv_time_per_step": "survey_dwell_time",
     "no_spectral_reg_full": "no_spectral_regions_full",
@@ -1440,7 +1440,7 @@ def _map_to_xy_with_units(value: str):
 def _convert_energy_referencing(value: str):
     """Map all items in energy_referencing to a dictionary."""
     peak, energy = value.split(" ")
-    return {"peak": peak, "energy": energy, "energy_units": "eV"}
+    return {"peak": peak, "energy": float(energy), "energy_units": "eV"}
 
 
 def _convert_channel_info(value: str):
@@ -1455,7 +1455,7 @@ def _convert_xray_source_params(value: str):
 
     return {
         "anode_material": label,
-        "energy": energy,
+        "energy": float(energy),
         "energy_units": "eV",
         "monochromatized": mono,
     }

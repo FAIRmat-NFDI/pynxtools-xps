@@ -59,7 +59,7 @@ CONVERT_DICT = {
     "instrument": "INSTRUMENT[instrument]",
     "source_xray": "sourceTYPE[source_xray]",
     "beam_xray": "beamTYPE[beam_xray]",
-    "analyser": "ELECTRONANALYSER[electronanalyser]",
+    "electronanalyzer": "ELECTRONANALYZER[electronanalyzer]",
     "collectioncolumn": "COLLECTIONCOLUMN[collectioncolumn]",
     "energydispersion": "ENERGYDISPERSION[energydispersion]",
     "detector": "DETECTOR[detector]",
@@ -501,21 +501,21 @@ class XPSReader(MultiFormatReader):
                 for key, value1, value2 in existing:
                     self.xps_data[key] = concatenate_values(value1, value2)
 
-    def _get_analyser_names(self) -> List[str]:
+    def _get_analyzer_names(self) -> List[str]:
         """
-        Returns a list of analyser names which should be constructed
-        from the data. Defaults to creating a single analyser named
-        "analyser".
+        Returns a list of analyzer names which should be constructed
+        from the data. Defaults to creating a single analyer named
+        "analyzer".
 
         Currently, this is not used, but can be changed if there are
-        multiple analysers in the future.
+        multiple analyzers in the future.
         """
-        analysers: List[str] = []
+        analyzers: List[str] = []
 
-        if not analysers:
-            analysers += ["electronanalyser"]
+        if not analyzers:
+            analyzers += ["electronanalyzer"]
 
-        return list(dict.fromkeys(analysers))
+        return list(dict.fromkeys(analyzers))
 
     def _get_detector_names(self) -> List[str]:
         """
@@ -545,13 +545,13 @@ class XPSReader(MultiFormatReader):
         Check if there are multiple of some class and, if so, change the
         keys and values in the config file.
 
-        This replaces all occureces of "detector" and "electronanalyser"
+        This replaces all occureces of "detector" and "electronanalyzer"
         in the config dict by the respective names (e.g., detector0, detector1)
         and removes the generic term if there are multiple different instances.
 
         """
         multiples_to_check = {
-            "electronanalyser": self._get_analyser_names,
+            "electronanalyzer": self._get_analyzer_names,
             "detector": self._get_detector_names,
         }
 
@@ -598,7 +598,7 @@ class XPSReader(MultiFormatReader):
 
         Note that the keys of metadata_dict may contain more than
         the path, i.e.,
-        /ENTRY[my-entry]/instrument/analyser/collectioncolumn/voltage.
+        /ENTRY[my-entry]/instrument/analyzer/collectioncolumn/voltage.
         With the regex, the path = "collectioncolumn/voltage" would
         still yield the correct value.
 

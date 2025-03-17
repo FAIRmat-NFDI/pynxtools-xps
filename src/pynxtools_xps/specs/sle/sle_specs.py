@@ -1583,7 +1583,9 @@ class SleProdigyParserV1(SleProdigyParser):
                     "File"
                 ]
             elif setting.tag == "Iris":
-                common_spectrum_settings["iris_diameter"] = setting.attrib["Diameter"]
+                common_spectrum_settings["iris_diameter"] = float(
+                    setting.attrib["Diameter"]
+                )
         return common_spectrum_settings
 
     def _get_spectrum_metadata(self, spectrum):
@@ -1763,7 +1765,9 @@ class SleProdigyParserV4(SleProdigyParser):
                     "File"
                 ]
             elif setting.tag == "Iris":
-                common_spectrum_settings["iris_diameter"] = setting.attrib["Diameter"]
+                common_spectrum_settings["iris_diameter"] = float(
+                    setting.attrib["Diameter"]
+                )
         return common_spectrum_settings
 
     def _get_spectrum_metadata(self, spectrum):

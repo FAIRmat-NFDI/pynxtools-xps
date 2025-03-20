@@ -35,7 +35,7 @@ function update_specs_sle_ref {
   echo "Update SPECS .sle NeXus reference"
   cd specs_sle/
   echo "Update .sle example"
-  dataconverter EX439_S718_Au.sle eln_data_specs_sle.yaml --reader $READER --nxdl $NXDL --ignore-undocumented --output specs_sle_ref.nxs
+  dataconverter EX439_S718_Au.sle eln_data_specs_sle.yaml --reader $READER --nxdl $NXDL --ignore-undocumented --output specs_sle_ref.nxs &> ref_output.txt
   cd ..
 }
 

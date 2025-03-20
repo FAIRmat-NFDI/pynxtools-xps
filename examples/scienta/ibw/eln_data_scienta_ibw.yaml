@@ -96,8 +96,8 @@ instrument:
       type: null
       pid_controller:
         setpoint: null
-    drain_current_amperemeter:
-      name: Amperemeter 1.0
+    drain_current_ammeter:
+      name: ammeter 1.0
       measurement: current
       type: wire
       value:

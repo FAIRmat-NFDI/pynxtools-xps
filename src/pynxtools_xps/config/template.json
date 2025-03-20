@@ -165,7 +165,7 @@
           "PID_CONTROLLER[pid_controller]/setpoint":null,
           "PID_CONTROLLER[pid_controller]/setpoint/@units":null
         },
-        "drain_current_amperemeter":{
+        "drain_current_ammeter":{
           "name":null,
           "measurement":null,
           "type":null,
@@ -344,7 +344,7 @@
       },
       "drain_current_env":{
         "value":null,
-        "amperemeter":null
+        "ammeter":null
       },
       "flood_gun_current_env":{
         "value":null,

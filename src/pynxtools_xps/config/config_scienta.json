@@ -161,7 +161,7 @@
         "PID_CONTROLLER[pid_controller]/setpoint/@units":"@eln"
       },
       "cryostat":null,
-      "drain_current_amperemeter":{
+      "drain_current_ammeter":{
         "name":"@eln",
         "measurement":"@eln",
         "type":"@eln",
@@ -250,7 +250,7 @@
       "voltmeter":"@link:/entry/instrument/manipulator/sample_bias_voltmeter"
     },
     "drain_current_env":{
-      "amperemeter":"@link:/entry/instrument/manipulator/drain_current_amperemeter"
+      "ammeter":"@link:/entry/instrument/manipulator/drain_current_ammeter"
     },
     "flood_gun_current_env":{
       "flood_gun":"@link:/entry/instrument/flood_gun"

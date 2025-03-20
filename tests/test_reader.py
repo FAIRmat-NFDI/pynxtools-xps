@@ -37,17 +37,17 @@ READER_CLASS = get_reader(READER_NAME)
 NXDLS = ["NXxps"]  # READER_CLASS.supported_nxdls
 
 test_cases = [
-    # ("phi_spe", "Phi .spe reader"),
-    # ("phi_pro", "Phi .pro reader"),
+    ("phi_spe", "Phi .spe reader"),
+    ("phi_pro", "Phi .pro reader"),
     ("specs_sle", "SPECS .sle reader"),
-    # ("specs_xml", "SPECS .xml reader"),
-    # ("specs_xy", "SPECS .xy reader"),
-    # ("scienta_ibw", "Scienta .ibw reader"),
-    # ("scienta_txt", "Scienta .txt export reader"),
-    # ("vms_analysis", "VAMAS reader with data analysis"),
-    # ("vms_irregular", "Irregular VAMAS reader"),
-    # ("vms_regular", "Regular VAMAS reader"),
-    # ("vms_txt_export", "Vamas txt export"),
+    ("specs_xml", "SPECS .xml reader"),
+    ("specs_xy", "SPECS .xy reader"),
+    ("scienta_ibw", "Scienta .ibw reader"),
+    ("scienta_txt", "Scienta .txt export reader"),
+    ("vms_analysis", "VAMAS reader with data analysis"),
+    ("vms_irregular", "Irregular VAMAS reader"),
+    ("vms_regular", "Regular VAMAS reader"),
+    ("vms_txt_export", "Vamas txt export"),
 ]
 
 test_params = []

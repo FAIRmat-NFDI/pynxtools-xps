@@ -95,8 +95,8 @@
             "setpoint":298.0
           }
         },
-        "drain_current_amperemeter":{
-          "name":"Amperemeter 1.0",
+        "drain_current_ammeter":{
+          "name":"Ammeter 1.0",
           "measurement":"current",
           "type":"wire",
           "value":0.1

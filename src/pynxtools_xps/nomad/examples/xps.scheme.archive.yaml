@@ -553,7 +553,7 @@ definitions:
                                       defaultDisplayUnit: 'kelvin'
                                   description: 'In case of a fixed or averaged cooling temperature, this is the scalar temperature setpoint.
                                                 It can also be a 1D array of temperature setpoints (without time stamps).'
-                    drain_current_amperemeter:
+                    drain_current_ammeter:
                       section:
                         m_annotations:
                           eln:
@@ -564,7 +564,7 @@ definitions:
                             m_annotations:
                               eln:
                                 component: StringEditQuantity
-                            description: 'Name of the amperemeter.'
+                            description: 'Name of the ammeter.'
                           measurement:
                             type: str
                             m_annotations:

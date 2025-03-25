@@ -3,10 +3,10 @@ name: NOMAD dependencies compatibility
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
     # Run workflow only when there are changes in pyproject.toml or dev-requirements.txt
     # paths:
     #   - 'pyproject.toml'
@@ -27,7 +27,7 @@ jobs:
       run: |
         git clone --depth 1 --branch develop --recurse-submodules https://gitlab.mpcdf.mpg.de/nomad-lab/nomad-FAIR.git nomad
         git submodule update --init --recursive --depth 1
-    - name: Add pynxtools dependency in NOMAD test_plugins.txt
+    - name: Add pynxtools-xps dependency in NOMAD test_plugins.txt
       working-directory: ./nomad
       run: |
         echo "" >> test_plugins.txt

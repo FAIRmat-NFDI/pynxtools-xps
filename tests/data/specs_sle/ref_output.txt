@@ -1,6 +1,0 @@
-Using xps reader to convert the given files:  
-• EX439_S718_Au.sle
-• eln_data_specs_sle.yaml
-WARNING: The value at /ENTRY[Au_in_25mBar_O2__Au4f]/INSTRUMENT[instrument]/ELECTRONANALYZER[electronanalyzer]/transmission_function/@axes should be one of the following: ['kinetic_energy'].
-WARNING: The value at /ENTRY[Au_in_vacuum__Au4f]/INSTRUMENT[instrument]/ELECTRONANALYZER[electronanalyzer]/transmission_function/@axes should be one of the following: ['kinetic_energy'].
-The output file generated: specs_sle_ref.nxs.

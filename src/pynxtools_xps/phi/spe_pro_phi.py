@@ -62,8 +62,8 @@ SETTINGS_MAP: Dict[str, str] = {
     "institution": "vendor",
     "operator": "user_name",
     "experiment_i_d": "experiment_id",
-    "analyser_work_fcn": "analyser_work_function",
-    "analyser_retard_gain": "analyser_retardation_gain",
+    "analyzer_work_fcn": "analyzer_work_function",
+    "analyzer_retard_gain": "analyzer_retardation_gain",
     "reg_image_interval": "register_image_interval",
     "reg_image_mode": "register_image_mode",
     "reg_image_last": "register_image_last",
@@ -136,9 +136,9 @@ SETTINGS_MAP: Dict[str, str] = {
 }
 
 KEYS_WITH_UNITS: List[str] = [
-    "analyser_work_function",
-    "source_analyser_angle",
-    "analyser_solid_angle",
+    "analyzer_work_function",
+    "source_analyzer_angle",
+    "analyzer_solid_angle",
     "scan_deflection_span_x",
     "scan_deflection_span_y",
     "scan_deflection_offset_x",
@@ -294,8 +294,8 @@ class MapperPhi(XPSMapper):
                 "bias_box_mode",
                 "instrument_model",
                 "vendor",
-                "source_analyser_angle",
-                "source_analyser_angle/@units",
+                "source_analyzer_angle",
+                "source_analyzer_angle/@units",
             ],
             "xray_source": [
                 "scan_deflection_span_x",
@@ -353,12 +353,12 @@ class MapperPhi(XPSMapper):
                 "xray_spot_size",
                 "xray_spot_size/@units",
             ],
-            "electronanalyser": [
-                "analyser_retardation_gain",
-                "analyser_solid_angle",
-                "analyser_solid_angle/@units",
-                "analyser_work_function",
-                "analyser_work_function/@units",
+            "electronanalyzer": [
+                "analyzer_retardation_gain",
+                "analyzer_solid_angle",
+                "analyzer_solid_angle/@units",
+                "analyzer_work_function",
+                "analyzer_work_function/@units",
                 "sxi_auto_contrast",
                 "sxi_auto_contrast_high",
                 "sxi_auto_contrast_low",
@@ -710,7 +710,7 @@ class MapperPhi(XPSMapper):
 
         file_parent = f"{entry_parent}/file_info"
         instrument_parent = f"{entry_parent}/instrument"
-        analyser_parent = f"{instrument_parent}/electronanalyser"
+        analyzer_parent = f"{instrument_parent}/electronanalyzer"
 
         path_map: Dict[str, str] = {
             "file_info": f"{file_parent}",
@@ -718,10 +718,10 @@ class MapperPhi(XPSMapper):
             "instrument": f"{instrument_parent}",
             "xray_source": f"{instrument_parent}/xray_source",
             "beam": f"{instrument_parent}/beam",
-            "electronanalyser": f"{analyser_parent}",
-            "collectioncolumn": f"{analyser_parent}/collectioncolumn",
-            "energydispersion": f"{analyser_parent}/energydispersion",
-            "detector": f"{analyser_parent}/detector",
+            "electronanalyzer": f"{analyzer_parent}",
+            "collectioncolumn": f"{analyzer_parent}/collectioncolumn",
+            "energydispersion": f"{analyzer_parent}/energydispersion",
+            "detector": f"{analyzer_parent}/detector",
             "manipulator": f"{instrument_parent}/manipulator",
             "c60_ion_gun": f"{instrument_parent}/c60_ion_gun",
             "defect_positioner": f"{instrument_parent}/defect_positioner",
@@ -1251,9 +1251,9 @@ class PhiParser:  # pylint: disable=too-few-public-methods
         Extract units for the metadata containing unit information.
 
         Example:
-            analyser_work_function: 4.506 eV
-            -> analyser_work_function: 4.506,
-               analyser_work_function_units: eV,
+            analyzer_work_function: 4.506 eV
+            -> analyzer_work_function: 4.506,
+               analyzer_work_function_units: eV,
 
         Parameters
         ----------
@@ -1440,7 +1440,7 @@ def _map_to_xy_with_units(value: str):
 def _convert_energy_referencing(value: str):
     """Map all items in energy_referencing to a dictionary."""
     peak, energy = value.split(" ")
-    return {"peak": peak, "energy": energy, "energy_units": "eV"}
+    return {"peak": peak, "energy": float(energy), "energy_units": "eV"}
 
 
 def _convert_channel_info(value: str):
@@ -1455,7 +1455,7 @@ def _convert_xray_source_params(value: str):
 
     return {
         "anode_material": label,
-        "energy": energy,
+        "energy": float(energy),
         "energy_units": "eV",
         "monochromatized": mono,
     }

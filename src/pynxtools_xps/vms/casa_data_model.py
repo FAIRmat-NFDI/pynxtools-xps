@@ -49,6 +49,24 @@ from pynxtools_xps.models.backgrounds import (
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+LINESHAPES: Dict[str, Any] = {
+    "GL": ("Gaussian-Lorentzian Product", GaussianLorentzianProduct),
+    "SGL": ("Gaussian-Lorentzian Sum", GaussianLorentzianSum),
+    "LA": ("Asymmetric Lorentzian", LorentzianAsymmetric),
+    "DS": ("Doniach-Sunjic", DoniachSunjic),
+    "LF": ("Asymmetric Finite", LorentzianFinite),
+}
+
+BACKGROUNDS: Dict[str, Any] = {
+    "Linear": ("Linear", LinearBackground),
+    "Shirley": ("Shirley Sum", Shirley),
+    "Step Up": ("Step Up", StepUp),
+    "Step Down": ("Step Down", StepDown),
+    "U 2 Tougaard": ("Tougaard", TougaardU3),
+    "U 3 Tougaard": ("Tougaard", TougaardU3),
+    "U 4 Tougaard": ("Tougaard", TougaardU4),
+}
+
 
 def split_after_letters(string: str):
     """
@@ -72,6 +90,134 @@ def split_after_letters(string: str):
         return leading_letters, []
 
     return leading_letters, [float(val) for val in split_values]
+
+
+@dataclass
+class CasaRegion(XpsDataclass):
+    """An object to store one CasaXPS peak fit region."""
+
+    name: str = ""
+    rsf: float = 0.0
+    start: float = 0.0
+    start_units: str = "eV"
+    end: float = 0.0
+    end_units: str = "eV"
+    bg_type: str = ""
+    function_type: str = ""
+    av_width: float = 0.0
+    av_width_units: str = "eV"
+    start_offset: float = 0.0
+    start_offset_units: str = ""
+    end_offset: float = 0.0
+    end_offset_units: str = ""
+    cross_section: list = field(default_factory=list)
+    tag: str = ""
+    unknown_0: float = 0.0
+    unknown_1: float = 0.0
+    rsf_effective: float = 0.0
+
+    def calculate_background(self, x: np.ndarray, y: np.ndarray):
+        background_params = [
+            float(param) for param in self.cross_section if float(param)
+        ]
+
+        try:
+            background_class = BACKGROUNDS[self.bg_type][-1]
+
+            try:
+                background = background_class(*background_params)
+            except TypeError:
+                background = background_class()
+
+            if self.end > self.start:
+                min_x = self.start
+                max_x = self.end
+            else:
+                min_x = self.end
+                max_x = self.start
+
+            region = np.argwhere((x >= min_x) & (x <= max_x))
+            fit_region = slice(region[0, 0], region[-1, 0], 1)
+
+            self.start_offset = 100
+
+            y_start_offset = y[0] * (self.start_offset / 100.0)
+            y_end_offset = y[-1] * (self.end_offset / 100.0)
+            y[0] -= y_start_offset
+            y[-1] -= y_end_offset
+
+            x, y = x[fit_region], y[fit_region]
+
+            self.data = background.calc_background(x, y)
+
+            self.formula = background.formula()
+            self.description = str(background)
+
+        except KeyError:
+            logger.warning(
+                f"Background {self.name} (type {self.bg_type}) could not be parsed because no model exists for it."
+            )
+
+
+@dataclass
+class CasaComponent(XpsDataclass):
+    """An object to store one CasaXPS peak fit component."""
+
+    name: str = ""
+    index: int = -1
+    lineshape: str = ""
+    function_type: str = ""
+
+    area: float = 0.0
+    area_min: float = 0.0
+    area_max: float = 0.0
+    area_ref_comp_id: int = -1
+    area_ref_comp_factor: float = 0.0
+
+    width: float = 0.0
+    width_units: str = "eV"
+    width_min: float = 0.0
+    width_min_units: str = "eV"
+    width_max: float = 0.0
+    width_max_units: str = "eV"
+    width_ref_comp_id: int = -1
+    width_ref_comp_factor: float = 0.0
+
+    position: float = 0.0
+    position_units: str = "eV"
+    position_min: float = 0.0
+    position_min_units: str = "eV"
+    position_max: float = 0.0
+    position_max_units: str = "eV"
+    position_ref_comp_id: int = -1
+    position_ref_comp_factor: float = 0.0
+
+    rsf: float = 0.0
+    uncorrected_rsf: float = 0.0
+    mass: float = 0.0
+    tag: str = ""
+    const: str = ""  # CONST
+
+    atomic_concentration: float = 0.0
+
+    def calculate_lineshape(self, x: np.ndarray):
+        leading_letters, params = split_after_letters(self.lineshape)
+
+        try:
+            peak_class = LINESHAPES[leading_letters][-1]
+
+            peak_parameters = [self.position, self.width, self.area] + params
+
+            peak = peak_class(*peak_parameters)
+
+            self.data = peak.calc_lineshape(x)
+            self.formula = peak.formula()
+            self.description = str(peak)
+
+        except KeyError:
+            logger.warning(
+                f"Component {self.name} (index {self.index}) could not be parsed because no model exists for it."
+            )
 
 
 class CasaProcess:
@@ -240,6 +386,8 @@ class CasaProcess:
         region = CasaRegion()
         region.name = split_line[2]
         region.bg_type = split_line[3]
+        region.function_type = BACKGROUNDS[region.bg_type][0]
+
         region.start = float(split_line[4])
         region.end = float(split_line[5])
         region.rsf = float(split_line[6])
@@ -278,6 +426,9 @@ class CasaProcess:
         component = CasaComponent()
         component.name = split_line[2]
         component.lineshape = split_line[3]
+        component.function_type = LINESHAPES[
+            split_after_letters(component.lineshape)[0]
+        ][0]
 
         area_index = split_line.index("Area")
         component.area = float(split_line[area_index + 1])
@@ -356,147 +507,3 @@ class CasaIntensityCalibration(XpsDataclass):
     # TODO: enable more types of intensity calibrations
     power_law_coefficient: float = 0.0
     tf_function_ordinate_no: int = 0
-
-
-@dataclass
-class CasaRegion(XpsDataclass):
-    """An object to store one CasaXPS peak fit region."""
-
-    name: str = ""
-    rsf: float = 0.0
-    start: float = 0.0
-    start_units: str = "eV"
-    end: float = 0.0
-    end_units: str = "eV"
-    bg_type: str = ""
-    av_width: float = 0.0
-    av_width_units: str = "eV"
-    start_offset: float = 0.0
-    start_offset_units: str = ""
-    end_offset: float = 0.0
-    end_offset_units: str = ""
-    cross_section: list = field(default_factory=list)
-    tag: str = ""
-    unknown_0: float = 0.0
-    unknown_1: float = 0.0
-    rsf_effective: float = 0.0
-
-    def calculate_background(self, x: np.ndarray, y: np.ndarray):
-        backgrounds: Dict[str, Any] = {
-            "Linear": LinearBackground,
-            "Shirley": Shirley,
-            "Step Up": StepUp,
-            "Step Down": StepDown,
-            "U 2 Tougaard": TougaardU3,
-            "U 3 Tougaard": TougaardU3,
-            "U 4 Tougaard": TougaardU4,
-        }
-
-        background_params = [
-            float(param) for param in self.cross_section if float(param)
-        ]
-
-        try:
-            background_class = backgrounds[self.bg_type]
-
-            try:
-                background = background_class(*background_params)
-            except TypeError:
-                background = background_class()
-
-            if self.end > self.start:
-                min_x = self.start
-                max_x = self.end
-            else:
-                min_x = self.end
-                max_x = self.start
-
-            region = np.argwhere((x >= min_x) & (x <= max_x))
-            fit_region = slice(region[0, 0], region[-1, 0], 1)
-
-            self.start_offset = 100
-
-            y_start_offset = y[0] * (self.start_offset / 100.0)
-            y_end_offset = y[-1] * (self.end_offset / 100.0)
-            y[0] -= y_start_offset
-            y[-1] -= y_end_offset
-
-            x, y = x[fit_region], y[fit_region]
-
-            self.data = background.calc_background(x, y)
-
-            self.formula = background.formula()
-            self.description = str(background)
-
-        except KeyError:
-            logger.warning(
-                f"Background {self.name} (type {self.bg_type}) could not be parsed because no model exists for it."
-            )
-
-
-@dataclass
-class CasaComponent(XpsDataclass):
-    """An object to store one CasaXPS peak fit component."""
-
-    name: str = ""
-    index: int = -1
-    lineshape: str = ""
-
-    area: float = 0.0
-    area_min: float = 0.0
-    area_max: float = 0.0
-    area_ref_comp_id: int = -1
-    area_ref_comp_factor: float = 0.0
-
-    width: float = 0.0
-    width_units: str = "eV"
-    width_min: float = 0.0
-    width_min_units: str = "eV"
-    width_max: float = 0.0
-    width_max_units: str = "eV"
-    width_ref_comp_id: int = -1
-    width_ref_comp_factor: float = 0.0
-
-    position: float = 0.0
-    position_units: str = "eV"
-    position_min: float = 0.0
-    position_min_units: str = "eV"
-    position_max: float = 0.0
-    position_max_units: str = "eV"
-    position_ref_comp_id: int = -1
-    position_ref_comp_factor: float = 0.0
-
-    rsf: float = 0.0
-    uncorrected_rsf: float = 0.0
-    mass: float = 0.0
-    tag: str = ""
-    const: str = ""  # CONST
-
-    atomic_concentration: float = 0.0
-
-    def calculate_lineshape(self, x: np.ndarray):
-        lineshapes: Dict[str, Any] = {
-            "GL": GaussianLorentzianProduct,
-            "SGL": GaussianLorentzianSum,
-            "LA": LorentzianAsymmetric,
-            "LF": LorentzianFinite,
-            "DS": DoniachSunjic,
-        }
-
-        leading_letters, params = split_after_letters(self.lineshape)
-
-        try:
-            peak_class = lineshapes[leading_letters]
-
-            peak_parameters = [self.position, self.width, self.area] + params
-
-            peak = peak_class(*peak_parameters)
-
-            self.data = peak.calc_lineshape(x)
-            self.formula = peak.formula()
-            self.description = str(peak)
-
-        except KeyError:
-            logger.warning(
-                f"Component {self.name} (index {self.index}) could not be parsed because no model exists for it."
-            )

@@ -59,7 +59,7 @@ from pynxtools_xps.value_mappers import (
 logger = logging.getLogger(__name__)
 
 UNITS: Dict[str, str] = {
-    "electronanalyser/work_function": "eV",
+    "electronanalyzer/work_function": "eV",
     "beam/excitation_energy": "eV",
     "collectioncolumn/iris_diameter": "mm",
     "data/step_size": "eV",
@@ -158,7 +158,7 @@ class SleMapperSpecs(XPSMapper):
                 "emission_current",
             ],
             "beam": ["excitation_energy"],
-            "electronanalyser": [
+            "electronanalyzer": [
                 "voltage_energy_range",
                 "voltage_energy_range/@units",
                 "work_function",
@@ -236,17 +236,17 @@ class SleMapperSpecs(XPSMapper):
         entry_parent = f"/ENTRY[{entry}]"
 
         instrument_parent = f"{entry_parent}/instrument"
-        analyser_parent = f"{instrument_parent}/electronanalyser"
+        analyzer_parent = f"{instrument_parent}/electronanalyzer"
 
         path_map = {
             "user": f"{entry_parent}/user",
             "instrument": f"{instrument_parent}",
             "source": f"{instrument_parent}/source",
             "beam": f"{instrument_parent}/beam",
-            "electronanalyser": f"{analyser_parent}",
-            "collectioncolumn": f"{analyser_parent}/collectioncolumn",
-            "energydispersion": f"{analyser_parent}/energydispersion",
-            "detector": f"{analyser_parent}/detector",
+            "electronanalyzer": f"{analyzer_parent}",
+            "collectioncolumn": f"{analyzer_parent}/collectioncolumn",
+            "energydispersion": f"{analyzer_parent}/energydispersion",
+            "detector": f"{analyzer_parent}/detector",
             "manipulator": f"{instrument_parent}/manipulator",
             "process/energy_calibration": f"{entry_parent}/process/energy_calibration",
             "process/transmission_correction": f"{entry_parent}/process/transmission_correction",
@@ -266,7 +266,7 @@ class SleMapperSpecs(XPSMapper):
                 if units is not None:
                     self._xps_dict[f"{root}/{mpes_key}/@units"] = units
 
-        self._xps_dict[f"{path_map['electronanalyser']}/name"] = spectrum["devices"][0]
+        self._xps_dict[f"{path_map['electronanalyzer']}/name"] = spectrum["devices"][0]
         self._xps_dict[f"{path_map['source']}/name"] = spectrum["devices"][1]
 
         # Create keys for writing to data
@@ -696,7 +696,7 @@ class SleProdigyParser(ABC):
     #         # "scan" in individual CountsSeq
     #         scan_counts = raw_data["scans"][scan_nm]
     #
-    #         if energy_scan_mode == "fixed_analyser_transmission":
+    #         if energy_scan_mode == "fixed_analyzer_transmission":
     #             for row in np.arange(mcd_num):
     #
     #                 count_on_row = scan_counts[row::mcd_num]
@@ -779,7 +779,7 @@ class SleProdigyParser(ABC):
     #         # "scan" in individual CountsSeq
     #         scan_counts = raw_data["scans"][scan_nm]
     #
-    #         if energy_scan_mode == "fixed_analyser_transmission":
+    #         if energy_scan_mode == "fixed_analyzer_transmission":
     #             for row in np.arange(mcd_num):
     #
     #                 count_on_row = scan_counts[row::mcd_num]
@@ -1583,7 +1583,9 @@ class SleProdigyParserV1(SleProdigyParser):
                     "File"
                 ]
             elif setting.tag == "Iris":
-                common_spectrum_settings["iris_diameter"] = setting.attrib["Diameter"]
+                common_spectrum_settings["iris_diameter"] = float(
+                    setting.attrib["Diameter"]
+                )
         return common_spectrum_settings
 
     def _get_spectrum_metadata(self, spectrum):
@@ -1763,7 +1765,9 @@ class SleProdigyParserV4(SleProdigyParser):
                     "File"
                 ]
             elif setting.tag == "Iris":
-                common_spectrum_settings["iris_diameter"] = setting.attrib["Diameter"]
+                common_spectrum_settings["iris_diameter"] = float(
+                    setting.attrib["Diameter"]
+                )
         return common_spectrum_settings
 
     def _get_spectrum_metadata(self, spectrum):

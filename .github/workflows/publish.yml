@@ -30,7 +30,7 @@ jobs:
         with:
           python-version: 3.12
       
-      # Final pytest with pynxtools before release
+      # Final pytest with latest pynxtools release
       - name: Install nomad
         run: |
           uv pip install nomad-lab[infrastructure]@git+https://gitlab.mpcdf.mpg.de/nomad-lab/nomad-FAIR.git
@@ -46,9 +46,10 @@ jobs:
           pytest tests/.
 
       # Build
-      - name: Install builddependencies
+      - name: Install build dependencies
         run: |
           uv pip install build
+          git reset --hard HEAD
       - name: Build package
         run: python -m build
       - name: Publish package distributions to PyPI

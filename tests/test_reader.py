@@ -122,28 +122,20 @@ def read_comment_file(filepath: str):
     return no_of_comments, comment_lines
 
 
-COMMENT_LENGHTS = {
-    "kratos.vms": 51,
-    "phi.vms": 312,
-    "casa_header.vms": 1,
-    "casa_process.vms": 147,
-    "specs_header.vms": 3,
-    "specs_block.vms": 11,
-}
-
-
 @pytest.mark.parametrize(
-    "file, comment_type",
+    "file, comment_type, expected_no_of_comments",
     [
-        pytest.param("kratos.vms", "block", id="Kratos metadata"),
-        pytest.param("phi.vms", "block", id="PHI metadata"),
-        pytest.param("casa_header.vms", "header", id="CasaXPS header"),
-        pytest.param("casa_process.vms", "block", id="CasaXPS processing"),
-        pytest.param("specs_header.vms", "header", id="SPECS header metadata"),
-        pytest.param("specs_block.vms", "block", id="SPECS header metadata"),
+        pytest.param("kratos.vms", "block", 51, id="Kratos metadata"),
+        pytest.param("phi.vms", "block", 312, id="PHI metadata"),
+        pytest.param("casa_header.vms", "header", 1, id="CasaXPS header"),
+        pytest.param("casa_process.vms", "block", 151, id="CasaXPS processing"),
+        pytest.param("specs_header.vms", "header", 3, id="SPECS header metadata"),
+        pytest.param("specs_block.vms", "block", 11, id="SPECS header metadata"),
     ],
 )
-def test_vms_comment_handler(file: str, comment_type: Literal["header", "block"]):
+def test_vms_comment_handler(
+    file: str, comment_type: Literal["header", "block"], expected_no_of_comments: bool
+):
     """Test for the comment handler in VAMAS files."""
     filepath = os.path.join(os.path.dirname(__file__), "data", "vms_comments", file)
     ref_json_filepath = filepath.replace(".vms", "_ref.json")
@@ -164,7 +156,7 @@ def test_vms_comment_handler(file: str, comment_type: Literal["header", "block"]
     with open(ref_json_filepath, "r") as json_file:
         ref_comments = json.load(json_file)
 
-    assert len(comments) == COMMENT_LENGHTS[file], (
-        f"Comments ({len(comments)} do not have the same number of lines as the reference ({COMMENT_LENGHTS[file]})."
+    assert len(comments) == expected_no_of_comments, (
+        f"Comments ({len(comments)}) do not have the same number of lines as the reference ({expected_no_of_comments})."
     )
     assert comments == ref_comments

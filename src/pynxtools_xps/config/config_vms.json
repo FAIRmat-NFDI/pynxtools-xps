@@ -52,7 +52,7 @@
     "address":"@eln",
     "email":"@eln",
     "identifier":"@eln",
-    "identifier/@type": "ORCID"
+    "identifier/@type":"@eln"
   },
   "/ENTRY/INSTRUMENT[instrument]":{
     "@default":"electronanalyzer",
@@ -66,7 +66,7 @@
       "physical_quantity":"energy",
       "type":"derived",
       "resolution":"!['@attrs:step_size', '@eln']",
-      "resolution/@units":"['@attrs:step_size@units', '@eln']"
+      "resolution/@units":"['@attrs:step_size@units', '@eln', 'eV']"
     },
     "source_probe":{
       "type":"@eln",
@@ -126,8 +126,8 @@
       "energy_resolution":{
         "physical_quantity":"energy",
         "type":"estimated",
-        "resolution":"!@attrs:step_size",
-        "resolution/@units":"eV"
+        "resolution":"!['@attrs:step_size', '@eln']",
+        "resolution/@units":"['@attrs:step_size@units', '@eln', 'eV']"
       },
       "transmission_function":null,
       "COLLECTIONCOLUMN[collectioncolumn]":{

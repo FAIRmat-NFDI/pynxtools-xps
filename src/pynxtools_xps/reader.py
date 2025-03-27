@@ -625,7 +625,11 @@ class XPSReader(MultiFormatReader):
 
         value = metadata_dict.get(matching_key)
 
-        if value is None or str(value) == "None":
+        if (
+            value is None
+            or str(value) in {"None", ""}
+            or (isinstance(value, list) and all(v == "" for v in value))
+        ):
             return
 
         if isinstance(value, datetime.datetime):

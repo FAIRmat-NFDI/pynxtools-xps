@@ -220,7 +220,7 @@
         "x": -15.0,
         "y": -40.0
     },
-    "xray_offset_units": "um",
+    "xray_offset_units": "m",
     "xray_magnification_factor": {
         "x": 0.365,
         "y": 0.357

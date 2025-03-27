@@ -191,7 +191,6 @@ class VamasMapper(XPSMapper):
         """
         Map one spectrum from raw data to NXmpes-ready dict.
         """
-
         entry_parts = []
 
         parts_to_use = ["group_name"] * bool(self.multiple_spectra_groups) + [
@@ -210,6 +209,12 @@ class VamasMapper(XPSMapper):
             entry_parts += [spectrum["time_stamp"]]
 
         entry = construct_entry_name(entry_parts)
+
+        if not entry:
+            if not self.multiple_spectra_groups:
+                entry = f"entry{spectrum['spectrum_id']}"
+            else:
+                entry = "entry"
 
         entry_parent = f"/ENTRY[{entry}]"
 
@@ -766,6 +771,7 @@ class VamasParser:
                 group_id += 1
 
             spectrum_type = str(block.species_label + block.transition_label)
+            transitions = [spectrum_type] if spectrum_type else []
 
             settings = {
                 convert_pascal_to_snake(k): v for (k, v) in block.dict().items()
@@ -860,7 +866,7 @@ class VamasParser:
                     data["y"] = getattr(block, "y")
                     del settings["y"]
 
-                    if block.variable_label_1 in ["Intensity", "counts"]:
+                    if block.variable_label_1 in ["Intensity", "counts", "count rate"]:
                         y_cps = [np.round(y / block.dwell_time, 2) for y in block.y]
                         data["y_cps"] = np.array(y_cps)
 
@@ -874,6 +880,7 @@ class VamasParser:
                 "group_name": group_name,
                 "group_id": group_id,
                 "spectrum_type": spectrum_type,
+                "transitions": transitions,
                 "spectrum_id": spectrum_id,
                 "scans": block.no_scans,
                 "data": data,

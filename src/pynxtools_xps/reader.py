@@ -45,9 +45,7 @@ from pynxtools_xps.specs.xy.xy_specs import XyMapperSpecs
 from pynxtools_xps.vms.vamas_export import TxtMapperVamasExport, CsvMapperVamasResult
 from pynxtools_xps.vms.vamas import VamasMapper
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
+logger = logging.getLogger("pynxtools")
 
 np.set_printoptions(threshold=sys.maxsize)
 
@@ -187,8 +185,8 @@ class XPSReader(MultiFormatReader):
         f"Need an XPS data file from one of the following vendors: {__vendors__}"
     )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, config_file: Optional[str] = None, *args, **kwargs):
+        super().__init__(config_file, *args, **kwargs)
 
         self.xps_data_dicts: List[Dict[str, Any]] = []
         self.xps_data: Dict[str, Any] = {}
@@ -217,12 +215,24 @@ class XPSReader(MultiFormatReader):
             ".json",
         ]
 
-    def set_config_file(self, file_path: str) -> Dict[str, Any]:
-        if self.config_file is not None:
-            logger.info(
-                f"Config file already set. Replaced by the new file {file_path}."
-            )
-        self.config_file = file_path
+    def set_config_file(
+        self, file_path: Optional[Union[str, Path]], replace: bool = True
+    ) -> Dict[str, Any]:
+        if not file_path:
+            return {}
+
+        if replace:
+            if self.config_file is not None:
+                if file_path != self.config_file:
+                    print(file_path, self.config_file)
+                    logger.info(
+                        f"Config file already set. Replaced by the new file {file_path}."
+                    )
+            self.config_file = file_path
+        else:
+            if self.config_file is None:
+                self.config_file = file_path
+
         return {}
 
     def handle_eln_file(self, file_path: str) -> Dict[str, Any]:
@@ -349,8 +359,9 @@ class XPSReader(MultiFormatReader):
             parser.parse_file(file_path, **self.kwargs)
             data_dict = parser.data_dict
 
-            self.config_file = XPSReader.reader_dir.joinpath(
-                "config", parser.config_file
+            self.set_config_file(
+                XPSReader.reader_dir.joinpath("config", parser.config_file),
+                replace=False,
             )
             self.xps_data_dicts += [data_dict]
 
@@ -625,7 +636,11 @@ class XPSReader(MultiFormatReader):
 
         value = metadata_dict.get(matching_key)
 
-        if value is None or str(value) == "None":
+        if (
+            value is None
+            or str(value) in {"None", ""}
+            or (isinstance(value, list) and all(v == "" for v in value))
+        ):
             return
 
         if isinstance(value, datetime.datetime):
@@ -812,6 +827,7 @@ class XPSReader(MultiFormatReader):
         **kwargs,
     ) -> dict:
         self.overwrite_keys = _check_multiple_extensions(file_paths)
+        self.set_config_file(kwargs.get("config_file"))
 
         template = super().read(template, file_paths, objects, suppress_warning=True)
         self.set_nxdata_defaults(template)

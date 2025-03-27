@@ -1,7 +1,7 @@
 definitions:
   name: XPS ELN data schema
   sections:
-    XPS:
+    ELN for XPS:
       base_sections:
       - pynxtools.nomad.dataconverter.ElnYamlConverter
       - nomad.datamodel.data.EntryData

@@ -216,7 +216,7 @@ class XPSReader(MultiFormatReader):
         ]
 
     def set_config_file(
-        self, file_path: Optional[str], replace: bool = True
+        self, file_path: Optional[Union[str, Path]], replace: bool = True
     ) -> Dict[str, Any]:
         if not file_path:
             return {}

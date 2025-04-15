@@ -129,8 +129,9 @@
           }
         }
       },
-      "MONOCHROMATOR_TYPE[monochromator_beam]":{
-        "energy":"@link:/entry/instrument/beam_probe/incident_energy",
+      "monochromator_TYPE[monochromator_beam]":{
+        "energy":"@attrs:region/excitation_energy",
+        "energy/@units":"eV",
         "associated_beam":"/entry/instrument/beam_probe"
       },
       "MANIPULATOR[manipulator]":{

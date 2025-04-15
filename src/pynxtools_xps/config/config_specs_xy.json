@@ -195,14 +195,12 @@
       "current/@units":"@eln"
     }
   },
-  "/ENTRY/PROCESS_MPES[process]":{
-    "energy_calibration":{
-      "calibrated_axis":"@data:energy",
-      "calibrated_axis/@units":"eV"
-    },
-    "energy_referencing":null,
-    "transmission_correction":null
+  "/ENTRY/energy_calibration":{
+    "calibrated_axis":"@data:energy",
+    "calibrated_axis/@units":"eV"
   },
+  "/ENTRY/energy_referencing":null,
+  "/ENTRY/transmission_correction":null,
   "/ENTRY/SAMPLE[sample]":{
     "name":"@eln",
     "identifier":{

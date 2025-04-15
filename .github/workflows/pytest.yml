@@ -33,7 +33,7 @@ jobs:
           uv pip install coverage coveralls
       - name: Install pynxtools master branch
         run: |
-          uv pip install pynxtools@git+https://github.com/FAIRmat-NFDI/pynxtools@master
+          uv pip install pynxtools@git+https://github.com/FAIRmat-NFDI/pynxtools@599-undescriptive-error-message
       - name: Test with pytest
         run: |
           coverage run -m pytest -sv --show-capture=no tests

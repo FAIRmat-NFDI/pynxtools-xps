@@ -410,8 +410,9 @@
         }
       }
     },
-    "MONOCHROMATOR_TYPE[monochromator_beam]":{
-      "energy":"@link:/entry/instrument/beam_probe/incident_energy",
+    "monochromator_TYPE[monochromator_beam]":{
+      "energy":"@attrs:xray_energy",
+      "energy/@units":"@attrs:xray_energy/@units",
       "associated_beam":"/entry/instrument/beam_probe"
     },
     "MANIPULATOR[manipulator]":{

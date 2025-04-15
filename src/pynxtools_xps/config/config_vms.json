@@ -312,26 +312,28 @@
         "function_type":"@attrs:component*/function_type",
         "description":"@attrs:component*/lineshape",
         "formula_description":"@attrs:component*/formula",
-        "position":{
-          "value":"@attrs:component*/position",
-          "value/@units":"@attrs:component*/position/@units",
-          "min_value":"@attrs:component*/position_min",
-          "min_value/@units":"@attrs:component*/position_min/@units",
-          "max_value":"@attrs:component*/position_max",
-          "max_value/@units":"@attrs:component*/position_max/@units"
-        },
-        "width":{
-          "value":"@attrs:component*/width",
-          "value/@units":"@attrs:component*/width/@units",
-          "min_value":"@attrs:component*/width_min",
-          "min_value/@units":"@attrs:component*/width_min/@units",
-          "max_value":"@attrs:component*/width_max",
-          "max_value/@units":"@attrs:component*/width_max/@units"
-        },
-        "area":{
-          "value":"@attrs:component*/area",
-          "min_value":"@attrs:component*/area_min",
-          "max_value":"@attrs:component*/area_max"
+        "fit_parameters":{
+          "position":{
+            "value":"@attrs:component*/position",
+            "value/@units":"@attrs:component*/position/@units",
+            "min_value":"@attrs:component*/position_min",
+            "min_value/@units":"@attrs:component*/position_min/@units",
+            "max_value":"@attrs:component*/position_max",
+            "max_value/@units":"@attrs:component*/position_max/@units"
+          },
+          "width":{
+            "value":"@attrs:component*/width",
+            "value/@units":"@attrs:component*/width/@units",
+            "min_value":"@attrs:component*/width_min",
+            "min_value/@units":"@attrs:component*/width_min/@units",
+            "max_value":"@attrs:component*/width_max",
+            "max_value/@units":"@attrs:component*/width_max/@units"
+          },
+          "area":{
+            "value":"@attrs:component*/area",
+            "min_value":"@attrs:component*/area_min",
+            "max_value":"@attrs:component*/area_max"
+          }
         }
       },
       "total_area":"@attrs:component*/area",

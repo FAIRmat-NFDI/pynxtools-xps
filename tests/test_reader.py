@@ -33,21 +33,21 @@ from pynxtools_xps.vms.vamas_comment_handler import handle_comments
 
 READER_NAME = "xps"
 READER_CLASS = get_reader(READER_NAME)
-# ToDo: make tests for all supported application definitions possible
+# TODO: make tests for all supported application definitions possible
 NXDLS = ["NXxps"]  # READER_CLASS.supported_nxdls
 
 test_cases = [
-    ("phi_spe", "Phi .spe reader"),
-    ("phi_pro", "Phi .pro reader"),
-    ("specs_sle", "SPECS .sle reader"),
-    ("specs_xml", "SPECS .xml reader"),
-    ("specs_xy", "SPECS .xy reader"),
-    ("scienta_ibw", "Scienta .ibw reader"),
-    ("scienta_txt", "Scienta .txt export reader"),
-    ("vms_analysis", "VAMAS reader with data analysis"),
-    ("vms_irregular", "Irregular VAMAS reader"),
-    ("vms_regular", "Regular VAMAS reader"),
-    ("vms_txt_export", "Vamas txt export"),
+    ("phi_spe", "phi-spe-reader"),
+    ("phi_pro", "phi-pro-reader"),
+    ("specs_sle", "specs-sle-reader"),
+    ("specs_xml", "specs-xml-reader"),
+    ("specs_xy", "specs-xy-reader"),
+    ("scienta_ibw", "scienta-ibw-reader"),
+    ("scienta_txt", "scienta-txt-reader"),
+    ("vms_analysis", "vms-reader-with-data-analysis"),
+    ("vms_irregular", "irregular-vms-reader"),
+    ("vms_regular", "regular-vms-reader"),
+    ("vms_txt_export", "vms-txt-export-reader"),
 ]
 
 test_params = []
@@ -70,7 +70,7 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
     ----------
     nxdl : str
         Name of the NXDL application definition that is to be tested by
-        this reader plugin (e.g. NXsts, NXmpes, etc)..
+        this reader plugin (e.g. NXxps, NXmpes, etc)..
     sub_reader_data_dir : str
         Test data directory that contains all the files required for running the data
         conversion through one of the sub-readers. All of these data dirs

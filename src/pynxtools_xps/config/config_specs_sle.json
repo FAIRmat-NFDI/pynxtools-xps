@@ -66,8 +66,8 @@
       "@default":"detector",
       "name":"@attrs:electronanalyzer/name",
       "description":"@eln",
-      "voltage_energy_range":"@attrs:electronanalyzer/voltage_energy_range",
-      "voltage_energy_range/@units":"@attrs:electronanalyzer/voltage_energy_range/@units",
+      "voltage_range":"@attrs:electronanalyzer/voltage_energy_range",
+      "voltage_range/@units":"@attrs:electronanalyzer/voltage_energy_range/@units",
       "work_function":"@attrs:electronanalyzer/work_function",
       "work_function/@units":"@attrs:electronanalyzer/work_function/@units",
       "fast_axes":null,
@@ -124,17 +124,17 @@
           "current":"@attrs:collectioncolumn/coil_current",
           "current/@units":"@attrs:collectioncolumn/coil_current/@units"
         },
-        "LENS_EM[Pre Defl X]":{
+        "LENS_EM[pre_defl_x]":{
           "name":"Pre-Deflector X",
           "current":"@attrs:collectioncolumn/pre_deflector_x_current",
           "current/@units":"@attrs:collectioncolumn/pre_deflector_x_current/@units"
         },
-        "LENS_EM[Pre Defl Y]":{
+        "LENS_EM[pre_defl_y]":{
           "name":"Pre-Deflector Y",
           "current":"@attrs:collectioncolumn/pre_deflector_y_current",
           "current/@units":"@attrs:collectioncolumn/pre_deflector_y_current/@units"
         },
-        "LENS_EM[Focus Displacement]":{
+        "LENS_EM[focus_displacement]":{
           "name":"Focus Displacement",
           "current":"@attrs:collectioncolumn/focus_displacement_current",
           "current/@units":"@attrs:collectioncolumn/focus_displacement_current/@units"
@@ -243,22 +243,27 @@
       "current/@units":"@eln"
     }
   },
-  "/ENTRY/PROCESS_MPES[process]":{
-    "energy_calibration":{
-      "calibrated_axis":"@attrs:process/energy_calibration/energy",
-      "calibrated_axis/@units":"@attrs:process/energy_calibration/energy/@units",
-      "calibration_object":{
-        "type":"file",
-        "path":"@attrs:process/energy_calibration/calibration_file/path"
-      }
+  "/ENTRY/energy_axis_calibration":{
+    "calibrated_axis":"@attrs:process/energy_calibration/energy",
+    "calibrated_axis/@units":"@attrs:process/energy_calibration/energy/@units",
+    "physical_quantity":"energy",
+    "calibration_object":{
+      "type":"file",
+      "file_name":"@attrs:process/energy_calibration/calibration_file/path"
+    }
+  },
+  "/ENTRY/energy_referencing":null,
+  "/ENTRY/transmission_correction":{
+    "transmission_function":{
+      "@signal":"relative_intensity",
+      "@axes":["kinetic_energy"],
+      "kinetic_energy":"@attrs:transmission_function/kinetic_energy",
+      "kinetic_energy/@units":"@attrs:transmission_function/kinetic_energy/@units",
+      "relative_intensity":"@attrs:collectioncolumn/transmission_function/relative_intensity"
     },
-    "energy_referencing":null,
-    "transmission_correction":{
-      "transmission_function":"@link:/entry/instrument/electronanalyzer/transmission_function",
-      "calibration_object":{
-        "type":"file",
-        "path":"@attrs:process/transmission_correction/transmission_function/file"
-      }
+    "calibration_object":{
+      "type":"file",
+      "file_name":"@attrs:process/transmission_correction/transmission_function/file"
     }
   },
   "/ENTRY/SAMPLE[sample]":{
@@ -268,13 +273,7 @@
     "atom_types":"@eln",
     "physical_form":"@eln",
     "situation":"@eln",
-    "SUBSTANCE[substance]":{
-      "name":"@eln",
-      "molecular_mass":"@eln",
-      "molecular_mass/@units":"@eln",
-      "cas_number":"@eln",
-      "molecular_formula_hill":"@eln"
-    },
+    "chemical_formula":"@eln",
     "history":{
       "sample_preparation":{
         "start_time":"@eln",
@@ -285,8 +284,7 @@
       "ACTIVITY[sample_loading]":{
         "start_time":"@eln",
         "end_time":"@eln",
-        "description":"@eln",
-        "method":"@eln"
+        "description":"@eln"
       }
     },
     "temperature_env":{
@@ -308,7 +306,7 @@
       "flood_gun":"@link:/entry/instrument/flood_gun"
     }
   },
-  "/ENTRY/data":{
+  "/ENTRY/DATA[data]":{
     "@axes":["energy"],
     "@signal":"data",
     "data":"@data:average",

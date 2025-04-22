@@ -158,5 +158,4 @@ sample:
     ACTIVITY[sample_loading]:
       start_time: 2022-04-08T11:02:00.0200Z
       end_time: 2022-04-08T11:03:00.0200Z
-      description: loaded in the endstation and transferred to analysis chamber
-      method: vacuum transfer
+      description: vacuum transfer, loaded in the endstation and transferred to analysis chamber

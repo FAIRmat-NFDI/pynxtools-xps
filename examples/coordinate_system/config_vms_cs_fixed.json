@@ -34,8 +34,13 @@
   },
   "/ENTRY/INSTRUMENT[instrument]":{
     "beamTYPE[beam_xray]":{
-      "depends_on":"/entry/instrument/beam_xray/transformations/beam_polar_angle_of_incidence",
+      "depends_on":"transformations/beam_direction",
       "transformations":{
+        "beam_direction":1,
+        "beam_direction/@vector":[0, 0, 1],
+        "beam_direction/@units":"m",
+        "beam_direction/@depends_on":"beam_polar_angle_of_incidence",
+
         "beam_polar_angle_of_incidence":54.5,
         "beam_polar_angle_of_incidence/@units":"degree",
         "beam_polar_angle_of_incidence/@transformation_type":"rotation",
@@ -46,11 +51,11 @@
         "beam_azimuth_angle/@units":"degree",
         "beam_azimuth_angle/@transformation_type":"rotation",
         "beam_azimuth_angle/@vector":[0, 0, -1],
-        "beam_azimuth_angle/@depends_on":"/entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation"
+        "beam_azimuth_angle/@depends_on":"/entry/geometries/xps_coordinate_system"
       }
     },
     "ELECTRONANALYSER[electronanalyser]":{
-      "depends_on":"/entry/instrument/electronanalyser/transformations/analyser_take_off_polar_angle",
+      "depends_on":"transformations/analyser_take_off_polar_angle",
       "transformations":{
         "analyser_take_off_polar_angle":0.0,
         "analyser_take_off_polar_angle/@units":"degree",
@@ -62,12 +67,12 @@
         "analyser_take_off_azimuth_angle/@units":"degree",
         "analyser_take_off_azimuth_angle/@transformation_type":"rotation",
         "analyser_take_off_azimuth_angle/@vector":[0, 0, -1],
-        "analyser_take_off_azimuth_angle/@depends_on":"/entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation"
+        "analyser_take_off_azimuth_angle/@depends_on":"/entry/geometries/xps_coordinate_system"
       }
     }
   },
   "/ENTRY/SAMPLE[sample]":{
-    "depends_on":"/entry/sample/transformations/sample_rotation_angle",
+    "depends_on":"transformations/sample_rotation_angle",
     "transformations":{
       "sample_rotation_angle":50.0,
       "sample_rotation_angle/@units":"degree",
@@ -85,7 +90,7 @@
       "sample_normal_tilt_azimuth_angle/@units":"degree",
       "sample_normal_tilt_azimuth_angle/@transformation_type":"rotation",
       "sample_normal_tilt_azimuth_angle/@vector":[0, 0, -1],
-      "sample_normal_tilt_azimuth_angle/@depends_on":"/entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation"
+      "sample_normal_tilt_azimuth_angle/@depends_on":"/entry/geometries/xps_coordinate_system"
     }
   }
 }

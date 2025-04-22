@@ -564,7 +564,7 @@
     "temperature_env":{
       "temperature_sensor":"@link:/entry/instrument/manipulator/temperature_sensor",
       "sample_heater":"@link:/entry/instrument/manipulator/sample_heater",
-      "cryostat":"None"
+      "cryostat":null
     },
     "gas_pressure_env":{
       "pressure_gauge":"@link:/entry/instrument/pressure_gauge"
@@ -580,7 +580,7 @@
       "flood_gun":"@link:/entry/instrument/flood_gun"
     }
   },
-  "/ENTRY/data":{
+  "/ENTRY/DATA[data]":{
     "@axes":["energy"],
     "@signal":"data",
     "data":"@data:average",

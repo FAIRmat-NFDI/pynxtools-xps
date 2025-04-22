@@ -238,7 +238,7 @@
         "flood_gun":"@link:/entry/instrument/flood_gun"
       }
     },
-    "/ENTRY/data":{
+    "/ENTRY/DATA[data]":{
       "@axes":["energy"],
       "@signal":"data",
       "data":"@data:average",

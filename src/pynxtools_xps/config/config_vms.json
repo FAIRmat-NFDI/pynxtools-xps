@@ -92,8 +92,13 @@
       "incident_polarization":null,
       "incident_polarization/@units":null,
       "associated_source":"/entry/instrument/source_probe",
-      "depends_on":"/entry/instrument/beam_xray/transformations/beam_polar_angle_of_incidence",
+      "depends_on":"transformations/beam_direction",
       "transformations":{
+        "beam_direction":1,
+        "beam_direction/@vector":[0, 0, 1],
+        "beam_direction/@units":"m",
+        "beam_direction/@depends_on":"beam_polar_angle_of_incidence",
+        
         "beam_polar_angle_of_incidence":"!@attrs:source_polar_angle",
         "beam_polar_angle_of_incidence/@units":"@attrs:source_polar_angle/@units",
         "beam_polar_angle_of_incidence/@transformation_type":"rotation",
@@ -104,7 +109,7 @@
         "beam_azimuth_angle/@units":"@attrs:source_azimuth_angle/@units",
         "beam_azimuth_angle/@transformation_type":"rotation",
         "beam_azimuth_angle/@vector":[0, 0, -1],
-        "beam_azimuth_angle/@depends_on":"/entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation"
+        "beam_azimuth_angle/@depends_on":"/entry/geometries/xps_coordinate_system"
       }
     },
     "ELECTRONANALYZER[electronanalyzer]":{
@@ -183,7 +188,7 @@
           "DATA[*]/@units":"counts"
         }
       },
-      "depends_on":"/entry/instrument/electronanalyzer/transformations/analyzer_take_off_polar_angle",
+      "depends_on":"transformations/analyzer_take_off_polar_angle",
       "transformations":{
         "analyzer_take_off_polar_angle":"!@attrs:analyzer_take_off_polar_angle",
         "analyzer_take_off_polar_angle/@units":"@attrs:analyzer_take_off_polar_angle/@units",
@@ -195,7 +200,7 @@
         "analyzer_take_off_azimuth_angle/@units":"@attrs:analyzer_take_off_azimuth_angle/@units",
         "analyzer_take_off_azimuth_angle/@transformation_type":"rotation",
         "analyzer_take_off_azimuth_angle/@vector":[0, 0, -1],
-        "analyzer_take_off_azimuth_angle/@depends_on":"/entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation"
+        "analyzer_take_off_azimuth_angle/@depends_on":"/entry/geometries/xps_coordinate_system"
       }
     },
     "MANIPULATOR[manipulator]":{
@@ -291,8 +296,8 @@
       "input_independent":"@link:/entry/data/energy",
       "input_independent/@units":"eV",
       "input_dependent":"@link:/entry/data/data",
-      "envelope":"['@attrs:fit_envelope_cps/data', '@attrs:fit_envelope/data']",
-      "envelope/@units":"counts_per_second",
+      "fit_sum":"['@attrs:fit_envelope_cps/data', '@attrs:fit_envelope/data']",
+      "fit_sum/@units":"counts_per_second",
       "residual": null,
       "DATA[peak*_intensity]":"@link:/entry/fit/peak*/data/intensity",
       "DATA[background*_intensity]":"@link:/entry/fit/background*/data/intensity"
@@ -313,27 +318,23 @@
         "description":"@attrs:component*/lineshape",
         "formula_description":"@attrs:component*/formula",
         "fit_parameters":{
-          "position":{
-            "value":"@attrs:component*/position",
-            "value/@units":"@attrs:component*/position/@units",
-            "min_value":"@attrs:component*/position_min",
-            "min_value/@units":"@attrs:component*/position_min/@units",
-            "max_value":"@attrs:component*/position_max",
-            "max_value/@units":"@attrs:component*/position_max/@units"
-          },
-          "width":{
-            "value":"@attrs:component*/width",
-            "value/@units":"@attrs:component*/width/@units",
-            "min_value":"@attrs:component*/width_min",
-            "min_value/@units":"@attrs:component*/width_min/@units",
-            "max_value":"@attrs:component*/width_max",
-            "max_value/@units":"@attrs:component*/width_max/@units"
-          },
-          "area":{
-            "value":"@attrs:component*/area",
-            "min_value":"@attrs:component*/area_min",
-            "max_value":"@attrs:component*/area_max"
-          }
+          "PARAMETER[position]":"@attrs:component*/position",
+          "PARAMETER[position]/@units":"@attrs:component*/position/@units",
+          "PARAMETER[position_min]":"@attrs:component*/position_min",
+          "PARAMETER[position_min]/@units":"@attrs:component*/position_min/@units",
+          "PARAMETER[position_max]":"@attrs:component*/position_max",
+          "PARAMETER[position_max]/@units":"@attrs:component*/position_max/@units",
+
+          "PARAMETER[width]":"@attrs:component*/width",
+          "PARAMETER[width]/@units":"@attrs:component*/width/@units",
+          "PARAMETER[width_min]":"@attrs:component*/width_min",
+          "PARAMETER[width_min]/@units":"@attrs:component*/width_min/@units",
+          "PARAMETER[width_max]":"@attrs:component*/width_max",
+          "PARAMETER[width_max]/@units":"@attrs:component*/width_max/@units",
+
+          "PARAMETER[area]":"@attrs:component*/area",
+          "PARAMETER[area_min]":"@attrs:component*/area_min",
+          "PARAMETER[area_max]":"@attrs:component*/area_max"
         }
       },
       "total_area":"@attrs:component*/area",
@@ -405,7 +406,7 @@
     "flood_gun_current_env":{
       "flood_gun":"!@link:/entry/instrument/flood_gun"
     },
-    "depends_on":"/entry/sample/transformations/sample_rotation_angle",
+    "depends_on":"transformations/sample_rotation_angle",
     "transformations":{
       "sample_rotation_angle":"@attrs:sample_rotation_angle",
       "sample_rotation_angle/@units":"@attrs:sample_rotation_angle/@units",
@@ -423,10 +424,10 @@
       "sample_normal_tilt_azimuth_angle/@units":"@attrs:sample_normal_tilt_azimuth_angle/@units",
       "sample_normal_tilt_azimuth_angle/@transformation_type":"rotation",
       "sample_normal_tilt_azimuth_angle/@vector":[0, 0, -1],
-      "sample_normal_tilt_azimuth_angle/@depends_on":"/entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation"
+      "sample_normal_tilt_azimuth_angle/@depends_on":"/entry/geometries/xps_coordinate_system"
     }
   },
-  "/ENTRY/data":{
+  "/ENTRY/DATA[data]":{
     "@axes":["energy"],
     "@signal":"data",
     "data":"@data:average",

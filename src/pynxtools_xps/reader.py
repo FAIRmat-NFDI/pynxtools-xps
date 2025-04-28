@@ -47,9 +47,6 @@ from pynxtools_xps.vms.vamas import VamasMapper
 
 logger = logging.getLogger("pynxtools")
 
-np.set_printoptions(threshold=sys.maxsize)
-
-
 CONVERT_DICT = {
     "unit": "@units",
     "version": "@version",

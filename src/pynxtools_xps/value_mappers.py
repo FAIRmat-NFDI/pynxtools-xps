@@ -32,6 +32,7 @@ ENERGY_TYPE_MAP = {
     "Kinetic": "kinetic",
     "Kinetic Energy": "kinetic",
     "kinetic energy": "kinetic",
+    "Analyser Energy": "binding",
 }
 
 ENERGY_SCAN_MODE_MAP = {

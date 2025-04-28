@@ -221,7 +221,6 @@ class XPSReader(MultiFormatReader):
         if replace:
             if self.config_file is not None:
                 if file_path != self.config_file:
-                    print(file_path, self.config_file)
                     logger.info(
                         f"Config file already set. Replaced by the new file {file_path}."
                     )
@@ -704,9 +703,10 @@ class XPSReader(MultiFormatReader):
             return sorted(process_names)
 
         patterns: Dict[str, Any] = {
-            r"data/DATA": lambda: get_signals(path.split(":*.")[-1]),
-            r"data/AXIS": lambda: get_signals(path.split(":*.")[-1]),
-            r"DETECTOR\[[a-zA-Z0-9_]+\]/raw_data": lambda: get_signals("channels"),
+            r"DATA\[data\]/(DATA|AXISNAME)": lambda: get_signals(path.split(":*.")[-1]),
+            r"ELECTRON_DETECTOR\[[a-zA-Z0-9_]+\]/raw_data": lambda: get_signals(
+                "channels"
+            ),
             "peak": lambda: get_processes("component"),
             "background": lambda: get_processes("region"),
         }

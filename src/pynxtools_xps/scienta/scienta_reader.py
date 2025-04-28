@@ -420,6 +420,8 @@ class ScientaIgorParser(ABC):
         wave_header = wave["wave_header"]
         data = wave["wData"]
 
+        print(wave)
+
         # TODO: Add support for formulas if they are written by the
         # measurement software.
         # formula = wave["formula"]
@@ -437,7 +439,7 @@ class ScientaIgorParser(ABC):
         spectrum["units"] = cast(Dict[str, Any], {})
 
         for i, (dim, unit) in enumerate(axes_labels_with_units):
-            if dim in ("Kinetic Energy", "Binding Energy"):
+            if dim in ("Kinetic Energy", "Binding Energy", "Analyser Energy"):
                 spectrum["energy_scale"] = convert_energy_type(dim)
                 dim = "energy"
             spectrum["data"][dim] = self.axis_for_dim(wave_header, dim=i)

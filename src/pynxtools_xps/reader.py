@@ -712,9 +712,9 @@ class XPSReader(MultiFormatReader):
         patterns: Dict[str, Any] = {
             "peak": lambda: get_all_keys("component"),
             "background": lambda: get_all_keys("region"),
-            r"DATA\[data]/DATA\[[^\]]+\](?:/@units)?": data_func,
-            r"DATA\[data]/AXIS\[[^\]]+\]":  data_func,
-            r"DETECTOR\[[a-zA-Z0-9_]+\]/raw_data": lambda: get_signals("channels"),
+            # r"DATA\[data]/DATA\[[^\]]+\](?:/@units)?": data_func,
+            r"DATA\[data]/DATA|AXISNAME\[[^\]]+\]":  data_func,
+            r"ELECTRON_DETECTOR\[[a-zA-Z0-9_]+\]/raw_data": lambda: get_signals("channels"),
         }
 
         for pattern, func in patterns.items():

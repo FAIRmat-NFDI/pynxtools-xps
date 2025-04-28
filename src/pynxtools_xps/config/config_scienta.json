@@ -264,9 +264,6 @@
     "data/@units":"@attrs:intensity/@units",
     "DATA[*]":"@data:*.scans",
     "DATA[*]/@units":"@attrs:intensity/@units",
-    "AXISNAME[energy]":"@data:energy",
-    "AXISNAME[energy]/@type":"@attrs:energy_scale",
-    "AXISNAME[energy]/@units":"@attrs:energy_axis/@units",
     "@energy_indices":0,
     "AXISNAME[*]":"@data:*.axes",
     "AXISNAME[*]/@units":"@attrs:*.axes"

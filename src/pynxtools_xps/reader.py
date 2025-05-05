@@ -713,8 +713,10 @@ class XPSReader(MultiFormatReader):
             "peak": lambda: get_all_keys("component"),
             "background": lambda: get_all_keys("region"),
             # r"DATA\[data]/DATA\[[^\]]+\](?:/@units)?": data_func,
-            r"DATA\[data]/DATA|AXISNAME\[[^\]]+\]":  data_func,
-            r"ELECTRON_DETECTOR\[[a-zA-Z0-9_]+\]/raw_data": lambda: get_signals("channels"),
+            r"DATA\[data]/DATA|AXISNAME\[[^\]]+\]": data_func,
+            r"ELECTRON_DETECTOR\[[a-zA-Z0-9_]+\]/raw_data": lambda: get_signals(
+                "channels"
+            ),
         }
 
         for pattern, func in patterns.items():
@@ -731,17 +733,16 @@ class XPSReader(MultiFormatReader):
         """
         xr_data = self.xps_data["data"].get(f"{self.callbacks.entry_name}")
 
-        if path.endswith("average"):
-            return np.mean(
+        if path.startswith(("average", "errors")):
+            data = (
                 [xr_data[x_arr].data for x_arr in _get_scan_vars(xr_data.data_vars)],
-                axis=0,
             )
-
-        elif path.endswith("errors"):
-            return np.std(
-                [xr_data[x_arr].data for x_arr in _get_scan_vars(xr_data.data_vars)],
-                axis=0,
-            )
+            if path.endswith("reduced"):
+                data = [np.sum(d_arr, axis=2) for d_arr in data]
+            if path.startswith("average"):
+                return np.mean(data, axis=0)
+            elif path.startswith("errors"):
+                return np.mean(data, axis=0)
 
         elif path.endswith("raw_data"):
             data_vars = _get_channel_vars(xr_data.data_vars)
@@ -765,7 +766,6 @@ class XPSReader(MultiFormatReader):
         elif path.endswith("channels"):
             return np.array(xr_data[path.split(".channels")[0]])
 
-<<<<<<< HEAD
         elif path.endswith((".external", "external_units")):
             channel_name = path.split(".external")[0]
             escaped_entry_name = re.escape(self.callbacks.entry_name)
@@ -792,10 +792,8 @@ class XPSReader(MultiFormatReader):
                         if (match := pattern.search(key))
                     ]
                 ).squeeze()
-=======
         elif path.endswith("axes"):
             return np.array(xr_data.coords[path.split(".axes")[0]].values)
->>>>>>> ced9a839 (clean up scienta config)
 
         elif "energy" in path:
             try:

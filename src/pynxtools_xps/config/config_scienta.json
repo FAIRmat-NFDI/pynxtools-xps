@@ -267,5 +267,15 @@
     "@energy_indices":0,
     "AXISNAME[*]":"@data:*.axes",
     "AXISNAME[*]/@units":"@attrs:*.axes"
+  },
+  "/ENTRY/DATA[data_reduced1d]":{
+    "@axes":["energy"],
+    "@signal":"data",
+    "data":"@data:average_reduced",
+    "FIELDNAME_errors[data_errors]":"@data:errors_reduced",
+    "data/@units":"@attrs:intensity/@units",
+    "@energy_indices":0,
+    "AXISNAME[energy]":"@data:energy",
+    "AXISNAME[energy]/@units":"eV"
   }
 }

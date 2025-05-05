@@ -186,9 +186,17 @@ class MapperScienta(XPSMapper):
             [
                 value
                 for key, value in spectrum["data"].items()
-                if key in spectrum["data_labels"]
+                if key in spectrum["data_labels"] and "reduced" not in key
             ]
         ).squeeze(axis=0)
+
+        intensities_reduced = np.array(
+            [
+                value
+                for key, value in spectrum["data"].items()
+                if key in spectrum["data_labels"] and "reduced" in key
+            ]
+        )
 
         # Write to data in order: scan, cycle, channel
 
@@ -420,8 +428,6 @@ class ScientaIgorParser(ABC):
         wave_header = wave["wave_header"]
         data = wave["wData"]
 
-        print(wave)
-
         # TODO: Add support for formulas if they are written by the
         # measurement software.
         # formula = wave["formula"]
@@ -446,7 +452,7 @@ class ScientaIgorParser(ABC):
             spectrum["axis_labels"].append(dim)
             spectrum["units"][dim] = convert_units(unit)
 
-        for i, (label, unit) in enumerate(data_labels_with_units):
+        for label, unit in data_labels_with_units:
             spectrum["data"][label] = data
             spectrum["data_labels"].append(label)
             spectrum["units"][label] = convert_units(unit)

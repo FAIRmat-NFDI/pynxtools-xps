@@ -57,8 +57,8 @@ KEY_MAP: Dict[str, str] = {
     "CPS": "counts_per_second",
     "Background": "background_intensity",
     "Background CPS": "background_intensity_cps",
-    "Envelope": "fit_envelope",
-    "Envelope CPS": "fit_envelope_cps",
+    "Envelope": "fit_sum",
+    "Envelope CPS": "fit_sum_cps",
     "%At Conc": "atomic_concentration",
 }
 
@@ -583,7 +583,7 @@ class TextParserColumns(TextParser):
 
                 keep_middle = 2
 
-                for name in ["background_intensity", "fit_envelope"]:
+                for name in ["background_intensity", "fit_sum"]:
                     if name in all_names:
                         keep_middle += 1
 

@@ -25,26 +25,7 @@
     "y":[0, 1, 0],
     "y/@units":"m",
     "z":[0, 0 , 1],
-    "z/@units":"m",
-    "coordinate_system_transformations":{
-      "AXISNAME[z_rotation]":"!@attrs:source_azimuth_angle",
-      "AXISNAME[z_rotation]/@units":"@attrs:source_azimuth_angle/@units",
-      "AXISNAME[z_rotation]/@transformation_type":"rotation",
-      "AXISNAME[z_rotation]/@vector":[0, 0, 1],
-      "AXISNAME[z_rotation]/@depends_on":"y_flip",
-
-      "AXISNAME[y_flip]":180,
-      "AXISNAME[y_flip]/@units":"degree",
-      "AXISNAME[y_flip]/@transformation_type":"rotation",
-      "AXISNAME[y_flip]/@vector":[0, 1, 0],
-      "AXISNAME[y_flip]/@depends_on":"y_rotation",
-
-      "AXISNAME[y_rotation]":"!@attrs:source_polar_angle",
-      "AXISNAME[y_rotation]/@units":"@attrs:source_polar_angle/@units",
-      "AXISNAME[y_rotation]/@transformation_type":"rotation",
-      "AXISNAME[y_rotation]/@vector":[0, -1, 0],
-      "AXISNAME[y_rotation]/@depends_on":"."
-    }
+    "z/@units":"m"
   },
   "/ENTRY/USER[user]":{
     "name":"@eln",
@@ -95,20 +76,20 @@
       "depends_on":"transformations/beam_direction",
       "transformations":{
         "beam_direction":1,
-        "beam_direction/@vector":[0, 0, 1],
+        "beam_direction/@vector":[0, 0, -1],
         "beam_direction/@units":"m",
         "beam_direction/@depends_on":"beam_polar_angle_of_incidence",
         
         "beam_polar_angle_of_incidence":"!@attrs:source_polar_angle",
         "beam_polar_angle_of_incidence/@units":"@attrs:source_polar_angle/@units",
         "beam_polar_angle_of_incidence/@transformation_type":"rotation",
-        "beam_polar_angle_of_incidence/@vector":[0, -1, 0],
+        "beam_polar_angle_of_incidence/@vector":[-1, 0, 0],
         "beam_polar_angle_of_incidence/@depends_on":"beam_azimuth_angle",
 
         "beam_azimuth_angle":"!@attrs:source_azimuth_angle",
         "beam_azimuth_angle/@units":"@attrs:source_azimuth_angle/@units",
         "beam_azimuth_angle/@transformation_type":"rotation",
-        "beam_azimuth_angle/@vector":[0, 0, -1],
+        "beam_azimuth_angle/@vector":[0, 0, 1],
         "beam_azimuth_angle/@depends_on":"/entry/geometries/xps_coordinate_system"
       }
     },
@@ -193,13 +174,13 @@
         "analyzer_take_off_polar_angle":"!@attrs:analyzer_take_off_polar_angle",
         "analyzer_take_off_polar_angle/@units":"@attrs:analyzer_take_off_polar_angle/@units",
         "analyzer_take_off_polar_angle/@transformation_type":"rotation",
-        "analyzer_take_off_polar_angle/@vector":[0, -1, 0],
+        "analyzer_take_off_polar_angle/@vector":[-1, 0, 0],
         "analyzer_take_off_polar_angle/@depends_on":"analyzer_take_off_azimuth_angle",
 
         "analyzer_take_off_azimuth_angle":"!@attrs:analyzer_take_off_azimuth_angle",
         "analyzer_take_off_azimuth_angle/@units":"@attrs:analyzer_take_off_azimuth_angle/@units",
         "analyzer_take_off_azimuth_angle/@transformation_type":"rotation",
-        "analyzer_take_off_azimuth_angle/@vector":[0, 0, -1],
+        "analyzer_take_off_azimuth_angle/@vector":[0, 0, 1],
         "analyzer_take_off_azimuth_angle/@depends_on":"/entry/geometries/xps_coordinate_system"
       }
     },
@@ -411,19 +392,19 @@
       "sample_rotation_angle":"@attrs:sample_rotation_angle",
       "sample_rotation_angle/@units":"@attrs:sample_rotation_angle/@units",
       "sample_rotation_angle/@transformation_type":"rotation",
-      "sample_rotation_angle/@vector":[0, 0, -1],
+      "sample_rotation_angle/@vector":[0, 0, 1],
       "sample_rotation_angle/@depends_on":"sample_normal_polar_angle_of_tilt",
 
       "sample_normal_polar_angle_of_tilt":"!@attrs:sample_normal_polar_angle_of_tilt",
       "sample_normal_polar_angle_of_tilt/@units":"@attrs:sample_normal_polar_angle_of_tilt/@units",
       "sample_normal_polar_angle_of_tilt/@transformation_type":"rotation",
-      "sample_normal_polar_angle_of_tilt/@vector":[0, -1, 0],
+      "sample_normal_polar_angle_of_tilt/@vector":[-1, 0, 0],
       "sample_normal_polar_angle_of_tilt/@depends_on":"sample_normal_tilt_azimuth_angle",
 
       "sample_normal_tilt_azimuth_angle":"!@attrs:sample_normal_tilt_azimuth_angle",
       "sample_normal_tilt_azimuth_angle/@units":"@attrs:sample_normal_tilt_azimuth_angle/@units",
       "sample_normal_tilt_azimuth_angle/@transformation_type":"rotation",
-      "sample_normal_tilt_azimuth_angle/@vector":[0, 0, -1],
+      "sample_normal_tilt_azimuth_angle/@vector":[0, 0, 1],
       "sample_normal_tilt_azimuth_angle/@depends_on":"/entry/geometries/xps_coordinate_system"
     }
   },

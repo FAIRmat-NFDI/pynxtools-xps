@@ -296,7 +296,7 @@
       "input_independent":"@link:/entry/data/energy",
       "input_independent/@units":"eV",
       "input_dependent":"@link:/entry/data/data",
-      "fit_sum":"['@attrs:fit_envelope_cps/data', '@attrs:fit_envelope/data']",
+      "fit_sum":"['@attrs:fit_sum_cps/data', '@attrs:fit_sum/data']",
       "fit_sum/@units":"counts_per_second",
       "residual": null,
       "DATA[peak*_intensity]":"@link:/entry/fit/peak*/data/intensity",

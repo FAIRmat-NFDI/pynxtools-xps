@@ -236,8 +236,8 @@
         "@auxiliary_signals":null,
         "input_independent":null,
         "input_dependent":null,
-        "envelope":null,
-        "envelope/@units":null,
+        "fit_sum":null,
+        "fit_sum/@units":null,
         "residual":null
       },
       "peakPEAK[peak*]":{

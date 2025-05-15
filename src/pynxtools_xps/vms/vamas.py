@@ -790,7 +790,7 @@ class VamasParser:
             if "casa" in comment_dict:
                 casa_process = comment_dict["casa"]
 
-                fit_aux_signals = ["envelope"]
+                fit_aux_signals = ["fit_sum"]
 
                 for energy_calibration in casa_process.casa_data["energy_calibrations"]:
                     block.x = energy_calibration.apply_energy_shift(block.x)

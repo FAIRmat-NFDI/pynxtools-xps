@@ -571,10 +571,10 @@ def check_units(template_path: str, unit: str) -> None:
     error_txt = f"Invalid unit '{unit}' at path: {template_path}"
 
     if unit is not None:
+        error_txt = f"Invalid unit '{unit}' at path: {template_path}"
         try:
             ureg.Unit(unit)
         except pint.errors.UndefinedUnitError as pint_err:
-            error_txt = f"Invalid unit '{unit}' at path: {template_path}"
             raise pint.errors.UndefinedUnitError(error_txt) from pint_err
         except TypeError as type_err:
-            raise TypeError(error_txt) from type_err
+            logger.warning(f"WARNING: {error_txt}")

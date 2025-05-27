@@ -18,6 +18,7 @@
 Tests for helper functions
 """
 
+import re
 import pytest
 import datetime
 from typing import Dict
@@ -159,7 +160,9 @@ def test_parse_datetime(
     ],
 )
 def test_parse_datetime_invalid(datetime_string, possible_date_formats):
-    with pytest.raises(
-        ValueError, match="Date and time could not be converted to ISO 8601 format."
-    ):
+    expected_error = (
+        f"Datetime {datetime_string} could not be converted to ISO 8601 format, "
+        f"as it does not match any of these formats: {possible_date_formats}."
+    )
+    with pytest.raises(ValueError, match=re.escape(expected_error)):
         parse_datetime(datetime_string, possible_date_formats)

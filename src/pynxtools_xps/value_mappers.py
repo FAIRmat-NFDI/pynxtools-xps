@@ -77,7 +77,6 @@ UNIT_MAP = {
     "eV/atom": "eV",
     "microm": "micrometer",
     "d": "degree",
-    "Ring Current [mA] (Monochromator)": "mA",  # could be extracted eventually
 }
 
 

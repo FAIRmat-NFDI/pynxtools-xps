@@ -614,6 +614,21 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
                 }
 
         """
+
+        def match_remote_device_units(unit: str) -> str:
+            """
+            Cover special case for remote devices in SPECS software
+            where the unit is written as Beam_SplitterD [A] (Remote Out Device).
+
+            Returns the part in the squared brackets, or the unit as is (if it does
+            not follow the pattern above).
+
+            """
+            matches = re.findall(r"\[([^\]]+)\]", y_units)
+            if matches:
+                return matches[0]
+            return unit
+
         energy = []
         intensity = []
         transmission_function = []
@@ -634,14 +649,14 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
                         if x_units == "energy":
                             x_units = "binding"
                         scan_settings["x_units"] = x_units
-                        matches = re.findall(r"$(.*?)$", y_units)
-                        # print(matches)
-                        # scan_settings["y_units"] = convert_units(y_units)
+                        y_units = match_remote_device_units(y_units)
+                        scan_settings["y_units"] = convert_units(y_units)
                         # print(scan_settings["y_units"])
 
                     else:
                         x_units, y_units, tf_units = val.split(" ")
                         scan_settings["x_units"] = x_units
+                        y_units = match_remote_device_units(y_units)
                         scan_settings["y_units"] = convert_units(y_units)
                         scan_settings["tf_units"] = tf_units
 

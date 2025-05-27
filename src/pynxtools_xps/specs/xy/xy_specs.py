@@ -811,5 +811,5 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
             date = date.strip()
             tzinfo = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo  # type: ignore[assignment]
 
-        possible_date_formats = ("%m/%d/%y %H:%M:%S", "%Y-%m-%d %H:%M:%S")
+        possible_date_formats = ["%m/%d/%y %H:%M:%S", "%Y-%m-%d %H:%M:%S"]
         return parse_datetime(date, possible_date_formats, tzinfo)

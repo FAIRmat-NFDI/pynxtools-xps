@@ -45,6 +45,8 @@ from pynxtools_xps.value_mappers import (
     convert_measurement_method,
     convert_energy_scan_mode,
     convert_units,
+    parse_datetime,
+    get_units_for_key,
 )
 
 SETTINGS_MAP: Dict[str, str] = {
@@ -85,12 +87,12 @@ VALUE_MAP: Dict[str, Any] = {
 }
 
 UNITS: Dict[str, str] = {
-    "instrument/work_function": "eV",
-    "beam_xray/excitation_energy": "eV",
-    "energydispersion/pass_energy": "eV",
-    "detector/bias_voltage_electrons": "V",
-    "detector/dwell_time": "s",
-    "data/step_size": "eV",
+    "work_function": "eV",
+    "excitation_energy": "eV",
+    "pass_energy": "eV",
+    "bias_voltage_electrons": "V",
+    "dwell_time": "s",
+    "step_size": "eV",
 }
 
 
@@ -140,54 +142,10 @@ class XyMapperSpecs(XPSMapper):
 
         self._xps_dict["data"]: dict = {}
 
-        template_key_map = {
-            "user": [],
-            "instrument": [
-                "work_function",
-            ],
-            "source_xray": [
-                "source_label",
-            ],
-            "beam_xray": ["excitation_energy"],
-            "analyzer": ["analyzer_name"],
-            "collectioncolumn": ["lens_mode"],
-            "energydispersion": [
-                "scan_mode",
-                "pass_energy",
-            ],
-            "detector": [
-                "bias_voltage_electrons",
-                "detector_voltage",
-                "dwell_time",
-            ],
-            "manipulator": [],
-            "sample": [],
-            "data": [
-                "x_units",
-                "y_units",
-                "n_values",
-                "start_energy",
-                "step_size",
-                "dwell_time",
-            ],
-            "region": [
-                "analysis_method",
-                "spectrum_type",
-                "comments",
-                "spectrum_id",
-                "time_stamp",
-                "scans",
-                "spectrum_id",
-                "cycle_no",
-            ],
-        }
-
         for spectrum in spectra:
-            self._update_xps_dict_with_spectrum(spectrum, template_key_map)
+            self._update_xps_dict_with_spectrum(spectrum)
 
-    def _update_xps_dict_with_spectrum(
-        self, spectrum: Dict[str, Any], key_map: Dict[str, List[str]]
-    ):
+    def _update_xps_dict_with_spectrum(self, spectrum: Dict[str, Any]):
         """
         Map one spectrum from raw data to NXmpes-ready dict.
 
@@ -206,41 +164,22 @@ class XyMapperSpecs(XPSMapper):
         instrument_parent = f"{entry_parent}/instrument"
         analyzer_parent = f"{instrument_parent}/analyzer"
 
-        path_map = {
-            "file_info": f"{file_parent}",
-            "user": f"{entry_parent}/user",
-            "instrument": f"{instrument_parent}",
-            "source_xray": f"{instrument_parent}/source_xray",
-            "beam_xray": f"{instrument_parent}/beam_xray",
-            "analyzer": f"{analyzer_parent}",
-            "collectioncolumn": f"{analyzer_parent}/collectioncolumn",
-            "energydispersion": f"{analyzer_parent}/energydispersion",
-            "detector": f"{analyzer_parent}/detector",
-            "manipulator": f"{instrument_parent}/manipulator",
-            "calibration": f"{instrument_parent}/calibration",
-            "sample": f"{entry_parent}/sample",
-            "data": f"{entry_parent}/data",
-            "region": f"{entry_parent}/region",
-        }
+        for key, value in spectrum.items():
+            if key.startswith("entry"):
+                entry_parent = "/ENTRY[entry]"
+                key = key.replace("entry/", "", 1)
+            mpes_key = f"{entry_parent}/{key}"
+            self._xps_dict[mpes_key] = value
 
-        for grouping, spectrum_keys in key_map.items():
-            root = path_map[str(grouping)]
-            for spectrum_key in spectrum_keys:
-                try:
-                    mpes_key = spectrum_key
-                    self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
-                except KeyError:
-                    pass
-
-                unit_key = f"{grouping}/{spectrum_key}"
-                units = self._get_units_for_key(unit_key)
-                if units:
-                    self._xps_dict[f"{root}/{mpes_key}/@units"] = units
+            units = get_units_for_key(key, UNITS)
+            if units is not None:
+                self._xps_dict[f"{mpes_key}/@units"] = units
 
         if self.parser.export_settings["Transmission Function"]:
-            path = f"{path_map['collectioncolumn']}/transmission_function"
-            self._xps_dict[path] = spectrum["data"]["transmission_function"]
-            self._xps_dict[f"{path}/units"] = spectrum["tf_units"]
+            self._xps_dict["transmission_function"] = spectrum["data"][
+                "transmission_function"
+            ]
+            self._xps_dict[f"transmission_function/units"] = spectrum["tf_units"]
 
         # Create key for writing to data.
         scan_key = construct_data_key(spectrum)
@@ -532,8 +471,13 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
                     region_data = region_data[i:]
                     break
                 setting_name = setting.split(self.prefix)[-1].strip().split(":")[0]
-                val = setting.split(self.prefix)[-1].strip().split(":")[1].strip()
-                region_settings[setting_name] = val
+
+                parts = setting.split(self.prefix)[-1].strip().split(":")
+
+                try:
+                    region_settings[setting_name] = parts[1].strip()
+                except IndexError:
+                    pass
 
             region_settings = re_map_keys(region_settings, SETTINGS_MAP)
             region_settings = re_map_values(region_settings, VALUE_MAP)
@@ -686,11 +630,14 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
 
                 if key == "ColumnLabels":
                     if not self.export_settings["Transmission Function"]:
-                        x_units, y_units = val.split(" ")
+                        x_units, y_units = val.split(" ", 1)
                         if x_units == "energy":
                             x_units = "binding"
                         scan_settings["x_units"] = x_units
-                        scan_settings["y_units"] = convert_units(y_units)
+                        matches = re.findall(r"$(.*?)$", y_units)
+                        # print(matches)
+                        # scan_settings["y_units"] = convert_units(y_units)
+                        # print(scan_settings["y_units"])
 
                     else:
                         x_units, y_units, tf_units = val.split(" ")
@@ -831,8 +778,9 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
         Parameters
         ----------
         date : str
-            String representation of the date in the format
-            "%m/%d/%y %H:%M:%S".
+            String representation of the date, in of these formats:
+            "%m/%d/%y %H:%M:%S",
+            "%m-%d-%y %H:%M:%S".
 
         Returns
         -------
@@ -840,15 +788,13 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
             Datetime in datetime.datetime format.
 
         """
+        # 2025-04-17 13:06:40 UTC
         if date.find("UTC"):
             date = date[: date.find("UTC")].strip()
-            tz = datetime.timezone.utc
+            tzinfo = datetime.timezone.utc
         else:
             date = date.strip()
-            tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo  # type: ignore[assignment]
+            tzinfo = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo  # type: ignore[assignment]
 
-        date_object = datetime.datetime.strptime(date, "%m/%d/%y %H:%M:%S").replace(
-            tzinfo=tz
-        )
-
-        return date_object.isoformat()
+        possible_date_formats = ("%m/%d/%y %H:%M:%S", "%Y-%m-%d %H:%M:%S")
+        return parse_datetime(date, possible_date_formats, tzinfo)

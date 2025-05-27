@@ -77,6 +77,7 @@ UNIT_MAP = {
     "eV/atom": "eV",
     "microm": "micrometer",
     "d": "degree",
+    "Ring Current [mA] (Monochromator)": "mA",  # could be extracted eventually
 }
 
 
@@ -194,4 +195,7 @@ def parse_datetime(
         except ValueError:
             continue
 
-    raise ValueError("Date and time could not be converted to ISO 8601 format.")
+    raise ValueError(
+        f"Datetime {datetime_string} could not be converted to ISO 8601 format, "
+        f"as it does not match any of these formats: {possible_date_formats}."
+    )

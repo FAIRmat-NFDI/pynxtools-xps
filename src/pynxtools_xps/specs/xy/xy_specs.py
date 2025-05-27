@@ -160,10 +160,6 @@ class XyMapperSpecs(XPSMapper):
         entry = construct_entry_name(entry_parts)
         entry_parent = f"/ENTRY[{entry}]"
 
-        file_parent = f"{entry_parent}/file_info"
-        instrument_parent = f"{entry_parent}/instrument"
-        analyzer_parent = f"{instrument_parent}/analyzer"
-
         for key, value in spectrum.items():
             if key.startswith("entry"):
                 entry_parent = "/ENTRY[entry]"
@@ -171,15 +167,14 @@ class XyMapperSpecs(XPSMapper):
             mpes_key = f"{entry_parent}/{key}"
             self._xps_dict[mpes_key] = value
 
-            units = get_units_for_key(key, UNITS)
-            if units is not None:
+            if units := get_units_for_key(key, UNITS) is not None:
                 self._xps_dict[f"{mpes_key}/@units"] = units
 
         if self.parser.export_settings["Transmission Function"]:
             self._xps_dict["transmission_function"] = spectrum["data"][
                 "transmission_function"
             ]
-            self._xps_dict[f"transmission_function/units"] = spectrum["tf_units"]
+            self._xps_dict["transmission_function/units"] = spectrum["tf_units"]
 
         # Create key for writing to data.
         scan_key = construct_data_key(spectrum)
@@ -625,9 +620,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
 
             """
             matches = re.findall(r"\[([^\]]+)\]", y_units)
-            if matches:
-                return matches[0]
-            return unit
+            return matches[0] if matches else unit
 
         energy = []
         intensity = []

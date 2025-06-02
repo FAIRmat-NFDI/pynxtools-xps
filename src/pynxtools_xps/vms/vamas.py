@@ -57,6 +57,7 @@ from pynxtools_xps.value_mappers import (
     convert_energy_type,
     convert_energy_scan_mode,
     get_units_for_key,
+    convert_units,
 )
 
 logger = logging.getLogger(__name__)
@@ -223,9 +224,10 @@ class VamasMapper(XPSMapper):
                 entry_parent = "/ENTRY[entry]"
                 key = key.replace("entry/", "", 1)
             mpes_key = f"{entry_parent}/{key}"
+            if "units" in key:
+                value = convert_units(value)
             self._xps_dict[mpes_key] = value
-
-            units = get_units_for_key(key, UNITS)
+            units = convert_units(get_units_for_key(key, UNITS))
             if units is not None:
                 self._xps_dict[f"{mpes_key}/@units"] = units
 

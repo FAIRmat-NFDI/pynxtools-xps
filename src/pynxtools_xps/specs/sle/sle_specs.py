@@ -54,26 +54,28 @@ from pynxtools_xps.value_mappers import (
     convert_energy_scan_mode,
     convert_measurement_method,
     get_units_for_key,
+    convert_units,
 )
 
 logger = logging.getLogger(__name__)
 
 UNITS: Dict[str, str] = {
-    "electronanalyzer/work_function": "eV",
-    "beam/excitation_energy": "eV",
-    "collectioncolumn/iris_diameter": "mm",
-    "data/step_size": "eV",
-    "detector/detector_voltage": "V",
-    "detector/dwell_time": "s",
-    "detector/raw_data/raw": "counts_per_second ",
-    "instrument/polar_angle": "degree ",
-    "instrument/azimuth_angle": "degree",
-    "energydispersion/pass_energy": "eV",
-    "region/start_energy": "eV",
-    "source/emission_current": "A",
-    "source/source_voltage": "V",
-    "collectioncolumn/transmission_function/kinetic_energy": "eV",
-    "process/transmission_correction/transmission_function/kinetic_energy": "eV",
+    "work_function": "eV",
+    "excitation_energy": "eV",
+    "iris_diameter": "mm",
+    "step_size": "eV",
+    "detector_voltage": "V",
+    "dwell_time": "s",
+    "raw_data/raw": "counts_per_second ",
+    "polar_angle": "degree ",
+    "azimuth_angle": "degree",
+    "pass_energy": "eV",
+    "start_energy": "eV",
+    "emission_current": "A",
+    "source_voltage": "V",
+    "energy_calibration/energy": "eV",
+    "transmission_function/kinetic_energy": "eV",
+    "transmission_correction/transmission_function/kinetic_energy": "eV",
 }
 
 
@@ -145,82 +147,11 @@ class SleMapperSpecs(XPSMapper):
         spectra = copy.deepcopy(self.raw_data)
 
         self._xps_dict["data"]: dict = {}
-        template_key_map = {
-            "user": [],
-            "instrument": [
-                "polar_angle",
-                "azimuth_angle",
-            ],
-            "source": [
-                "source_label",
-                "source_voltage",
-                "operating_mode",
-                "emission_current",
-            ],
-            "beam": ["excitation_energy"],
-            "electronanalyzer": [
-                "voltage_energy_range",
-                "voltage_energy_range/@units",
-                "work_function",
-            ],
-            "collectioncolumn": [
-                "lens1_voltage [nU]",
-                "lens2_voltage [nU]",
-                "coil_current [mA]",
-                "pre_deflector_x_current [nU]",
-                "pre_deflector_y_current [nU]",
-                "focus_displacement_current [nU]",
-                "iris_diameter",
-                "lens_mode",
-                "transmission_function/kinetic_energy",
-                "transmission_function/relative_intensity",
-                "transmission_function/file",
-            ],
-            "energydispersion": [
-                "energy_scan_mode",
-                "entrance_slit",
-                "exit_slit",
-                "pass_energy",
-            ],
-            "detector": [
-                "bias_voltage_electrons [V]",
-                "bias_voltage_ions [V]",
-                "detector_voltage [V]",
-                "dwell_time",
-            ],
-            "manipulator": [],
-            "process/energy_calibration": [
-                "calibration_file/dir",
-                "calibration_file/path",
-                "energy/@units",
-            ],
-            "process/transmission_correction": [
-                "transmission_function/kinetic_energy",
-                "transmission_function/relative_intensity",
-                "transmission_function/file",
-            ],
-            "data": [
-                "energy/@type",
-                "energy/@units",
-                "intensity/@units",
-                "n_values",
-                "step_size",
-            ],
-            "region": [
-                "analysis_method",
-                "start_energy",
-                "spectrum_comment",
-                "time_stamp",
-                "total_scans",
-            ],
-        }
 
         for spectrum in spectra:
-            self._update_xps_dict_with_spectrum(spectrum, template_key_map)
+            self._update_xps_dict_with_spectrum(spectrum)
 
-    def _update_xps_dict_with_spectrum(
-        self, spectrum: Dict[str, Any], template_key_map: Dict[str, str]
-    ):
+    def _update_xps_dict_with_spectrum(self, spectrum: Dict[str, Any]):
         """
         Map one spectrum from raw data to NXmpes-ready dict.
 
@@ -235,39 +166,22 @@ class SleMapperSpecs(XPSMapper):
         entry = construct_entry_name(entry_parts)
         entry_parent = f"/ENTRY[{entry}]"
 
-        instrument_parent = f"{entry_parent}/instrument"
-        analyzer_parent = f"{instrument_parent}/electronanalyzer"
+        for key, value in spectrum.items():
+            if key.startswith("entry"):
+                entry_parent = "/ENTRY[entry]"
+                key = key.replace("entry/", "", 1)
+            mpes_key = f"{entry_parent}/{key}"
+            if "units" in key:
+                value = convert_units(value)
+            self._xps_dict[mpes_key] = value
+            units = convert_units(get_units_for_key(key, UNITS))
+            if units is not None:
+                self._xps_dict[f"{mpes_key}/@units"] = units
 
-        path_map = {
-            "user": f"{entry_parent}/user",
-            "instrument": f"{instrument_parent}",
-            "source": f"{instrument_parent}/source",
-            "beam": f"{instrument_parent}/beam",
-            "electronanalyzer": f"{analyzer_parent}",
-            "collectioncolumn": f"{analyzer_parent}/collectioncolumn",
-            "energydispersion": f"{analyzer_parent}/energydispersion",
-            "detector": f"{analyzer_parent}/detector",
-            "manipulator": f"{instrument_parent}/manipulator",
-            "process/energy_calibration": f"{entry_parent}/process/energy_calibration",
-            "process/transmission_correction": f"{entry_parent}/process/transmission_correction",
-            "sample": f"{entry_parent}/sample",
-            "data": f"{entry_parent}/data",
-            "region": f"{entry_parent}/region",
-        }
+        analyzer_path = f"{entry_parent}/instrument/electronanalyzer"
 
-        for grouping, spectrum_keys in template_key_map.items():
-            root = path_map[str(grouping)]
-            for spectrum_key in spectrum_keys:
-                mpes_key = spectrum_key.rsplit(" ", 1)[0]
-                self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
-
-                unit_key = f"{grouping}/{spectrum_key}"
-                units = get_units_for_key(unit_key, UNITS)
-                if units is not None:
-                    self._xps_dict[f"{root}/{mpes_key}/@units"] = units
-
-        self._xps_dict[f"{path_map['electronanalyzer']}/name"] = spectrum["devices"][0]
-        self._xps_dict[f"{path_map['source']}/name"] = spectrum["devices"][1]
+        self._xps_dict[f"{entry_parent}/electronanalyzer/name"] = spectrum["devices"][0]
+        self._xps_dict[f"{entry_parent}/'source/name"] = spectrum["devices"][1]
 
         # Create keys for writing to data
         scan_key = construct_data_key(spectrum)
@@ -297,10 +211,6 @@ class SleMapperSpecs(XPSMapper):
         if averaged_scans.shape == energy.shape:
             # TODO: fix this hotfix so that all data can be written
 
-            # Add energy axis to energy_calibration
-            calib_energy_key = f"{path_map['process/energy_calibration']}/energy"
-            self._xps_dict[calib_energy_key] = energy
-
             self._xps_dict["data"][entry][scan_key.split("_")[0]] = xr.DataArray(
                 data=averaged_scans,
                 coords={"energy": energy},
@@ -329,7 +239,7 @@ class SleMapperSpecs(XPSMapper):
                 )
 
             # Add unit for detector data
-            detector_data_unit_key = f"{path_map['detector']}/raw_data/raw/@units"
+            detector_data_unit_key = f"{entry_parent}/detector/raw_data/raw/@units"
 
             detector_data_units = get_units_for_key("detector/raw_data/raw", UNITS)
             if detector_data_units is not None:

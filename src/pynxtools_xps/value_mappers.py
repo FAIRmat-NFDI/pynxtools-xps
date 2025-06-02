@@ -65,7 +65,7 @@ BOOL_MAP = {
 }
 
 UNIT_MAP = {
-    "Counts": "counts",
+    "Counts": "counts_per_second",
     "counts/s": "counts_per_second",
     "CPS": "counts_per_second",
     "u": "um",
@@ -77,6 +77,7 @@ UNIT_MAP = {
     "eV/atom": "eV",
     "microm": "micrometer",
     "d": "degree",
+    "nU": "V",  # workaround for SPECS SLE reader
 }
 
 

@@ -161,13 +161,12 @@ class XyMapperSpecs(XPSMapper):
         entry_parent = f"/ENTRY[{entry}]"
 
         for key, value in spectrum.items():
-            if key.startswith("entry"):
-                entry_parent = "/ENTRY[entry]"
-                key = key.replace("entry/", "", 1)
             mpes_key = f"{entry_parent}/{key}"
+            if "units" in key:
+                value = convert_units(value)
             self._xps_dict[mpes_key] = value
-
-            if units := get_units_for_key(key, UNITS) is not None:
+            units = convert_units(get_units_for_key(key, UNITS))
+            if units is not None:
                 self._xps_dict[f"{mpes_key}/@units"] = units
 
         if self.parser.export_settings["Transmission Function"]:

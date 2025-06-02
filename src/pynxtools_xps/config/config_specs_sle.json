@@ -4,7 +4,7 @@
     "title":"@eln",
     "start_time":"@eln",
     "end_time":"@eln",
-    "method":"@attrs:region/analysis_method",
+    "method":"@attrs:analysis_method",
     "transitions":"@attrs:transitions",
     "experiment_institution":"@eln",
     "experiment_facility":"@eln",
@@ -36,12 +36,12 @@
     },
     "source_probe":{
       "type":"@eln",
-      "name":"@attrs:source/name",
+      "name":"@attrs:name",
       "probe":"@eln",
-      "current":"@attrs:source/emission_current",
-      "current/@units":"@attrs:source/emission_current/@units",
-      "voltage":"@attrs:source/source_voltage",
-      "voltage/@units":"@attrs:source/source_voltage/@units",
+      "current":"@attrs:emission_current",
+      "current/@units":"@attrs:emission_current/@units",
+      "voltage":"@attrs:source_voltage",
+      "voltage/@units":"@attrs:source_voltage/@units",
       "device_information":{
         "vendor":"@eln",
         "model":"@eln",
@@ -53,8 +53,8 @@
     "beam_probe":{
       "distance":"@eln",
       "distance/@units":"@eln",
-      "incident_energy":"@attrs:beam/excitation_energy",
-      "incident_energy/@units":"@attrs:beam/excitation_energy/@units",
+      "incident_energy":"@attrs:excitation_energy",
+      "incident_energy/@units":"@attrs:excitation_energy/@units",
       "incident_energy_spread":null,
       "incident_energy_spread/@units":null,
       "incident_polarization":null,
@@ -64,12 +64,12 @@
     },
     "ELECTRONANALYZER[electronanalyzer]":{
       "@default":"detector",
-      "name":"@attrs:electronanalyzer/name",
+      "name":"@attrs:name",
       "description":"@eln",
-      "voltage_range":"@attrs:electronanalyzer/voltage_energy_range",
-      "voltage_range/@units":"@attrs:electronanalyzer/voltage_energy_range/@units",
-      "work_function":"@attrs:electronanalyzer/work_function",
-      "work_function/@units":"@attrs:electronanalyzer/work_function/@units",
+      "voltage_range":"@attrs:voltage_energy_range",
+      "voltage_range/@units":"@attrs:voltage_energy_range/@units",
+      "work_function":"@attrs:work_function",
+      "work_function/@units":"@attrs:work_function/@units",
       "fast_axes":null,
       "slow_axes":"energy",
       "device_information":{
@@ -81,27 +81,27 @@
       "energy_resolution":{
         "physical_quantity":"energy",
         "type":"estimated",
-        "resolution":"@attrs:data/step_size",
-        "resolution/@units":"@attrs:data/step_size/@units"
+        "resolution":"@attrs:step_size",
+        "resolution/@units":"@attrs:step_size/@units"
       },
       "transmission_function":{
         "@signal":"relative_intensity",
         "@axes":["kinetic_energy"],
         "kinetic_energy":"@attrs:transmission_function/kinetic_energy",
         "kinetic_energy/@units":"@attrs:transmission_function/kinetic_energy/@units",
-        "relative_intensity":"@attrs:collectioncolumn/transmission_function/relative_intensity"
+        "relative_intensity":"@attrs:transmission_function/relative_intensity"
       },
       "COLLECTIONCOLUMN[collectioncolumn]":{
         "scheme":"@eln",
-        "lens_mode":"@attrs:collectioncolumn/lens_mode",
+        "lens_mode":"@attrs:lens_mode",
         "projection":null,
         "angular_acceptance":null,
         "spatial_acceptance":null,
         "field_aperture":null,
         "contrast_aperture":null,
         "iris":{
-          "size":"@attrs:collectioncolumn/iris_diameter",
-          "size/@units":"@attrs:collectioncolumn/iris_diameter/@units"
+          "size":"@attrs:iris_diameter",
+          "size/@units":"@attrs:iris_diameter/@units"
         },
         "device_information":{
           "vendor":"@eln",
@@ -111,42 +111,42 @@
         },
         "LENS_EM[L1]":{
           "name":"Lens 1",
-          "voltage":"@attrs:collectioncolumn/lens1_voltage",
-          "voltage/@units":"@attrs:collectioncolumn/lens1_voltage/@units"
+          "voltage":"@attrs:lens1_voltage",
+          "voltage/@units":"@attrs:lens1_voltage/@units"
         },
         "LENS_EM[L2]":{
           "name":"Lens 2",
-          "voltage":"@attrs:collectioncolumn/lens2_voltage",
-          "voltage/@units":"@attrs:collectioncolumn/lens2_voltage/@units"
+          "voltage":"@attrs:lens2_voltage",
+          "voltage/@units":"@attrs:lens2_voltage/@units"
         },
         "LENS_EM[coil]":{
           "name":"Coil",
-          "current":"@attrs:collectioncolumn/coil_current",
-          "current/@units":"@attrs:collectioncolumn/coil_current/@units"
+          "current":"@attrs:coil_current",
+          "current/@units":"@attrs:coil_current/@units"
         },
         "LENS_EM[pre_defl_x]":{
           "name":"Pre-Deflector X",
-          "current":"@attrs:collectioncolumn/pre_deflector_x_current",
-          "current/@units":"@attrs:collectioncolumn/pre_deflector_x_current/@units"
+          "current":"@attrs:pre_deflector_x_current",
+          "current/@units":"@attrs:pre_deflector_x_current/@units"
         },
         "LENS_EM[pre_defl_y]":{
           "name":"Pre-Deflector Y",
-          "current":"@attrs:collectioncolumn/pre_deflector_y_current",
-          "current/@units":"@attrs:collectioncolumn/pre_deflector_y_current/@units"
+          "current":"@attrs:pre_deflector_y_current",
+          "current/@units":"@attrs:pre_deflector_y_current/@units"
         },
         "LENS_EM[focus_displacement]":{
           "name":"Focus Displacement",
-          "current":"@attrs:collectioncolumn/focus_displacement_current",
-          "current/@units":"@attrs:collectioncolumn/focus_displacement_current/@units"
+          "current":"@attrs:focus_displacement_current",
+          "current/@units":"@attrs:focus_displacement_current/@units"
         }
       },
       "ENERGYDISPERSION[energydispersion]":{
         "scheme":"@eln",
-        "pass_energy":"@attrs:energydispersion/pass_energy",
-        "pass_energy/@units":"@attrs:energydispersion/pass_energy/@units",
-        "energy_scan_mode":"@attrs:energydispersion/energy_scan_mode",
-        "entrance_slit/description":"@attrs:energydispersion/entrance_slit",
-        "exit_slit/description":"@attrs:energydispersion/exit_slit",
+        "pass_energy":"@attrs:pass_energy",
+        "pass_energy/@units":"@attrs:pass_energy/@units",
+        "energy_scan_mode":"@attrs:energy_scan_mode",
+        "entrance_slit/description":"@attrs:entrance_slit",
+        "exit_slit/description":"@attrs:exit_slit",
         "radius":"@eln",
         "radius/@units":"@eln",
         "device_information":{
@@ -160,12 +160,12 @@
         "@default":"raw_data",
         "amplifier_type":"@eln",
         "detector_type":"@eln",
-        "detector_voltage":"@attrs:detector/detector_voltage",
-        "detector_voltage/@units":"@attrs:detector/detector_voltage/@units",
-        "amplifier_bias":"@attrs:detector/bias_voltage_electrons",
-        "amplifier_bias/@units":"@attrs:detector/bias_voltage_electrons/@units",
-        "count_time":"@attrs:detector/dwell_time",
-        "count_time/@units":"@attrs:detector/dwell_time/@units",
+        "detector_voltage":"@attrs:detector_voltage",
+        "detector_voltage/@units":"@attrs:detector_voltage/@units",
+        "amplifier_bias":"@attrs:bias_voltage_electrons",
+        "amplifier_bias/@units":"@attrs:bias_voltage_electrons/@units",
+        "count_time":"@attrs:dwell_time",
+        "count_time/@units":"@attrs:dwell_time/@units",
         "device_information":{
           "vendor":"@eln",
           "model":"@eln",
@@ -175,9 +175,9 @@
         "raw_data":{
           "@signal":"raw",
           "raw":"@data:raw_data",
-          "raw/@units":"@attrs:detector/raw_data/raw/@units",
+          "raw/@units":"@attrs:raw_data/raw/@units",
           "DATA[*]":"@data:*.channels",
-          "DATA[*]/@units":"@attrs:detector/raw_data/raw/@units"
+          "DATA[*]/@units":"@attrs:raw_data/raw/@units"
         }
       }
     },
@@ -244,12 +244,12 @@
     }
   },
   "/ENTRY/energy_axis_calibration":{
-    "calibrated_axis":"@attrs:process/energy_calibration/energy",
-    "calibrated_axis/@units":"@attrs:process/energy_calibration/energy/@units",
+    "calibrated_axis":"@data:energy",
+    "calibrated_axis/@units":"@attrs:energy/@units",
     "physical_quantity":"energy",
     "calibration_object":{
       "type":"file",
-      "file_name":"@attrs:process/energy_calibration/calibration_file/path"
+      "file_name":"@attrs:calibration_file/path"
     }
   },
   "/ENTRY/energy_referencing":null,
@@ -259,11 +259,11 @@
       "@axes":["kinetic_energy"],
       "kinetic_energy":"@attrs:transmission_function/kinetic_energy",
       "kinetic_energy/@units":"@attrs:transmission_function/kinetic_energy/@units",
-      "relative_intensity":"@attrs:collectioncolumn/transmission_function/relative_intensity"
+      "relative_intensity":"@attrs:transmission_function/relative_intensity"
     },
     "calibration_object":{
       "type":"file",
-      "file_name":"@attrs:process/transmission_correction/transmission_function/file"
+      "file_name":"@attrs:transmission_correction/transmission_function/file"
     }
   },
   "/ENTRY/SAMPLE[sample]":{
@@ -311,12 +311,12 @@
     "@signal":"data",
     "data":"@data:average",
     "FIELDNAME_errors[data_errors]":"@data:errors",
-    "data/@units":"@attrs:data/intensity/@units",
+    "data/@units":"@attrs:intensity/@units",
     "DATA[*]":"@data:*.scans",
-    "DATA[*]/@units":"@attrs:data/intensity/@units",
+    "DATA[*]/@units":"@attrs:intensity/@units",
     "energy":"@data:energy",
-    "energy/@type":"@attrs:data/energy/@type",
-    "energy/@units":"@attrs:data/energy/@units",
+    "energy/@type":"@attrs:energy/@type",
+    "energy/@units":"@attrs:energy/@units",
     "@energy_indices":0
   }
 }

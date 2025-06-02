@@ -77,7 +77,6 @@
       "transformations":{
         "beam_direction":1,
         "beam_direction/@vector":[0, 0, -1],
-        "beam_direction/@units":"m",
         "beam_direction/@depends_on":"beam_polar_angle_of_incidence",
         
         "beam_polar_angle_of_incidence":"!@attrs:source_polar_angle",

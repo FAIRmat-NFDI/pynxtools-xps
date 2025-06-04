@@ -23,7 +23,7 @@ Specs Lab Prodigy XY exports, to be passed to mpes nxdl
 
 import re
 import logging
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any, Union, Optional
 import warnings
 import itertools
 from collections import OrderedDict
@@ -644,7 +644,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
 
         """
 
-        def _normalize_ext_channel_label(label: str) -> tuple[str, str | None]:
+        def _normalize_ext_channel_label(label: str) -> tuple[str, Optional[str]]:
             """
             Normalize a label by converting the main part to snake_case and separating the unit.
 

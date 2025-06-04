@@ -246,14 +246,15 @@
   "/ENTRY/DATA[data]":{
     "@axes":["energy"],
     "@signal":"data",
+    "@auxiliary_signals":"@attrs:aux_signals",
     "data":"@data:average",
     "FIELDNAME_errors[data_errors]":"@data:errors",
-    "data/@units":"@attrs:y_units",
-    "DATA[*]":"@data:*.scans",
-    "DATA[*]/@units":"@attrs:y_units",
+    "data/@units":"counts_per_second",
+    "DATA[*]":"@data:*.external",
+    "DATA[*]/@units":"@data:*.external_units",
     "energy":"@data:energy",
-    "energy/@type":"@attrs:x_units",
+    "energy/@type":"['@attrs:x_units', 'kinetic']",
     "energy/@units":"eV",
     "@energy_indices":0
-  }      
+  }     
 }

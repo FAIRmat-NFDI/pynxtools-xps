@@ -221,7 +221,6 @@ class XPSReader(MultiFormatReader):
         if replace:
             if self.config_file is not None:
                 if file_path != self.config_file:
-                    print(file_path, self.config_file)
                     logger.info(
                         f"Config file already set. Replaced by the new file {file_path}."
                     )
@@ -688,23 +687,30 @@ class XPSReader(MultiFormatReader):
 
             return list(map(str, data_vars))
 
-        def get_processes(process_key: str) -> List[str]:
+        def get_all_keys(template_key: str) -> List[str]:
             escaped_entry_name = re.escape(self.callbacks.entry_name)
 
             pattern = re.compile(
-                rf"/ENTRY\[{escaped_entry_name}]\.*/{process_key}([a-zA-Z0-9_]+)"
+                rf"^/ENTRY\[{escaped_entry_name}]/{template_key}([^/]+)"
             )
 
-            process_names = {
-                match for key in self.xps_data for match in pattern.findall(key)
+            keys = {
+                match.group(1)
+                for key in self.xps_data
+                if (match := pattern.search(key))
             }
 
-            return sorted(process_names)
+            return sorted(keys)
+
+        if isinstance(path, str) and path.endswith(("*.external", "*.external_units")):
+            data_func = lambda: get_all_keys("external_")
+        else:
+            data_func = lambda: get_signals(path.split(":*.")[-1])
 
         patterns: Dict[str, Any] = {
-            "peak": lambda: get_processes("component"),
-            "background": lambda: get_processes("region"),
-            r"data/DATA": lambda: get_signals(path.split(":*.")[-1]),
+            "peak": lambda: get_all_keys("component"),
+            "background": lambda: get_all_keys("region"),
+            r"DATA\[data]/DATA\[[^\]]+\](?:/@units)?": data_func,
             r"DETECTOR\[[a-zA-Z0-9_]+\]/raw_data": lambda: get_signals("channels"),
         }
 
@@ -756,8 +762,38 @@ class XPSReader(MultiFormatReader):
         elif path.endswith("channels"):
             return np.array(xr_data[path.split(".channels")[0]])
 
+        elif path.endswith((".external", "external_units")):
+            channel_name = path.split(".external")[0]
+            escaped_entry_name = re.escape(self.callbacks.entry_name)
+
+            if path.endswith("_units"):
+                pattern = re.compile(
+                    rf"^/ENTRY\[{escaped_entry_name}]/external_{re.escape(channel_name)}/@units"
+                )
+
+                return [
+                    value
+                    for key, value in self.xps_data.items()
+                    if (match := pattern.search(key))
+                ][0]
+
+            else:
+                pattern = re.compile(
+                    rf"^/ENTRY\[{escaped_entry_name}]/external_{re.escape(channel_name)}$"
+                )
+                return np.array(
+                    [
+                        value
+                        for key, value in self.xps_data.items()
+                        if (match := pattern.search(key))
+                    ]
+                ).squeeze()
+
         elif "energy" in path:
-            return np.array(xr_data.coords["energy"].values)
+            try:
+                return np.array(xr_data.coords["energy"].values)
+            except KeyError:
+                return None
 
         else:
             try:

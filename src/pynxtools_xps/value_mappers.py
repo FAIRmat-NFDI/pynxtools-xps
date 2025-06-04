@@ -78,6 +78,8 @@ UNIT_MAP = {
     "microm": "micrometer",
     "d": "degree",
     "nU": "V",  # workaround for SPECS SLE reader
+    "s-1": "1/s",  # workaround for SPECS XY reader
+    "norm": None,  # workaround for SPECS XY reader
 }
 
 

@@ -712,8 +712,8 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
             return name, unit
 
         scan_settings = {}
-        data_channels = OrderedDict()
-        channel_units = OrderedDict()
+        data_channels: OrderedDict[str, list[float]] = OrderedDict()
+        channel_units: OrderedDict[str, str] = OrderedDict()
 
         in_remote_channel = False
 
@@ -755,10 +755,10 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
 
             elif not line.startswith(self.prefix) and line.strip():
                 values = [float(v) for v in line.strip().split()]
-                for i, (channel, v) in enumerate(
+                for i, (channel_label_and_unit, v) in enumerate(
                     zip(normalized_labels_and_units, values)
                 ):
-                    label = channel[0]
+                    label = channel_label_and_unit[0]
                     if not (in_remote_channel and i == 0):
                         data_channels[label].append(v)
 
@@ -769,7 +769,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
         scan_settings = re_map_keys(scan_settings, SETTINGS_MAP)
         scan_settings = re_map_values(scan_settings, VALUE_MAP)
 
-        scan = OrderedDict()
+        scan: OrderedDict[str, dict[str, Any]] = OrderedDict()
         scan["data"] = data_channels
         scan["channel_units"] = channel_units
         scan["scan_settings"] = scan_settings
@@ -861,7 +861,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
                     cycle_settings = cycle["cycle_settings"]
                     for scan in list(cycle.values())[:1]:
                         scan_settings = scan["scan_settings"]
-                        spectrum = {"data": {}}
+                        spectrum: Dict[str, Any] = {"data": {}}
                         for settings in [
                             group_settings,
                             region_settings,

@@ -90,74 +90,10 @@ class MapperScienta(XPSMapper):
 
         self._xps_dict["data"]: dict = {}
 
-        template_key_map = {
-            "file_info": ["data_file", "sequence_file"],
-            "user": [
-                "user_name",
-            ],
-            "instrument": [
-                "instrument_name",
-                "vendor",
-            ],
-            "source_xray": [],
-            "beam_xray": [
-                "excitation_energy",
-            ],
-            "electronanalyzer": [],
-            "collectioncolumn": [
-                "lens_mode",
-            ],
-            "energydispersion": [
-                "acquisition_mode",
-                "pass_energy",
-            ],
-            "detector": [
-                "detector_first_x_channel",
-                "detector_first_y_channel",
-                "detector_last_x_channel",
-                "detector_last_y_channel",
-                "detector_mode",
-                "dwell_time",
-                "time_per_spectrum_channel",
-            ],
-            "manipulator": [
-                "manipulator_r1",
-                "manipulator_r2",
-            ],
-            "calibration": [],
-            "sample": ["sample_name"],
-            "region": [
-                "center_energy",
-                "energy_axis",
-                "energy_scale",
-                "energy_scale_2",
-                "energy_size",
-                "no_of_scans",
-                "region_id",
-                "spectrum_comment",
-                "start_energy",
-                "step_size",
-                "stop_energy",
-                "time_stamp",
-                "intensity/@units",
-            ],
-            # 'unused': [
-            #     'energy_unit',
-            #     'number_of_slices',
-            #     'software_version',
-            #     'spectrum_comment',
-            #     'start_date',
-            #     'start_time',
-            #     'time_per_spectrum_channel'
-            # ]
-        }
-
         for spectrum in spectra:
-            self._update_xps_dict_with_spectrum(spectrum, template_key_map)
+            self._update_xps_dict_with_spectrum(spectrum)
 
-    def _update_xps_dict_with_spectrum(
-        self, spectrum: Dict[str, Any], template_key_map: Dict[str, List[str]]
-    ):
+    def _update_xps_dict_with_spectrum(self, spectrum: Dict[str, Any]):
         """
         Map one spectrum from raw data to NXmpes-ready dict.
 
@@ -171,41 +107,14 @@ class MapperScienta(XPSMapper):
         entry = construct_entry_name(entry_parts)
         entry_parent = f"/ENTRY[{entry}]"
 
-        file_parent = f"{entry_parent}/file_info"
-        instrument_parent = f"{entry_parent}/instrument"
-        analyzer_parent = f"{instrument_parent}/electronanalyzer"
-
-        path_map = {
-            "file_info": f"{file_parent}",
-            "user": f"{entry_parent}/user",
-            "instrument": f"{instrument_parent}",
-            "source_xray": f"{instrument_parent}/source_xray",
-            "beam_xray": f"{instrument_parent}/beam_xray",
-            "electronanalyzer": f"{analyzer_parent}",
-            "collectioncolumn": f"{analyzer_parent}/collectioncolumn",
-            "energydispersion": f"{analyzer_parent}/energydispersion",
-            "detector": f"{analyzer_parent}/detector",
-            "manipulator": f"{instrument_parent}/manipulator",
-            "calibration": f"{instrument_parent}/calibration",
-            "sample": f"{entry_parent}/sample",
-            "data": f"{entry_parent}/data",
-            "region": f"{entry_parent}/region",
-        }
-
-        for grouping, spectrum_keys in template_key_map.items():
-            root = path_map[str(grouping)]
-
-            for spectrum_key in spectrum_keys:
-                mpes_key = spectrum_key.rsplit(" ", 1)[0]
-                try:
-                    self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
-                except KeyError:
-                    pass
-
-                unit_key = f"{grouping}/{spectrum_key}"
-                units = get_units_for_key(unit_key, UNITS)
-                if units is not None:
-                    self._xps_dict[f"{root}/{mpes_key}/@units"] = units
+        for key, value in spectrum.items():
+            mpes_key = f"{entry_parent}/{key}"
+            if "units" in key:
+                value = convert_units(value)
+            self._xps_dict[mpes_key] = value
+            units = convert_units(get_units_for_key(key, UNITS))
+            if units is not None:
+                self._xps_dict[f"{mpes_key}/@units"] = units
 
         # Create key for writing to data
         scan_key = construct_data_key(spectrum)
@@ -408,7 +317,7 @@ class ScientaTxtParser:
         region.validate_types()
 
         region_dict = {**self.header.dict(), **region.dict()}
-        region_dict["intensity/@units"] = "counts"
+        region_dict["intensity/@units"] = "counts_per_second"
 
         self.spectra.append(region_dict)
 

@@ -65,7 +65,7 @@ BOOL_MAP = {
 }
 
 UNIT_MAP = {
-    "Counts": "counts",
+    "Counts": "counts_per_second",
     "counts/s": "counts_per_second",
     "CPS": "counts_per_second",
     "u": "um",
@@ -77,6 +77,9 @@ UNIT_MAP = {
     "eV/atom": "eV",
     "microm": "micrometer",
     "d": "degree",
+    "nU": "V",  # workaround for SPECS SLE reader
+    "s-1": "1/s",  # workaround for SPECS XY reader
+    "norm": None,  # workaround for SPECS XY reader
 }
 
 
@@ -194,4 +197,7 @@ def parse_datetime(
         except ValueError:
             continue
 
-    raise ValueError("Date and time could not be converted to ISO 8601 format.")
+    raise ValueError(
+        f"Datetime {datetime_string} could not be converted to ISO 8601 format, "
+        f"as it does not match any of these formats: {possible_date_formats}."
+    )

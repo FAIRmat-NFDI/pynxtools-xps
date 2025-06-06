@@ -243,7 +243,7 @@
       "@signal":"data",
       "data":"@data:average",
       "FIELDNAME_errors[data_errors]":"@data:errors",
-      "data/@units":"counts",
+      "data/@units":"counts_per_second",
       "DATA[*]":"@data:*.scans",
       "DATA[*]/@units":"counts_per_second",
       "energy":"@data:energy",

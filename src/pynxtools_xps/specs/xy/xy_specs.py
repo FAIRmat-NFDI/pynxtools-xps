@@ -22,7 +22,8 @@ Specs Lab Prodigy XY exports, to be passed to mpes nxdl
 """
 
 import re
-from typing import List, Dict, Any, Union
+import logging
+from typing import List, Dict, Any, Union, Optional, Tuple
 import warnings
 import itertools
 from collections import OrderedDict
@@ -40,33 +41,51 @@ from pynxtools_xps.reader_utils import (
     get_minimal_step,
     construct_entry_name,
     construct_data_key,
+    convert_pascal_to_snake,
 )
 from pynxtools_xps.value_mappers import (
     convert_measurement_method,
     convert_energy_scan_mode,
     convert_units,
+    parse_datetime,
+    get_units_for_key,
 )
 
+logger = logging.getLogger("pynxtools")
+
 SETTINGS_MAP: Dict[str, str] = {
+    "Group": "group_id",
+    "Scan Mode": "scan_mode",
+    "Analyzer Lens Voltage": "analyzer_lens_voltage",
+    "Calibration File": "calibration_file",
+    "Transmission File": "transmission_file",
+    "Analyzer Slit": "entrance_slit",
+    "Iris Diameter": "iris_diameter",
+    "Energy Axis": "x_units",
+    "Source": "source_label",
+    "Polar Angle": "source_polar_angle",
+    "Azimuth Angle": "source_azimuth_angle",
+    "ex_energy": "excitation_energy",
     "Acquisition Date": "time_stamp",
     "Analysis Method": "analysis_method",
     "Analyzer": "analyzer_name",
     "Analyzer Lens": "lens_mode",
-    "Analyzer Slit": "entrance_slit",
-    "Bias Voltage": "bias_voltage_electrons",
-    "Binding Energy": "start_energy",
-    "Scan Mode": "scan_mode",
+    "Analyzer Lens Mode": "lens_mode",
+    "Scan Variable": "scan_variable",
+    "Curves/Scan": "curves_per_scan",
     "Values/Curve": "n_values",
-    "Eff. Workfunction": "work_function",
+    "Step Size": "step_size",
+    "Dwell Time": "dwell_time",
     "Excitation Energy": "excitation_energy",
     "Kinetic Energy": "kinetic_energy",
-    "Dwell Time": "dwell_time",
-    "Detector Voltage": "detector_voltage",
-    "Comment": "comments",
-    "Curves/Scan": "curves_per_scan",
     "Pass Energy": "pass_energy",
-    "Source": "source_label",
+    "Bias Voltage": "bias_voltage_electrons",
+    "Binding Energy": "start_energy",
+    "Detector Voltage": "detector_voltage",
+    "Eff. Workfunction": "work_function",
+    "Comment": "comments",
     "Spectrum ID": "spectrum_id",
+    "Note": "note",
 }
 
 VALUE_MAP: Dict[str, Any] = {
@@ -85,12 +104,12 @@ VALUE_MAP: Dict[str, Any] = {
 }
 
 UNITS: Dict[str, str] = {
-    "instrument/work_function": "eV",
-    "beam_xray/excitation_energy": "eV",
-    "energydispersion/pass_energy": "eV",
-    "detector/bias_voltage_electrons": "V",
-    "detector/dwell_time": "s",
-    "data/step_size": "eV",
+    "work_function": "eV",
+    "excitation_energy": "eV",
+    "pass_energy": "eV",
+    "bias_voltage_electrons": "V",
+    "dwell_time": "s",
+    "step_size": "eV",
 }
 
 
@@ -140,54 +159,10 @@ class XyMapperSpecs(XPSMapper):
 
         self._xps_dict["data"]: dict = {}
 
-        template_key_map = {
-            "user": [],
-            "instrument": [
-                "work_function",
-            ],
-            "source_xray": [
-                "source_label",
-            ],
-            "beam_xray": ["excitation_energy"],
-            "analyzer": ["analyzer_name"],
-            "collectioncolumn": ["lens_mode"],
-            "energydispersion": [
-                "scan_mode",
-                "pass_energy",
-            ],
-            "detector": [
-                "bias_voltage_electrons",
-                "detector_voltage",
-                "dwell_time",
-            ],
-            "manipulator": [],
-            "sample": [],
-            "data": [
-                "x_units",
-                "y_units",
-                "n_values",
-                "start_energy",
-                "step_size",
-                "dwell_time",
-            ],
-            "region": [
-                "analysis_method",
-                "spectrum_type",
-                "comments",
-                "spectrum_id",
-                "time_stamp",
-                "scans",
-                "spectrum_id",
-                "cycle_no",
-            ],
-        }
-
         for spectrum in spectra:
-            self._update_xps_dict_with_spectrum(spectrum, template_key_map)
+            self._update_xps_dict_with_spectrum(spectrum)
 
-    def _update_xps_dict_with_spectrum(
-        self, spectrum: Dict[str, Any], key_map: Dict[str, List[str]]
-    ):
+    def _update_xps_dict_with_spectrum(self, spectrum: Dict[str, Any]):
         """
         Map one spectrum from raw data to NXmpes-ready dict.
 
@@ -202,51 +177,30 @@ class XyMapperSpecs(XPSMapper):
         entry = construct_entry_name(entry_parts)
         entry_parent = f"/ENTRY[{entry}]"
 
-        file_parent = f"{entry_parent}/file_info"
-        instrument_parent = f"{entry_parent}/instrument"
-        analyzer_parent = f"{instrument_parent}/analyzer"
+        for key, value in spectrum.items():
+            mpes_key = f"{entry_parent}/{key}"
+            if "units" in key:
+                if isinstance(value, dict):
+                    value = {k: convert_units(v) for k, v in value.items()}
+                else:
+                    value = convert_units(value)
+            self._xps_dict[mpes_key] = value
+            units = convert_units(get_units_for_key(key, UNITS))
+            if units is not None:
+                self._xps_dict[f"{mpes_key}/@units"] = units
 
-        path_map = {
-            "file_info": f"{file_parent}",
-            "user": f"{entry_parent}/user",
-            "instrument": f"{instrument_parent}",
-            "source_xray": f"{instrument_parent}/source_xray",
-            "beam_xray": f"{instrument_parent}/beam_xray",
-            "analyzer": f"{analyzer_parent}",
-            "collectioncolumn": f"{analyzer_parent}/collectioncolumn",
-            "energydispersion": f"{analyzer_parent}/energydispersion",
-            "detector": f"{analyzer_parent}/detector",
-            "manipulator": f"{instrument_parent}/manipulator",
-            "calibration": f"{instrument_parent}/calibration",
-            "sample": f"{entry_parent}/sample",
-            "data": f"{entry_parent}/data",
-            "region": f"{entry_parent}/region",
-        }
-
-        for grouping, spectrum_keys in key_map.items():
-            root = path_map[str(grouping)]
-            for spectrum_key in spectrum_keys:
-                try:
-                    mpes_key = spectrum_key
-                    self._xps_dict[f"{root}/{mpes_key}"] = spectrum[spectrum_key]
-                except KeyError:
-                    pass
-
-                unit_key = f"{grouping}/{spectrum_key}"
-                units = self._get_units_for_key(unit_key)
-                if units:
-                    self._xps_dict[f"{root}/{mpes_key}/@units"] = units
+        data = spectrum["data"]
 
         if self.parser.export_settings["Transmission Function"]:
-            path = f"{path_map['collectioncolumn']}/transmission_function"
-            self._xps_dict[path] = spectrum["data"]["transmission_function"]
-            self._xps_dict[f"{path}/units"] = spectrum["tf_units"]
+            self._xps_dict["transmission_function"] = data["transmission"]
+            self._xps_dict["transmission_function/units"] = "counts_per_second"
 
         # Create key for writing to data.
         scan_key = construct_data_key(spectrum)
 
-        energy = np.array(spectrum["data"]["x"])
-        intensity = np.array(spectrum["data"]["y"])
+        x_axis_name, x_axis = list(data.items())[0]
+        y_axis_name, intensity = list(data.items())[1]
+        x_axis, intensity = np.array(x_axis), np.array(intensity)
 
         if entry not in self._xps_dict["data"]:
             self._xps_dict["data"][entry] = xr.Dataset()
@@ -286,13 +240,13 @@ class XyMapperSpecs(XPSMapper):
         # Write averaged cycle data to 'data'.
         self._xps_dict["data"][entry][scan_key.split("_")[0]] = xr.DataArray(
             data=averaged_scans,
-            coords={"energy": energy},
+            coords={x_axis_name: x_axis},
         )
 
         # Write average cycle data to '_scan'.
         self._xps_dict["data"][entry][scan_key] = xr.DataArray(
             data=averaged_channels,
-            coords={"energy": energy},
+            coords={x_axis_name: x_axis},
         )
 
         if (
@@ -302,8 +256,23 @@ class XyMapperSpecs(XPSMapper):
             # Write channel data to '_chan'.
             channel_no = spectrum["channel_no"]
             self._xps_dict["data"][entry][f"{scan_key}_chan{channel_no}"] = (
-                xr.DataArray(data=intensity, coords={"energy": energy})
+                xr.DataArray(
+                    data=intensity,
+                    coords={x_axis_name: x_axis},
+                )
             )
+
+        if self.parser.export_settings["External Channel Data"]:
+            self._xps_dict[f"{entry_parent}/aux_signals"] = []
+            for ext_channel, channel_data in list(spectrum["data"].items()):
+                if ext_channel not in [x_axis_name, y_axis_name, "transmission"]:
+                    self._xps_dict[f"{entry_parent}/external_{ext_channel}"] = (
+                        channel_data
+                    )
+                    self._xps_dict[f"{entry_parent}/external_{ext_channel}/@units"] = (
+                        spectrum["channel_units"].get(ext_channel)
+                    )
+                    self._xps_dict[f"{entry_parent}/aux_signals"] += [ext_channel]
 
     def _get_units_for_key(self, unit_key: str):
         """
@@ -488,10 +457,9 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
             group_settings = re_map_keys(group_settings, SETTINGS_MAP)
             group_settings = re_map_values(group_settings, VALUE_MAP)
 
-            groups[name] = {
-                "group_settings": group_settings,
-            }
-            groups[name].update(self._handle_regions(group_data))
+            group = self._handle_regions(group_data)
+            group["group_settings"] = group_settings
+            groups[name] = group
 
         return groups
 
@@ -532,14 +500,20 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
                     region_data = region_data[i:]
                     break
                 setting_name = setting.split(self.prefix)[-1].strip().split(":")[0]
-                val = setting.split(self.prefix)[-1].strip().split(":")[1].strip()
-                region_settings[setting_name] = val
+
+                parts = setting.split(self.prefix)[-1].strip().split(":")
+
+                try:
+                    region_settings[setting_name] = parts[1].strip()
+                except IndexError:
+                    pass
 
             region_settings = re_map_keys(region_settings, SETTINGS_MAP)
             region_settings = re_map_values(region_settings, VALUE_MAP)
 
-            regions[name] = {"region_settings": region_settings}
-            regions[name].update(self._handle_cycles(region_data))
+            region = self._handle_cycles(region_data)
+            region["region_settings"] = region_settings
+            regions[name] = region
 
         return regions
 
@@ -584,11 +558,10 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
             cycle_settings = re_map_keys(cycle_settings, SETTINGS_MAP)
             cycle_settings = re_map_values(cycle_settings, VALUE_MAP)
 
-            cycles[name] = {
-                "cycle_settings": cycle_settings,
-            }
+            cycle = self._handle_individual_cycles(cycle_data)
+            cycle["cycle_settings"] = cycle_settings
 
-            cycles[name].update(self._handle_individual_cycles(cycle_data))
+            cycles[name] = cycle
 
         return cycles
 
@@ -653,7 +626,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
         """
         Separate the data list of an individual scan into a
         dictionary, with each element containing the data and
-        metadata of one spectrum.
+        metadata of one spectrum. External channels are handled as well
 
         Parameters
         scan_data : list
@@ -670,58 +643,136 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
                 }
 
         """
-        energy = []
-        intensity = []
-        transmission_function = []
+
+        def _normalize_ext_channel_label(label: str) -> Tuple[str, Optional[str]]:
+            """
+            Normalize a label by converting the main part to snake_case and separating the unit.
+
+            - Converts PascalCase or CamelCase to snake_case.
+            - Preserves a single trailing capital letter (e.g., 'D' or 'L') without inserting an underscore.
+            - Extracts and standardizes the unit (e.g., converts 's-1' to '1/s').
+            - Extracts context from parentheses and appends it to the name in snake_case.
+
+            Args:
+                label (str): Raw input label, e.g., 'Beam_SplitterD [A]'.
+
+            Returns:
+                tuple: (normalized_label: str, unit: Optional[str])
+
+            Examples:
+                >>> _normalize_ext_channel_label("Beam_SplitterD [A]")
+                ('beam_splitterD', 'A')
+
+                >>> _normalize_ext_channel_label("Photo_count_ext [s-1]")
+                ('photo_count_ext', '1/s')
+
+                >>> _normalize_ext_channel_label("Excitation Energy [eV] (Monochromator)")
+                ('excitation_energy_monochromator', 'eV')
+
+                >>> _normalize_ext_channel_label("Ring Current [mA] (Monochromator)")
+                ('ring_current_monochromator', 'mA')
+
+                >>> _normalize_ext_channel_label("energy")
+                ('energy', None)
+            """
+            label = label.strip()
+
+            # Extract context in parentheses
+            context = ""
+            paren_match = re.search(r"\(([^)]+)\)", label)
+            if paren_match:
+                context = paren_match.group(1).strip()
+                label = re.sub(r"\s*\([^)]*\)", "", label)
+
+            # Extract unit in square brackets
+            unit = None
+            bracket_match = re.search(r"\[([^\]]+)\]", label)
+            if bracket_match:
+                unit = bracket_match.group(1).strip()
+                label = re.sub(r"\s*\[[^\]]*\]", "", label)
+                unit = convert_units(unit)
+
+            # Preserve trailing uppercase letter (e.g., D or L)
+            trailing_upper = ""
+            if label and label[-1].isupper():
+                trailing_upper = label[-1]
+                label = label[:-1]
+
+            # Convert label to snake_case
+            name = re.sub(
+                r"(?<!^)(?<!_)([A-Z])", r"_\1", label.replace(" ", "_")
+            ).lower()
+
+            if trailing_upper:
+                name += trailing_upper  # Append preserved trailing capital
+
+            if context:
+                name += f"_{context.lower()}"
+
+            return name, unit
+
         scan_settings = {}
+        data_channels: OrderedDict[str, list[float]] = OrderedDict()
+        channel_units: OrderedDict[str, str] = OrderedDict()
+
+        in_remote_channel = False
+
+        if self.export_settings["External Channel Data"]:
+            remote_ch_pattern_str = rf"{re.escape(self.prefix)} External Channel Data Cycle: \d+,\s*(.+?)\s*\(Remote Out Device\)"
+            remote_ch_pattern = re.compile(remote_ch_pattern_str, re.IGNORECASE)
 
         for line in scan_data:
-            if line.startswith(self.prefix) and line.strip(self.prefix).strip("\n"):
+            if match := remote_ch_pattern.search(line):
+                in_remote_channel = True
+                channel = _normalize_ext_channel_label(match.group(1))[0]
+
+            if line.startswith(self.prefix) and line.strip(self.prefix).strip():
                 key, val = [
                     item.strip()
-                    for item in line.strip(self.prefix).strip("\n").split(":", 1)
+                    for item in line.strip(self.prefix).strip().split(":", 1)
                 ]
                 if key == "Acquisition Date":
                     scan_settings[key] = self._parse_datetime(val)
 
                 if key == "ColumnLabels":
-                    if not self.export_settings["Transmission Function"]:
-                        x_units, y_units = val.split(" ")
-                        if x_units == "energy":
-                            x_units = "binding"
-                        scan_settings["x_units"] = x_units
-                        scan_settings["y_units"] = convert_units(y_units)
-
+                    if in_remote_channel:
+                        column_labels = val.strip().split(" ", 1)
+                        column_labels = [
+                            label.split("(Remote Out Device)", 1)[0].strip()
+                            for label in column_labels
+                        ]
                     else:
-                        x_units, y_units, tf_units = val.split(" ")
-                        scan_settings["x_units"] = x_units
-                        scan_settings["y_units"] = convert_units(y_units)
-                        scan_settings["tf_units"] = tf_units
+                        column_labels = val.strip().split(" ")
+                    normalized_labels_and_units = [
+                        _normalize_ext_channel_label(label) for label in column_labels
+                    ]
 
-            if not line.startswith(self.prefix) and line.strip("\n"):
-                data = line.strip("\n").split(" ")
-                data = [d for d in data if d]
-                energy.append(float(data[0]))
-                intensity.append(float(data[1]))
-                if self.export_settings["Transmission Function"]:
-                    transmission_function.append(float(data[2]))
+                    for i, (label, unit) in enumerate(normalized_labels_and_units):
+                        if not (in_remote_channel and i == 0):
+                            data_channels[label] = []
+                            if unit:
+                                channel_units[label] = unit
 
-        if check_uniform_step_width(energy):
-            scan_settings["step_size"] = get_minimal_step(energy)
+            elif not line.startswith(self.prefix) and line.strip():
+                values = [float(v) for v in line.strip().split()]
+                for i, (channel_label_and_unit, v) in enumerate(
+                    zip(normalized_labels_and_units, values)
+                ):
+                    label = channel_label_and_unit[0]
+                    if not (in_remote_channel and i == 0):
+                        data_channels[label].append(v)
 
+        energy_axis = data_channels.get("energy")
+
+        if energy_axis and check_uniform_step_width(energy_axis):
+            scan_settings["step_size"] = get_minimal_step(energy_axis)
         scan_settings = re_map_keys(scan_settings, SETTINGS_MAP)
         scan_settings = re_map_values(scan_settings, VALUE_MAP)
 
-        scan: Dict[str, Any] = {
-            "data": {
-                "x": np.array(energy),
-                "y": np.array(intensity),
-            },
-            "scan_settings": scan_settings,
-        }
-
-        if self.export_settings["Transmission Function"]:
-            scan["data"]["transmission_function"] = np.array(transmission_function)
+        scan: OrderedDict[str, dict[str, Any]] = OrderedDict()
+        scan["data"] = data_channels
+        scan["channel_units"] = channel_units
+        scan["scan_settings"] = scan_settings
 
         return scan
 
@@ -804,13 +855,13 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
 
         for group in data_dict.values():
             group_settings = group["group_settings"]
-            for region in list(group.values())[1:]:
+            for region in list(group.values())[:1]:
                 region_settings = region["region_settings"]
-                for cycle in list(region.values())[1:]:
+                for cycle in list(region.values())[:1]:
                     cycle_settings = cycle["cycle_settings"]
-                    for scan in list(cycle.values())[1:]:
+                    for scan in list(cycle.values())[:1]:
                         scan_settings = scan["scan_settings"]
-                        spectrum = {}
+                        spectrum: Dict[str, Any] = {"data": {}}
                         for settings in [
                             group_settings,
                             region_settings,
@@ -818,7 +869,9 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
                             scan_settings,
                         ]:
                             spectrum.update(settings)
-                        spectrum["data"] = scan["data"]
+                        for key, val in scan.items():
+                            if key != "scan_settings":
+                                spectrum[key] = val
                         spectra.append(spectrum)
 
         return spectra
@@ -831,8 +884,9 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
         Parameters
         ----------
         date : str
-            String representation of the date in the format
-            "%m/%d/%y %H:%M:%S".
+            String representation of the date, in of these formats:
+            "%m/%d/%y %H:%M:%S",
+            "%m-%d-%y %H:%M:%S".
 
         Returns
         -------
@@ -840,15 +894,13 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
             Datetime in datetime.datetime format.
 
         """
+        # 2025-04-17 13:06:40 UTC
         if date.find("UTC"):
             date = date[: date.find("UTC")].strip()
-            tz = datetime.timezone.utc
+            tzinfo = datetime.timezone.utc
         else:
             date = date.strip()
-            tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo  # type: ignore[assignment]
+            tzinfo = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo  # type: ignore[assignment]
 
-        date_object = datetime.datetime.strptime(date, "%m/%d/%y %H:%M:%S").replace(
-            tzinfo=tz
-        )
-
-        return date_object.isoformat()
+        possible_date_formats = ["%m/%d/%y %H:%M:%S", "%Y-%m-%d %H:%M:%S"]
+        return parse_datetime(date, possible_date_formats, tzinfo)

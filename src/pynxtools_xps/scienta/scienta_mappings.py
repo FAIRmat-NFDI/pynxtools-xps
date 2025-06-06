@@ -156,15 +156,15 @@ VALUE_MAP = {
 }
 
 UNITS: dict = {
-    "energydispersion/pass_energy": "eV",
-    "beam_xray/excitation_energy": "eV",
-    "region/energy_axis": "eV",
-    "region/center_energy": "eV",
-    "region/start_energy": "eV",
-    "region/stop_energy": "eV",
-    "region/step_size": "eV",
-    "detector/dwell_time": "eV",
-    "region/time_per_spectrum_channel": "s",
+    "pass_energy": "eV",
+    "excitation_energy": "eV",
+    "energy_axis": "eV",
+    "center_energy": "eV",
+    "start_energy": "eV",
+    "stop_energy": "eV",
+    "step_size": "eV",
+    "dwell_time": "s",
+    "time_per_spectrum_channel": "s",
 }
 
 

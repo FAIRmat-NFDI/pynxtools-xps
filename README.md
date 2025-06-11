@@ -6,7 +6,8 @@
 ![](https://img.shields.io/pypi/l/pynxtools-xps)
 ![](https://img.shields.io/pypi/v/pynxtools-xps)
 ![](https://coveralls.io/repos/github/FAIRmat-NFDI/pynxtools-xps/badge.svg?branch=main)
-<!-- [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1323437.svg)]() -->
+[![DOI](https://zenodo.org/badge/759916501.svg)](https://doi.org/10.5281/zenodo.13951684)
+
 
 # A reader for XPS data
 
@@ -35,3 +36,6 @@ Extensive documentation of this pynxtools plugin is available [here](https://fai
 
 ## Contact person in FAIRmat for this reader
 Lukas Pielsticker
+
+## How to cite this work
+Pielsticker, L., Mozumder, R., Dobener, F., Hetaba, W., Rettig, L., & Brockhauser, S. (2025). pynxtools-xps: A pynxtools reader plugin for X-ray photoelectron spectroscopy (XPS) data. Zenodo. https://doi.org/10.5281/zenodo.13951684

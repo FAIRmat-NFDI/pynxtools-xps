@@ -40,6 +40,7 @@ from pynxtools_xps.reader_utils import (
     _re_map_single_value,
     construct_data_key,
     construct_entry_name,
+    convert_pascal_to_snake,
 )
 from pynxtools_xps.value_mappers import (
     get_units_for_key,
@@ -158,16 +159,22 @@ class MapperScienta(XPSMapper):
         entry_parent = f"/ENTRY[{entry}]"
 
         for key, value in spectrum.items():
+            if isinstance(value, dict):
+                continue
             if key.startswith("entry"):
                 entry_parent = f"/ENTRY[entry]"
                 key = key.replace("entry/", "", 1)
             mpes_key = f"{entry_parent}/{key}"
-            if "units" in key:
-                value = convert_units(value)
             self._xps_dict[mpes_key] = value
-            units = convert_units(get_units_for_key(key, UNITS))            
+            units = convert_units(get_units_for_key(key, UNITS))
             if units is not None:
                 self._xps_dict[f"{mpes_key}/@units"] = units
+
+        axis_units = spectrum.get("units")
+        if axis_units:
+            for axis_name, unit in axis_units.items():
+                unit_key = f"{entry_parent}/{axis_name}/@units"
+                self._xps_dict[unit_key] = convert_units(unit)
 
         # Create key for writing to data
         scan_key = construct_data_key(spectrum)
@@ -388,6 +395,7 @@ class ScientaTxtParser:
         region.validate_types()
 
         region_dict = {**self.header.dict(), **region.dict()}
+        region_dict["energy/@units"] = "eV"
         region_dict["intensity/@units"] = "counts_per_second"
 
         region_dict["axis_labels"] = ["energy"]
@@ -445,7 +453,7 @@ class ScientaIgorParser(ABC):
         spectrum["units"] = cast(Dict[str, Any], {})
 
         for i, (dim, unit) in enumerate(axes_labels_with_units):
-            if dim in ("Kinetic Energy", "Binding Energy", "Analyser Energy"):
+            if dim in ("kinetic_energy", "binding_energy", "analyser_energy"):
                 spectrum["energy_scale"] = convert_energy_type(dim)
                 dim = "energy"
             spectrum["data"][dim] = self.axis_for_dim(wave_header, dim=i)
@@ -504,10 +512,13 @@ class ScientaIgorParser(ABC):
 
         if matches:
             # Process each match into a tuple of (label, unit)
-            return [(label.strip(), unit.strip()) for label, unit in matches]
+            return [
+                (convert_pascal_to_snake(label.strip()), unit.strip())
+                for label, unit in matches
+            ]
 
         # If no matches, return the entire string as a label with no unit
-        return [(unit.strip(), None)]
+        return [(convert_pascal_to_snake(unit.strip()), None)]
 
     def axis_for_dim(self, wave_header: Dict[str, Any], dim: int) -> np.ndarray:
         """

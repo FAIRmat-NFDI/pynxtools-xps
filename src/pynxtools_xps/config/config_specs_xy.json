@@ -251,7 +251,7 @@
     "FIELDNAME_errors[data_errors]":"@data:errors",
     "data/@units":"counts_per_second",
     "DATA[*]":"@data:*.external",
-    "DATA[*]/@units":"@data:*.external_units",
+    "DATA[*]/@units":"@data:*.external_unit",
     "energy":"@data:energy",
     "energy/@type":"['@attrs:x_units', 'kinetic']",
     "energy/@units":"eV",

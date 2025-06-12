@@ -27,7 +27,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, Pattern, Callable
 
 import numpy as np
 from pynxtools.dataconverter.helpers import extract_atom_types
@@ -672,10 +672,11 @@ class XPSReader(MultiFormatReader):
         """
         Returns the dimensions of the data from the given path.
         """
+        entry = self.callbacks.entry_name
+        escaped_entry = re.escape(entry)
+        xr_data = self.xps_data["data"].get(entry)
 
         def get_signals(key: str) -> List[str]:
-            xr_data = self.xps_data["data"].get(f"{self.callbacks.entry_name}")
-
             if key == "scans":
                 data_vars = _get_scan_vars(xr_data.data_vars)
             elif key == "channels":
@@ -690,11 +691,7 @@ class XPSReader(MultiFormatReader):
             return list(map(str, data_vars))
 
         def get_all_keys(template_key: str) -> List[str]:
-            escaped_entry_name = re.escape(self.callbacks.entry_name)
-
-            pattern = re.compile(
-                rf"^/ENTRY\[{escaped_entry_name}]/{template_key}([^/]+)"
-            )
+            pattern = re.compile(rf"^/ENTRY\[{escaped_entry}]/{template_key}([^/]+)")
 
             keys = {
                 match.group(1)
@@ -704,111 +701,135 @@ class XPSReader(MultiFormatReader):
 
             return sorted(keys)
 
-        if isinstance(path, str) and path.endswith(("*.external", "*.external_units")):
+        if isinstance(path, str) and path.endswith(("*.external", "*.external_unit")):
             data_func = lambda: get_all_keys("external_")
         else:
-            data_func = lambda: get_signals(path.split(":*.")[-1])
+            if path.endswith(".unit"):
+                data_func = lambda: [name for name in xr_data.coords]
+            else:
+                data_func = lambda: get_signals(path.split(":*.")[-1])
 
-        patterns: Dict[str, Any] = {
-            "peak": lambda: get_all_keys("component"),
-            "background": lambda: get_all_keys("region"),
-            # r"DATA\[data]/DATA\[[^\]]+\](?:/@units)?": data_func,
-            r"DATA\[data]/DATA|AXISNAME\[[^\]]+\]": data_func,
-            r"ELECTRON_DETECTOR\[[a-zA-Z0-9_]+\]/raw_data": lambda: get_signals(
-                "channels"
-            ),
+        PatternHandler = Dict[Pattern[str], Callable[[], Any]]
+
+        patterns: dict[re.Pattern, Callable[[], Any]] = {
+            re.compile(r"peak"): lambda: get_all_keys("component"),
+            re.compile(r"background"): lambda: get_all_keys("region"),
+            re.compile(
+                r"DATA\[[^\]]+\]/(?:DATA\[[^\]]+\]|AXISNAME\[[^\]]+\])(?:/@units)?"
+            ): data_func,
+            re.compile(
+                r"ELECTRON_DETECTOR\[[a-zA-Z0-9_]+\]/raw_data"
+            ): lambda: get_signals("channels"),
         }
 
-        for pattern, func in patterns.items():
-            if re.search(pattern, key):
-                return func()
+        # Function to match and return the handler result
+        for pattern, handler in patterns.items():
+            if pattern.search(key):
+                return handler()
 
         return get_signals(key="scans")
 
-    def get_data(self, key: str, path: str) -> Any:
+    def _search_first(self, data: dict[str, Any], pattern: re.Pattern) -> Optional[Any]:
         """
-        Returns data for a given key.
-        Can either return averaged, scan, or channel data.
-        Should return None if the path does not exist.
-        """
-        xr_data = self.xps_data["data"].get(f"{self.callbacks.entry_name}")
+        Search for the first value in a dictionary whose key matches a regex pattern.
 
+        Parameters:
+            data (dict[str, Any]): The dictionary to search.
+            pattern (re.Pattern): The compiled regex pattern to search for in keys.
+
+        Returns:
+            The first matching value, or None if no match is found.
+        """
+        for key, value in data.items():
+            if pattern.search(key):
+                return value
+        return None
+
+    def get_data(self, key: str, path: str) -> Optional[Any]:
+        """
+        Retrieve XPS data based on a key and a path string. The method supports multiple
+        forms of data access, such as averages, raw data, axis values, units, and external links.
+
+        Parameters:
+            key (str): The key under which the data is stored (unused in current logic).
+            path (str): A string path that determines what type of data to return.
+
+        Returns:
+            Any: The requested data, or None if the path is invalid or not found.
+        """
+        entry = self.callbacks.entry_name
+        escaped_entry = re.escape(entry)
+        xr_data = self.xps_data["data"].get(entry)
+
+        # Average or errors
         if path.startswith(("average", "errors")):
-            data = (
-                [xr_data[x_arr].data for x_arr in _get_scan_vars(xr_data.data_vars)],
-            )
+            data = [xr_data[var].data for var in _get_scan_vars(xr_data.data_vars)]
             if path.endswith("reduced"):
-                data = [np.sum(d_arr, axis=2) for d_arr in data]
-            if path.startswith("average"):
-                return np.mean(data, axis=0)
-            elif path.startswith("errors"):
-                return np.mean(data, axis=0)
+                try:
+                    data = [np.sum(arr, axis=tuple(range(1, arr.ndim))) for arr in data]
+                except np.AxisError:
+                    return None
+            stats_func = np.mean if path.startswith("average") else np.std
+            return stats_func(data, axis=0)
 
-        elif path.endswith("raw_data"):
-            data_vars = _get_channel_vars(xr_data.data_vars)
-
-            if not data_vars:
-                # If there is no channel data, use scan data.
-                data_vars = _get_scan_vars(xr_data.data_vars)
-
-            # Skip average cycle data
+        # Raw data
+        if path.endswith("raw_data"):
+            data_vars = _get_channel_vars(xr_data.data_vars) or _get_scan_vars(
+                xr_data.data_vars
+            )
             return np.array(
-                [
-                    xr_data[data_var].data
-                    for data_var in data_vars
-                    if SCAN_COUNT in data_var
-                ]
+                [xr_data[var].data for var in data_vars if SCAN_COUNT in var]
             )
 
-        elif path.endswith("scans"):
-            return np.array(xr_data[path.split(".scans")[0]])
+        # Channels or scans by suffix
+        for suffix, extractor in {
+            ".scans": lambda name: xr_data.get(name),
+            ".channels": lambda name: xr_data.get(name),
+        }.items():
+            if path.endswith(suffix):
+                name = path.split(suffix)[0]
+                data = extractor(name)
+                return np.array(data) if data is not None else None
 
-        elif path.endswith("channels"):
-            return np.array(xr_data[path.split(".channels")[0]])
+        # Axis or coordinate data
+        if path.endswith(".axes"):
+            axis = path.split(".axes")[0]
+            coord = xr_data.coords.get(axis)
+            return np.array(coord.values) if coord is not None else None
 
-        elif path.endswith((".external", "external_units")):
-            channel_name = path.split(".external")[0]
-            escaped_entry_name = re.escape(self.callbacks.entry_name)
+        # Units for internal channels
+        if path.endswith(".unit"):
+            channel = path.split(".unit")[0]
+            pattern = re.compile(
+                rf"^/ENTRY\[{escaped_entry}]/{re.escape(channel)}/@units"
+            )
+            return self._search_first(self.xps_data, pattern)
 
-            if path.endswith("_units"):
+        # External channels and units
+        if path.endswith((".external", ".external_unit")):
+            channel = path.split(".external")[0]
+            if path.endswith("_unit"):
                 pattern = re.compile(
-                    rf"^/ENTRY\[{escaped_entry_name}]/external_{re.escape(channel_name)}/@units"
+                    rf"^/ENTRY\[{escaped_entry}]/external_{re.escape(channel)}/@units"
                 )
-
-                return [
-                    value
-                    for key, value in self.xps_data.items()
-                    if (match := pattern.search(key))
-                ][0]
-
+                return self._search_first(self.xps_data, pattern)
             else:
                 pattern = re.compile(
-                    rf"^/ENTRY\[{escaped_entry_name}]/external_{re.escape(channel_name)}$"
+                    rf"^/ENTRY\[{escaped_entry}]/external_{re.escape(channel)}$"
                 )
-                return np.array(
-                    [
-                        value
-                        for key, value in self.xps_data.items()
-                        if (match := pattern.search(key))
-                    ]
-                ).squeeze()
-        elif path.endswith("axes"):
-            return np.array(xr_data.coords[path.split(".axes")[0]].values)
+                matches = [
+                    value for key, value in self.xps_data.items() if pattern.search(key)
+                ]
+                return np.array(matches).squeeze() if matches else None
 
-        elif "energy" in path:
+        # Default: try direct data access
+        try:
+            return xr_data[path]
+        except KeyError:
             try:
-                return np.array(xr_data.coords["energy"].values)
+                return np.array(xr_data.coords[path].values)
             except KeyError:
                 return None
-
-        else:
-            try:
-                return xr_data[path]
-            except KeyError:
-                try:
-                    return np.array(xr_data.coords[path].values)
-                except KeyError:
-                    return None
 
     def set_nxdata_defaults(self, template):
         """Set the default for automatic plotting."""

@@ -65,7 +65,7 @@ from pynxtools_xps.value_mappers import convert_units, get_units_for_key
 logger = logging.getLogger(__name__)
 
 
-def flatten_dict(
+def _flatten_dict(
     d: Dict[str, Any], parent_key: str = "", sep: str = "/"
 ) -> Dict[str, Any]:
     """
@@ -79,11 +79,11 @@ def flatten_dict(
     Returns:
         Dict[str, Any]: The flattened dictionary.
     """
-    items = []
+    items: List[Any] = []
     for k, v in d.items():
         new_key = f"{parent_key}{sep}{k}" if parent_key else k
         if isinstance(v, dict):
-            items.extend(flatten_dict(v, new_key, sep=sep).items())
+            items.extend(_flatten_dict(v, new_key, sep=sep).items())
         else:
             items.append((new_key, v))
     return dict(items)
@@ -387,14 +387,16 @@ class ScientaTxtParser:
                     # First line
                     pass
 
-        region.data = {"energy": np.array(energies), "intensity": np.array(intensities)}
-
         # Convert date and time to ISO8601 date time.
         region.time_stamp = _construct_date_time(region.start_date, region.start_time)
 
         region.validate_types()
 
         region_dict = {**self.header.dict(), **region.dict()}
+        region_dict["data"] = {
+            "energy": np.array(energies),
+            "intensity": np.array(intensities),
+        }
         region_dict["energy/@units"] = "eV"
         region_dict["intensity/@units"] = "counts_per_second"
 
@@ -671,7 +673,7 @@ class ScientaIgorParserPEAK(ScientaIgorParser):
     ) -> Dict[str, Any]:
         region: Dict[str, Any] = {}
         region["region_id"] = region_id
-        region.update(flatten_dict(notes))
+        region.update(_flatten_dict(notes))
         region["timestamp"] = _construct_date_time(region["Date"], region["Time"])
 
         return region

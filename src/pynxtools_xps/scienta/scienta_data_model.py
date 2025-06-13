@@ -67,4 +67,141 @@ class ScientaRegion(XpsDataclass):
     time_stamp: str = ""
     time_per_spectrum_channel: float = 0.0
     detector_mode: str = ""
-    data: dict = field(default_factory=dict)
+
+
+"""
+jsonschema data model for data from the Scienta PEAK software.
+"""
+scienta_igor_peak_schema = {
+    "type": "object",
+    "properties": {
+        "Version": {"type": ["integer", "null"]},
+        "Name": {"type": ["string", "null"]},
+        "ElementSet": {"type": ["string", "null"]},
+        "ImageSource": {"type": ["string", "null"]},
+        "ImageDetector": {"type": ["string", "null"]},
+        "LensMode": {"type": ["string", "null"]},
+        "AcquisitionMode": {"type": ["string", "null"]},
+        "PassEnergy": {"type": ["number", "null"]},
+        "Date": {"type": ["string", "null"], "format": "date"},
+        "Time": {"type": ["string", "null"], "format": "time"},
+        "Duration": {"type": ["number", "null"]},
+        "AcquisitionLoopCount": {"type": ["integer", "null"]},
+        "Instrument": {"type": ["string", "null"]},
+        "AnalyserModel": {"type": ["string", "null"]},
+        "Location": {"type": ["string", "null"]},
+        "SerialNumber": {"type": ["string", "null"]},
+        "AnalyserRadius": {"type": ["number", "null"]},
+        "AnalysedParticle": {"type": ["string", "null"]},
+        "AnalyserWorkFunction": {"type": ["number", "null"]},
+        "SpectrumVersion": {"type": ["integer", "null"]},
+        "AcquisitionStatus": {"type": ["string", "null"]},
+        "TotalAcquisitionTime": {"type": ["number", "null"]},
+        "DwellTime": {"type": ["number", "null"]},
+        "IsSweep": {"type": ["boolean", "null"]},
+        "EnergyConversion": {
+            "type": "object",
+            "properties": {
+                "UseAnalyserWorkFunction": {"type": ["boolean", "null"]},
+                "UseSampleWorkFunction": {"type": ["boolean", "null"]},
+                "UseSampleBias": {"type": ["boolean", "null"]},
+                "AnalyserMode": {"type": ["string", "null"]},
+            },
+        },
+        "EnergyMode": {"type": ["string", "null"]},
+        "ConstantParameters": {"type": ["object", "null"]},
+        "Slit": {
+            "type": "object",
+            "properties": {
+                "Id": {"type": ["string", "null"]},
+                "Name": {"type": ["string", "null"]},
+                "SlitType": {"type": ["string", "null"]},
+                "Width": {"type": ["number", "null"]},
+                "Length": {"type": ["number", "null"]},
+                "Radius": {"type": ["number", "null"]},
+                "IsCentered": {"type": ["boolean", "null"]},
+                "HasBadQuality": {"type": ["boolean", "null"]},
+                "HasAperture": {"type": ["boolean", "null"]},
+                "KnobPosition": {"type": ["integer", "null"]},
+                "MotorizedPosition": {"type": ["integer", "null"]},
+                "MotorizedPositionTolerance": {"type": ["number", "null"]},
+            },
+        },
+        "Sample": {
+            "type": "object",
+            "properties": {
+                "Name": {"type": ["string", "null"]},
+                "Description": {"type": ["string", "null"]},
+                "Temperature": {"type": ["number", "null"]},
+                "Compound": {"type": ["string", "null"]},
+                "Environment": {"type": ["string", "null"]},
+                "WorkFunction": {"type": ["number", "null"]},
+                "Bias": {"type": ["number", "null"]},
+            },
+        },
+        "ExcitationSource": {
+            "type": "object",
+            "properties": {
+                "ExcitationSourceServerInformation": {"type": ["string", "null"]},
+                "ExcitationSourcePreset": {
+                    "type": "object",
+                    "properties": {
+                        "Id": {"type": ["string", "null"]},
+                        "Name": {"type": ["string", "null"]},
+                        "Description": {"type": ["string", "null"]},
+                        "TargetEnergy": {"type": ["number", "null"]},
+                        "SourceType": {"type": ["string", "null"]},
+                    },
+                },
+                "ExcitationSourceEnergyInformation": {
+                    "type": "object",
+                    "properties": {
+                        "SourceType": {"type": ["string", "null"]},
+                        "Energy": {"type": ["number", "null"]},
+                        "TargetEnergy": {"type": ["number", "null"]},
+                        "EnergyStatus": {"type": ["string", "null"]},
+                        "EnergyStatusMessage": {"type": ["string", "null"]},
+                    },
+                },
+                "ExcitationSourceServerStatusInformation": {"type": ["string", "null"]},
+            },
+        },
+        "FixedAxes": {
+            "type": "object",
+            "patternProperties": {
+                "^[XYZ]$": {
+                    "type": "object",
+                    "properties": {
+                        "Center": {"type": ["number", "null"]},
+                        "Binning": {"type": ["integer", "null"]},
+                        "Name": {"type": ["string", "null"]},
+                        "Unit": {"type": ["string", "null"]},
+                    },
+                }
+            },
+            "additionalProperties": True,
+        },
+        "SweepAxes": {
+            "type": "object",
+            "properties": {
+                "X": {
+                    "type": "object",
+                    "properties": {
+                        "Offset": {"type": ["number", "null"]},
+                        "Delta": {"type": ["number", "null"]},
+                        "Count": {"type": ["integer", "null"]},
+                        "AnalyserDelta": {"type": ["number", "null"]},
+                        "Name": {"type": ["string", "null"]},
+                        "Unit": {"type": ["string", "null"]},
+                    },
+                }
+            },
+        },
+        "UserName": {"type": ["string", "null"]},
+        "StorageName": {"type": ["string", "null"]},
+        "SequenceName": {"type": ["string", "null"]},
+        "SequenceCounter": {"type": ["integer", "null"]},
+        "SpectrumCounter": {"type": ["integer", "null"]},
+        "TimePerEnergyChannel": {"type": ["number", "null"]},
+    },
+}

@@ -79,7 +79,7 @@ def _flatten_dict(
     Returns:
         Dict[str, Any]: The flattened dictionary.
     """
-    items: List[Any] = []
+    items: List[Tuple[str, Any]] = []
     for k, v in d.items():
         new_key = f"{parent_key}{sep}{k}" if parent_key else k
         if isinstance(v, dict):
@@ -162,7 +162,6 @@ class MapperScienta(XPSMapper):
             if isinstance(value, dict):
                 continue
             if key.startswith("entry"):
-                entry_parent = f"/ENTRY[entry]"
                 key = key.replace("entry/", "", 1)
             mpes_key = f"{entry_parent}/{key}"
             self._xps_dict[mpes_key] = value
@@ -448,11 +447,12 @@ class ScientaIgorParser(ABC):
 
         self.no_of_regions = len(data.shape)
 
-        spectrum: Dict[str, Any] = {}
-        spectrum["data"] = cast(Dict[str, Any], {})
-        spectrum["axis_labels"] = cast(List[str], [])
-        spectrum["data_labels"] = cast(List[str], [])
-        spectrum["units"] = cast(Dict[str, Any], {})
+        spectrum: Dict[str, Any] = {
+            "data": cast(Dict[str, Any], {}),
+            "axis_labels": cast(List[str], []),
+            "data_labels": cast(List[str], []),
+            "units": cast(Dict[str, Any], {}),
+        }
 
         for i, (dim, unit) in enumerate(axes_labels_with_units):
             if dim in ("kinetic_energy", "binding_energy", "analyser_energy"):
@@ -510,9 +510,8 @@ class ScientaIgorParser(ABC):
 
         # Regex to match "Label [Unit]" patterns
         pattern = r"([\w\s]+?)\s*\[([\w\s.]+)\]"
-        matches = re.findall(pattern, unit)
 
-        if matches:
+        if matches := re.findall(pattern, unit):
             # Process each match into a tuple of (label, unit)
             return [
                 (convert_pascal_to_snake(label.strip()), unit.strip())
@@ -671,9 +670,10 @@ class ScientaIgorParserPEAK(ScientaIgorParser):
         region_id: int,
         notes: Dict[str, Any],
     ) -> Dict[str, Any]:
-        region: Dict[str, Any] = {}
-        region["region_id"] = region_id
-        region.update(_flatten_dict(notes))
-        region["timestamp"] = _construct_date_time(region["Date"], region["Time"])
+        region: Dict[str, Any] = {
+            "region_id": region_id,
+            "timestamp": _construct_date_time(region["Date"], region["Time"]),
+        }
+        region |= _flatten_dict(notes)
 
         return region

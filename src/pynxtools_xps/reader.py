@@ -693,18 +693,16 @@ class XPSReader(MultiFormatReader):
         def get_all_keys(template_key: str) -> List[str]:
             pattern = re.compile(rf"^/ENTRY\[{escaped_entry}]/{template_key}([^/]+)")
 
-            keys = {
-                match.group(1)
-                for key in self.xps_data
-                if (match := pattern.search(key))
-            }
+            keys = set(
+                match[1] for key in self.xps_data if (match := pattern.search(key))
+            )
 
             return sorted(keys)
 
         if isinstance(path, str) and path.endswith(("*.external", "*.external_unit")):
             data_func = lambda: get_all_keys("external_")
         else:
-            if path.endswith(".unit"):
+            if isinstance(path, str) and path.endswith(".unit"):
                 data_func = lambda: [name for name in xr_data.coords]
             else:
                 data_func = lambda: get_signals(path.split(":*.")[-1])
@@ -740,10 +738,7 @@ class XPSReader(MultiFormatReader):
         Returns:
             The first matching value, or None if no match is found.
         """
-        for key, value in data.items():
-            if pattern.search(key):
-                return value
-        return None
+        return next((value for key, value in data.items() if pattern.search(key)), None)
 
     def get_data(self, key: str, path: str) -> Optional[Any]:
         """
@@ -824,7 +819,7 @@ class XPSReader(MultiFormatReader):
 
         # Default: try direct data access
         try:
-            return xr_data[path]
+            return xr_data[path].values
         except KeyError:
             try:
                 return np.array(xr_data.coords[path].values)

@@ -29,9 +29,12 @@ ENERGY_TYPE_MAP = {
     "Binding": "binding",
     "Binding Energy": "binding",
     "binding energy": "binding",
+    "binding_energy": "binding",
     "Kinetic": "kinetic",
     "Kinetic Energy": "kinetic",
     "kinetic energy": "kinetic",
+    "kinetic_energy": "kinetic",
+    "Analyser Energy": "binding",
 }
 
 ENERGY_SCAN_MODE_MAP = {
@@ -65,7 +68,8 @@ BOOL_MAP = {
 }
 
 UNIT_MAP = {
-    "Counts": "counts_per_second",
+    "a.u.": "counts",
+    "Counts": "counts",
     "counts/s": "counts_per_second",
     "CPS": "counts_per_second",
     "u": "um",

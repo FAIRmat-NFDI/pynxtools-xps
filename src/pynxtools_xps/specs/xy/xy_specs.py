@@ -44,6 +44,7 @@ from pynxtools_xps.reader_utils import (
     convert_pascal_to_snake,
 )
 from pynxtools_xps.value_mappers import (
+    convert_energy_type,
     convert_measurement_method,
     convert_energy_scan_mode,
     convert_units,
@@ -83,6 +84,7 @@ SETTINGS_MAP: Dict[str, str] = {
     "Binding Energy": "start_energy",
     "Detector Voltage": "detector_voltage",
     "Eff. Workfunction": "work_function",
+    "Normalized By": "normalized_by",
     "Comment": "comments",
     "Spectrum ID": "spectrum_id",
     "Note": "note",
@@ -101,6 +103,7 @@ VALUE_MAP: Dict[str, Any] = {
     "curves_per_scan": int,
     "pass_energy": float,
     "spectrum_id": int,
+    "x_units": convert_energy_type,
 }
 
 UNITS: Dict[str, str] = {
@@ -420,8 +423,11 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
                 pass
             else:
                 setting = line.split(":", 1)[1].strip()
-                setting_bool = bool_map.get(setting)
+                setting_bool = bool_map.get(setting, setting)
                 export_settings[line.split(":", 1)[0].strip()] = setting_bool
+
+        export_settings = re_map_keys(export_settings, SETTINGS_MAP)
+        export_settings = re_map_values(export_settings, VALUE_MAP)
 
         return export_settings
 
@@ -872,6 +878,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
                         for key, val in scan.items():
                             if key != "scan_settings":
                                 spectrum[key] = val
+                        spectrum["x_units"] = self.export_settings["x_units"]
                         spectra.append(spectrum)
 
         return spectra

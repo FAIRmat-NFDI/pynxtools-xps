@@ -727,7 +727,7 @@ class XPSReader(MultiFormatReader):
 
         return get_signals(key="scans")
 
-    def _search_first(self, data: dict[str, Any], pattern: re.Pattern) -> Optional[Any]:
+    def _search_first(self, data: Dict[str, Any], pattern: re.Pattern) -> Optional[Any]:
         """
         Search for the first value in a dictionary whose key matches a regex pattern.
 

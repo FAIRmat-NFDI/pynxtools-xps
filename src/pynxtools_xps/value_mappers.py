@@ -35,6 +35,7 @@ ENERGY_TYPE_MAP: Dict[str, str] = {
     "kinetic energy": "kinetic",
     "kinetic_energy": "kinetic",
     "Analyser Energy": "binding",
+    "analyser_energy": "binding",
 }
 
 ENERGY_SCAN_MODE_MAP: Dict[str, str] = {
@@ -58,7 +59,10 @@ MEASUREMENT_METHOD_MAP: Dict[str, str] = {
     "ARXPS": "angle-resolved X-ray photoelectron spectroscopy (ARXPS)",
 }
 
-ACQUSITION_MODE_MAP: Dict[str, str] = {"Image": "pulse counting"}
+ACQUSITION_MODE_MAP: Dict[str, str] = {
+    "Image": "pulse counting",
+    "Events": "pulse counting",
+}
 
 SLIT_TYPE_MAP: Dict[str, str] = {"Straight": "straight slit", "Curved": "curved slit"}
 

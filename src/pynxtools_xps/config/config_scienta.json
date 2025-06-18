@@ -257,7 +257,7 @@
     }
   },
   "/ENTRY/DATA[data]":{
-    "@axes":["energy"],
+    "@axes":"@attrs:axis_labels",
     "@signal":"data",
     "data":"@data:average",
     "FIELDNAME_errors[data_errors]":"@data:errors",

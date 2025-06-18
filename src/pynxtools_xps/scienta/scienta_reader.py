@@ -792,4 +792,17 @@ class ScientaHdf5Parser:
         except KeyError:
             pass
 
+        # Find all axes
+        pattern = re.compile(r"^acquisition/spectrum/data/(?!x_axis$)([^/]+_axis)$")
+        additional_axes = list(
+            reversed(
+                [match.group(1) for key in hdf5_data if (match := pattern.match(key))]
+            )
+        )
+
+        if additional_axes:
+            hdf5_data["data_axes"] = additional_axes + ["energy"]
+        else:
+            hdf5_data["data_axes"] = ["energy"]
+
         return [hdf5_data]

@@ -832,6 +832,7 @@ class XPSReader(MultiFormatReader):
             return xr_data[path]
         except KeyError:
             try:
+                print(key, path)
                 return np.array(xr_data.coords[path].values)
             except KeyError:
                 return None

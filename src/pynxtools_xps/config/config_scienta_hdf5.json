@@ -259,15 +259,17 @@
     }
   },
   "/ENTRY/DATA[data]":{
-    "@axes":["y_axis", "energy"],
+    "@axes":"@attrs:data_axes",
     "@signal":"data",
     "data":"@data:data/data",
     "data/@units":"counts_per_second",
     "energy":"@data:data/x_axis",
     "energy/@type":"@attrs:acquisition/spectrum_definition/energy_mode",
     "energy/@units":"eV",
-    "AXISNAME[y_axis]":"@data:data/y_axis",
-    "AXISNAME[y_axis]/@units":"@attrs:y_axis/@units",    
+    "AXISNAME[y_axis]":"@attrs:data/y_axis",
+    "AXISNAME[y_axis]/@units":"@attrs:y_axis/@units",        
+    "AXISNAME[z_axis]":"@attrs:data/z_axis",
+    "AXISNAME[z_axis]/@units":"@attrs:z_axis/@units",
     "@y_axis_indices": 0,
     "@energy_indices": 1
   },

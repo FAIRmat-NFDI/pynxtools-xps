@@ -359,9 +359,11 @@ class XPSReader(MultiFormatReader):
             parser.parse_file(file_path, **self.kwargs)
             data_dict = parser.data_dict
 
+            config_file = parser.config_file
+
             if isinstance(config_file, dict):
                 config_file = config_file.get(file_ext)
-            
+
             self.set_config_file(
                 XPSReader.reader_dir.joinpath("config", config_file),
                 replace=False,
@@ -711,7 +713,7 @@ class XPSReader(MultiFormatReader):
             data_func = lambda: get_all_keys("external_")
         else:
             if isinstance(path, str) and path.endswith(".unit"):
-                data_func = lambda: [name for name in xr_data.coords]
+                data_func = lambda: list(xr_data.coords)
             else:
                 data_func = lambda: get_signals(path.split(":*.")[-1])
 
@@ -827,7 +829,7 @@ class XPSReader(MultiFormatReader):
 
         # Default: try direct data access
         try:
-            return xr_data[path].values
+            return xr_data[path]
         except KeyError:
             try:
                 return np.array(xr_data.coords[path].values)

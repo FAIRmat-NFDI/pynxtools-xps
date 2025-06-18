@@ -24,7 +24,7 @@ classifiers = [
 dependencies = [
     "h5py>=3.6.0",
     "igor2",
-    "jsonschema",
+    "jsonschema>=4.0.0",
     "numpy>=1.22.4,<2.0.0",
     "pint>=0.17",
     "pynxtools>=0.10.7",

@@ -21,9 +21,9 @@ Utility function for mapping keys and values in the pynxtools template.
 
 import re
 import datetime
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Callable
 
-ENERGY_TYPE_MAP = {
+ENERGY_TYPE_MAP: Dict[str, str] = {
     "BE": "binding",
     "KE": "kinetic",
     "Binding": "binding",
@@ -37,7 +37,7 @@ ENERGY_TYPE_MAP = {
     "Analyser Energy": "binding",
 }
 
-ENERGY_SCAN_MODE_MAP = {
+ENERGY_SCAN_MODE_MAP: Dict[str, str] = {
     "Fixed": "fixed_energy",
     "fixed": "fixed_energy",
     "FixedEnergies": "fixed_energy",
@@ -50,7 +50,7 @@ ENERGY_SCAN_MODE_MAP = {
     "SnapshotFAT": "snapshot",
 }
 
-MEASUREMENT_METHOD_MAP = {
+MEASUREMENT_METHOD_MAP: Dict[str, str] = {
     "XPS": "X-ray photoelectron spectroscopy (XPS)",
     "UPS": "ultraviolet photoelectron spectroscopy (UPS)",
     "ElectronSpectroscopy": "electron spectroscopy for chemical analysis (ESCA)",
@@ -58,7 +58,11 @@ MEASUREMENT_METHOD_MAP = {
     "ARXPS": "angle-resolved X-ray photoelectron spectroscopy (ARXPS)",
 }
 
-BOOL_MAP = {
+ACQUSITION_MODE_MAP: Dict[str, str] = {"Image": "pulse counting"}
+
+SLIT_TYPE_MAP: Dict[str, str] = {"Straight": "straight slit", "Curved": "curved slit"}
+
+BOOL_MAP: Dict[str, bool] = {
     "yes": True,
     "Yes": True,
     "no": False,
@@ -67,7 +71,7 @@ BOOL_MAP = {
     "Off": False,
 }
 
-UNIT_MAP = {
+UNIT_MAP: Dict[str, str] = {
     "a.u.": "counts",
     "Counts": "counts",
     "counts/s": "counts_per_second",
@@ -92,46 +96,20 @@ def _replace_from_map(value: Any, value_map: Dict[str, Any]):
     For a given value, return a new value if the value is
     part of the value_map.
     """
-    if value in value_map:
-        return value_map[value]
-    return value
+    return value_map.get(value, value)
 
 
-def convert_energy_type(energy_type: str):
-    """
-    Change the strings for energy type to the allowed
-    values in NXmpes.
-
-    """
-    return _replace_from_map(energy_type, ENERGY_TYPE_MAP)
+def make_converter(value_map: Dict[str, Any]) -> Callable[[Any], Any]:
+    return lambda value: _replace_from_map(value, value_map)
 
 
-def convert_energy_scan_mode(energy_scan_mode: str):
-    """
-    Change the strings for energy scan mode to
-    the allowed values in NXmpes.
-
-    """
-    return _replace_from_map(energy_scan_mode, ENERGY_SCAN_MODE_MAP)
-
-
-def convert_measurement_method(measurement_method: str):
-    """
-    Change the strings for measurement method to
-    the allowed values in NXmpes.
-
-    """
-    return _replace_from_map(measurement_method, MEASUREMENT_METHOD_MAP)
-
-
-def convert_bool(bool_like: str):
-    """Convert "yes", "no" to actual boooleans."""
-    return _replace_from_map(bool_like, BOOL_MAP)
-
-
-def convert_units(units: str):
-    """Map y_units to shortened values."""
-    return _replace_from_map(units, UNIT_MAP)
+convert_energy_type = make_converter(ENERGY_TYPE_MAP)
+convert_energy_scan_mode = make_converter(ENERGY_SCAN_MODE_MAP)
+convert_measurement_method = make_converter(MEASUREMENT_METHOD_MAP)
+convert_detector_acquisition_mode = make_converter(ACQUSITION_MODE_MAP)
+convert_slit_type = make_converter(SLIT_TYPE_MAP)
+convert_bool = make_converter(BOOL_MAP)
+convert_units = make_converter(UNIT_MAP)
 
 
 def get_units_for_key(unit_key: str, unit_map: Dict[str, str]) -> str:

@@ -353,9 +353,10 @@ def _re_map_single_value(
         value = value.rstrip("\n")
 
     for key, map_method in map_functions.items():
-        if key in input_key:
+        if key == input_key:
             map_method = map_functions[key]
-            value = map_method(value, **kwargs)  # type: ignore[operator]
+            return map_method(value, **kwargs) if kwargs else map_method(value)  # type: ignore[operator]
+
     return value
 
 

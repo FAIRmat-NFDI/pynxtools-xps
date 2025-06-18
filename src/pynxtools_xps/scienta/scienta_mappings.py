@@ -32,6 +32,8 @@ from pynxtools_xps.reader_utils import (
 from pynxtools_xps.value_mappers import (
     convert_energy_type,
     convert_energy_scan_mode,
+    convert_detector_acquisition_mode,
+    convert_slit_type,
     parse_datetime,
 )
 
@@ -158,6 +160,9 @@ VALUE_MAP = {
     "preset_type": lambda x: x.lower(),
     "source_type": lambda x: x.lower(),
     "energy_mode": convert_energy_type,
+    "duration": int,
+    "acquisition/spectrum_definition/acquisition_mode": convert_detector_acquisition_mode,
+    "instrument/analyser/slit/type": convert_slit_type,
 }
 
 UNITS: dict = {

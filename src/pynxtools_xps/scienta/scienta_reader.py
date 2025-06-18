@@ -138,7 +138,7 @@ class MapperScienta(XPSMapper):
                     "Version"
                 ]
                 return ScientaIgorParserPEAK()
-            except Exception as e:
+            except json.JSONDecodeError:
                 return ScientaIgorParserOld()
             return ScientaIgorParser()
         elif str(self.file).endswith((".h5", ".hdf5")):
@@ -163,7 +163,13 @@ class MapperScienta(XPSMapper):
         """
 
         entry_parts = []
-        for part in ["spectrum_type", "region_name", "Name", "acquisition/spectrum/name", "title"]:
+        for part in [
+            "spectrum_type",
+            "region_name",
+            "Name",
+            "acquisition/spectrum/name",
+            "title",
+        ]:
             val = spectrum.get(part, None)
             if val:
                 entry_parts += [val]
@@ -181,16 +187,15 @@ class MapperScienta(XPSMapper):
             units = convert_units(get_units_for_key(key, UNITS))
             if units is not None:
                 self._xps_dict[f"{mpes_key}/@units"] = units
-            
-        
+
         try:
             self._fill_with_data_txt_ibw(spectrum, entry, entry_parent)
         except (IndexError, KeyError):
             self._fill_with_data_hdf5(spectrum, entry, entry_parent)
 
-        
-
-    def _fill_with_data_txt_ibw(self, spectrum: Dict[str, Any], entry: str, entry_parent: str):
+    def _fill_with_data_txt_ibw(
+        self, spectrum: Dict[str, Any], entry: str, entry_parent: str
+    ):
         # If multiple spectra exist to entry, only create a new
         # xr.Dataset if the entry occurs for the first time.
         if entry not in self._xps_dict["data"]:
@@ -217,14 +222,6 @@ class MapperScienta(XPSMapper):
                 if key in spectrum["data_labels"] and "reduced" not in key
             ]
         ).squeeze(axis=0)
-
-        intensities_reduced = np.array(
-            [
-                value
-                for key, value in spectrum["data"].items()
-                if key in spectrum["data_labels"] and "reduced" in key
-            ]
-        )
 
         # Write to data in order: scan, cycle, channel
 
@@ -258,7 +255,9 @@ class MapperScienta(XPSMapper):
             data=intensities, coords=axes
         )
 
-    def _fill_with_data_hdf5(self, spectrum: Dict[str, Any], entry: str):
+    def _fill_with_data_hdf5(
+        self, spectrum: Dict[str, Any], entry: str, entry_parent: str
+    ):
         self._xps_dict["data"][entry] = {}
 
         data_keys = [
@@ -480,9 +479,7 @@ class ScientaIgorParser(ABC):
         # measurement software.
         # formula = wave["formula"]
 
-        notes: Dict[str, Any] = {}
-
-        notes = self._parse_note(wave["note"])
+        notes: Dict[str, Any] = self._parse_note(wave["note"])
 
         self.no_of_regions = len(data.shape)
 
@@ -510,7 +507,7 @@ class ScientaIgorParser(ABC):
         spectrum["igor_binary_wave_format_version"] = ibw_version
 
         region_metadata = self._parse_region_metadata(region_id=0, notes=notes)
-        spectrum.update(region_metadata)
+        spectrum |= region_metadata
 
         self.spectra.append(spectrum)
 
@@ -658,7 +655,7 @@ class ScientaIgorParserOld(ScientaIgorParser):
                     unused_notes_keys += [key]
 
         # Convert date and time to ISO8601 date time.
-        region.time_stamp = _construct_date_time(region.start_date, region.start_time)
+        region.time_stamp = _construct_date_time(region.start_date, region.time)
 
         region.validate_types()
 
@@ -710,13 +707,13 @@ class ScientaIgorParserPEAK(ScientaIgorParser):
         region_id: int,
         notes: Dict[str, Any],
     ) -> Dict[str, Any]:
-        region: Dict[str, Any] = {
-            "region_id": region_id,
-            "timestamp": _construct_date_time(region["Date"], region["Time"]),
-        }
+        region: Dict[str, Any] = {"region_id": region_id}
         region |= _flatten_dict(notes)
+        region["timestamp"] = _construct_date_time(region["Date"], region["Time"])
 
         return region
+
+
 class ScientaHdf5Parser:
     def __init__(self):
         self.spectra: List[Dict[str, Any]] = []
@@ -754,14 +751,13 @@ class ScientaHdf5Parser:
             """
             kwargs: Dict[str, Any] = {}
 
-            if "_time" in key:
+            if key.endswith(("start_time", "stop_time")):
                 kwargs["possible_date_formats"] = [
                     "%Y-%m-%dT%H:%M:%S",
                     "%Y-%m-%dT%H:%M:%S.%f%z",
+                    "%Y-%m-%dT%H:%M:%S%z",
                 ]
-
             value = _re_map_single_value(key, value_str, VALUE_MAP, **kwargs)
-
             value = _format_value(value)
 
             return value
@@ -778,7 +774,8 @@ class ScientaHdf5Parser:
                     data = item[()]
                     if isinstance(data, bytes):
                         data = data.decode("utf-8")
-                        data = format_value(key, data)
+                    data = format_value(key, data)
+                    data = format_value(new_path, data)
                     result[new_path] = data
             return result
 

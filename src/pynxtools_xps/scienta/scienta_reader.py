@@ -735,7 +735,7 @@ class ScientaHdf5Parser:
 
         """
 
-        def format_value(key: str, value_str: str) -> Tuple[Any, str]:
+        def format_value(key: str, value_str: str) -> Any:
             """
             Formats a value string (to a corresponding key) according to a series of transformations.
             This function:

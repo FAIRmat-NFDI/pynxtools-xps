@@ -84,14 +84,14 @@ function update_vms_analysis_ref {
 project_dir=$(dirname $(dirname $(realpath $0)))
 cd $project_dir/tests/data
 
-# update_phi_pro_ref
-# update_phi_spe_ref
+update_phi_pro_ref
+update_phi_spe_ref
 update_scienta_ibw_ref
 update_scienta_txt_ref
-# update_specs_sle_ref
-# update_specs_xml_ref
-# update_specs_xy_ref
-# update_vms_irregular_ref
-# update_vms_regular_ref
-# update_vms_txt_export_ref
-# update_vms_analysis_ref
+update_specs_sle_ref
+update_specs_xml_ref
+update_specs_xy_ref
+update_vms_irregular_ref
+update_vms_regular_ref
+update_vms_txt_export_ref
+update_vms_analysis_ref

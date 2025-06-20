@@ -1,24 +1,31 @@
 {
   "/ENTRY":{
     "@default":"data",
-    "title":"@eln",
-    "start_time":"@attrs:time_stamp",
-    "end_time":"@eln",
+    "title":"@attrs:acquisition/spectrum/name",
+    "start_time":"@attrs:acquisition/spectrum_log/start_time",
+    "end_time":"@attrs:acquisition/spectrum_log/stop_time",
     "method":"X-ray photoelectron spectroscopy (XPS)",
-    "transitions":"@attrs:transitions",
     "experiment_institution":"@eln",
     "experiment_facility":"@eln",
     "experiment_laboratory":"@eln",
-    "data_file":"@attrs:data_file",
-    "sequence_file":"@attrs:sequence_file"
+    "duration":"@attrs:acquisition/spectrum_log/duration",
+    "duration/@units":"s",
+    "transitions":"@attrs:transitions",
+    "sequence_counter":"@attrs:acquisition/spectrum_log/sequence_counter",
+    "sequence_name":"@attrs:acquisition/spectrum_log/sequence_name",
+    "spectrum_counter":"@attrs:acquisition/spectrum_log/spectrum_counter",
+    "storage_name":"@attrs:acquisition/spectrum_log/storage_name"
   },
   "/ENTRY/USER[user]":{
-    "name":"@attrs:user_name",
+    "name":"@attrs:user/name",
     "affiliation":"@eln",
     "address":"@eln",
     "email":"@eln",
-    "identifier_orcid":"@eln",
-    "identifier_orcid/@type":"@eln"
+    "IDENTIFIER[orcid]":{
+      "service":"@eln",
+      "identifier":"@eln",
+      "is_persistent":"@eln"
+    }
   },
   "/ENTRY/INSTRUMENT[instrument]":{
     "@default":"electronanalyzer",
@@ -31,14 +38,14 @@
     },
     "energy_resolution":{
       "physical_quantity":"energy",
-      "type":"derived",
-      "resolution":"@attrs:step_size",
-      "resolution/@units":"@attrs:step_size/@units"
+      "type":"@eln",
+      "resolution":"@eln",
+      "resolution/@units":"@eln"
     },
     "source_probe":{
       "type":"@eln",
-      "name":"@eln",
-      "probe":"photon",
+      "name":"@attrs:instrument/analyser/excitation_source/preset_name",
+      "probe":"@attrs:instrument/analyser/excitation_source/source_type",
       "device_information":{
         "vendor":"@eln",
         "model":"@eln",
@@ -50,8 +57,8 @@
     "beam_probe":{
       "distance":"@eln",
       "distance/@units":"@eln",
-      "incident_energy":"@attrs:excitation_energy",
-      "incident_energy/@units":"@attrs:excitation_energy/@units",
+      "incident_energy":"@attrs:instrument/analyser/excitation_source/energy",
+      "incident_energy/@units":"eV",
       "incident_energy_spread":null,
       "incident_energy_spread/@units":null,
       "incident_polarization":null,
@@ -63,26 +70,26 @@
       "@default":"detector",
       "description":"@eln",
       "name":"@eln",
-      "work_function":"@eln",
-      "work_function/@units":"@eln",
+      "work_function":"@attrs:instrument/analyser/work_function",
+      "work_function/@units":"eV",
       "fast_axes":null,
       "slow_axes":"energy",
       "device_information":{
         "vendor":"@eln",
         "model":"@eln",
-        "identifier":"@eln",
+        "identifier":"@attrs:instrument/analyser/serial_number",
         "identifier/@type":"@eln"
       },
       "energy_resolution":{
         "physical_quantity":"energy",
-        "type":"derived",
-        "resolution":"@attrs:step_size",
-        "resolution/@units":"@attrs:step_size/@units"
+        "type":"@eln",
+        "resolution":"@eln",
+        "resolution/@units":"@eln"
       },
       "transmission_function":null,
       "COLLECTIONCOLUMN[collectioncolumn]":{
         "scheme":"@eln",
-        "lens_mode":"@attrs:lens_mode",
+        "lens_mode":"@attrs:acquisition/spectrum_definition/lens_mode_name",
         "projection":null,
         "angular_acceptance":null,
         "spatial_acceptance":null,
@@ -98,16 +105,25 @@
       },
       "ENERGYDISPERSION[energydispersion]":{
         "scheme":"@eln",
-        "pass_energy":"@attrs:pass_energy",
-        "pass_energy/@units":"@attrs:pass_energy/@units",
-        "energy_scan_mode":"@attrs:acquisition_mode",
-        "APERTURE[entrance_slit]":{
-          "description":"@eln",
-          "shape":"@eln",
-          "size":"@eln",
-          "size/@units":"@eln"
+        "pass_energy":"@attrs:acquisition/spectrum_definition/pass_energy",
+        "pass_energy/@units":"eV",
+        "energy_scan_mode":"@eln",
+        "radius":"@attrs:/ENTRY[Fix_2D_Trans]/instrument/analyser/radius",
+        "radius/@units":"mm",
+        "APERTURE[slit]":{
+          "description":"@attrs:instrument/analyser/slit/name",
+          "shape":"@attrs:instrument/analyser/slit/type",
+          "length":"@attrs:instrument/analyser/slit/length",
+          "length/@units":"mm",
+          "width":"@attrs:instrument/analyser/slit/width",
+          "width/@units":"mm",
+          "size":"@attrs:instrument/analyser/slit/size",
+          "size/@units":"mm",          
+          "is_centered":"@attrs:instrument/analyser/slit/is_centered",
+          "knob_position":"@attrs:instrument/analyser/slit/knob_position",
+          "motorized_position":"@attrs:instrument/analyser/slit/motorized_position",
+          "motorized_position_tolerance":"@attrs:instrument/analyser/slit/motorized_position_tolerance"
         },
-        "exit_slit":null,
         "device_information":{
           "vendor":"@eln",
           "model":"@eln",
@@ -117,22 +133,24 @@
       },
       "ELECTRON_DETECTOR[detector]":{
         "@default":"raw_data",
+        "acquisition_mode":"@attrs:acquisition/spectrum_definition/acquisition_mode",
         "amplifier_type":"@eln",
-        "count_time":"@attrs:dwell_time",
-        "count_time/@units":"@attrs:dwell_time/@units",
-        "detector_type":"@eln",
+        "count_time":"@attrs:acquisition/spectrum/dwell_time",
+        "count_time/@units":"s",
+        "image_detector":"@attrs:instrument/analyser/image_detector",
+        "image_source":"@attrs:instrument/analyser/image_source",
+        "time_per_energy_channel":"@attrs:acquisition/spectrum/time_per_energy_channel",
+        "time_per_energy_channel/@units":"s",
         "device_information":{
           "vendor":"@eln",
-          "model":"@eln",
+          "model":"@attrs:instrument/analyser/model",
           "identifier":"@eln",
           "identifier/@type":"@eln"
         },
         "raw_data":{
           "@signal":"raw",
-          "raw":"@data:raw_data",
-          "raw/@units":"counts",
-          "DATA[*]":"@data:*.channels",
-          "DATA[*]/@units":"counts"
+          "raw":"@data:data/data",
+          "raw/@units":"counts"
         }
       }
     },
@@ -155,13 +173,13 @@
         "name":"@eln",
         "actuation_target":"@eln",
         "type":"@eln",
-        "output_heater_power":"@eln",
-        "output_heater_power/@units":"@eln",
+        "heater_power":"@eln",
+        "heater_power/@units":"@eln",
         "PID_CONTROLLER[pid_controller]/setpoint":"@eln",
         "PID_CONTROLLER[pid_controller]/setpoint/@units":"@eln"
       },
       "cryostat":null,
-      "drain_current_ammeter":{
+      "drain_current_amperemeter":{
         "name":"@eln",
         "measurement":"@eln",
         "type":"@eln",
@@ -177,26 +195,10 @@
       },
       "sample_bias_potentiostat":{
         "name":"@eln",
-        "actuation_target":"@eln",
+        "actuation_target":"voltage",
         "type":"@eln",
-        "PID_CONTROLLER[pid_controller]/setpoint":"@eln",
-        "PID_CONTROLLER[pid_controller]/setpoint/@units":"@eln"
-      },
-      "POSITIONER[positioner_x]":{
-        "value":"@eln",
-        "value/@units":"@eln"
-      },
-      "POSITIONER[positioner_y]":{
-        "value":"@eln",
-        "value/@units":"@eln"
-      },
-      "POSITIONER[positioner_z]":{
-        "value":"@eln",
-        "value/@units":"@eln"
-      },
-      "POSITIONER[positioner_phi]":{
-        "value":"@eln",
-        "value/@units":"@eln"
+        "PID_CONTROLLER[pid_controller]/setpoint":"@attrs:sample/bias",
+        "PID_CONTROLLER[pid_controller]/setpoint/@units":"V"
       }
     },
     "pressure_gauge":{
@@ -216,17 +218,17 @@
   },
   "/ENTRY/energy_axis_calibration":{
     "physical_quantity":"energy",
-    "calibrated_axis":"@data:energy",
-    "calibrated_axis/@units":"eV"
+    "calibrated_axis":"@data:data/x_axis",
+      "calibrated_axis/@units":"eV"
   },
   "/ENTRY/energy_referencing":null,
   "/ENTRY/transmission_correction":null,
   "/ENTRY/SAMPLE[sample]":{
-    "name":"@attrs:sample_name",
+    "name":"@attrs:sample/name",
+    "description":"@attrs:sample/description",
     "identifier":"@eln",
     "identifier/@type":"@eln",
     "atom_types":"@eln",
-    "chemical_formula":"@eln",
     "physical_form":"@eln",
     "situation":"@eln",
     "history":{
@@ -250,34 +252,35 @@
       "voltmeter":"@link:/entry/instrument/manipulator/sample_bias_voltmeter"
     },
     "drain_current_env":{
-      "ammeter":"@link:/entry/instrument/manipulator/drain_current_ammeter"
+      "amperemeter":"@link:/entry/instrument/manipulator/drain_current_amperemeter"
     },
     "flood_gun_current_env":{
       "flood_gun":"@link:/entry/instrument/flood_gun"
     }
   },
   "/ENTRY/DATA[data]":{
-    "@axes":"@attrs:axis_labels",
+    "@axes":"@attrs:data_axes",
     "@signal":"data",
-    "data":"@data:average",
-    "FIELDNAME_errors[data_errors]":"@data:errors",
-    "data/@units":"@attrs:intensity/@units",
-    "DATA[*]":"@data:*.scans",
-    "DATA[*]/@units":"@attrs:intensity/@units",
-    "@energy_indices":0,
-    "AXISNAME[*]":"@data:*.axes",
-    "AXISNAME[*]/@units":"@data:*.unit",
-    "AXISNAME[energy]/@type":"@attrs:energy_scale"
+    "data":"@data:data/data",
+    "data/@units":"counts_per_second",
+    "energy":"@data:data/x_axis",
+    "energy/@type":"@attrs:acquisition/spectrum_definition/energy_mode",
+    "energy/@units":"eV",
+    "AXISNAME[y_axis]":"@attrs:data/y_axis",
+    "AXISNAME[y_axis]/@units":"@attrs:y_axis/@units",        
+    "AXISNAME[z_axis]":"@attrs:data/z_axis",
+    "AXISNAME[z_axis]/@units":"@attrs:z_axis/@units",
+    "@y_axis_indices": 0,
+    "@energy_indices": 1
   },
   "/ENTRY/DATA[data_reduced1d]":{
     "@axes":["energy"],
     "@signal":"data",
-    "data":"!@data:average_reduced",
-    "FIELDNAME_errors[data_errors]":"@data:errors_reduced",
-    "data/@units":"@attrs:intensity/@units",
-    "@energy_indices":0,
-    "energy":"@data:energy",
+    "data":"@data:data_reduced_1d/data",
+    "data/@units":"counts_per_second",
+    "energy":"@link:/entry/data/energy",
+    "energy/@type":"@attrs:acquisition/spectrum_definition/energy_mode",
     "energy/@units":"eV",
-    "energy/@type":"@attrs:energy_scale"
+    "@energy_indices":0
   }
 }

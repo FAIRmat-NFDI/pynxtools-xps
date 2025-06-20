@@ -142,6 +142,8 @@ class XPSReader(MultiFormatReader):
     )
 
     __prmt_file_ext__ = [
+        ".h5",
+        ".hdf5",
         ".ibw",
         ".npl",
         ".pro",
@@ -159,6 +161,8 @@ class XPSReader(MultiFormatReader):
     __vendors__ = ["kratos", "phi", "scienta", "specs", "unkwown"]
     __prmt_vndr_cls: Dict[str, Dict] = {
         ".csv": {"unknown": CsvMapperVamasResult},
+        ".h5": {"scienta": MapperScienta},
+        ".hdf5": {"scienta": MapperScienta},
         ".ibw": {"scienta": MapperScienta},
         ".npl": {"unkwown": VamasMapper},
         ".pro": {"phi": MapperPhi},
@@ -355,11 +359,17 @@ class XPSReader(MultiFormatReader):
             parser.parse_file(file_path, **self.kwargs)
             data_dict = parser.data_dict
 
+            config_file = parser.config_file
+
+            if isinstance(config_file, dict):
+                config_file = config_file.get(file_ext)
+
             self.set_config_file(
-                XPSReader.reader_dir.joinpath("config", parser.config_file),
+                XPSReader.reader_dir.joinpath("config", config_file),
                 replace=False,
             )
-            self.xps_data_dicts += [data_dict]
+
+            self.xps_data_dicts += [parser.data_dict]
 
         elif file_ext in XPSReader.__prmt_metadata_file_ext__:
             vendor = _check_for_vendors(file_path)
@@ -703,7 +713,7 @@ class XPSReader(MultiFormatReader):
             data_func = lambda: get_all_keys("external_")
         else:
             if isinstance(path, str) and path.endswith(".unit"):
-                data_func = lambda: [name for name in xr_data.coords]
+                data_func = lambda: list(xr_data.coords)
             else:
                 data_func = lambda: get_signals(path.split(":*.")[-1])
 
@@ -819,9 +829,10 @@ class XPSReader(MultiFormatReader):
 
         # Default: try direct data access
         try:
-            return xr_data[path].values
+            return xr_data[path]
         except KeyError:
             try:
+                print(key, path)
                 return np.array(xr_data.coords[path].values)
             except KeyError:
                 return None

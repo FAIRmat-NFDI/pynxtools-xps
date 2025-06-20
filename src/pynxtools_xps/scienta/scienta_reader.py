@@ -29,6 +29,7 @@ from typing import Any, Dict, List, Tuple, Union, Optional, cast
 import json
 from abc import ABC, abstractmethod
 
+import h5py
 import numpy as np
 import jsonschema
 import xarray as xr
@@ -41,6 +42,7 @@ from pynxtools_xps.reader_utils import (
     construct_data_key,
     construct_entry_name,
     convert_pascal_to_snake,
+    _format_value,
 )
 from pynxtools_xps.value_mappers import (
     get_units_for_key,
@@ -96,11 +98,18 @@ class MapperScienta(XPSMapper):
     dictionaries.
     """
 
-    config_file = "config_scienta.json"
+    config_file = {
+        ".h5": "config_scienta_hdf5.json",
+        ".hdf5": "config_scienta_hdf5.json",
+        ".ibw": "config_scienta.json",
+        ".txt": "config_scienta.json",
+    }
 
     __prmt_file_ext__ = [
-        "ibw",
-        "txt",
+        ".h5",
+        ".hdf5",
+        ".ibw",
+        ".txt",
     ]
 
     __file_err_msg__ = (
@@ -129,8 +138,11 @@ class MapperScienta(XPSMapper):
                     "Version"
                 ]
                 return ScientaIgorParserPEAK()
-            except Exception as e:
+            except json.JSONDecodeError:
                 return ScientaIgorParserOld()
+            return ScientaIgorParser()
+        elif str(self.file).endswith((".h5", ".hdf5")):
+            return ScientaHdf5Parser()
         raise ValueError(MapperScienta.__file_err_msg__)
 
     def construct_data(self):
@@ -149,8 +161,15 @@ class MapperScienta(XPSMapper):
         Map one spectrum from raw data to NXmpes-ready dict.
 
         """
+
         entry_parts = []
-        for part in ["spectrum_type", "region_name", "Name"]:
+        for part in [
+            "spectrum_type",
+            "region_name",
+            "Name",
+            "acquisition/spectrum/name",
+            "title",
+        ]:
             val = spectrum.get(part, None)
             if val:
                 entry_parts += [val]
@@ -169,6 +188,19 @@ class MapperScienta(XPSMapper):
             if units is not None:
                 self._xps_dict[f"{mpes_key}/@units"] = units
 
+        try:
+            self._fill_with_data_txt_ibw(spectrum, entry, entry_parent)
+        except (IndexError, KeyError):
+            self._fill_with_data_hdf5(spectrum, entry, entry_parent)
+
+    def _fill_with_data_txt_ibw(
+        self, spectrum: Dict[str, Any], entry: str, entry_parent: str
+    ):
+        # If multiple spectra exist to entry, only create a new
+        # xr.Dataset if the entry occurs for the first time.
+        if entry not in self._xps_dict["data"]:
+            self._xps_dict["data"][entry] = xr.Dataset()
+
         axis_units = spectrum.get("units")
         if axis_units:
             for axis_name, unit in axis_units.items():
@@ -177,11 +209,6 @@ class MapperScienta(XPSMapper):
 
         # Create key for writing to data
         scan_key = construct_data_key(spectrum)
-
-        # If multiple spectra exist to entry, only create a new
-        # xr.Dataset if the entry occurs for the first time.
-        if entry not in self._xps_dict["data"]:
-            self._xps_dict["data"][entry] = xr.Dataset()
 
         axes = {
             key: value
@@ -195,14 +222,6 @@ class MapperScienta(XPSMapper):
                 if key in spectrum["data_labels"] and "reduced" not in key
             ]
         ).squeeze(axis=0)
-
-        intensities_reduced = np.array(
-            [
-                value
-                for key, value in spectrum["data"].items()
-                if key in spectrum["data_labels"] and "reduced" in key
-            ]
-        )
 
         # Write to data in order: scan, cycle, channel
 
@@ -235,6 +254,25 @@ class MapperScienta(XPSMapper):
         self._xps_dict["data"][entry][channel_key] = xr.DataArray(
             data=intensities, coords=axes
         )
+
+    def _fill_with_data_hdf5(
+        self, spectrum: Dict[str, Any], entry: str, entry_parent: str
+    ):
+        self._xps_dict["data"][entry] = {}
+
+        data_keys = [
+            "data/data",
+            "data/sum",
+            "data/x_axis",
+            "data/y_axis",
+            "data_reduced_1d/data",
+            "data_reduced_1d/x_axis",
+        ]
+
+        for key in data_keys:
+            value = spectrum.get(f"acquisition/spectrum/{key}")
+            if value is not None:
+                self._xps_dict["data"][entry][key] = value
 
 
 class ScientaTxtParser:
@@ -387,7 +425,7 @@ class ScientaTxtParser:
                     pass
 
         # Convert date and time to ISO8601 date time.
-        region.time_stamp = _construct_date_time(region.start_date, region.start_time)
+        region.time_stamp = _construct_date_time(region.start_date, region.time)
 
         region.validate_types()
 
@@ -441,9 +479,7 @@ class ScientaIgorParser(ABC):
         # measurement software.
         # formula = wave["formula"]
 
-        notes: Dict[str, Any] = {}
-
-        notes = self._parse_note(wave["note"])
+        notes: Dict[str, Any] = self._parse_note(wave["note"])
 
         self.no_of_regions = len(data.shape)
 
@@ -466,11 +502,12 @@ class ScientaIgorParser(ABC):
             spectrum["data"][label] = data
             spectrum["data_labels"].append(label)
             spectrum["units"][label] = convert_units(unit)
+            # Convert date and time to ISO8601 date time.
 
         spectrum["igor_binary_wave_format_version"] = ibw_version
 
         region_metadata = self._parse_region_metadata(region_id=0, notes=notes)
-        spectrum.update(region_metadata)
+        spectrum |= region_metadata
 
         self.spectra.append(spectrum)
 
@@ -618,7 +655,7 @@ class ScientaIgorParserOld(ScientaIgorParser):
                     unused_notes_keys += [key]
 
         # Convert date and time to ISO8601 date time.
-        region.time_stamp = _construct_date_time(region.start_date, region.start_time)
+        region.time_stamp = _construct_date_time(region.start_date, region.time)
 
         region.validate_types()
 
@@ -670,10 +707,102 @@ class ScientaIgorParserPEAK(ScientaIgorParser):
         region_id: int,
         notes: Dict[str, Any],
     ) -> Dict[str, Any]:
-        region: Dict[str, Any] = {
-            "region_id": region_id,
-            "timestamp": _construct_date_time(region["Date"], region["Time"]),
-        }
+        region: Dict[str, Any] = {"region_id": region_id}
         region |= _flatten_dict(notes)
+        region["timestamp"] = _construct_date_time(region["Date"], region["Time"])
 
         return region
+
+
+class ScientaHdf5Parser:
+    def __init__(self):
+        self.spectra: List[Dict[str, Any]] = []
+
+    def parse_file(self, file: Union[str, Path], **kwargs):
+        """
+        Reads the igor binarywave files and returns a list of
+        dictionary containing the wave data.
+
+        Parameters
+        ----------
+        file : str
+            Filepath of the TXT file to be read.
+
+        Returns
+        -------
+        self.spectra
+            Flat list of dictionaries containing one spectrum each.
+
+        """
+
+        def format_value(key: str, value_str: str) -> Any:
+            """
+            Formats a value string (to a corresponding key) according to a series of transformations.
+            This function:
+            1. Formats the numeric part of the value according to its expected type.
+            2. Remaps the value to a new format if specified in `VALUE_MAP`.
+            Args:
+                key (str): The key associated with the value, which may need mapping and formatting.
+                value_str (str): The value string to format and separate into numeric value and unit.
+            Returns:
+                Tuple[Any, str]:
+                    - The formatted key (converted to snake_case and remapped if needed).
+                    - The formatted value, with numeric value processed and remapped according to `VALUE_MAP`.
+            """
+            kwargs: Dict[str, Any] = {}
+
+            if key.endswith(("start_time", "stop_time")):
+                kwargs["possible_date_formats"] = [
+                    "%Y-%m-%dT%H:%M:%S",
+                    "%Y-%m-%dT%H:%M:%S.%f%z",
+                    "%Y-%m-%dT%H:%M:%S%z",
+                ]
+            value = _re_map_single_value(key, value_str, VALUE_MAP, **kwargs)
+            value = _format_value(value)
+
+            return value
+
+        def recursively_read_group(group, path=""):
+            result = {}
+            for key, item in group.items():
+                new_path = f"{path}/{key}" if path else key
+                if isinstance(item, h5py.Group):
+                    # Recursively read subgroups
+                    result.update(recursively_read_group(item, new_path))
+                elif isinstance(item, h5py.Dataset):
+                    # Read datasets
+                    data = item[()]
+                    if isinstance(data, bytes):
+                        data = data.decode("utf-8")
+                    data = format_value(key, data)
+                    data = format_value(new_path, data)
+                    result[new_path] = data
+            return result
+
+        # Open the HDF5 file and read its contents
+        with h5py.File(file, "r") as hdf:
+            hdf5_data = recursively_read_group(hdf)
+
+        try:
+            length, width = (
+                hdf5_data["instrument/analyser/slit/length"],
+                hdf5_data["instrument/analyser/slit/width"],
+            )
+            hdf5_data["instrument/analyser/slit/size"] = np.array([length, width])
+        except KeyError:
+            pass
+
+        # Find all axes
+        pattern = re.compile(r"^acquisition/spectrum/data/(?!x_axis$)([^/]+_axis)$")
+        additional_axes = list(
+            reversed(
+                [match.group(1) for key in hdf5_data if (match := pattern.match(key))]
+            )
+        )
+
+        if additional_axes:
+            hdf5_data["data_axes"] = additional_axes + ["energy"]
+        else:
+            hdf5_data["data_axes"] = ["energy"]
+
+        return [hdf5_data]

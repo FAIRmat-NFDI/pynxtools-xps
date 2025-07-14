@@ -54,10 +54,10 @@ pynx convert irregular.vms eln_data_vms.yaml --reader xps --nxdl NXxps --output 
 `pynxtools-xps` can also extract CasaXPS peak fitting data alongside the raw spectra.
 Three files are required:
 
-1. The VAMAS `.vms` file containing the original data and the peak fitting definition in
-   the VAMAS comments.
-2. The lineshapes exported from CasaXPS as a TXT file.
-3. The analysis results (including atomic concentrations) exported from CasaXPS as a CSV file.
+1. The VAMAS (.vms) file containing the original (meta)data and the definition of the peak fitting in the VAMAS
+comments
+2. The lineshapes of the measurement data as well as the peak fitting, exported from CasaXPS as a TXT file.
+3. The analysis results (incl. the atomic concentrations), exported from CasaXPS as a CSV file.
 
 Example data is available in the
 [`examples/vms/data_analysis/` directory](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/vms/data_analysis).

@@ -46,8 +46,7 @@ from pynxtools_xps.models.backgrounds import (
 )
 
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger = logging.getLogger("pynxtools")
 
 LINESHAPES: Dict[str, Any] = {
     "GL": ("Gaussian-Lorentzian Product", GaussianLorentzianProduct),
@@ -59,7 +58,7 @@ LINESHAPES: Dict[str, Any] = {
 
 BACKGROUNDS: Dict[str, Any] = {
     "Linear": ("Linear", LinearBackground),
-    "Shirley": ("Shirley Sum", Shirley),
+    "Shirley": ("Shirley", Shirley),
     "Step Up": ("Step Up", StepUp),
     "Step Down": ("Step Down", StepDown),
     "U 2 Tougaard": ("Tougaard", TougaardU3),
@@ -139,8 +138,6 @@ class CasaRegion(XpsDataclass):
             region = np.argwhere((x >= min_x) & (x <= max_x))
             fit_region = slice(region[0, 0], region[-1, 0], 1)
 
-            self.start_offset = 100
-
             y_start_offset = y[0] * (self.start_offset / 100.0)
             y_end_offset = y[-1] * (self.end_offset / 100.0)
             y[0] -= y_start_offset
@@ -156,6 +153,10 @@ class CasaRegion(XpsDataclass):
         except KeyError:
             logger.warning(
                 f"Background {self.name} (type {self.bg_type}) could not be parsed because no model exists for it."
+            )
+        except ValueError:
+            logger.warning(
+                f"Background {self.name} (type {self.bg_type}) could not be parsed because it could not be calculated."
             )
 
 

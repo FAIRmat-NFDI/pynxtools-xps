@@ -13,15 +13,15 @@ available in CasaXPS, including the most commonly used linear, Shirley, and Toug
 
 ## Modeling of data fitting in NeXus
 
-NeXus contains a base class for modelling fit procedures called [`NXfit`](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXfit.html). ``NXfit`` contains
+NeXus contains a base class for modelling fit procedures called [`NXfit`](https://fairmat-nfdi.github.io/nexus_definitions/classes/base_classes/NXfit.html). ``NXfit`` contains
 
 - the data to be modelled
-- one or more instances of [`NXpeak`](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXpeak.html) to define individual peaks in the model. These map to the components in CasaXPS
-- one or more instances of [`NXpeak`](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXpeak.html) to define the background to be subtracted during the fit. These map to the regions in CasaXPS.
-- two instances of [`NXfit_function`](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXfit_function.html) to describe the function used for the global fit (`global_fit_function`) and for the optimization (`error_function`).
+- one or more instances of [`NXpeak`](https://fairmat-nfdi.github.io/nexus_definitions/classes/base_classes/NXpeak.html) to define individual peaks in the model. These map to the components in CasaXPS
+- one or more instances of [`NXpeak`](https://fairmat-nfdi.github.io/nexus_definitions/classes/base_classes/NXpeak.html) to define the background to be subtracted during the fit. These map to the regions in CasaXPS.
+- two instances of [`NXfit_function`](https://fairmat-nfdi.github.io/nexus_definitions/classes/base_classes/NXfit_function.html) to describe the function used for the global fit (`global_fit_function`) and for the optimization (`error_function`).
 - information about the fitting sum (envelope) and the residual of the fit
 
-The application definition `NXxps` implements an [`NXfit` group](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXxps.html#nxxps-entry-fit-group) to model peak fitting in XPS. Aside from the terms defined in the base class `NXfit`, it also contains some information more specific to XPS fits, like the atomic concentration of each species in the fit model.
+The application definition `NXxps` implements an [`NXfit` group](https://fairmat-nfdi.github.io/nexus_definitions/classes/applications/NXxps.html#nxxps-entry-fit-group) to model peak fitting in XPS. Aside from the terms defined in the base class `NXfit`, it also contains some information more specific to XPS fits, like the atomic concentration of each species in the fit model.
 
 ## How-to convert peak fitting in CasaXPS into a NeXus file
 
@@ -29,11 +29,11 @@ The application definition `NXxps` implements an [`NXfit` group](https://fairmat
 
 Three files are needed for the example conversion:
 
-1) The VAMAS (.vms) file containing the original (meta)data and the definition of the peak fitting in the VAMAS
+1. The VAMAS (.vms) file containing the original (meta)data and the definition of the peak fitting in the VAMAS
 comments
-2) The lineshapes of the measurement data as well as the peak fitting, exported from CasaXPS as a TXT file.
+2. The lineshapes of the measurement data as well as the peak fitting, exported from CasaXPS as a TXT file.
 This file can be obtained by using the `Save Tab ASCII` to TXT button in CasaXPS and choosing "Rows of Tables" as the export option.
-3) The analysis results (incl. the atomic concentrations), exported from CasaXPS as a CSV file. This file can be obtained from the `Quantify` window in CasaXPS and exporting the "Comps" report from the "Report" tab. You can learn more about XPS quantification in CasaXPS [here](http://www.casaxps.com/casaxps-training/quantification/quant.htm).
+3. The analysis results (incl. the atomic concentrations), exported from CasaXPS as a CSV file. This file can be obtained from the `Quantify` window in CasaXPS and exporting the "Comps" report from the "Report" tab. You can learn more about XPS quantification in CasaXPS [here](http://www.casaxps.com/casaxps-training/quantification/quant.htm).
 
 You can have a look a the example conversion to understand which exported files are expected for the data reader to work.
 

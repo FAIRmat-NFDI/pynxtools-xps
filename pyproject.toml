@@ -24,6 +24,7 @@ dependencies = [
     "pynxtools>=0.12.0",
     "jsonschema>=4.0.0",
     "igor2",
+    "lmfitxps>=4.1.2"
 ]
 
 [project.optional-dependencies]

@@ -40,10 +40,10 @@ user@box:~$ dataconverter irregular.vms eln_data_vms.yaml --reader xps --nxdl NX
 ```pynxtools-xps``` also supports extracting data and the description of the data analysis (i.e., peak fitting)
 by the [CasaXPS data analysis software](http://www.casaxps.com/). Three files are needed for the example conversion:
 
-1) The VAMAS (.vms) file containing the original (meta)data and the definition of the peak fitting in the VAMAS
+1. The VAMAS (.vms) file containing the original (meta)data and the definition of the peak fitting in the VAMAS
 comments
-2) The lineshapes of the measurement data as well as the peak fitting, exported from CasaXPS as a TXT file.
-3) The analysis results (incl. the atomic concentrations), exported from CasaXPS as a CSV file.
+2. The lineshapes of the measurement data as well as the peak fitting, exported from CasaXPS as a TXT file.
+3. The analysis results (incl. the atomic concentrations), exported from CasaXPS as a CSV file.
 
 Example data is available [here](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/vms/vms_analysis).
 

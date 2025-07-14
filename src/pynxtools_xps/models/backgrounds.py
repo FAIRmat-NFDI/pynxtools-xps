@@ -19,19 +19,20 @@ Backgrounds for peak fitting.
 """
 
 from collections.abc import Callable
-from typing import cast
+import logging
+from typing import cast, Optional
 
 import numpy as np
-
-# Workaround for different functions for trapezoid in numpy
 import scipy
 
+# Workaround for different functions for trapezoid in numpy
 NPTrapezoidType = Callable[..., np.typing.NDArray[np.float64]]
 
 if np.lib.NumpyVersion(np.__version__) >= "2.0.0":
     np_trapezoid = cast(NPTrapezoidType, getattr(np, "trapezoid"))
 else:
     np_trapezoid = cast(NPTrapezoidType, getattr(np, "trapz"))  # noqa: NPY201
+from lmfitxps.backgrounds import shirley_calculate
 
 
 class LinearBackground:
@@ -192,10 +193,13 @@ class Shirley:
         pass
 
     def calc_background(
-        self, x: np.ndarray, y: np.ndarray, tol: float = 1e-5, maxit: int = 15
+        self, x: np.ndarray, y: np.ndarray, tol: float = 1e-5, maxit: int = 30
     ) -> np.ndarray:
         """
         Calculate the Shirley background using the Sherwood method.
+
+        We are using the lmfit-xps package for this purpose. See
+        https://lmfitxps.readthedocs.io/en/latest/_modules/lmfitxps/backgrounds.html#shirley_calculate.
 
         Parameters:
         - x (np.ndarray): The x-axis data (energy or time, etc.).
@@ -214,7 +218,6 @@ class Shirley:
             raise ValueError(
                 f"Parameters x and y must be numpy arrays, not {type(x)} and {type(y)}"
             )
-
         if len(x) != len(y):
             raise ValueError("x and y arrays must have the same length.")
 
@@ -225,41 +228,7 @@ class Shirley:
             raise ValueError(
                 f"Data arrays must be one-dimensional. Found shapes x: {x.shape}, y: {y.shape}."
             )
-
-        # Reverse the data if it is in ascending order
-        is_reversed = False
-        if x[0] < x[-1]:
-            is_reversed = True
-            x = np.flip(x)
-            y = np.flip(y)
-
-        # Initialize background arrays
-        background = np.zeros_like(x)
-        background_next = np.zeros_like(x)
-
-        # Iterative loop to compute Shirley background
-        for iters in range(maxit):
-            k = (y[0] - y[-1]) / np_trapezoid(y - background, x=x)
-
-            # Update the background using trapezoidal integration
-            for energy in range(len(x)):
-                background_next[energy] = k * np_trapezoid(
-                    y[energy:] - background[energy:], x=x[energy:]
-                )
-
-            # Check for convergence
-            diff = np.linalg.norm(background_next - background)
-            background = np.copy(background_next)
-            if diff < tol:
-                break
-        else:
-            # Raise an error if the maximum iterations are reached
-            raise ValueError(
-                "Maximum number of iterations exceeded before convergence."
-            )
-
-        # Reverse back the result if the data was originally reversed
-        return np.flip(y[-1] + background) if is_reversed else y[-1] + background
+        return shirley_calculate(x, y, tol=tol, maxit=30, bounds=None)
 
     def formula(self) -> str:
         """

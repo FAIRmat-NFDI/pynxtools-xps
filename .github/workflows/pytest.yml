@@ -16,9 +16,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          submodules: recursive
       - name: Install uv and set the python version to ${{ matrix.python-version }}
         uses: astral-sh/setup-uv@v5
         with:

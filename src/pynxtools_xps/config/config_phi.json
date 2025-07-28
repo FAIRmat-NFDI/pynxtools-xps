@@ -69,17 +69,17 @@
       "voltage":"@attrs:xray_high_voltage",
       "voltage/@units":"@attrs:xray_high_voltage/@units",
       "associated_beam":"/entry/instrument/beam_probe",
-      "LENS_EM[blanking_lens]":{
+      "ELECTROMAGNETIC_LENS[blanking_lens]":{
         "name":"blanking lens",
         "voltage":"@attrs:xray_blanking_voltage",
         "voltage/@units":"@attrs:xray_blanking_voltage/@units"
       },
-      "LENS_EM[condenser_lens]":{
+      "ELECTROMAGNETIC_LENS[condenser_lens]":{
         "name":"condenser lens",
         "voltage":"@attrs:xray_condenser_lens_voltage",
         "voltage/@units":"@attrs:xray_condenser_lens_voltage/@units"
       },
-      "LENS_EM[objective_coil]":{
+      "ELECTROMAGNETIC_LENS[objective_coil]":{
         "name":"objective coil",
         "current":"@attrs:xray_objective_coil_current",
         "current/@units":"@attrs:xray_objective_coil_current/@units"
@@ -150,7 +150,7 @@
       "x_steering/@units":"@attrs:flood_gun_x_steering/@units",
       "y_steering":"@attrs:flood_gun_y_steering",
       "y_steering/@units":"@attrs:flood_gun_y_steering/@units",
-      "LENS_EM[extractor]":{
+      "ELECTROMAGNETIC_LENS[extractor]":{
         "name":"extractor",
         "voltage":"@attrs:flood_gun_extractor_voltage",
         "voltage/@units":"@attrs:flood_gun_extractor_voltage/@units"
@@ -188,17 +188,17 @@
       "voltage":"@attrs:gcib_high_voltage",
       "voltage/@units":"@attrs:gcib_high_voltage/@units",
       "associated_beam":"none",
-      "LENS_EM[bending_lens]":{
+      "ELECTROMAGNETIC_LENS[bending_lens]":{
         "name":"bending lens",
         "voltage":"@attrs:gcib_bend_voltage",
         "voltage/@units":"@attrs:gcib_bend_voltage/@units"
       },
-      "LENS_EM[extractor]":{
+      "ELECTROMAGNETIC_LENS[extractor]":{
         "name":"extractor",
         "voltage":"@attrs:gcib_extractor",
         "voltage/@units":"@attrs:gcib_extractor/@units"
       },
-      "LENS_EM[objective_lens]":{
+      "ELECTROMAGNETIC_LENS[objective_lens]":{
         "name":"objective lens",
         "voltage":"@attrs:gcib_objective",
         "voltage/@units":"['@attrs:gcib_objective/@units', 'V']"
@@ -236,17 +236,17 @@
       "target_sputter_time":"@attrs:neutral_target_timed_on_time",
       "target_sputter_time/@units":"@attrs:neutral_target_timed_on_time/@units",
       "associated_beam":"none",
-      "LENS_EM[bending_lens]":{
+      "ELECTROMAGNETIC_LENS[bending_lens]":{
         "name":"bending lens",
         "voltage":"@attrs:neutral_bend_voltage",
         "voltage/@units":"@attrs:neutral_bend_voltage/@units"
       },
-      "LENS_EM[condenser_lens]":{
+      "ELECTROMAGNETIC_LENS[condenser_lens]":{
         "name":"condenser lens",
         "voltage":"@attrs:neutral_condenser_lens_voltage",
         "voltage/@units":"@attrs:neutral_condenser_lens_voltage/@units"
       },
-      "LENS_EM[objective_lens]":{
+      "ELECTROMAGNETIC_LENS[objective_lens]":{
         "name":"objective lens",
         "voltage":"@attrs:neutral_objective_lens_voltage",
         "voltage/@units":"@attrs:neutral_objective_lens_voltage/@units"
@@ -285,17 +285,17 @@
       "target_sputter_time":"@attrs:target_sputter_time",
       "target_sputter_time/@units":"@attrs:target_sputter_time/@units",
       "associated_beam":"none",
-      "LENS_EM[bending_lens]":{
+      "ELECTROMAGNETIC_LENS[bending_lens]":{
         "name":"bending lens",
         "voltage":"@attrs:bend_voltage",
         "voltage/@units":"@attrs:bend_voltage/@units"
       },
-      "LENS_EM[condenser_lens]":{
+      "ELECTROMAGNETIC_LENS[condenser_lens]":{
         "name":"condenser lens",
         "voltage":"@attrs:condenser_lens_voltage",
         "voltage/@units":"@attrs:condenser_lens_voltage/@units"
       },
-      "LENS_EM[objective_lens]":{
+      "ELECTROMAGNETIC_LENS[objective_lens]":{
         "name":"objective lens",
         "voltage":"@attrs:objective_lens_voltage",
         "voltage/@units":"@attrs:objective_lens_voltage/@units"
@@ -341,27 +341,27 @@
           "identifier":"@eln",
           "identifier/@type":"@eln"
         },
-        "LENS_EM[lens_2]":{
+        "ELECTROMAGNETIC_LENS[lens_2]":{
           "name":"Lens 2",
           "voltage":"@attrs:sxi_lens2_voltage",
           "voltage/@units":"@attrs:sxi_lens2_voltage/@units"
         },
-        "LENS_EM[lens_3]":{
+        "ELECTROMAGNETIC_LENS[lens_3]":{
           "name":"Lens 3",
           "voltage":"@attrs:sxi_lens3_voltage",
           "voltage/@units":"@attrs:sxi_lens3_voltage/@units"
         },
-        "LENS_EM[lens_4]":{
+        "ELECTROMAGNETIC_LENS[lens_4]":{
           "name":"Lens 4",
           "voltage":"@attrs:sxi_lens4_voltage",
           "voltage/@units":"@attrs:sxi_lens4_voltage/@units"
         },
-        "LENS_EM[lens_5]":{
+        "ELECTROMAGNETIC_LENS[lens_5]":{
           "name":"Lens 5",
           "voltage":"@attrs:sxi_lens5_voltage",
           "voltage/@units":"@attrs:sxi_lens5_voltage/@units"
         },                     
-        "LENS_EM[lens_bias]":{
+        "ELECTROMAGNETIC_LENS[lens_bias]":{
           "name":"Lens bias",
           "voltage":"@attrs:sxi_lens_bias_voltage",
           "voltage/@units":"@attrs:sxi_lens_bias_voltage/@units"

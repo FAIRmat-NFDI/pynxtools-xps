@@ -109,32 +109,32 @@
           "identifier":"@eln",
           "identifier/@type": "@eln"
         },
-        "LENS_EM[L1]":{
+        "ELECTROMAGNETIC_LENS[L1]":{
           "name":"Lens 1",
           "voltage":"@attrs:lens1_voltage",
           "voltage/@units":"@attrs:lens1_voltage/@units"
         },
-        "LENS_EM[L2]":{
+        "ELECTROMAGNETIC_LENS[L2]":{
           "name":"Lens 2",
           "voltage":"@attrs:lens2_voltage",
           "voltage/@units":"@attrs:lens2_voltage/@units"
         },
-        "LENS_EM[coil]":{
+        "ELECTROMAGNETIC_LENS[coil]":{
           "name":"Coil",
           "current":"@attrs:coil_current",
           "current/@units":"@attrs:coil_current/@units"
         },
-        "LENS_EM[pre_defl_x]":{
+        "ELECTROMAGNETIC_LENS[pre_defl_x]":{
           "name":"Pre-Deflector X",
           "current":"@attrs:pre_deflector_x_current",
           "current/@units":"@attrs:pre_deflector_x_current/@units"
         },
-        "LENS_EM[pre_defl_y]":{
+        "ELECTROMAGNETIC_LENS[pre_defl_y]":{
           "name":"Pre-Deflector Y",
           "current":"@attrs:pre_deflector_y_current",
           "current/@units":"@attrs:pre_deflector_y_current/@units"
         },
-        "LENS_EM[focus_displacement]":{
+        "ELECTROMAGNETIC_LENS[focus_displacement]":{
           "name":"Focus Displacement",
           "current":"@attrs:focus_displacement_current",
           "current/@units":"@attrs:focus_displacement_current/@units"

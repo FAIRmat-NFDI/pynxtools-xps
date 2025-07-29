@@ -26,7 +26,7 @@ except ImportError as exc:
 
 xps_example = ExampleUploadEntryPoint(
     title="X-ray Photoelectron Spectroscopy (XPS)",
-    category="FAIRmat examples",
+    category="NeXus Experiment Examples",
     description="""
         This example presents the capabilities of the NOMAD platform to store and standardize X-ray Photoelectron Spectroscopy XPS data.
         It shows the generation of a NeXus file according to the

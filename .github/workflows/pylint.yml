@@ -2,15 +2,18 @@ name: linting
 
 on: [push]
 
+env:
+  python-version: 3.12      
+
 jobs:
   linting:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install uv and set the python version to 3.12
+      - name: Install uv and set the python version to ${{ env.python-version }}
         uses: astral-sh/setup-uv@v5
         with:
-          python-version: 3.12
+          python-version: ${{ env.python-version }}
       - name: Install package and dev dependencies
         run: |
           uv pip install ".[dev]"

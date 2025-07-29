@@ -908,6 +908,8 @@ class XPSReader(MultiFormatReader):
                 if "@units" in key:
                     check_units(key, val)
                 final_template[key] = val
+                if isinstance(val, dict) and "link" in val:
+                    final_template[f"{key}/@target"] = val["link"]
 
         return final_template
 

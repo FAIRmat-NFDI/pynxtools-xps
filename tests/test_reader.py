@@ -55,7 +55,7 @@ test_params = []
 for test_case in test_cases:
     # ToDo: make tests for all supported appdefs possible
     for nxdl in NXDLS:
-        test_params += [pytest.param(nxdl, test_case[0], id=f"{test_case[1]}, {nxdl}")]
+        test_params += [pytest.param(nxdl, test_case[0], id=f"{test_case[1]}-{nxdl}")]
 
 
 @pytest.mark.parametrize(

@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This example presents the capabilities of the NOMAD platform to store and standardize XPS data. It shows the generation of a NeXus file according to the [`NXxps`](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXxps.html#nxxps) application definition and a successive analysis of an example data set.
+This example presents the capabilities of the NOMAD platform to store and standardize XPS data. It shows the generation of a NeXus file according to the [`NXxps`](https://fairmat-nfdi.github.io/nexus_definitions/classes/applications/NXxps.html#nxxps) application definition and a subsequent analysis of an example data set.
 
 ## Viewing uploaded data
 

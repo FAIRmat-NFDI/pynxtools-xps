@@ -76,11 +76,12 @@ test_params = [
         test_case[0],
         f"{test_case[0]}_{nxdl.lower()}_ref.log",
         test_case[2],
-        id=f"{test_case[1]}, {nxdl}",
+        id=f"{test_case[1]}-{nxdl}",
     )
     for test_case in test_cases
-    for nxdl in NXDLS # READER_CLASS.supported_nxdls
+    for nxdl in READER_CLASS.supported_nxdls
 ]
+
 
 @pytest.mark.parametrize(
     "nxdl, sub_reader_data_dir, ref_log_file, ignore_sections"
@@ -124,7 +125,7 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, ref_log_file, ignore_sectio
         *[os.path.dirname(__file__), "data", sub_reader_data_dir]
     )
 
-    ref_log_filepath = os.path.join(files_or_dir, ref_log_file)
+    ref_log_path = os.path.join(files_or_dir, ref_log_file)
 
     test = ReaderTest(
         nxdl=nxdl,
@@ -132,7 +133,7 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, ref_log_file, ignore_sectio
         files_or_dir=files_or_dir,
         tmp_path=tmp_path,
         caplog=caplog,
-        ref_log_file=ref_log_filepath,
+        ref_log_path=ref_log_path,
     )
     test.convert_to_nexus(caplog_level="WARNING", ignore_undocumented=True)
     test.test_verify_nexus(caplog_level="WARNING")

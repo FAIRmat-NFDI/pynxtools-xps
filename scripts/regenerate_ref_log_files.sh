@@ -1,18 +1,13 @@
 #!/bin/bash
 READER=xps
 
-# Function to generate log filename
-function generate_filename {
-  local NXDL="$2"
-  local lowercase_NXDL=$(echo "$NXDL" | tr '[:upper:]' '[:lower:]')
-  local filename="$1_${lowercase_NXDL}_ref.log"
-}
-
 # Function to update log
 function update_log {
   local FOLDER=$1
   local NXDL=$2
-  log_filename=$(generate_filename "$FOLDER" "$NXDL")
+  local lowercase_NXDL=$(echo "$NXDL" | tr '[:upper:]' '[:lower:]')
+  log_filename="${FOLDER}_${lowercase_NXDL}_ref.log"
+  echo "Generating log file at $log_filename..."
   python -c "
 import os
 from pynxtools.testing.nexus_conversion import get_log_file
@@ -21,6 +16,8 @@ nxs_filepath = os.path.join(folder,'output.nxs')
 log_filepath = os.path.join(folder,'$log_filename')
 get_log_file(nxs_filepath, log_filepath, './')
 "
+  echo "Done!"
+  echo
 }
 
 function update_log_file {
@@ -51,7 +48,7 @@ folders=(
 )
 
 nxdls=(
-  "NXmpes"
+  # "NXmpes"
   "NXxps"
 )
 

@@ -45,10 +45,11 @@ folders=(
   "vms_irregular"
   "vms_regular"
   "vms_txt_export"
+  "vms_analysis"
 )
 
 nxdls=(
-  # "NXmpes"
+  "NXmpes"
   "NXxps"
 )
 

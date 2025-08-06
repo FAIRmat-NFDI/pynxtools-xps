@@ -5559,7 +5559,7 @@ DEBUG - classpath: ['NXentry']
 DEBUG - NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Ag__002__VB/start_time): <HDF5 dataset "start_time": shape (), type "|O">
-DEBUG - value: 2023-03-08T15:30:27+01:00 
+DEBUG - value: 2023-03-08T15:30:27+00:00 
 DEBUG - classpath: ['NXentry', 'NX_DATE_TIME']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/start_time

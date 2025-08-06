@@ -758,7 +758,7 @@ class XPSReader(MultiFormatReader):
             if path.endswith("reduced"):
                 try:
                     data = [np.sum(arr, axis=tuple(range(1, arr.ndim))) for arr in data]
-                except np.AxisError:
+                except np.exceptions.AxisError:
                     return None
             stats_func = np.mean if path.startswith("average") else np.std
             return stats_func(data, axis=0)

@@ -227,11 +227,11 @@ class Shirley:
 
         # Iterative loop to compute Shirley background
         for iters in range(maxit):
-            k = (y[0] - y[-1]) / np.trapz(y - background, x=x)
+            k = (y[0] - y[-1]) / np.trapezoid(y - background, x=x)
 
             # Update the background using trapezoidal integration
             for energy in range(len(x)):
-                background_next[energy] = k * np.trapz(
+                background_next[energy] = k * np.trapezoid(
                     y[energy:] - background[energy:], x=x[energy:]
                 )
 

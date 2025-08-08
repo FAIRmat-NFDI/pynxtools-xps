@@ -1,4 +1,4 @@
-# How to map pieces of information to NeXus
+# How to map raw XPS data to NeXus
 
 Conceptually, mapping between representations of concepts and instance data is a key tasks in information science. The plugin pynxtools-xps implements this specifically for the file and serialization formats used within the research field of photoelectron spectroscopy (PES).
 

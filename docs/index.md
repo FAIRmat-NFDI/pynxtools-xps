@@ -44,7 +44,7 @@ The explanation section provides background knowledge on the implementation desi
 - [Design principles and implementation](explanation/implementation.md)
 - [NXmpes and NXxps](explanation/appdefs.md)
 - [The XPS coordinate system](explanation/coordinate_system.md)
-- [How to map pieces of information to NeXus](explanation/contextualization.md)
+- [How to map raw XPS data to NeXus](explanation/contextualization.md)
 - [Mapping of data processing performed in CasaXPS](explanation/data_processing.md)
 <!-- - - [NOMAD integration](explanation/nomad_integration.md) -->
 

@@ -130,6 +130,7 @@
     },
     "source_TYPE[source_flood_gun]":{
       "type":"Monochromatized electron source",
+      "type/@custom":true,
       "current":"@attrs:flood_gun_current",
       "current/@units":"@attrs:flood_gun_current/@units",
       "voltage":"@attrs:flood_gun_energy",
@@ -159,7 +160,7 @@
     },
     "source_TYPE[source_gas_cluster_ion_beam]":{
       "type":"other",
-      "type_other":"@eln",
+      "type/@custom":true,
       "description":"@eln",
       "cluster_size":"@attrs:gcib_cluster_size",
       "cluster_size/@units":"@attrs:gcib_cluster_size/@units",
@@ -206,7 +207,7 @@
     },
     "source_TYPE[source_neutral_ion_gun]":{
       "type":"other",
-      "type_other":"@eln",
+      "type/@custom":true,
       "description":"@eln",
       "current":"@attrs:neutral_current",
       "current/@units":"@attrs:neutral_current/@units",
@@ -254,7 +255,7 @@
     },
     "source_TYPE[source_sputter_gun]":{
       "type":"other",
-      "type_other":"@eln",
+      "type/@custom":true,
       "description":"@eln",
       "current":"@attrs:sputter_current",
       "current/@units":"@attrs:sputter_current/@units",

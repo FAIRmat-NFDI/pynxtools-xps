@@ -51,12 +51,12 @@ ENERGY_SCAN_MODE_MAP: Dict[str, str] = {
     "SnapshotFAT": "snapshot",
 }
 
-MEASUREMENT_METHOD_MAP: Dict[str, str] = {
-    "XPS": "X-ray photoelectron spectroscopy (XPS)",
-    "UPS": "ultraviolet photoelectron spectroscopy (UPS)",
-    "ElectronSpectroscopy": "electron spectroscopy for chemical analysis (ESCA)",
-    "NAPXPS": "near ambient pressure X-ray photoelectron spectroscopy (NAPXPS)",
-    "ARXPS": "angle-resolved X-ray photoelectron spectroscopy (ARXPS)",
+MEASUREMENT_METHOD_MAP: Dict[str, tuple[str, str]] = {
+    "XPS": ("XPS", "X-ray photoelectron spectroscopy"),
+    "UPS": ("UPS", "ultraviolet photoelectron spectroscopy"),
+    "ESCA": ("XPS", "electron spectroscopy for chemical analysis"),
+    "NAPXPS": ("NAPXPS", "near ambient pressure X-ray photoelectron spectroscopy"),
+    "ARXPS": ("ARXPS", "angle-resolved X-ray photoelectron spectroscopy"),
 }
 
 ACQUSITION_MODE_MAP: Dict[str, str] = {
@@ -178,10 +178,8 @@ def parse_datetime(
             datetime_obj = datetime.datetime.strptime(datetime_string, date_fmt)
 
             if tzinfo is not None:
-                # Apply the specified timezone to the datetime object
                 datetime_obj = datetime_obj.replace(tzinfo=tzinfo)
 
-            # Convert to ISO 8601 format
             return datetime_obj.isoformat()
 
         except ValueError:

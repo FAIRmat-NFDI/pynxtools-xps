@@ -5,13 +5,14 @@
     "start_time":"@attrs:acquisition_file_date",
     "end_time":"@eln",
     "method":"@attrs:technique",
+    "method/@long_name":"@attrs:/technique_long_name",    
     "transitions":"@attrs:transitions",
     "identifier_experiment":"@attrs:experiment_id",
     "experiment_institution":"@eln",
     "experiment_facility":"@eln",
     "experiment_laboratory":"@eln",
     "program_name":"@attrs:software_version",
-    "acquisition_filename":"@attrs:acquisition_filename"
+    "acquisition_filename":"@attrs:acquisition_filename",
   },
   "/ENTRY/USER[user]":{
     "name":"['@attrs:user_name', 'user']",

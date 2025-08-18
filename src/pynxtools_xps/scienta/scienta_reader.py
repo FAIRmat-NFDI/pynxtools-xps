@@ -20,56 +20,53 @@ Scienta spectrometers (.ibw or .txt format), to be passed to
 MPES nxdl (NeXus Definition Language) template.
 """
 
-import re
 import copy
-import logging
-import warnings
-from pathlib import Path
-from typing import Any, Dict, List, Tuple, Union, Optional, cast
 import json
+import logging
+import re
+import warnings
 from abc import ABC, abstractmethod
+from pathlib import Path
+from typing import Any, Optional, Union, cast
 
 import h5py
-import numpy as np
 import jsonschema
+import numpy as np
 import xarray as xr
 from igor2 import binarywave
 
 from pynxtools_xps.reader_utils import (
     XPSMapper,
     _check_valid_value,
+    _format_value,
     _re_map_single_value,
     construct_data_key,
     construct_entry_name,
     convert_pascal_to_snake,
-    _format_value,
 )
-from pynxtools_xps.value_mappers import (
-    get_units_for_key,
-    convert_units,
-    convert_energy_type,
-)
-
 from pynxtools_xps.scienta.scienta_data_model import (
     ScientaHeader,
     ScientaRegion,
     scienta_igor_peak_schema,
 )
-
 from pynxtools_xps.scienta.scienta_mappings import (
     UNITS,
     VALUE_MAP,
-    _get_key_value_pair,
     _construct_date_time,
+    _get_key_value_pair,
 )
-from pynxtools_xps.value_mappers import convert_units, get_units_for_key
+from pynxtools_xps.value_mappers import (
+    convert_energy_type,
+    convert_units,
+    get_units_for_key,
+)
 
 logger = logging.getLogger(__name__)
 
 
 def _flatten_dict(
-    d: Dict[str, Any], parent_key: str = "", sep: str = "/"
-) -> Dict[str, Any]:
+    d: dict[str, Any], parent_key: str = "", sep: str = "/"
+) -> dict[str, Any]:
     """
     Flattens a nested dictionary into a single level with keys representing the hierarchy.
 
@@ -81,7 +78,7 @@ def _flatten_dict(
     Returns:
         Dict[str, Any]: The flattened dictionary.
     """
-    items: List[Tuple[str, Any]] = []
+    items: list[tuple[str, Any]] = []
     for k, v in d.items():
         new_key = f"{parent_key}{sep}{k}" if parent_key else k
         if isinstance(v, dict):
@@ -151,12 +148,12 @@ class MapperScienta(XPSMapper):
 
         spectra = copy.deepcopy(self.raw_data)
 
-        self._xps_dict["data"] = cast(Dict[str, Any], {})
+        self._xps_dict["data"] = cast(dict[str, Any], {})
 
         for spectrum in spectra:
             self._update_xps_dict_with_spectrum(spectrum)
 
-    def _update_xps_dict_with_spectrum(self, spectrum: Dict[str, Any]):
+    def _update_xps_dict_with_spectrum(self, spectrum: dict[str, Any]):
         """
         Map one spectrum from raw data to NXmpes-ready dict.
 
@@ -194,7 +191,7 @@ class MapperScienta(XPSMapper):
             self._fill_with_data_hdf5(spectrum, entry, entry_parent)
 
     def _fill_with_data_txt_ibw(
-        self, spectrum: Dict[str, Any], entry: str, entry_parent: str
+        self, spectrum: dict[str, Any], entry: str, entry_parent: str
     ):
         # If multiple spectra exist to entry, only create a new
         # xr.Dataset if the entry occurs for the first time.
@@ -256,7 +253,7 @@ class MapperScienta(XPSMapper):
         )
 
     def _fill_with_data_hdf5(
-        self, spectrum: Dict[str, Any], entry: str, entry_parent: str
+        self, spectrum: dict[str, Any], entry: str, entry_parent: str
     ):
         self._xps_dict["data"][entry] = {}
 
@@ -281,9 +278,9 @@ class ScientaTxtParser:
     # pylint: disable=too-few-public-methods
 
     def __init__(self):
-        self.lines: List[str] = []
+        self.lines: list[str] = []
         self.header = ScientaHeader()
-        self.spectra: List[Dict[str, Any]] = []
+        self.spectra: list[dict[str, Any]] = []
 
     def parse_file(self, file: Union[str, Path], **kwargs):
         """
@@ -375,8 +372,8 @@ class ScientaTxtParser:
             "in_data": False,
         }
 
-        energies: List[float] = []
-        intensities: List[float] = []
+        energies: list[float] = []
+        intensities: list[float] = []
 
         line_start_patterns = {
             "in_region": f"[Region {region_id}",
@@ -447,8 +444,8 @@ class ScientaIgorParser(ABC):
     """Parser for Scienta IBW exports."""
 
     def __init__(self):
-        self.lines: List[str] = []
-        self.spectra: List[Dict[str, Any]] = []
+        self.lines: list[str] = []
+        self.spectra: list[dict[str, Any]] = []
 
     def parse_file(self, file: Union[str, Path], **kwargs):
         """
@@ -479,15 +476,15 @@ class ScientaIgorParser(ABC):
         # measurement software.
         # formula = wave["formula"]
 
-        notes: Dict[str, Any] = self._parse_note(wave["note"])
+        notes: dict[str, Any] = self._parse_note(wave["note"])
 
         self.no_of_regions = len(data.shape)
 
-        spectrum: Dict[str, Any] = {
-            "data": cast(Dict[str, Any], {}),
-            "axis_labels": cast(List[str], []),
-            "data_labels": cast(List[str], []),
-            "units": cast(Dict[str, Any], {}),
+        spectrum: dict[str, Any] = {
+            "data": cast(dict[str, Any], {}),
+            "axis_labels": cast(list[str], []),
+            "data_labels": cast(list[str], []),
+            "units": cast(dict[str, Any], {}),
         }
 
         for i, (dim, unit) in enumerate(axes_labels_with_units):
@@ -514,16 +511,16 @@ class ScientaIgorParser(ABC):
         return self.spectra
 
     @abstractmethod
-    def _parse_note(self, bnote: bytes) -> Dict[str, Any]:
+    def _parse_note(self, bnote: bytes) -> dict[str, Any]:
         pass
 
     @abstractmethod
     def _parse_region_metadata(
-        self, region_id: int, notes: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, region_id: int, notes: dict[str, Any]
+    ) -> dict[str, Any]:
         return {}
 
-    def _parse_unit(self, bunit: bytes) -> List[Tuple[str, Optional[str]]]:
+    def _parse_unit(self, bunit: bytes) -> list[tuple[str, Optional[str]]]:
         """
         Extracts labels and units from a string containing one or more label-unit pairs.
         If no unit is present, it returns just the label.
@@ -558,7 +555,7 @@ class ScientaIgorParser(ABC):
         # If no matches, return the entire string as a label with no unit
         return [(convert_pascal_to_snake(unit.strip()), None)]
 
-    def axis_for_dim(self, wave_header: Dict[str, Any], dim: int) -> np.ndarray:
+    def axis_for_dim(self, wave_header: dict[str, Any], dim: int) -> np.ndarray:
         """
         Returns the axis values for a given dimension from the wave header.
 
@@ -580,7 +577,7 @@ class ScientaIgorParser(ABC):
             + wave_header["sfB"][dim]
         )
 
-    def axis_units_for_dim(self, wave_header: Dict[str, Any], dim: int) -> str:
+    def axis_units_for_dim(self, wave_header: dict[str, Any], dim: int) -> str:
         """
         Returns the unit for a given dimension from the wave header.
 
@@ -609,7 +606,7 @@ class ScientaIgorParser(ABC):
 class ScientaIgorParserOld(ScientaIgorParser):
     """Parser version for the old Scienta exporter (i.e., not the one used by the PEAK software)."""
 
-    def _parse_note(self, bnote: bytes) -> Dict[str, Any]:
+    def _parse_note(self, bnote: bytes) -> dict[str, Any]:
         """
         Parses the note field of the igor binarywave file.
 
@@ -639,8 +636,8 @@ class ScientaIgorParserOld(ScientaIgorParser):
         return notes
 
     def _parse_region_metadata(
-        self, region_id: int, notes: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, region_id: int, notes: dict[str, Any]
+    ) -> dict[str, Any]:
         region = ScientaRegion(region_id=region_id)
         region_fields = list(region.__dataclass_fields__.keys())
         overwritten_fields = ["region_id", "time_stamp", "data"]
@@ -670,7 +667,7 @@ class ScientaIgorParserOld(ScientaIgorParser):
 class ScientaIgorParserPEAK(ScientaIgorParser):
     """Parser version for data exported by Scienta's PEAK software."""
 
-    def _parse_note(self, bnote: bytes) -> Dict[str, Any]:
+    def _parse_note(self, bnote: bytes) -> dict[str, Any]:
         """
         Parses the note field of the igor binarywave file.
 
@@ -705,9 +702,9 @@ class ScientaIgorParserPEAK(ScientaIgorParser):
     def _parse_region_metadata(
         self,
         region_id: int,
-        notes: Dict[str, Any],
-    ) -> Dict[str, Any]:
-        region: Dict[str, Any] = {"region_id": region_id}
+        notes: dict[str, Any],
+    ) -> dict[str, Any]:
+        region: dict[str, Any] = {"region_id": region_id}
         region |= _flatten_dict(notes)
         region["timestamp"] = _construct_date_time(region["Date"], region["Time"])
 
@@ -716,7 +713,7 @@ class ScientaIgorParserPEAK(ScientaIgorParser):
 
 class ScientaHdf5Parser:
     def __init__(self):
-        self.spectra: List[Dict[str, Any]] = []
+        self.spectra: list[dict[str, Any]] = []
 
     def parse_file(self, file: Union[str, Path], **kwargs):
         """
@@ -749,7 +746,7 @@ class ScientaHdf5Parser:
                     - The formatted key (converted to snake_case and remapped if needed).
                     - The formatted value, with numeric value processed and remapped according to `VALUE_MAP`.
             """
-            kwargs: Dict[str, Any] = {}
+            kwargs: dict[str, Any] = {}
 
             if key.endswith(("start_time", "stop_time")):
                 kwargs["possible_date_formats"] = [
@@ -758,7 +755,7 @@ class ScientaHdf5Parser:
                     "%Y-%m-%dT%H:%M:%S%z",
                 ]
             value = _re_map_single_value(key, value_str, VALUE_MAP, **kwargs)
-            value = _format_value(value)
+            value = _format_value(value)  # type: ignore
 
             return value
 

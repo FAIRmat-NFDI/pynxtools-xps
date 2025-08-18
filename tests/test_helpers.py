@@ -18,13 +18,12 @@
 Tests for helper functions
 """
 
-import re
-import pytest
 import datetime
-from typing import Dict
+import re
+
+import pytest
 
 from pynxtools_xps.reader_utils import extract_unit
-
 from pynxtools_xps.value_mappers import get_units_for_key, parse_datetime
 
 
@@ -47,7 +46,7 @@ from pynxtools_xps.value_mappers import get_units_for_key, parse_datetime
         ("not_mapped/[value]", {}, "value"),
     ],
 )
-def test_get_units_for_key(unit_key: str, unit_map: Dict[str, str], expected_unit: str):
+def test_get_units_for_key(unit_key: str, unit_map: dict[str, str], expected_unit: str):
     result = get_units_for_key(unit_key, unit_map)
     assert result == expected_unit, f"Expected {expected_unit} but got {result}"
 
@@ -75,7 +74,7 @@ def test_get_units_for_key(unit_key: str, unit_map: Dict[str, str], expected_uni
 def test_extract_unit(
     key: str,
     value: str,
-    unit_missing: Dict[str, str],
+    unit_missing: dict[str, str],
     expected_value: str,
     expected_unit: str,
 ):

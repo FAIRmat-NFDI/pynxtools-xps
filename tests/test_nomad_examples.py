@@ -18,6 +18,7 @@
 """Test for NOMAD examples in XPS reader plugin."""
 
 import os
+
 import pytest
 
 try:
@@ -29,13 +30,12 @@ except ImportError:
     )
 
 from pynxtools.testing.nomad_example import (
+    example_upload_entry_point_valid,
     get_file_parameter,
     parse_nomad_examples,
-    example_upload_entry_point_valid,
 )
 
 from pynxtools_xps.nomad.entrypoints import xps_example
-
 
 EXAMPLE_PATH = os.path.join(
     os.path.dirname(__file__),

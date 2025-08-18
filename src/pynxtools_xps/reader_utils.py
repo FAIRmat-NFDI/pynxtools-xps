@@ -18,19 +18,18 @@
 Helper functions for populating NXmpes template
 """
 
-import os
 import logging
+import os
 import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import numpy as np
 import pint
-from scipy.interpolate import interp1d
-
 from pynxtools.units import ureg
+from scipy.interpolate import interp1d
 
 logger = logging.getLogger(__name__)
 
@@ -63,8 +62,8 @@ class XPSMapper(ABC):
 
     def __init__(self):
         self.file: Union[str, Path] = ""
-        self.raw_data: List[str] = []
-        self._xps_dict: Dict[str, Any] = {}
+        self.raw_data: list[str] = []
+        self._xps_dict: dict[str, Any] = {}
 
         self.parser = None
 
@@ -74,11 +73,6 @@ class XPSMapper(ABC):
         Select the correct parser for the file extension and format.
 
         Should be implemented by the inheriting mapper.
-
-        Returns
-        -------
-        Parser
-
         """
 
     @property
@@ -86,7 +80,7 @@ class XPSMapper(ABC):
         """Getter property."""
         return self._xps_dict
 
-    def parse_file(self, file, **kwargs):
+    def parse_file(self, file: Union[str, Path], **kwargs):
         """
         Parse the file using the Scienta TXT parser.
 
@@ -128,42 +122,32 @@ def convert_pascal_to_snake(str_value: str):
     return snake_case_cleaned.lower()
 
 
-def safe_arange_with_edges(start: float, stop: float, step: float):
+def safe_arange_with_edges(start: float, stop: float, step: float) -> np.ndarray:
     """
     In order to avoid float point errors in the division by step.
 
-    Parameters
-    ----------
-    start : float
-        Smallest value.
-    stop : float
-        Biggest value.
-    step : float
-        Step size between points.
-
-    Returns
-    -------
-    ndarray
-        1D array with values in the interval (start, stop),
-        incremented by step.
+    Args:
+        start (float): Lower limit.
+        stop (float): Upper limit.
+        step (float): Step size between points.
+    Returns:
+        ndarray
+            1D array with values in the interval (start, stop),
+            incremented by step.
 
     """
     return step * np.arange(start / step, (stop + step) / step)
 
 
-def check_uniform_step_width(lst: List[float]):
+def check_uniform_step_width(lst: list[float]) -> bool:
     """
     Check to see if a non-uniform step width is used in an list.
 
-    Parameters
-    ----------
-    lst : list
-        List of data points.
+    Args:
+        lst (list): List of data points.
 
-    Returns
-    -------
-    bool
-        False if list is non-uniformally spaced.
+    Returns:
+        bool: False if list is non-uniformally spaced.
 
     """
     start = lst[0]
@@ -175,21 +159,17 @@ def check_uniform_step_width(lst: List[float]):
     return True
 
 
-def get_minimal_step(lst):
+def get_minimal_step(lst: Union[list[float], np.ndarray]) -> float:
     """
     Return the minimal difference between two consecutive values
     in a list. Used for extracting minimal difference in a
     list with non-uniform spacing.
 
-    Parameters
-    ----------
-    lst : list or np.ndarray
-        List of data points.
+    Args:
+        lst (list): List of data points.
 
-    Returns
-    -------
-    step : float
-        Non-zero, minimal distance between consecutive data
+    Returns:
+        step (float): Non-zero, minimal distance between consecutive data
         points in lst.
 
     """
@@ -200,25 +180,19 @@ def get_minimal_step(lst):
     return step
 
 
-def _resample_array(y, x0, x1):
+def _resample_array(y: np.ndarray, x0: np.ndarray, x1: np.ndarray) -> np.ndarray:
     """
     Resample an array (y) which has the same initial spacing
     of another array(x0), based on the spacing of a new
     array(x1).
 
-    Parameters
-    ----------
-    y : array
-        Lineshape array or list.
-    x0 : array
-        x array with old spacing.
-    x1 : array
-        x array with new spacing.
+    Args:
+        y (np.ndarray): Lineshape array or list.
+        x0 (np.ndarray): x array with old spacing.
+        x1 (np.ndarray): x array with new spacing.
 
-    Returns
-    -------
-    list
-        Interpolated y array.
+    Returns:
+        np.ndarray: Interpolated y array.
 
     """
     # pylint: disable=invalid-name
@@ -226,7 +200,7 @@ def _resample_array(y, x0, x1):
     return interp_fn(x1)
 
 
-def interpolate_arrays(x: List[float], array_list: List[np.ndarray]):
+def interpolate_arrays(x: list[float], array_list: list[np.ndarray]):
     """
     Interpolate data points in case a non-uniform step width was used.
 
@@ -255,12 +229,12 @@ def interpolate_arrays(x: List[float], array_list: List[np.ndarray]):
     else:
         new_x = safe_arange_with_edges(start, stop, step)
 
-    output_list = [_resample_array(arr, x, new_x) for arr in array_list]
+    output_list = [_resample_array(arr, np.array(x), new_x) for arr in array_list]
 
     return new_x, output_list
 
 
-def check_for_allowed_in_list(value, allowed_values: List[Any]):
+def check_for_allowed_in_list(value: Any, allowed_values: list[Any]):
     """
     Check if a value is a list of values.
     If not, raise Exception.
@@ -271,7 +245,7 @@ def check_for_allowed_in_list(value, allowed_values: List[Any]):
     return value
 
 
-def re_map_keys(dictionary: Dict[str, Any], key_map: Dict[str, str]):
+def re_map_keys(dictionary: dict[str, Any], key_map: dict[str, str]) -> dict[str, Any]:
     """
     Map the keys in a dictionary such that they are replaced by the values
     in key_map and return the dictionary with replaced keys.
@@ -279,12 +253,11 @@ def re_map_keys(dictionary: Dict[str, Any], key_map: Dict[str, str]):
     This is often used to map some metadata keys in a vendor file format
     to the common metadata names. used in NXmpes/NXxps.
 
-    Parameters
-    ----------
-    dictionary : Dict[str, Any]
-        Dictionary with XPS metadata.
-    key_map : Dict[str, str]
-        Mapping of keys from vendor file format to common metadata names.
+    Args:
+        dictionary (dict[str, Any]): Dictionary with XPS metadata.
+        key_map (dict[str, str]): Mapping of keys from vendor file format
+        to common metadata names.
+
         Example from the VMS parser:
             key_map = {
                "block_id": "region",
@@ -293,10 +266,8 @@ def re_map_keys(dictionary: Dict[str, Any], key_map: Dict[str, str]):
                "source_energy": "excitation_energy",
             }
 
-    Returns
-    -------
-    dictionary : Dict[str, Any]
-        Dictionary with changed keys.
+    Returns:
+        dictionary (dict[str, Any]): Dictionary with changed keys.
 
     """
     for key in key_map:
@@ -306,7 +277,9 @@ def re_map_keys(dictionary: Dict[str, Any], key_map: Dict[str, str]):
     return dictionary
 
 
-def re_map_values(dictionary: Dict[str, Any], map_functions: Dict[str, Any]):
+def re_map_values(
+    dictionary: dict[str, Any], map_functions: dict[str, Any]
+) -> dict[str, Any]:
     """
     Map the values in a dicitionary using functions defined in a
     mapping functions dictionary.
@@ -314,24 +287,20 @@ def re_map_values(dictionary: Dict[str, Any], map_functions: Dict[str, Any]):
     This is often used to map some metadata in a vendor file format
     to the enumerations used in NXmpes/NXxps.
 
-    Parameters
-    ----------
-    dictionary : Dict[str, Any]
-        Dictionary with XPS metadata.
-    map_functions : Dict[str, Any]
-       Mapping functions for keys in the dictionary.
-       Example from the SLE parser:
-           map_functions = {
-               "energy/@type": self._change_energy_type,
-               "excitation_energy": self._convert_excitation_energy,
-               "time_stamp": self._convert_date_time,
-               "energy_scan_mode": self._convert_energy_scan_mode,
-           }
+    Args:
+        dictionary (dict[str, Any]): Dictionary with XPS metadata.
+        map_functions (dict[str, Any]): Mapping functions for keys in the dictionary.
 
-    Returns
-    -------
-    dictionary : Dict[str, Any]
-        Dictionary with changed values.
+        Example from the SLE parser:
+        map_functions = {
+            "energy/@type": self._change_energy_type,
+            "excitation_energy": self._convert_excitation_energy,
+            "time_stamp": self._convert_date_time,
+            "energy_scan_mode": self._convert_energy_scan_mode,
+        }
+
+    Returns:
+        dictionary (dict[str, Any]): Dictionary with changed values.
 
     """
     for key, map_fn in map_functions.items():
@@ -343,9 +312,9 @@ def re_map_values(dictionary: Dict[str, Any], map_functions: Dict[str, Any]):
 def _re_map_single_value(
     input_key: str,
     value: Optional[Union[str, int, float, bool, np.ndarray]],
-    map_functions: Dict[str, Any],
+    map_functions: dict[str, Any],
     **kwargs,
-):
+) -> Optional[Union[str, int, float, bool, np.ndarray]]:
     """
     Map the values returned from the file to the preferred format for
     the parser output.
@@ -364,18 +333,17 @@ def _re_map_single_value(
 
 def _check_valid_value(value: Union[str, int, float, bool, np.ndarray]) -> bool:
     """
-    Check if a string or an array is empty.
+    Check if a value is valid.
 
-    Parameters
-    ----------
-    value : obj
-        For testing, this can be a str or a np.ndarray.
+    Strings and arrays are considered valid if they are non-empty.
+    Numbers and booleans are always considered valid.
 
-    Returns
-    -------
-    bool
-        True if the string or np.ndarray is not empty.
+    Args:
+        value (str | int | float | bool | np.ndarray):
+            The value to check. Can be a scalar, string, or NumPy array.
 
+    Returns:
+        bool: True if the value is valid, False otherwise.
     """
     if isinstance(value, (str, int, float)) and value is not None:
         return True
@@ -386,33 +354,29 @@ def _check_valid_value(value: Union[str, int, float, bool, np.ndarray]) -> bool:
     return False
 
 
-def drop_unused_keys(dictionary: Dict[str, Any], keys_to_drop: List[str]):
+def drop_unused_keys(dictionary: dict[str, Any], keys_to_drop: list[str]) -> None:
     """
-    Remove any keys parsed from sle that are not needed
+    Remove unwanted keys from a dictionary.
 
-    Parameters
-    ----------
-    dictionary : dict
-        Dictionary with data and metadata for a spectrum.
-    keys_to_drop : list
-        List of metadata keys that are not needed.
+    Args:
+        dictionary (dict[str, Any]):
+            Dictionary containing data and metadata for a spectrum.
+        keys_to_drop (list[str]):
+            List of keys that should be removed from the dictionary.
 
-    Returns
-    -------
-    None.
-
+    Returns:
+        None
     """
     for key in keys_to_drop:
-        if key in dictionary:
-            dictionary.pop(key)
+        dictionary.pop(key, None)
 
 
-def update_dict_without_overwrite(d1: Dict[str, Any], d2: Dict[str, Any]):
+def update_dict_without_overwrite(d1: dict[str, Any], d2: dict[str, Any]):
     """Update d1 with d2, but don't overwrite existing keys."""
     d1.update({k: v for k, v in d2.items() if k not in d1})
 
 
-def construct_data_key(spectrum: Dict[str, Any]) -> str:
+def construct_data_key(spectrum: dict[str, Any]) -> str:
     """
     Construct a key for the 'data' field of the xps_dict.
     Output example: cycle0_scan0.
@@ -449,28 +413,27 @@ def align_name_part(name_part: str):
     return name_part.translate(translation_table)
 
 
-def construct_entry_name(parts: List[str]) -> str:
+def construct_entry_name(parts: list[str]) -> str:
     """Construct name for the NXentry instances."""
     if len(parts) == 1:
         return align_name_part(parts[0])
     return "__".join([align_name_part(part) for part in parts])
 
 
-def _format_value(value: Union[str, float, int]) -> Union[float, int, str]:
+def _format_value(value: Union[int, float, str]) -> Union[int, float, str]:
     """
     Formats the input value as an int or float if it's a numeric string.
 
-    If a string represents a float (e.g., "5.0"), it remains a float even if it has no decimals.
+    If a string represents a float (e.g., "5.0"), it remains a float even if it
+    has no decimals.
 
-    Parameters
-    ----------
-    value : Union[str, float, int]
-        The input value to format.
+    Args:
+        value (Union[str, float, int]): The input value to format.
 
-    Returns
-    -------
-    Union[float, int, str]
-        The formatted value, converted to int or float if applicable; otherwise, the original value.
+    Returns:
+        Union[int, float, str]: The formatted value as int or float if numeric;
+                                otherwise, returns the original value.
+
     """
     if isinstance(value, str) and re.match(r"^-?\d*\.?\d+(?:[eE][-+]?\d+)?$", value):
         # Check for decimal to ensure float, even if the decimal part is zero
@@ -483,7 +446,7 @@ UNIT_PATTERN = re.compile(r"^([-+]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\s*([a-zA-Z/\s
 
 def split_value_and_unit(
     value_str: str,
-) -> Tuple[Union[int, float, str], str]:
+) -> tuple[Union[int, float, str], str]:
     """
     Splits a string into a numerical value and its associated unit.
 
@@ -492,17 +455,14 @@ def split_value_and_unit(
     the value (as a float) and the unit (as a string). If the string does not match
     this pattern, it returns the original string.
 
-    Parameters
-    ----------
-    value : str
-        The input string to be split.
+    Args:
+        value_str (str): The input string to split.
 
-    Returns
-    -------
-    (Union[Tuple[Union[int, float], str], str])
-        - A tuple with the value and unit if the string matches the pattern.
-        - A tuple with he original string and an empty string if it does not
-          match the pattern.
+    Returns:
+        Tuple[Union[int, float, str], str]:
+            - (value, unit) if a numeric value is detected.
+            - (original string, "") if no numeric value is detected.
+
     """
     match = UNIT_PATTERN.match(value_str)
     if match:
@@ -513,38 +473,31 @@ def split_value_and_unit(
 
 
 def extract_unit(
-    key: str, value_str: str, unit_missing: Dict[str, str] = {}
-) -> Tuple[Union[int, float, str], str]:
+    key: str, value_str: str, unit_missing: Optional[dict[str, str]] = None
+) -> tuple[Union[int, float, str], str]:
     """
-    Extracts a numeric value and its associated unit from a metadata string.
+    Extract a numeric value and its associated unit from a metadata string.
 
     The function identifies and separates numerical and unit components from
     the `value_str` string. If no unit is found in `value_str`, it checks the
     `unit_missing` dictionary for a default unit.
 
     Example:
-        analyzer_work_function: "4.506eV"
-        -> ("4.506", "eV")
+        analyzer_work_function = "4.506eV"
+        -> (4.506, "eV")
 
-    Parameters
-    ----------
-    key : str
-        Key of the associated value.
-    value_str : str
-        Combined unit and value information.
-    unit_missing : Dict[str, str], optional
-        Dictionary with default units for keys that do not have a unit attached.
-        By default, this dictionary is None.
+    Args:
+        key (str): Key associated with the value.
+        value_str (str): Combined numeric value and unit as a string.
+        unit_missing (Optional[dict[str, str]]): Optional dictionary with default units
+            for keys missing units. Defaults to None.
 
-    Returns
-    -------
-    Tuple[Union[int, float, str], str]
-        - A tuple with the numeric value (as int, float, or str) and associated unit
-          if extracted from `value_str`.
-        - If no unit is found in `value_str`, checks `unit_missing`
-          for a default unit.
-        - If no unit is found in both `value_str` and `unit_missing`,
-          returns an empty string for the unit.
+    Returns:
+        tuple[Union[int, float, str], str]:
+            - A tuple with the numeric value (int, float, or str) and the unit.
+            - If no unit is found in `value_str`, it uses `unit_missing` if available.
+            - If no unit is found in either, returns an empty string for the unit.
+
     """
     value, unit = split_value_and_unit(value_str)
 
@@ -558,16 +511,9 @@ def check_units(template_path: str, unit: str) -> None:
     """
     Check that the unit is a valid pint unit.
 
-    Parameters
-    ----------
-    template_path : str
-        Path of a Template object.
-    unit : str
-        String representation of a unit.
-
-    Returns
-    -------
-    None.
+    Args:
+        template_path (str): Path of a Template object.
+        unit (str): String representation of a unit.
 
     """
     error_txt = f"Invalid unit '{unit}' at path: {template_path}"

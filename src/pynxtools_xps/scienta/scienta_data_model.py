@@ -19,6 +19,7 @@ Data model for data from Scienta instruments.
 """
 
 from dataclasses import dataclass, field
+
 import numpy as np
 
 from pynxtools_xps.reader_utils import XpsDataclass

@@ -19,20 +19,17 @@
 Mappings for Scienta reader.
 """
 
-import re
 import datetime
-from typing import Dict, Optional
+import re
+from typing import Optional
+
 import numpy as np
 
-from pynxtools_xps.reader_utils import (
-    convert_pascal_to_snake,
-    _re_map_single_value,
-)
-
+from pynxtools_xps.reader_utils import _re_map_single_value, convert_pascal_to_snake
 from pynxtools_xps.value_mappers import (
-    convert_energy_type,
-    convert_energy_scan_mode,
     convert_detector_acquisition_mode,
+    convert_energy_scan_mode,
+    convert_energy_type,
     convert_slit_type,
     parse_datetime,
 )
@@ -104,7 +101,7 @@ def _construct_date_time(date_string: str, time_string: str) -> Optional[str]:
         ) from err
 
 
-KEY_MAP: Dict[str, str] = {
+KEY_MAP: dict[str, str] = {
     "number_of_regions": "no_of_regions",
     "version": "software_version",
     "dimension_name": "energy_units",
@@ -202,14 +199,14 @@ def _get_key_value_pair(line: str):
 
     """
     try:
-        key, value = line.split("=")
+        key, value_str = line.split("=")
         key = convert_pascal_to_snake(key)
         key = KEY_MAP.get(key, key)
         if "dimension" in key:
             key_part = f"dimension_{key.rsplit('_')[-1]}"
             key = KEY_MAP.get(key_part, key_part)
 
-        value = _re_map_single_value(key, value, VALUE_MAP)
+        value = _re_map_single_value(key, value_str, VALUE_MAP)
 
     except ValueError:
         key, value = "", ""

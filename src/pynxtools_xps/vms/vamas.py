@@ -21,43 +21,43 @@ VAMAS standard, to be passed to MPES nxdl (NeXus Definition Language)
 template.
 """
 
-from copy import deepcopy
-import logging
 import datetime
-from pathlib import Path
-from typing import Any, Dict, List, Union
+import logging
 import warnings
+from copy import deepcopy
 from itertools import groupby
-import xarray as xr
-import numpy as np
+from pathlib import Path
+from typing import Any, Union
 
-from pynxtools_xps.vms.vamas_data_model import (
-    VamasHeader,
-    VamasBlock,
-    ExpVariable,
-    VamasAdditionalParam,
-    OrdinateValue,
-)
-from pynxtools_xps.vms.vamas_comment_handler import handle_comments
+import numpy as np
+import xarray as xr
 
 from pynxtools_xps.reader_utils import (
     XPSMapper,
-    construct_entry_name,
-    construct_data_key,
-    convert_pascal_to_snake,
-    get_minimal_step,
     check_for_allowed_in_list,
+    construct_data_key,
+    construct_entry_name,
+    convert_pascal_to_snake,
+    drop_unused_keys,
+    get_minimal_step,
     re_map_keys,
     re_map_values,
-    drop_unused_keys,
     update_dict_without_overwrite,
 )
 from pynxtools_xps.value_mappers import (
-    convert_measurement_method,
-    convert_energy_type,
     convert_energy_scan_mode,
-    get_units_for_key,
+    convert_energy_type,
+    convert_measurement_method,
     convert_units,
+    get_units_for_key,
+)
+from pynxtools_xps.vms.vamas_comment_handler import handle_comments
+from pynxtools_xps.vms.vamas_data_model import (
+    ExpVariable,
+    OrdinateValue,
+    VamasAdditionalParam,
+    VamasBlock,
+    VamasHeader,
 )
 
 logger = logging.getLogger(__name__)
@@ -137,7 +137,7 @@ class VamasMapper(XPSMapper):
 
     def __init__(self):
         self.multiple_spectra_groups: bool = True
-        self.duplicate_spectrum_types: List[str] = []
+        self.duplicate_spectrum_types: list[str] = []
 
         super().__init__()
 
@@ -157,7 +157,7 @@ class VamasMapper(XPSMapper):
     def construct_data(self):
         """Map VMS format to NXmpes-ready dict."""
 
-        def get_duplicate_spectrum_types(spectra: List[Dict]) -> set:
+        def get_duplicate_spectrum_types(spectra: list[dict]) -> set:
             """
             Find all duplicate 'spectrum_type' values in the given list of spectra.
 
@@ -177,7 +177,7 @@ class VamasMapper(XPSMapper):
 
         spectra = deepcopy(self.raw_data)
 
-        self._xps_dict["data"]: Dict[str, Any] = {}
+        self._xps_dict["data"]: dict[str, Any] = {}
 
         if len({spectrum.get("group_name") for spectrum in spectra}) == 1:
             self.multiple_spectra_groups = False
@@ -188,7 +188,7 @@ class VamasMapper(XPSMapper):
         for spectrum in spectra:
             self._update_xps_dict_with_spectrum(spectrum)
 
-    def _update_xps_dict_with_spectrum(self, spectrum: Dict[str, Any]):
+    def _update_xps_dict_with_spectrum(self, spectrum: dict[str, Any]):
         """
         Map one spectrum from raw data to NXmpes-ready dict.
         """
@@ -311,10 +311,10 @@ class VamasParser:
         vamas attribute keys, which are used, depending on how the
         vamas file is formatted.
         """
-        self.data: List[str] = []
+        self.data: list[str] = []
 
         self.header = VamasHeader()
-        self.blocks: List[VamasBlock] = []
+        self.blocks: list[VamasBlock] = []
 
     def parse_file(self, file: Union[str, Path], **kwargs):
         """Parse the vamas file into a list of dictionaries.
@@ -631,7 +631,7 @@ class VamasParser:
 
     def _add_regular_data(self, block: VamasBlock):
         """Parse data with regularly spaced energy axis."""
-        data_dict: Dict[str, np.ndarray] = {}
+        data_dict: dict[str, np.ndarray] = {}
 
         start = float(block.abscissa_start)
         step = float(block.abscissa_step)
@@ -665,7 +665,7 @@ class VamasParser:
 
     def _add_irregular_data(self, block: VamasBlock):
         """Parse data with regularly spaced energy axis."""
-        data_dict: Dict[str, np.ndarray] = {}
+        data_dict: dict[str, np.ndarray] = {}
 
         block_data = np.array(self.data[: block.num_ord_values], dtype=float)
 
@@ -702,7 +702,7 @@ class VamasParser:
         """
         pass
 
-    def _get_scan_numbers_for_spectra(self, spectra: List[Dict]):
+    def _get_scan_numbers_for_spectra(self, spectra: list[dict]):
         """
         For a flat list of spectra dictionaries, group the spectra
         by group name and spectrum type and iteratively give them

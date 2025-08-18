@@ -25,9 +25,10 @@ import datetime
 import logging
 import os
 import re
-import sys
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union, Pattern, Callable
+from re import Pattern
+from typing import Any, Callable, Optional, Union
 
 import numpy as np
 from pynxtools.dataconverter.helpers import extract_atom_types
@@ -35,15 +36,14 @@ from pynxtools.dataconverter.readers.multi.reader import MultiFormatReader
 from pynxtools.dataconverter.readers.utils import parse_yml
 from pynxtools.dataconverter.template import Template
 
-from pynxtools_xps.reader_utils import check_units
-
 from pynxtools_xps.phi.spe_pro_phi import MapperPhi
+from pynxtools_xps.reader_utils import check_units
 from pynxtools_xps.scienta.scienta_reader import MapperScienta
 from pynxtools_xps.specs.sle.sle_specs import SleMapperSpecs
 from pynxtools_xps.specs.xml.xml_specs import XmlMapperSpecs
 from pynxtools_xps.specs.xy.xy_specs import XyMapperSpecs
-from pynxtools_xps.vms.vamas_export import TxtMapperVamasExport, CsvMapperVamasResult
 from pynxtools_xps.vms.vamas import VamasMapper
+from pynxtools_xps.vms.vamas_export import CsvMapperVamasResult, TxtMapperVamasExport
 
 logger = logging.getLogger("pynxtools")
 
@@ -65,18 +65,18 @@ CONVERT_DICT = {
     "substance": "SUBSTANCE[substance]",
 }
 
-REPLACE_NESTED: Dict[str, str] = {}
+REPLACE_NESTED: dict[str, str] = {}
 
 CHAN_COUNT = "_chan"
 SCAN_COUNT = "_scan"
 
 
-def _get_channel_vars(data_vars: List[str]):
+def _get_channel_vars(data_vars: list[str]) -> list[str]:
     """Get all data vars that containt _chan."""
     return [data_var for data_var in data_vars if CHAN_COUNT in data_var]
 
 
-def _get_scan_vars(data_vars: List[str]):
+def _get_scan_vars(data_vars: list[str]) -> list[str]:
     """Get all data vars that contain _scan, but not _chan."""
     return [
         data_var
@@ -85,12 +85,11 @@ def _get_scan_vars(data_vars: List[str]):
     ]
 
 
-def concatenate_values(value1, value2):
+def concatenate_values(value1: Any, value2: Any) -> Any:
     """
     Concatenate two values of same type to be stored
     in xps_data_dict. Dicts are merged and every other object is
     appended to a list.
-
     """
     if isinstance(value1, dict) and isinstance(value2, dict):
         concatenated = {**value1, **value2}
@@ -104,7 +103,7 @@ def concatenate_values(value1, value2):
     return concatenated
 
 
-def _check_multiple_extensions(file_paths: Tuple[str] = None) -> bool:
+def _check_multiple_extensions(file_paths: Iterable[str | Path] | None = None) -> bool:
     """
     Determines if a list of file paths contains more than one unique file extension.
 
@@ -113,7 +112,7 @@ def _check_multiple_extensions(file_paths: Tuple[str] = None) -> bool:
     is identified as the substring after the last period (`.`) in the file name.
 
     Parameters:
-        file_paths (Tuple[str]): A tuple of file paths, which can be strings or
+        file_paths (tuple[str]): A tuple of file paths, which can be strings or
                                  `Path` objects. Defaults to None.
 
     Returns:
@@ -131,17 +130,17 @@ def _check_multiple_extensions(file_paths: Tuple[str] = None) -> bool:
 class XPSReader(MultiFormatReader):
     """Reader for XPS."""
 
-    supported_nxdls = [
+    supported_nxdls: list[str] = [
         "NXmpes",
         "NXxps",
     ]
 
-    reader_dir = Path(__file__).parent
+    reader_dir: Path = Path(__file__).parent
     config_file: Optional[Union[str, Path]] = reader_dir.joinpath(
         "config", "template.json"
     )
 
-    __prmt_file_ext__ = [
+    __prmt_file_ext__: list[str] = [
         ".h5",
         ".hdf5",
         ".ibw",
@@ -156,10 +155,10 @@ class XPSReader(MultiFormatReader):
         ".txt",  # This is last because of the processing_order
     ]
 
-    __prmt_metadata_file_ext__ = {".csv": ".txt"}
+    __prmt_metadata_file_ext__: dict[str, str] = {".csv": ".txt"}
 
-    __vendors__ = ["kratos", "phi", "scienta", "specs", "unkwown"]
-    __prmt_vndr_cls: Dict[str, Dict] = {
+    __vendors__: list[str] = ["kratos", "phi", "scienta", "specs", "unkwown"]
+    __prmt_vndr_cls: dict[str, dict[str, Any]] = {
         ".csv": {"unknown": CsvMapperVamasResult},
         ".h5": {"scienta": MapperScienta},
         ".hdf5": {"scienta": MapperScienta},
@@ -177,29 +176,29 @@ class XPSReader(MultiFormatReader):
         ".xy": {"specs": XyMapperSpecs},
     }
 
-    __file_err_msg__ = (
+    __file_err_msg__: str = (
         "Need an XPS data file with one of the following extensions: "
         f"data files: {__prmt_file_ext__}, metadata files: {__prmt_metadata_file_ext__}."
     )
 
-    __vndr_err_msg__ = (
+    __vndr_err_msg__: str = (
         f"Need an XPS data file from one of the following vendors: {__vendors__}"
     )
 
     def __init__(self, config_file: Optional[str] = None, *args, **kwargs):
         super().__init__(config_file, *args, **kwargs)
 
-        self.xps_data_dicts: List[Dict[str, Any]] = []
-        self.xps_data: Dict[str, Any] = {}
-        self.eln_data: Dict[str, Any] = {}
+        self.xps_data_dicts: list[dict[str, Any]] = []
+        self.xps_data: dict[str, Any] = {}
+        self.eln_data: dict[str, Any] = {}
 
-        self.extensions = {
+        self.extensions: dict[str, Callable] = {
             ".yml": self.handle_eln_file,
             ".yaml": self.handle_eln_file,
             ".json": self.set_config_file,
         }
 
-        self.processing_order = (
+        self.processing_order: list[str] = (
             XPSReader.__prmt_file_ext__
             + list(XPSReader.__prmt_metadata_file_ext__.keys())
             + list(self.extensions.keys())
@@ -210,15 +209,9 @@ class XPSReader(MultiFormatReader):
         ):
             self.extensions[ext] = self.handle_data_file
 
-        self.processing_order = XPSReader.__prmt_file_ext__ + [
-            ".yml",
-            ".yaml",
-            ".json",
-        ]
-
     def set_config_file(
         self, file_path: Optional[Union[str, Path]], replace: bool = True
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if not file_path:
             return {}
 
@@ -235,12 +228,12 @@ class XPSReader(MultiFormatReader):
 
         return {}
 
-    def handle_eln_file(self, file_path: str) -> Dict[str, Any]:
+    def handle_eln_file(self, file_path: str) -> dict[str, Any]:
         """
         Loads ELN file and handles specific cases.
         """
 
-        def combine_and_unique_string(string: str, elements: List[str]) -> str:
+        def combine_and_unique_string(string: str, elements: list[str]) -> str:
             """
             Combines a comma-separated string and a list into a single string with unique elements.
 
@@ -303,7 +296,7 @@ class XPSReader(MultiFormatReader):
 
         return {}
 
-    def handle_data_file(self, file_path: str) -> Dict[str, Any]:
+    def handle_data_file(self, file_path: str) -> dict[str, Any]:
         def _check_for_vendors(file_path: str) -> str:
             """
             Check for the vendor name of the XPS data file.
@@ -323,15 +316,10 @@ class XPSReader(MultiFormatReader):
             """
             Search for a vendor names in a txt file
 
-            Parameters
-            ----------
-            file : str
-                XPS txt file.
-
-            Returns
-            -------
-            vendor
-                Vendor name if that name is in the txt file.
+            Args:
+                file (str): XPS txt file
+            Returns:
+                str: vendor (str): Vendor name if that name is in the txt file or "unknown"
 
             """
             vendor_dict = XPSReader.__prmt_vndr_cls[".txt"]
@@ -387,13 +375,13 @@ class XPSReader(MultiFormatReader):
 
         return {}
 
-    def get_entry_names(self) -> List[str]:
+    def get_entry_names(self) -> list[str]:
         """
         Returns a list of entry names which should be constructed from the data.
         Defaults to creating a single entry named "entry".
         """
         # Track entries for using for eln data
-        entries: List[str] = []
+        entries: list[str] = []
 
         try:
             for entry in self.xps_data["data"]:
@@ -406,14 +394,14 @@ class XPSReader(MultiFormatReader):
 
         return list(dict.fromkeys(entries))
 
-    def setup_template(self) -> Dict[str, Any]:
+    def setup_template(self) -> dict[str, Any]:
         """
         Setups the initial data in the template.
         """
         # TODO: Set fixed information, e.g., about the reader.
         return {}
 
-    def handle_objects(self, objects: Tuple[Any]) -> Dict[str, Any]:
+    def handle_objects(self, objects: tuple[Any]) -> dict[str, Any]:
         """
         Handles the objects passed into the reader.
         """
@@ -434,24 +422,20 @@ class XPSReader(MultiFormatReader):
         combines the different data sets from the XPS files and ensures
         that entry names are different and that no data is overwritten.
 
-        Returns
-        -------
-        None
-
         """
 
         def check_for_same_entries(
-            dicts: List[Dict[str, Any]],
-        ) -> Optional[Tuple[Set[str], List[Set[int]]]]:
+            dicts: list[dict[str, Any]],
+        ) -> Optional[tuple[set[str], list[set[int]]]]:
             """
             Checks whether the input dictionaries have the same entries and identifies which
             dictionaries contain each common entry.
 
             Args:
-                dicts (List[Dict[str, any]]): A list of dictionaries with keys potentially containing entries.
+                dicts (list[dict[str, any]]): A list of dictionaries with keys potentially containing entries.
 
             Returns:
-                Optional[Tuple[Set[str], List[Set[int]]]]:
+                Optional[tuple[Set[str], list[Set[int]]]]:
                 - A tuple where:
                   - The first element is a set of common entries found across the dictionaries.
                   - The second element is a list of sets, where each set contains the indices of dictionaries
@@ -460,7 +444,7 @@ class XPSReader(MultiFormatReader):
             """
             entry_pattern = re.compile(r"/ENTRY\[(.*?)\]")
 
-            entry_to_dicts: Dict[str, Set] = {}
+            entry_to_dicts: dict[str, set] = {}
 
             for i, d in enumerate(dicts):
                 for key in d.keys():
@@ -518,7 +502,7 @@ class XPSReader(MultiFormatReader):
                 for key, value1, value2 in existing:
                     self.xps_data[key] = concatenate_values(value1, value2)
 
-    def _get_analyzer_names(self) -> List[str]:
+    def _get_analyzer_names(self) -> list[str]:
         """
         Returns a list of analyzer names which should be constructed
         from the data. Defaults to creating a single analyer named
@@ -527,20 +511,20 @@ class XPSReader(MultiFormatReader):
         Currently, this is not used, but can be changed if there are
         multiple analyzers in the future.
         """
-        analyzers: List[str] = []
+        analyzers: list[str] = []
 
         if not analyzers:
             analyzers += ["electronanalyzer"]
 
         return list(dict.fromkeys(analyzers))
 
-    def _get_detector_names(self) -> List[str]:
+    def _get_detector_names(self) -> list[str]:
         """
         Returns a list of detector names which should be constructed
         from the data. Defaults to creating a single detector named
         "detector".
         """
-        detectors: List[str] = []
+        detectors: list[str] = []
 
         try:
             for entry, entry_values in self.xps_data["data"].items():
@@ -606,7 +590,7 @@ class XPSReader(MultiFormatReader):
 
     def get_metadata(
         self,
-        metadata_dict: Dict[str, Any],
+        metadata_dict: dict[str, Any],
         path: str,
         entry_name: str,
     ) -> Any:
@@ -621,7 +605,7 @@ class XPSReader(MultiFormatReader):
 
         Parameters
         ----------
-        metadata_dict : Dict[str, Any]
+        metadata_dict : dict[str, Any]
             One of ELN or XPS data dictionaries .
         path : str
             Path to search in the metadata_dict
@@ -678,7 +662,7 @@ class XPSReader(MultiFormatReader):
                 return self.eln_data.get(modified_key)
         return
 
-    def get_data_dims(self, key: str, path: str) -> List[str]:
+    def get_data_dims(self, key: str, path: str) -> list[str]:
         """
         Returns the dimensions of the data from the given path.
         """
@@ -686,7 +670,7 @@ class XPSReader(MultiFormatReader):
         escaped_entry = re.escape(entry)
         xr_data = self.xps_data["data"].get(entry)
 
-        def get_signals(key: str) -> List[str]:
+        def get_signals(key: str) -> list[str]:
             if key == "scans":
                 data_vars = _get_scan_vars(xr_data.data_vars)
             elif key == "channels":
@@ -700,7 +684,7 @@ class XPSReader(MultiFormatReader):
 
             return list(map(str, data_vars))
 
-        def get_all_keys(template_key: str) -> List[str]:
+        def get_all_keys(template_key: str) -> list[str]:
             pattern = re.compile(rf"^/ENTRY\[{escaped_entry}]/{template_key}([^/]+)")
 
             keys = set(
@@ -717,7 +701,7 @@ class XPSReader(MultiFormatReader):
             else:
                 data_func = lambda: get_signals(path.split(":*.")[-1])
 
-        PatternHandler = Dict[Pattern[str], Callable[[], Any]]
+        PatternHandler = dict[Pattern[str], Callable[[], Any]]
 
         patterns: dict[re.Pattern, Callable[[], Any]] = {
             re.compile(r"peak"): lambda: get_all_keys("component"),
@@ -737,7 +721,7 @@ class XPSReader(MultiFormatReader):
 
         return get_signals(key="scans")
 
-    def _search_first(self, data: Dict[str, Any], pattern: re.Pattern) -> Optional[Any]:
+    def _search_first(self, data: dict[str, Any], pattern: re.Pattern) -> Optional[Any]:
         """
         Search for the first value in a dictionary whose key matches a regex pattern.
 
@@ -841,7 +825,7 @@ class XPSReader(MultiFormatReader):
         """Set the default for automatic plotting."""
         survey_count, count = 0, 0
 
-        def get_unique_nxfit_names(template) -> Set[str]:
+        def get_unique_nxfit_names(template) -> set[str]:
             """Extract unique 'ENTRY[<some-name>]/FIT[<some-other-name>]' pairs from template keys."""
             pattern = re.compile(r"^/?ENTRY\[(?P<entry>[^]]+)\]/FIT\[(?P<fit>[^]]+)\]/")
 
@@ -853,7 +837,7 @@ class XPSReader(MultiFormatReader):
             return result
 
         def get_first_matching_fit(
-            entry_name: str, unique_fits: Set[str]
+            entry_name: str, unique_fits: set[str]
         ) -> Optional[str]:
             """Return the first '<fit>' name that matches the given entry name, if any."""
             for fit in unique_fits:
@@ -888,8 +872,8 @@ class XPSReader(MultiFormatReader):
     def read(
         self,
         template: dict = None,
-        file_paths: Tuple[str] = None,
-        objects: Tuple[Any] = None,
+        file_paths: tuple[str] = None,
+        objects: tuple[Any] = None,
         **kwargs,
     ) -> dict:
         self.overwrite_keys = _check_multiple_extensions(file_paths)

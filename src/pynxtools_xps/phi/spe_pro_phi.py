@@ -20,42 +20,41 @@ Phi PHI VersaProbe 4 instruments (.spe or .pro format), to be passed to
 MPES nxdl (NeXus Definition Language) template.
 """
 
-import re
-import warnings
 import copy
 import datetime
 import logging
+import re
 import struct
-from typing import Any, Dict, List, Union
+import warnings
 from pathlib import Path
+from typing import Any, Union
+
+import numpy as np
 import pytz
 import xarray as xr
-import numpy as np
-
-from pynxtools_xps.reader_utils import (
-    XPSMapper,
-    construct_entry_name,
-    safe_arange_with_edges,
-    convert_pascal_to_snake,
-    split_value_and_unit,
-)
-
-from pynxtools_xps.value_mappers import (
-    convert_energy_scan_mode,
-    convert_measurement_method,
-    convert_bool,
-    convert_units,
-)
 
 from pynxtools_xps.phi.phi_data_model import (
     PhiMetadata,
-    PhiSpectralRegion,
     PhiSpatialArea,
+    PhiSpectralRegion,
+)
+from pynxtools_xps.reader_utils import (
+    XPSMapper,
+    construct_entry_name,
+    convert_pascal_to_snake,
+    safe_arange_with_edges,
+    split_value_and_unit,
+)
+from pynxtools_xps.value_mappers import (
+    convert_bool,
+    convert_energy_scan_mode,
+    convert_measurement_method,
+    convert_units,
 )
 
 logger = logging.getLogger(__name__)
 
-SETTINGS_MAP: Dict[str, str] = {
+SETTINGS_MAP: dict[str, str] = {
     "FileDesc": "file_description",
     "acq_filename": "acquisition_filename",
     "acq_file_date": "acquisition_file_date",
@@ -135,7 +134,7 @@ SETTINGS_MAP: Dict[str, str] = {
     "auto_ion_neut": "auto_neutral_ion_source",
 }
 
-KEYS_WITH_UNITS: List[str] = [
+KEYS_WITH_UNITS: list[str] = [
     "analyzer_work_function",
     "source_analyzer_angle",
     "analyzer_solid_angle",
@@ -233,7 +232,7 @@ KEYS_WITH_UNITS: List[str] = [
     "deconvolution_pass_energy",
 ]
 
-UNIT_MISSING: Dict[str, str] = {
+UNIT_MISSING: dict[str, str] = {
     "intensity": "counts_per_second",
     "grid_voltage": "V",
     "condenser_lens_voltage": "V",
@@ -294,7 +293,7 @@ class MapperPhi(XPSMapper):
         for spectrum in spectra:
             self._update_xps_dict_with_spectrum(spectrum)
 
-    def _update_xps_dict_with_spectrum(self, spectrum: Dict[str, Any]):
+    def _update_xps_dict_with_spectrum(self, spectrum: dict[str, Any]):
         """
         Map one spectrum from raw data to NXmpes-ready dict.
 
@@ -364,13 +363,13 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         """
         self.raw_data: str = ""
-        self.spectra: List[Dict[str, Any]] = []
+        self.spectra: list[dict[str, Any]] = []
 
         self.metadata = PhiMetadata()
 
         self.binary_header_length = 4
         self.spectra_header_length = 24
-        self.encoding: List[str, int] = ["<f", 4]
+        self.encoding: list[str, int] = ["<f", 4]
 
         self.binary_header: np.ndarray = None
         self.spectra_header: np.ndarray = None
@@ -492,7 +491,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         return header, data
 
-    def parse_header_into_metadata(self, header: List[str]):
+    def parse_header_into_metadata(self, header: list[str]):
         """
         Parse header into PHiMetadata dataclass.
 
@@ -523,7 +522,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
                 key = f"channel_{channel_count}_info"
                 channel_count += 1
 
-            key_map: Dict[str, str] = {
+            key_map: dict[str, str] = {
                 "desc": "description",
                 "defect_pos": "defect_positioner",
                 "g_c_i_b": "gcib",
@@ -569,7 +568,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         self.metadata.validate_types()
 
-    def parse_spectral_regions(self, header: List[str]):
+    def parse_spectral_regions(self, header: list[str]):
         """
         Parse spectral regions definitions.
 
@@ -637,7 +636,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         return regions
 
-    def parse_spatial_areas(self, header: List[str]):
+    def parse_spatial_areas(self, header: list[str]):
         """
         Parse spatial areas definitions.
 
@@ -692,7 +691,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
             for area in areas:
                 concatenated = {**region.dict(), **area.dict()}
 
-                region_and_areas: Dict[str, Any] = {}
+                region_and_areas: dict[str, Any] = {}
 
                 for key, value in concatenated.items():
                     replacement_map = {

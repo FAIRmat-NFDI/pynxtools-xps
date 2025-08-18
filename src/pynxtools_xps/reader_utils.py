@@ -30,6 +30,8 @@ import numpy as np
 import pint
 from scipy.interpolate import interp1d
 
+from pynxtools.units import ureg
+
 logger = logging.getLogger(__name__)
 
 
@@ -550,9 +552,6 @@ def extract_unit(
         unit = unit_missing.get(key, "")
 
     return value, unit
-
-
-ureg = pint.UnitRegistry()
 
 
 def check_units(template_path: str, unit: str) -> None:

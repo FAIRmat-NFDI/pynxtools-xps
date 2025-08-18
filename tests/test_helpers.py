@@ -44,6 +44,12 @@ from pynxtools_xps.value_mappers import get_units_for_key, parse_datetime
         ("sensor/[sensor_current]", {"sensor/sensor_current": "A"}, "sensor_current"),
         # Test cases with key that includes a regex but isn't mapped
         ("not_mapped/[value]", {}, "value"),
+        # Key with multiple slashes
+        ("foo/bar/baz", {"foo/bar/baz": "kg"}, "kg"),
+        # Key with trailing slash
+        ("foo/bar/", {"foo/bar/": "s"}, "s"),
+        # Key with leading slash
+        ("/foo/bar", {"/foo/bar": "A"}, "A"),
     ],
 )
 def test_get_units_for_key(unit_key: str, unit_map: dict[str, str], expected_unit: str):

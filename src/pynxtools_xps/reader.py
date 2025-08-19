@@ -104,7 +104,7 @@ def concatenate_values(value1: Any, value2: Any) -> Any:
 
 
 def _check_multiple_extensions(
-    file_paths: Iterable[Union[str, Path]] | None = None,
+    file_paths: Optional[Iterable[Union[str, Path]]] = None,
 ) -> bool:
     """
     Determines if a list of file paths contains more than one unique file extension.

@@ -19,38 +19,37 @@
 Classes for reading XPS files from TXT export of CasaXPS.
 """
 
-import matplotlib.pyplot as plt
-
-
-import re
+import copy
+import csv
 import itertools
 import operator
-import copy
+import re
 import warnings
-from typing import Any, Dict, List
-from collections import Counter
 from abc import ABC, abstractmethod
-import csv
-import xarray as xr
+from collections import Counter
+from typing import Any
+
+import matplotlib.pyplot as plt
 import numpy as np
+import xarray as xr
 
 from pynxtools_xps.reader_utils import (
     XPSMapper,
+    _format_value,
     check_uniform_step_width,
+    construct_data_key,
+    construct_entry_name,
+    convert_pascal_to_snake,
     get_minimal_step,
     interpolate_arrays,
-    construct_entry_name,
-    construct_data_key,
-    convert_pascal_to_snake,
-    _format_value,
 )
-from pynxtools_xps.value_mappers import get_units_for_key, convert_units
+from pynxtools_xps.value_mappers import convert_units, get_units_for_key
 
-UNITS: Dict[str, str] = {
+UNITS: dict[str, str] = {
     "step_size": "eV",
 }
 
-KEY_MAP: Dict[str, str] = {
+KEY_MAP: dict[str, str] = {
     "K.E.": "kinetic_energy",
     "B.E.": "binding_energy",
     "Counts": "counts",
@@ -63,7 +62,7 @@ KEY_MAP: Dict[str, str] = {
 }
 
 
-def handle_repetitions(input_list: List[str]) -> List[str]:
+def handle_repetitions(input_list: list[str]) -> list[str]:
     """
     Process a list of strings to handle repeated items by appending a suffix
     to each duplicate item. The suffix is in the format '_n', where 'n' is the
@@ -94,7 +93,7 @@ def handle_repetitions(input_list: List[str]) -> List[str]:
     return result
 
 
-def select_from_list(input_list: List[str], skip: int, keep_middle: int) -> List[str]:
+def select_from_list(input_list: list[str], skip: int, keep_middle: int) -> list[str]:
     """
     Select items from a list according to the specified pattern:
     - Extract the first (2 + count + keep_middle) items,
@@ -116,7 +115,7 @@ def select_from_list(input_list: List[str], skip: int, keep_middle: int) -> List
     return first_part + remaining_part
 
 
-def get_dict_keys(header_lines: List[str]) -> List[str]:
+def get_dict_keys(header_lines: list[str]) -> list[str]:
     """
     Maps a list of header strings to their corresponding keys based on a predefined mapping.
 
@@ -182,12 +181,12 @@ class TxtMapperVamasExport(XPSMapper):
         """Map TXT format to NXmpes-ready dict."""
         spectra = copy.deepcopy(self.raw_data)
 
-        self._xps_dict["data"]: Dict[str, Any] = {}
+        self._xps_dict["data"]: dict[str, Any] = {}
 
         for spectrum in spectra:
             self._update_xps_dict_with_spectrum(spectrum)
 
-    def _update_xps_dict_with_spectrum(self, spectrum: Dict[str, Any]):
+    def _update_xps_dict_with_spectrum(self, spectrum: dict[str, Any]):
         """
         Map one spectrum from raw data to NXmpes-ready dict.
 
@@ -258,7 +257,7 @@ class TextParser(ABC):  # pylint: disable=too-few-public-methods
     """
 
     def __init__(self):
-        self.lines: List[str] = []
+        self.lines: list[str] = []
         self.n_headerlines: int = 7
         self.uniform_energy_steps: bool = True
 
@@ -758,12 +757,12 @@ class CsvMapperVamasResult(XPSMapper):
     def construct_data(self):
         self._xps_dict = self.raw_data
 
-    def update_main_file_dict(self, main_file_dicts: List[Dict[str, Any]]):
+    def update_main_file_dict(self, main_file_dicts: list[dict[str, Any]]):
         """
         Update the dictionaries returned by the main files with specific keys from self.data_dict.
 
         Args:
-            main_file_dicts (List[Dict[str, Any]]): List of dictionaries to update.
+            main_file_dicts (List[list[str, Any]]): List of dictionaries to update.
         """
         pattern = re.compile(r"(component\d+/)name")
         update_with = {
@@ -798,11 +797,11 @@ class CsvResultParser:
         Returns:
             dict: Parsed data including the file path, header, and rows.
         """
-        table_data: Dict[str, Any] = {}
-        headers: List[str] = []
+        table_data: dict[str, Any] = {}
+        headers: list[str] = []
         reading_table: bool = False
 
-        with open(file, "r") as f:
+        with open(file) as f:
             reader = csv.reader(f, delimiter="\t")
 
             for row in reader:

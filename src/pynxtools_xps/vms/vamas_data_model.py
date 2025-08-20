@@ -20,6 +20,7 @@ Data model for Vamas ISO standard.
 """
 
 from dataclasses import dataclass, field
+
 from pynxtools_xps.reader_utils import XpsDataclass
 
 

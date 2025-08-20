@@ -19,17 +19,16 @@
 Basic example based test for the XPS reader
 """
 
-import os
-import pytest
 import json
+import os
 from typing import Literal
-import numpy as np
 
+import numpy as np
+import pytest
 from pynxtools.dataconverter.convert import get_reader
 from pynxtools.testing.nexus_conversion import ReaderTest
 
 from pynxtools_xps.vms.vamas_comment_handler import handle_comments
-
 
 READER_NAME = "xps"
 READER_CLASS = get_reader(READER_NAME)
@@ -153,7 +152,7 @@ def test_vms_comment_handler(
         if isinstance(val, np.ndarray):
             comments[key] = val.tolist()
 
-    with open(ref_json_filepath, "r") as json_file:
+    with open(ref_json_filepath) as json_file:
         ref_comments = json.load(json_file)
 
     assert len(comments) == expected_no_of_comments, (

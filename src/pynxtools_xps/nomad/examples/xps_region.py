@@ -1,13 +1,14 @@
 """Fitting functions for XPS spectra"""
 
-from typing import Optional
 from dataclasses import dataclass
+from typing import Optional
+
 import numpy as np
-from numpy.linalg import norm
-import plotly.graph_objects as go
 import pandas as pd
+import plotly.graph_objects as go
 from h5py import File as H5File
-from lmfit import Model, CompositeModel
+from lmfit import CompositeModel, Model
+from numpy.linalg import norm
 
 
 @dataclass

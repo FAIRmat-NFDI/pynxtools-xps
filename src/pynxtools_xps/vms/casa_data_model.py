@@ -18,38 +18,35 @@
 Data model for CasaXPS.
 """
 
-import re
 import logging
-from typing import List, Dict, Any, Optional
+import re
 from dataclasses import dataclass, field
+from typing import Any
+
 import numpy as np
-
-from pynxtools_xps.reader_utils import XpsDataclass
-from pynxtools_xps.value_mappers import convert_energy_type
-
-from pynxtools_xps.models.lineshapes import (
-    Peak,
-    LorentzianAsymmetric,
-    LorentzianFinite,
-    GaussianLorentzianSum,
-    GaussianLorentzianProduct,
-    DoniachSunjic,
-)
 
 from pynxtools_xps.models.backgrounds import (
     LinearBackground,
     Shirley,
-    StepUp,
     StepDown,
+    StepUp,
     TougaardU3,
     TougaardU4,
 )
-
+from pynxtools_xps.models.lineshapes import (
+    DoniachSunjic,
+    GaussianLorentzianProduct,
+    GaussianLorentzianSum,
+    LorentzianAsymmetric,
+    LorentzianFinite,
+)
+from pynxtools_xps.reader_utils import XpsDataclass
+from pynxtools_xps.value_mappers import convert_energy_type
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-LINESHAPES: Dict[str, Any] = {
+LINESHAPES: dict[str, Any] = {
     "GL": ("Gaussian-Lorentzian Product", GaussianLorentzianProduct),
     "SGL": ("Gaussian-Lorentzian Sum", GaussianLorentzianSum),
     "LA": ("Asymmetric Lorentzian", LorentzianAsymmetric),
@@ -57,7 +54,7 @@ LINESHAPES: Dict[str, Any] = {
     "LF": ("Asymmetric Finite", LorentzianFinite),
 }
 
-BACKGROUNDS: Dict[str, Any] = {
+BACKGROUNDS: dict[str, Any] = {
     "Linear": ("Linear", LinearBackground),
     "Shirley": ("Shirley Sum", Shirley),
     "Step Up": ("Step Up", StepUp),
@@ -224,7 +221,7 @@ class CasaProcess:
     """Processing and fitting information from CasaXPS."""
 
     def __init__(self):
-        self.casa_data: Dict[str, List[Any]] = {
+        self.casa_data: dict[str, list[Any]] = {
             "energy_calibrations": [],
             "intensity_calibrations": [],
             "smoothings": [],
@@ -232,7 +229,7 @@ class CasaProcess:
             "components": [],
         }
 
-    def process_comments(self, comment_list: List[str]):
+    def process_comments(self, comment_list: list[str]):
         line_map = {
             "Calib": self.process_energy_calibration,
             "KECalib": self.process_intensity_calibration,
@@ -263,7 +260,7 @@ class CasaProcess:
 
     def flatten_metadata(self):
         # Write process data
-        process_keys: List[str] = [
+        process_keys: list[str] = [
             "energy_calibrations",
             "intensity_calibrations",
             "smoothings",
@@ -271,7 +268,7 @@ class CasaProcess:
             "components",
         ]
 
-        flattened_dict: Dict[str, Any] = {}
+        flattened_dict: dict[str, Any] = {}
 
         for process_key in process_keys:
             processes = self.casa_data[process_key]

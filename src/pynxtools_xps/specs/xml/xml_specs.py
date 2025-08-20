@@ -20,12 +20,13 @@ Specs Lab Prodigy XML export, to be passed to mpes nxdl
 (NeXus Definition Language) template.
 """
 
+import copy
 import re
 import xml.etree.ElementTree as EmtT
-from typing import Tuple, List, Dict, Any
-import copy
-import xarray as xr
+from typing import Any
+
 import numpy as np
+import xarray as xr
 
 from pynxtools_xps.reader_utils import XPSMapper, align_name_part
 from pynxtools_xps.value_mappers import convert_energy_scan_mode
@@ -276,7 +277,7 @@ class XmlParserSpecs:
             child_num -= 1
             child_elmt_ind += 1
 
-        metadata_dict: Dict[str, Any] = {}
+        metadata_dict: dict[str, Any] = {}
 
         for key, value in self.metadata_dict.items():
             entry_name = construct_entry_name(key)
@@ -550,7 +551,7 @@ class XmlParserSpecs:
 
     def check_last_part_repetition(
         self, parent_path: str, pre_tail_part: str, new_tail_part: str
-    ) -> Tuple[str, str]:
+    ) -> tuple[str, str]:
         """
          Check for the data from the same group, for example repetition of the
          experiments under the same physical circumstances, make number of
@@ -654,7 +655,7 @@ class XmlParserSpecs:
         scan_seq_elem: EmtT.Element,
         counts_length: int = None,
         cumulative_counts: np.ndarray = None,
-    ) -> Tuple[str, np.ndarray]:
+    ) -> tuple[str, np.ndarray]:
         """
         Sum the counts over different scans. Each ScanSeaq contains
         multiple scans under the same physical environment. The
@@ -714,7 +715,7 @@ class XmlParserSpecs:
         and counts for the corresponding nominal.
         """
 
-        entry_list: List = []
+        entry_list: list = []
         raw_dict = {
             "mcd_num": 0,
             "curves_per_scan": 0,

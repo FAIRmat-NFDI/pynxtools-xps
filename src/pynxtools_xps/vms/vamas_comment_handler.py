@@ -19,24 +19,20 @@
 Comment handler for .vms files.
 """
 
-from typing import List, Literal, Any, Dict, Tuple, Union
+from typing import Any, Literal, Union
 
-from pynxtools_xps.vms.casa_data_model import CasaProcess
-from pynxtools_xps.phi.spe_pro_phi import PhiParser
 from pynxtools_xps.kratos.metadata_kratos import KratosParser
-
-from pynxtools_xps.reader_utils import (
-    convert_pascal_to_snake,
-    split_value_and_unit,
-)
+from pynxtools_xps.phi.spe_pro_phi import PhiParser
+from pynxtools_xps.reader_utils import convert_pascal_to_snake, split_value_and_unit
+from pynxtools_xps.vms.casa_data_model import CasaProcess
 
 
 def handle_comments(
-    comment_list: List[str], comment_type: Literal["header", "block"]
-) -> Dict[str, Any]:
+    comment_list: list[str], comment_type: Literal["header", "block"]
+) -> dict[str, Any]:
     comments = {}
 
-    special_keys: Tuple[str, ...] = (
+    special_keys: tuple[str, ...] = (
         "Casa Info Follows",
         "SpecsLab Prodigy",
         "SOFH",
@@ -89,8 +85,8 @@ def handle_comments(
 
 
 def _handle_casa_comments(
-    comment_list: List[str], comment_type: Literal["header", "block"]
-) -> Tuple[Dict[str, Any], int]:
+    comment_list: list[str], comment_type: Literal["header", "block"]
+) -> tuple[dict[str, Any], int]:
     """Handle comments from CasaXPS, depending on their location."""
     handle_functions = {
         "header": _handle_casa_header_comments,
@@ -100,7 +96,7 @@ def _handle_casa_comments(
     return handle_functions[comment_type](comment_list)
 
 
-def _handle_casa_header_comments(comment_list: List[str]) -> Tuple[Dict[str, Any], int]:
+def _handle_casa_header_comments(comment_list: list[str]) -> tuple[dict[str, Any], int]:
     """Get information about CasaXPS version."""
     comment_line = comment_list[0]
 
@@ -114,7 +110,7 @@ def _handle_casa_header_comments(comment_list: List[str]) -> Tuple[Dict[str, Any
     return comments, no_of_casa_lines
 
 
-def _handle_casa_block_comments(comment_list: List[str]) -> Tuple[Dict[str, Any], int]:
+def _handle_casa_block_comments(comment_list: list[str]) -> tuple[dict[str, Any], int]:
     """Get all processing and fitting data from CasaXPS comments."""
     casa = CasaProcess()
     casa.process_comments(comment_list)
@@ -124,13 +120,13 @@ def _handle_casa_block_comments(comment_list: List[str]) -> Tuple[Dict[str, Any]
     return comments, casa.no_of_casa_lines
 
 
-def _handle_prodigy_header_comments(comment_list: List[str]) -> Dict[str, str]:
+def _handle_prodigy_header_comments(comment_list: list[str]) -> dict[str, str]:
     """Get information about SpecsLab Prodigy version."""
     comment_line = comment_list[0]
     return {"prodigy_version": comment_line.split("Version")[1].strip()}
 
 
-def _handle_phi_header_comments(comment_list: List[str]) -> Dict[str, Any]:
+def _handle_phi_header_comments(comment_list: list[str]) -> dict[str, Any]:
     """Get metadata from Phi system."""
     phi_parser = PhiParser()
     phi_parser.parse_header_into_metadata(comment_list)
@@ -149,7 +145,7 @@ def _handle_phi_header_comments(comment_list: List[str]) -> Dict[str, Any]:
     return phi_comments
 
 
-def _handle_kratos_block_comments(comment_list: List[str]) -> Dict[str, Any]:
+def _handle_kratos_block_comments(comment_list: list[str]) -> dict[str, Any]:
     """Get metadata from Kratos system."""
     kratos_parser = KratosParser()
     kratos_parser.parse_header_into_metadata(comment_list)
@@ -158,8 +154,8 @@ def _handle_kratos_block_comments(comment_list: List[str]) -> Dict[str, Any]:
 
 
 def _handle_misc_comments(
-    comment_list: List[str],
-) -> Dict[str, Union[int, float, str, Any]]:
+    comment_list: list[str],
+) -> dict[str, Union[int, float, str, Any]]:
     """Handle any other comments."""
     comments = {}
     for sep in ("=", ":"):

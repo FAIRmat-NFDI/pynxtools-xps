@@ -21,24 +21,14 @@ passed to MPES nxdl (NeXus Definition Language) template.
 """
 
 import re
-from typing import Any, Dict, List, Union, Tuple
 from pathlib import Path
+from typing import Any, Union
 
-from pynxtools_xps.reader_utils import (
-    convert_pascal_to_snake,
-    extract_unit,
-)
+from pynxtools_xps.kratos.kratos_data_model import KratosMetadata
+from pynxtools_xps.reader_utils import convert_pascal_to_snake, extract_unit
+from pynxtools_xps.value_mappers import convert_bool, parse_datetime
 
-from pynxtools_xps.value_mappers import (
-    convert_bool,
-    parse_datetime,
-)
-
-from pynxtools_xps.kratos.kratos_data_model import (
-    KratosMetadata,
-)
-
-SETTINGS_MAP: Dict[str, str] = {
+SETTINGS_MAP: dict[str, str] = {
     "location_i_d": "location_id",
     "tilt": "sample_tilt",
     "lens": "lens_mode",
@@ -50,7 +40,7 @@ SETTINGS_MAP: Dict[str, str] = {
     "x-ray_power": "x_ray_power",
 }
 
-KEYS_WITH_UNITS: List[str] = [
+KEYS_WITH_UNITS: list[str] = [
     "filament_current",
     "filament_bias",
     "charge_balance",
@@ -66,11 +56,11 @@ KEYS_WITH_UNITS: List[str] = [
     "x_ray_power",
 ]
 
-UNIT_MISSING: Dict[str, str] = {
+UNIT_MISSING: dict[str, str] = {
     "sample_tilt": "degree",
 }
 
-POSSIBLE_DATE_FORMATS: List[str] = ["%d.%m.%Y %H:%M", "%d/%m/%Y %H:%M"]
+POSSIBLE_DATE_FORMATS: list[str] = ["%d.%m.%Y %H:%M", "%d/%m/%Y %H:%M"]
 
 
 class KratosParser:
@@ -84,11 +74,11 @@ class KratosParser:
 
         """
         self.raw_data: str = ""
-        self.spectra: List[Dict[str, Any]] = []
+        self.spectra: list[dict[str, Any]] = []
 
         self.metadata = KratosMetadata()
 
-        self.value_function_map: Dict[str, Any] = {
+        self.value_function_map: dict[str, Any] = {
             "date_created": parse_datetime,
             "description": _convert_description,
             "charge_neutraliser": convert_bool,
@@ -123,7 +113,7 @@ class KratosParser:
 
         return self.spectra
 
-    def parse_header_into_metadata(self, header: List[str]):
+    def parse_header_into_metadata(self, header: list[str]):
         """
         Parse header into KratosMetadata dataclass.
 
@@ -187,7 +177,7 @@ class KratosParser:
                 value = map_fn(value)
         return field_type(value)
 
-    def flatten_metadata(self) -> Dict[str, Any]:
+    def flatten_metadata(self) -> dict[str, Any]:
         """
         Flatten metadata dict so that key-value pairs of nested
         dictionaries are at the top level.
@@ -204,9 +194,9 @@ class KratosParser:
 
         """
 
-        flattened_dict: Dict[str, Any] = {}
+        flattened_dict: dict[str, Any] = {}
 
-        def setup_unit(flattened_dict: Dict[str, Any], unit_key: str):
+        def setup_unit(flattened_dict: dict[str, Any], unit_key: str):
             """Sets up unit for in flattened_dict a given key ."""
             if "_units" in unit_key:
                 new_key = unit_key.replace("_units", "/@units")
@@ -231,7 +221,7 @@ class KratosParser:
         return flattened_dict
 
 
-def _convert_description(value: str) -> Dict[str, Any]:
+def _convert_description(value: str) -> dict[str, Any]:
     """Map all items in description to a dictionary."""
     pattern = re.compile(
         r"\(\s*([-+]?\d*\.?\d+)\s*,\s*([-+]?\d*\.?\d+)\s*,\s*([-+]?\d*\.?\d+)\s*\)\s*([a-zA-Z]+)"
@@ -252,7 +242,7 @@ def _convert_description(value: str) -> Dict[str, Any]:
         raise ValueError(f"Invalid input string '{value}' for description.")
 
 
-def _separate_val_and_unit(value: str) -> Tuple[Any, str]:
+def _separate_val_and_unit(value: str) -> tuple[Any, str]:
     """Map all items in energy_referencing to a dictionary."""
 
     pattern = re.compile(r"([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)([a-zA-Z]+)")
@@ -265,7 +255,7 @@ def _separate_val_and_unit(value: str) -> Tuple[Any, str]:
         raise ValueError(f"Input string '{value}' does not contain a value and unit.")
 
 
-def _convert_xray_deflection(value: str) -> Dict[str, Any]:
+def _convert_xray_deflection(value: str) -> dict[str, Any]:
     """Convert deflection like (0.000, 0.000)mm to dict."""
 
     pattern = re.compile(

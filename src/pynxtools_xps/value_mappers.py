@@ -19,11 +19,11 @@
 Utility function for mapping keys and values in the pynxtools template.
 """
 
-import re
 import datetime
-from typing import Dict, List, Any, Callable
+import re
+from typing import Any, Callable
 
-ENERGY_TYPE_MAP: Dict[str, str] = {
+ENERGY_TYPE_MAP: dict[str, str] = {
     "BE": "binding",
     "KE": "kinetic",
     "Binding": "binding",
@@ -38,7 +38,7 @@ ENERGY_TYPE_MAP: Dict[str, str] = {
     "analyser_energy": "binding",
 }
 
-ENERGY_SCAN_MODE_MAP: Dict[str, str] = {
+ENERGY_SCAN_MODE_MAP: dict[str, str] = {
     "Fixed": "fixed_energy",
     "fixed": "fixed_energy",
     "FixedEnergies": "fixed_energy",
@@ -51,7 +51,7 @@ ENERGY_SCAN_MODE_MAP: Dict[str, str] = {
     "SnapshotFAT": "snapshot",
 }
 
-MEASUREMENT_METHOD_MAP: Dict[str, str] = {
+MEASUREMENT_METHOD_MAP: dict[str, str] = {
     "XPS": "X-ray photoelectron spectroscopy (XPS)",
     "UPS": "ultraviolet photoelectron spectroscopy (UPS)",
     "ElectronSpectroscopy": "electron spectroscopy for chemical analysis (ESCA)",
@@ -59,14 +59,14 @@ MEASUREMENT_METHOD_MAP: Dict[str, str] = {
     "ARXPS": "angle-resolved X-ray photoelectron spectroscopy (ARXPS)",
 }
 
-ACQUSITION_MODE_MAP: Dict[str, str] = {
+ACQUSITION_MODE_MAP: dict[str, str] = {
     "Image": "pulse counting",
     "Events": "pulse counting",
 }
 
-SLIT_TYPE_MAP: Dict[str, str] = {"Straight": "straight slit", "Curved": "curved slit"}
+SLIT_TYPE_MAP: dict[str, str] = {"Straight": "straight slit", "Curved": "curved slit"}
 
-BOOL_MAP: Dict[str, bool] = {
+BOOL_MAP: dict[str, bool] = {
     "yes": True,
     "Yes": True,
     "no": False,
@@ -75,7 +75,7 @@ BOOL_MAP: Dict[str, bool] = {
     "Off": False,
 }
 
-UNIT_MAP: Dict[str, str] = {
+UNIT_MAP: dict[str, str] = {
     "a.u.": "counts",
     "Counts": "counts",
     "counts/s": "counts_per_second",
@@ -95,7 +95,7 @@ UNIT_MAP: Dict[str, str] = {
 }
 
 
-def _replace_from_map(value: Any, value_map: Dict[str, Any]):
+def _replace_from_map(value: Any, value_map: dict[str, Any]):
     """
     For a given value, return a new value if the value is
     part of the value_map.
@@ -103,7 +103,7 @@ def _replace_from_map(value: Any, value_map: Dict[str, Any]):
     return value_map.get(value, value)
 
 
-def make_converter(value_map: Dict[str, Any]) -> Callable[[Any], Any]:
+def make_converter(value_map: dict[str, Any]) -> Callable[[Any], Any]:
     return lambda value: _replace_from_map(value, value_map)
 
 
@@ -116,7 +116,7 @@ convert_bool = make_converter(BOOL_MAP)
 convert_units = make_converter(UNIT_MAP)
 
 
-def get_units_for_key(unit_key: str, unit_map: Dict[str, str]) -> str:
+def get_units_for_key(unit_key: str, unit_map: dict[str, str]) -> str:
     """
     Get correct units for a given key from a dictionary with unit map.
     Parameters
@@ -137,7 +137,7 @@ def get_units_for_key(unit_key: str, unit_map: Dict[str, str]) -> str:
 
 def parse_datetime(
     datetime_string: str,
-    possible_date_formats: List[str],
+    possible_date_formats: list[str],
     tzinfo: datetime.tzinfo = datetime.timezone.utc,
 ) -> str:
     """

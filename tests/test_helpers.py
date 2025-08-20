@@ -18,13 +18,12 @@
 Tests for helper functions
 """
 
-import re
-import pytest
 import datetime
-from typing import Dict
+import re
+
+import pytest
 
 from pynxtools_xps.reader_utils import extract_unit
-
 from pynxtools_xps.value_mappers import get_units_for_key, parse_datetime
 
 
@@ -45,9 +44,15 @@ from pynxtools_xps.value_mappers import get_units_for_key, parse_datetime
         ("sensor/[sensor_current]", {"sensor/sensor_current": "A"}, "sensor_current"),
         # Test cases with key that includes a regex but isn't mapped
         ("not_mapped/[value]", {}, "value"),
+        # Key with multiple slashes
+        ("foo/bar/baz", {"foo/bar/baz": "kg"}, "kg"),
+        # Key with trailing slash
+        ("foo/bar/", {"foo/bar/": "s"}, "s"),
+        # Key with leading slash
+        ("/foo/bar", {"/foo/bar": "A"}, "A"),
     ],
 )
-def test_get_units_for_key(unit_key: str, unit_map: Dict[str, str], expected_unit: str):
+def test_get_units_for_key(unit_key: str, unit_map: dict[str, str], expected_unit: str):
     result = get_units_for_key(unit_key, unit_map)
     assert result == expected_unit, f"Expected {expected_unit} but got {result}"
 
@@ -75,7 +80,7 @@ def test_get_units_for_key(unit_key: str, unit_map: Dict[str, str], expected_uni
 def test_extract_unit(
     key: str,
     value: str,
-    unit_missing: Dict[str, str],
+    unit_missing: dict[str, str],
     expected_value: str,
     expected_unit: str,
 ):

@@ -19,6 +19,7 @@ Line shapes for peak fitting.
 """
 
 from typing import Optional
+
 import numpy as np
 
 

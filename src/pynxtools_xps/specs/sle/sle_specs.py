@@ -28,38 +28,39 @@ SPECS Lab Prodigy, to be passed to MPES nxdl (NeXus Definition Language)
 template.
 """
 
-import re
-import struct
 import copy
 import logging
-from typing import Dict, Any
-import warnings
-from datetime import datetime
+import re
 import sqlite3
+import struct
+import warnings
 import xml.etree.ElementTree as ET
 from abc import ABC, abstractmethod
-import xarray as xr
+from datetime import datetime
+from typing import Any
+
 import numpy as np
+import xarray as xr
 
 from pynxtools_xps.reader_utils import (
     XPSMapper,
-    construct_entry_name,
     construct_data_key,
+    construct_entry_name,
+    drop_unused_keys,
     re_map_keys,
     re_map_values,
-    drop_unused_keys,
 )
 from pynxtools_xps.value_mappers import (
-    convert_energy_type,
     convert_energy_scan_mode,
+    convert_energy_type,
     convert_measurement_method,
-    get_units_for_key,
     convert_units,
+    get_units_for_key,
 )
 
 logger = logging.getLogger(__name__)
 
-UNITS: Dict[str, str] = {
+UNITS: dict[str, str] = {
     "work_function": "eV",
     "excitation_energy": "eV",
     "iris_diameter": "mm",
@@ -151,7 +152,7 @@ class SleMapperSpecs(XPSMapper):
         for spectrum in spectra:
             self._update_xps_dict_with_spectrum(spectrum)
 
-    def _update_xps_dict_with_spectrum(self, spectrum: Dict[str, Any]):
+    def _update_xps_dict_with_spectrum(self, spectrum: dict[str, Any]):
         """
         Map one spectrum from raw data to NXmpes-ready dict.
 
@@ -1183,7 +1184,7 @@ class SleProdigyParser(ABC):
 
         """
         cur = self.con.cursor()
-        cur.execute((f"SELECT * FROM {table_name}"))
+        cur.execute(f"SELECT * FROM {table_name}")
         names = [description[0] for description in cur.description]
         return names
 

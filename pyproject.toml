@@ -84,6 +84,9 @@ select = [
     "E", # pycodestyle
     "W", # pycodestyle
     "PL", # pylint
+    "UP", # pyupgrade
+    # "F401", # remove unused import
+    "I001", # sort imports
     # "NPY201", # reactivate when using numpy > 2.0
 ]
 ignore = [
@@ -102,6 +105,7 @@ ignore = [
     "PLR5501", # else-if-used
 ]
 fixable = ["ALL"]
+isort.split-on-trailing-comma = false
 
 [tool.ruff.format]
 quote-style = "double"

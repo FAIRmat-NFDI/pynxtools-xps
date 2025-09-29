@@ -1,7 +1,7 @@
 """Fitting functions for XPS spectra"""
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Callable, Optional, cast
 
 import numpy as np
 import pandas as pd
@@ -9,6 +9,14 @@ import plotly.graph_objects as go
 from h5py import File as H5File
 from lmfit import CompositeModel, Model
 from numpy.linalg import norm
+
+# Workaround for different functions for trapezoid in numpy
+NPTrapezoidType = Callable[..., np.typing.NDArray[np.float64]]
+
+if np.lib.NumpyVersion(np.__version__) >= "2.0.0":
+    np_trapezoid = cast(NPTrapezoidType, getattr(np, "trapezoid"))
+else:
+    np_trapezoid = cast(NPTrapezoidType, np.trapz)  # noqa: NPY201
 
 
 @dataclass
@@ -328,10 +336,10 @@ def shirley_baseline(
 
     iters = 0
     while True:
-        k = (y[0] - y[-1]) / np.trapz(y - background, x=x)
+        k = (y[0] - y[-1]) / np_trapezoid(y - background, x=x)
 
         for energy in range(len(x)):
-            background_next[energy] = k * np.trapz(
+            background_next[energy] = k * np_trapezoid(
                 y[energy:] - background[energy:], x=x[energy:]
             )
 

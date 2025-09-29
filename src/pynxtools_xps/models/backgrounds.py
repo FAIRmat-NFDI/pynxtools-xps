@@ -18,8 +18,20 @@
 Backgrounds for peak fitting.
 """
 
+from typing import Callable, Optional, cast
+
 import numpy as np
+
+# Workaround for different functions for trapezoid in numpy
+import numpy.typing as npt
 import scipy
+
+NPTrapezoidType = Callable[..., np.typing.NDArray[np.float64]]
+
+if np.lib.NumpyVersion(np.__version__) >= "2.0.0":
+    np_trapezoid = cast(NPTrapezoidType, getattr(np, "trapezoid"))
+else:
+    np_trapezoid = cast(NPTrapezoidType, np.trapz)  # noqa: NPY201
 
 
 class LinearBackground:
@@ -227,11 +239,11 @@ class Shirley:
 
         # Iterative loop to compute Shirley background
         for iters in range(maxit):
-            k = (y[0] - y[-1]) / np.trapz(y - background, x=x)
+            k = (y[0] - y[-1]) / np_trapezoid(y - background, x=x)
 
             # Update the background using trapezoidal integration
             for energy in range(len(x)):
-                background_next[energy] = k * np.trapz(
+                background_next[energy] = k * np_trapezoid(
                     y[energy:] - background[energy:], x=x[energy:]
                 )
 

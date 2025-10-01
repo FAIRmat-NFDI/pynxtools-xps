@@ -36,17 +36,25 @@ READER_CLASS = get_reader(READER_NAME)
 NXDLS = ["NXxps"]  # READER_CLASS.supported_nxdls
 
 test_cases = [
-    ("phi_spe", "phi-spe-reader"),
-    ("phi_pro", "phi-pro-reader"),
-    ("specs_sle", "specs-sle-reader"),
-    ("specs_xml", "specs-xml-reader"),
-    ("specs_xy", "specs-xy-reader"),
-    ("scienta_ibw", "scienta-ibw-reader"),
-    ("scienta_txt", "scienta-txt-reader"),
-    ("vms_analysis", "vms-reader-with-data-analysis"),
-    ("vms_irregular", "irregular-vms-reader"),
-    ("vms_regular", "regular-vms-reader"),
-    ("vms_txt_export", "vms-txt-export-reader"),
+    ("phi_spe", "phi-spe-reader", {}),
+    ("phi_pro", "phi-pro-reader", {}),
+    ("specs_sle", "specs-sle-reader", {}),
+    ("specs_xml", "specs-xml-reader", {}),
+    ("specs_xy", "specs-xy-reader", {}),
+    (
+        "scienta_ibw",
+        "scienta-ibw-reader",
+        {"FIELD (//Ag__002__VB/start_time)": ["DEBUG - value:"]},
+    ),
+    (
+        "scienta_txt",
+        "scienta-txt-reader",
+        {"FIELD (//Ag__002__VB/start_time)": ["DEBUG - value:"]},
+    ),
+    ("vms_analysis", "vms-reader-with-data-analysis", {}),
+    ("vms_irregular", "irregular-vms-reader", {}),
+    ("vms_regular", "regular-vms-reader", {}),
+    ("vms_txt_export", "vms-txt-export-reader", {}),
 ]
 
 test_params = []
@@ -55,15 +63,17 @@ for test_case in test_cases:
     # ToDo: make tests for all supported appdefs possible
     for nxdl in NXDLS:
         test_params += [
-            pytest.param(nxdl, test_case[0], id=f"{test_case[1]}-{nxdl.lower()}")
+            pytest.param(
+                nxdl, test_case[0], test_case[2], id=f"{test_case[1]}-{nxdl.lower()}"
+            )
         ]
 
 
 @pytest.mark.parametrize(
-    "nxdl, sub_reader_data_dir",
+    "nxdl, sub_reader_data_dir, ignore_sections",
     test_params,
 )
-def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
+def test_nexus_conversion(nxdl, sub_reader_data_dir, ignore_sections, tmp_path, caplog):
     """
     Test XPS reader
 
@@ -76,6 +86,8 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
         Test data directory that contains all the files required for running the data
         conversion through one of the sub-readers. All of these data dirs
         are placed within tests/data/...
+    ignore_sections: Dict[str, List[str]]
+        Subsections of the log file to ignore.
     tmp_path : pathlib.PosixPath
         Pytest fixture variable, used to clean up the files generated during
         the test.
@@ -104,7 +116,7 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, tmp_path, caplog):
         caplog=caplog,
     )
     test.convert_to_nexus(caplog_level="WARNING", ignore_undocumented=True)
-    test.check_reproducibility_of_nexus()
+    test.check_reproducibility_of_nexus(ignore_sections=ignore_sections)
 
 
 def read_comment_file(filepath: str):

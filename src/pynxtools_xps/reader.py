@@ -25,10 +25,10 @@ import datetime
 import logging
 import os
 import re
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from pathlib import Path
 from re import Pattern
-from typing import Any, Callable, Optional, Union
+from typing import Any, Optional, Union
 
 import numpy as np
 from pynxtools.dataconverter.helpers import extract_atom_types
@@ -104,7 +104,7 @@ def concatenate_values(value1: Any, value2: Any) -> Any:
 
 
 def _check_multiple_extensions(
-    file_paths: Optional[Iterable[Union[str, Path]]] = None,
+    file_paths: Iterable[str | Path] | None = None,
 ) -> bool:
     """
     Determines if a list of file paths contains more than one unique file extension.
@@ -138,9 +138,7 @@ class XPSReader(MultiFormatReader):
     ]
 
     reader_dir: Path = Path(__file__).parent
-    config_file: Optional[Union[str, Path]] = reader_dir.joinpath(
-        "config", "template.json"
-    )
+    config_file: str | Path | None = reader_dir.joinpath("config", "template.json")
 
     __prmt_file_ext__: list[str] = [
         ".h5",
@@ -187,7 +185,7 @@ class XPSReader(MultiFormatReader):
         f"Need an XPS data file from one of the following vendors: {__vendors__}"
     )
 
-    def __init__(self, config_file: Optional[str] = None, *args, **kwargs):
+    def __init__(self, config_file: str | None = None, *args, **kwargs):
         super().__init__(config_file, *args, **kwargs)
 
         self.xps_data_dicts: list[dict[str, Any]] = []
@@ -212,7 +210,7 @@ class XPSReader(MultiFormatReader):
             self.extensions[ext] = self.handle_data_file
 
     def set_config_file(
-        self, file_path: Optional[Union[str, Path]], replace: bool = True
+        self, file_path: str | Path | None, replace: bool = True
     ) -> dict[str, Any]:
         if not file_path:
             return {}
@@ -428,7 +426,7 @@ class XPSReader(MultiFormatReader):
 
         def check_for_same_entries(
             dicts: list[dict[str, Any]],
-        ) -> Optional[tuple[set[str], list[set[int]]]]:
+        ) -> tuple[set[str], list[set[int]]] | None:
             """
             Checks whether the input dictionaries have the same entries and identifies which
             dictionaries contain each common entry.
@@ -723,7 +721,7 @@ class XPSReader(MultiFormatReader):
 
         return get_signals(key="scans")
 
-    def _search_first(self, data: dict[str, Any], pattern: re.Pattern) -> Optional[Any]:
+    def _search_first(self, data: dict[str, Any], pattern: re.Pattern) -> Any | None:
         """
         Search for the first value in a dictionary whose key matches a regex pattern.
 
@@ -736,7 +734,7 @@ class XPSReader(MultiFormatReader):
         """
         return next((value for key, value in data.items() if pattern.search(key)), None)
 
-    def get_data(self, key: str, path: str) -> Optional[Any]:
+    def get_data(self, key: str, path: str) -> Any | None:
         """
         Retrieve XPS data based on a key and a path string. The method supports multiple
         forms of data access, such as averages, raw data, axis values, units, and external links.
@@ -840,7 +838,7 @@ class XPSReader(MultiFormatReader):
 
         def get_first_matching_fit(
             entry_name: str, unique_fits: set[str]
-        ) -> Optional[str]:
+        ) -> str | None:
             """Return the first '<fit>' name that matches the given entry name, if any."""
             for fit in unique_fits:
                 if fit.startswith(f"{entry_name}/"):

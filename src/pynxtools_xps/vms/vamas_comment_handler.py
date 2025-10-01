@@ -155,7 +155,7 @@ def _handle_kratos_block_comments(comment_list: list[str]) -> dict[str, Any]:
 
 def _handle_misc_comments(
     comment_list: list[str],
-) -> dict[str, Union[int, float, str, Any]]:
+) -> dict[str, int | float | str | Any]:
     """Handle any other comments."""
     comments = {}
     for sep in ("=", ":"):

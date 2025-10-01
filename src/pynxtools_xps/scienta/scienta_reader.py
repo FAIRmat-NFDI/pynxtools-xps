@@ -282,7 +282,7 @@ class ScientaTxtParser:
         self.header = ScientaHeader()
         self.spectra: list[dict[str, Any]] = []
 
-    def parse_file(self, file: Union[str, Path], **kwargs):
+    def parse_file(self, file: str | Path, **kwargs):
         """
         Parse the file's data and metadata into a flat
         list of dictionaries.
@@ -307,7 +307,7 @@ class ScientaTxtParser:
 
         return self.spectra
 
-    def _read_lines(self, file: Union[str, Path]):
+    def _read_lines(self, file: str | Path):
         """
         Read all lines from the input txt files.
 
@@ -447,7 +447,7 @@ class ScientaIgorParser(ABC):
         self.lines: list[str] = []
         self.spectra: list[dict[str, Any]] = []
 
-    def parse_file(self, file: Union[str, Path], **kwargs):
+    def parse_file(self, file: str | Path, **kwargs):
         """
         Reads the igor binarywave files and returns a list of
         dictionary containing the wave data.
@@ -520,7 +520,7 @@ class ScientaIgorParser(ABC):
     ) -> dict[str, Any]:
         return {}
 
-    def _parse_unit(self, bunit: bytes) -> list[tuple[str, Optional[str]]]:
+    def _parse_unit(self, bunit: bytes) -> list[tuple[str, str | None]]:
         """
         Extracts labels and units from a string containing one or more label-unit pairs.
         If no unit is present, it returns just the label.
@@ -715,7 +715,7 @@ class ScientaHdf5Parser:
     def __init__(self):
         self.spectra: list[dict[str, Any]] = []
 
-    def parse_file(self, file: Union[str, Path], **kwargs):
+    def parse_file(self, file: str | Path, **kwargs):
         """
         Reads the igor binarywave files and returns a list of
         dictionary containing the wave data.

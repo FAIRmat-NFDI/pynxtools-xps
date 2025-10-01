@@ -18,7 +18,8 @@
 Backgrounds for peak fitting.
 """
 
-from typing import Callable, Optional, cast
+from collections.abc import Callable
+from typing import Optional, cast
 
 import numpy as np
 

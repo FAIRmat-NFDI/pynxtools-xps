@@ -131,7 +131,7 @@ class XyMapperSpecs(XPSMapper):
     def _select_parser(self):
         return XyProdigyParser()
 
-    def parse_file(self, file: Union[str, Path], **kwargs):
+    def parse_file(self, file: str | Path, **kwargs):
         """
         Parse the file using the Specs XY parser.
 
@@ -319,7 +319,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
         self.n_headerlines = 14
         self.export_settings = {}
 
-    def parse_file(self, file: Union[str, Path], **kwargs):
+    def parse_file(self, file: str | Path, **kwargs):
         """
         Parse the .xy file into a list of dictionaries.
 
@@ -359,7 +359,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
 
         return self._flatten_dict(groups)
 
-    def _read_lines(self, file: Union[str, Path]):
+    def _read_lines(self, file: str | Path):
         """
         Read all lines from the input XY files.
 
@@ -650,7 +650,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
 
         """
 
-        def _normalize_ext_channel_label(label: str) -> tuple[str, Optional[str]]:
+        def _normalize_ext_channel_label(label: str) -> tuple[str, str | None]:
             """
             Normalize a label by converting the main part to snake_case and separating the unit.
 

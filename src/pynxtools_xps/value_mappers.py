@@ -21,7 +21,8 @@ Utility function for mapping keys and values in the pynxtools template.
 
 import datetime
 import re
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 ENERGY_TYPE_MAP: dict[str, str] = {
     "BE": "binding",

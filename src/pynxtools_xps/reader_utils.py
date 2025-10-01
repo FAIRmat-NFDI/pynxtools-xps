@@ -61,7 +61,7 @@ class XPSMapper(ABC):
     """Abstract base class from mapping from a parser to NXmpes template"""
 
     def __init__(self):
-        self.file: Union[str, Path] = ""
+        self.file: str | Path = ""
         self.raw_data: list[str] = []
         self._xps_dict: dict[str, Any] = {}
 
@@ -80,7 +80,7 @@ class XPSMapper(ABC):
         """Getter property."""
         return self._xps_dict
 
-    def parse_file(self, file: Union[str, Path], **kwargs):
+    def parse_file(self, file: str | Path, **kwargs):
         """
         Parse the file using the Scienta TXT parser.
 
@@ -159,7 +159,7 @@ def check_uniform_step_width(lst: list[float]) -> bool:
     return True
 
 
-def get_minimal_step(lst: Union[list[float], np.ndarray]) -> float:
+def get_minimal_step(lst: list[float] | np.ndarray) -> float:
     """
     Return the minimal difference between two consecutive values
     in a list. Used for extracting minimal difference in a
@@ -311,10 +311,10 @@ def re_map_values(
 
 def _re_map_single_value(
     input_key: str,
-    value: Optional[Union[str, int, float, bool, np.ndarray]],
+    value: str | int | float | bool | np.ndarray | None,
     map_functions: dict[str, Any],
     **kwargs,
-) -> Optional[Union[str, int, float, bool, np.ndarray]]:
+) -> str | int | float | bool | np.ndarray | None:
     """
     Map the values returned from the file to the preferred format for
     the parser output.
@@ -331,7 +331,7 @@ def _re_map_single_value(
     return value
 
 
-def _check_valid_value(value: Union[str, int, float, bool, np.ndarray]) -> bool:
+def _check_valid_value(value: str | int | float | bool | np.ndarray) -> bool:
     """
     Check if a value is valid.
 
@@ -345,7 +345,7 @@ def _check_valid_value(value: Union[str, int, float, bool, np.ndarray]) -> bool:
     Returns:
         bool: True if the value is valid, False otherwise.
     """
-    if isinstance(value, (str, int, float)) and value is not None:
+    if isinstance(value, str | int | float) and value is not None:
         return True
     if isinstance(value, bool):
         return True
@@ -420,7 +420,7 @@ def construct_entry_name(parts: list[str]) -> str:
     return "__".join([align_name_part(part) for part in parts])
 
 
-def _format_value(value: Union[int, float, str]) -> Union[int, float, str]:
+def _format_value(value: int | float | str) -> int | float | str:
     """
     Formats the input value as an int or float if it's a numeric string.
 
@@ -446,7 +446,7 @@ UNIT_PATTERN = re.compile(r"^([-+]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\s*([a-zA-Z/\s
 
 def split_value_and_unit(
     value_str: str,
-) -> tuple[Union[int, float, str], str]:
+) -> tuple[int | float | str, str]:
     """
     Splits a string into a numerical value and its associated unit.
 
@@ -473,8 +473,8 @@ def split_value_and_unit(
 
 
 def extract_unit(
-    key: str, value_str: str, unit_missing: Optional[dict[str, str]] = None
-) -> tuple[Union[int, float, str], str]:
+    key: str, value_str: str, unit_missing: dict[str, str] | None = None
+) -> tuple[int | float | str, str]:
     """
     Extract a numeric value and its associated unit from a metadata string.
 

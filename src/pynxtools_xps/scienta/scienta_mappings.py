@@ -63,7 +63,7 @@ def _separate_dimension_scale(scale: str) -> np.typing.ArrayLike:
     return np.array([float(s) for s in scale.split(" ")])
 
 
-def _construct_date_time(date_string: str, time_string: str) -> Optional[str]:
+def _construct_date_time(date_string: str, time_string: str) -> str | None:
     """
     Convert the native time format to the datetime string
     in the ISO 8601 format: '%Y-%b-%dT%H:%M:%S.%fZ'.

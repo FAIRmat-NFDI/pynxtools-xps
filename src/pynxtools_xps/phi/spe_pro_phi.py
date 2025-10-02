@@ -414,7 +414,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
             "presputter": convert_bool,
         }
 
-    def parse_file(self, file: Union[str, Path], **kwargs):
+    def parse_file(self, file: str | Path, **kwargs):
         """
         Parse the .spe, .pro file into a list of dictionaries.
 
@@ -451,7 +451,7 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         return self.spectra
 
-    def _read_lines(self, file: Union[str, Path]):
+    def _read_lines(self, file: str | Path):
         """
         Read in all lines from the file as a list of strings.
 

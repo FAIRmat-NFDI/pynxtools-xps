@@ -316,7 +316,7 @@ class VamasParser:
         self.header = VamasHeader()
         self.blocks: list[VamasBlock] = []
 
-    def parse_file(self, file: Union[str, Path], **kwargs):
+    def parse_file(self, file: str | Path, **kwargs):
         """Parse the vamas file into a list of dictionaries.
 
         Parameters
@@ -329,7 +329,7 @@ class VamasParser:
         self._parse_blocks()
         return self.build_list()
 
-    def _read_lines(self, file: Union[str, Path]):
+    def _read_lines(self, file: str | Path):
         """Read in vamas text file."""
         with open(file, "rb") as vms_file:
             for line in vms_file:

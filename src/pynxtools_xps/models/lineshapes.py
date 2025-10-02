@@ -47,7 +47,7 @@ class Gaussian(Peak):
     Gaussian peak with specified position, width, and area.
     """
 
-    def calc_lineshape(self, x: float) -> Optional[float]:
+    def calc_lineshape(self, x: float) -> float | None:
         """
         Calculate the Gaussian lineshape at a given energy value x.
 
@@ -82,7 +82,7 @@ class Gaussian(Peak):
 class Lorentzian(Peak):
     """Lorentzian peak with specified position, width, and area."""
 
-    def calc_lineshape(self, x: float) -> Optional[float]:
+    def calc_lineshape(self, x: float) -> float | None:
         """
         Calculate the Lorentzian lineshape at a given energy value x.
 
@@ -193,7 +193,7 @@ class LorentzianFinite(LorentzianAsymmetric):
         self.gauss_contribution = gauss_contribution
         self.no_of_convolutions = no_of_convolutions
 
-    def calc_lineshape(self, x: np.ndarray) -> Optional[np.ndarray]:
+    def calc_lineshape(self, x: np.ndarray) -> np.ndarray | None:
         """
         Calculate the finite Lorentzian lineshape with damping for an array of energy values x.
 
@@ -257,7 +257,7 @@ class GaussianLorentzianSum(Peak):
             fraction_gauss /= 100
         self.fraction_gauss = fraction_gauss
 
-    def calc_lineshape(self, x: float) -> Optional[float]:
+    def calc_lineshape(self, x: float) -> float | None:
         """
         Calculate the combined lineshape of the Gaussian and Lorentzian at x.
 
@@ -332,7 +332,7 @@ class GaussianLorentzianProduct(Peak):
             fraction_gauss /= 100
         self.fraction_gauss = fraction_gauss
 
-    def calc_lineshape(self, x: float) -> Optional[float]:
+    def calc_lineshape(self, x: float) -> float | None:
         """
         Calculate the combined lineshape of the Gaussian and Lorentzian product at x.
 

@@ -823,7 +823,7 @@ class CsvResultParser:
                         if value:
                             formatted_value = _format_value(value)
                             if header == "atomic_concentration" and isinstance(
-                                value, (int, float)
+                                value, int | float
                             ):
                                 formatted_value /= 100
                             table_data[row[0]].update({header: formatted_value})

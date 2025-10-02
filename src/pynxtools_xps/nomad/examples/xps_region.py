@@ -1,7 +1,8 @@
 """Fitting functions for XPS spectra"""
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, Optional, cast
+from typing import Optional, cast
 
 import numpy as np
 import pandas as pd
@@ -26,10 +27,10 @@ class XPSRegion:
     binding_energy: np.ndarray
     counts: np.ndarray
     counts_err: np.ndarray
-    baseline: Optional[np.ndarray] = None
+    baseline: np.ndarray | None = None
     _fit_region: slice = slice(None, None)
-    _fit_mod: Optional[Model] = None
-    fit_result: Optional[Model] = None
+    _fit_mod: Model | None = None
+    fit_result: Model | None = None
 
     @staticmethod
     def load(filename: str, entry: str) -> "XPSRegion":

@@ -85,7 +85,7 @@ class KratosParser:
             "deflection": _convert_xray_deflection,
         }
 
-    def parse_file(self, file: Union[str, Path], **kwargs):  # -> List[str, Any]:
+    def parse_file(self, file: str | Path, **kwargs):
         """
         TODO: parse actual data, not just metadata!
 
@@ -103,7 +103,7 @@ class KratosParser:
 
         Returns
         -------
-        List[str, Any]
+        list[dict[str, Any]]
             Flat list of dictionaries containing one spectrum each.
 
         """

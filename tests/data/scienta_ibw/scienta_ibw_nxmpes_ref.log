@@ -40,7 +40,7 @@ NXroot.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//@NeXus_release)
-DEBUG - value: v2024.02.post1.dev1989+gc0f643ac 
+DEBUG - value: v2024.02.post1.dev1996+g6cfc2d2e 
 DEBUG - classpath: ['']
 DEBUG - classes:
 NXroot.nxdl.xml:
@@ -61,7 +61,7 @@ DEBUG -
             attribute must be included, specifying the URL of the repository containing that version.
         
 DEBUG - ===== ATTRS (//@NeXus_repository)
-DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/c0f643ac 
+DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/6cfc2d2e 
 DEBUG - classpath: ['']
 DEBUG - classes:
 NXroot.nxdl.xml:
@@ -109,7 +109,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXroot.nxdl.xml:/file_name):
 DEBUG - File name of original NeXus file
 DEBUG - ===== ATTRS (//@file_time)
-DEBUG - value: 2025-08-01 17:10:58.884739+02:00 
+DEBUG - value: 2025-10-09 11:01:26.927526+02:00 
 DEBUG - classpath: ['']
 DEBUG - classes:
 NXroot.nxdl.xml:
@@ -118,7 +118,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXroot.nxdl.xml:/file_time):
 DEBUG - Date and time file was originally created
 DEBUG - ===== ATTRS (//@file_update_time)
-DEBUG - value: 2025-08-01 17:10:58.884739+02:00 
+DEBUG - value: 2025-10-09 11:01:26.927526+02:00 
 DEBUG - classpath: ['']
 DEBUG - classes:
 NXroot.nxdl.xml:
@@ -1032,7 +1032,7 @@ DEBUG -
 			*It is advised* to use :ref:`NXsubentry`, instead, as the overlay position.
 		
 DEBUG - ===== ATTRS (//Ag__002__VB/definition@URL)
-DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/c0f643ac 
+DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/6cfc2d2e 
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/definition
@@ -1042,7 +1042,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXentry.nxdl.xml:/definition/URL):
 DEBUG - URL of NXDL file
 DEBUG - ===== ATTRS (//Ag__002__VB/definition@version)
-DEBUG - value: v2024.02.post1.dev1989+gc0f643ac 
+DEBUG - value: v2024.02.post1.dev1996+g6cfc2d2e 
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/definition
@@ -5547,7 +5547,7 @@ DEBUG - classpath: ['NXentry']
 DEBUG - NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Ag__002__VB/start_time): <HDF5 dataset "start_time": shape (), type "|O">
-DEBUG - value: 2023-03-08T15:30:27+00:00 
+DEBUG - value: 2023-03-08T15:30:27+01:00 
 DEBUG - classpath: ['NXentry', 'NX_DATE_TIME']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/start_time

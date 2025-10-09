@@ -33,7 +33,10 @@ from pynxtools_xps.vms.vamas_comment_handler import handle_comments
 READER_NAME = "xps"
 READER_CLASS = get_reader(READER_NAME)
 # TODO: make tests for all supported application definitions possible
-NXDLS = ["NXxps"]  # READER_CLASS.supported_nxdls
+NXDLS = READER_CLASS.supported_nxdls
+caplog_level = "WARNING"
+ignore_undocumented = True
+
 
 test_cases = [
     ("phi_spe", "phi-spe-reader", {}),
@@ -65,7 +68,7 @@ for test_case in test_cases:
         ref_log_file = f"{test_case[0]}_{nxdl.lower()}_ref.log"
         test_params += [
             pytest.param(
-                nxdl, test_case[0], ref_log_file,  id=f"{test_case[1]}-{nxdl.lower()}"
+                nxdl, test_case[0], ref_log_file, id=f"{test_case[1]}-{nxdl.lower()}"
             )
         ]
 
@@ -84,10 +87,12 @@ test_params = [
 
 
 @pytest.mark.parametrize(
-    "nxdl, sub_reader_data_dir, ref_log_file, ignore_sections"
+    "nxdl, sub_reader_data_dir, ref_log_file, ignore_sections",
     test_params,
 )
-def test_nexus_conversion(nxdl, sub_reader_data_dir, ref_log_file, ignore_sections, tmp_path, caplog):
+def test_nexus_conversion(
+    nxdl, sub_reader_data_dir, ref_log_file, ignore_sections, tmp_path, caplog
+):
     """
     Test XPS reader
 
@@ -135,10 +140,14 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, ref_log_file, ignore_sectio
         caplog=caplog,
         ref_log_path=ref_log_path,
     )
-    test.convert_to_nexus(caplog_level="WARNING", ignore_undocumented=True)
-    test.test_verify_nexus(caplog_level="WARNING")
+    test.convert_to_nexus(
+        caplog_level=caplog_level, ignore_undocumented=ignore_undocumented
+    )
+    test.validate_nexus_file(
+        caplog_level=caplog_level, ignore_undocumented=ignore_undocumented
+    )
     test.check_reproducibility_of_nexus(ignore_sections=ignore_sections)
-    test.test_parse_nomad()
+    test.parse_nomad()
 
 
 def read_comment_file(filepath: str):

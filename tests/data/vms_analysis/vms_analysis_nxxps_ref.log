@@ -40,7 +40,7 @@ NXroot.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//@NeXus_release)
-DEBUG - value: v2024.02.post1.dev1989+gc0f643ac 
+DEBUG - value: v2024.02.post1.dev1996+g6cfc2d2e 
 DEBUG - classpath: ['']
 DEBUG - classes:
 NXroot.nxdl.xml:
@@ -61,7 +61,7 @@ DEBUG -
             attribute must be included, specifying the URL of the repository containing that version.
         
 DEBUG - ===== ATTRS (//@NeXus_repository)
-DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/c0f643ac 
+DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/6cfc2d2e 
 DEBUG - classpath: ['']
 DEBUG - classes:
 NXroot.nxdl.xml:
@@ -109,7 +109,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXroot.nxdl.xml:/file_name):
 DEBUG - File name of original NeXus file
 DEBUG - ===== ATTRS (//@file_time)
-DEBUG - value: 2025-08-01 17:27:52.440786+02:00 
+DEBUG - value: 2025-10-09 11:03:47.368053+02:00 
 DEBUG - classpath: ['']
 DEBUG - classes:
 NXroot.nxdl.xml:
@@ -118,7 +118,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXroot.nxdl.xml:/file_time):
 DEBUG - Date and time file was originally created
 DEBUG - ===== ATTRS (//@file_update_time)
-DEBUG - value: 2025-08-01 17:27:52.440786+02:00 
+DEBUG - value: 2025-10-09 11:03:47.368053+02:00 
 DEBUG - classpath: ['']
 DEBUG - classes:
 NXroot.nxdl.xml:
@@ -579,13 +579,6 @@ DEBUG - <<OPTIONAL>>
 DEBUG - Dataset referenced as NXdata SIGNAL
 DEBUG - documentation (NXdata.nxdl.xml:/DATA/long_name):
 DEBUG - data label
-DEBUG - ===== ATTRS (//Fe2p/data/data@target)
-DEBUG - value: /Fe2p/data/data 
-DEBUG - classpath: ['NXentry', 'NXdata', 'NX_NUMBER']
-DEBUG - classes:
-NXdata.nxdl.xml:/DATA
-DEBUG - @target - IS NOT IN SCHEMA
-DEBUG - 
 DEBUG - ===== ATTRS (//Fe2p/data/data@units)
 DEBUG - value: degree 
 DEBUG - classpath: ['NXentry', 'NXdata', 'NX_NUMBER']
@@ -645,13 +638,6 @@ DEBUG - <<OPTIONAL>>
 DEBUG - Dataset referenced as NXdata AXIS #0
 DEBUG - documentation (NXdata.nxdl.xml:/AXISNAME/long_name):
 DEBUG - Axis label
-DEBUG - ===== ATTRS (//Fe2p/data/energy@target)
-DEBUG - value: /Fe2p/data/energy 
-DEBUG - classpath: ['NXentry', 'NXdata', 'NX_CHAR_OR_NUMBER']
-DEBUG - classes:
-NXdata.nxdl.xml:/AXISNAME
-DEBUG - @target - IS NOT IN SCHEMA
-DEBUG - 
 DEBUG - ===== ATTRS (//Fe2p/data/energy@type)
 DEBUG - value: binding 
 DEBUG - classpath: ['NXentry', 'NXdata', 'NX_CHAR_OR_NUMBER']
@@ -705,7 +691,7 @@ DEBUG -
 			*It is advised* to use :ref:`NXsubentry`, instead, as the overlay position.
 		
 DEBUG - ===== ATTRS (//Fe2p/definition@URL)
-DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/c0f643ac 
+DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/6cfc2d2e 
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/definition
@@ -716,7 +702,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXentry.nxdl.xml:/definition/URL):
 DEBUG - URL of NXDL file
 DEBUG - ===== ATTRS (//Fe2p/definition@version)
-DEBUG - value: v2024.02.post1.dev1989+gc0f643ac 
+DEBUG - value: v2024.02.post1.dev1996+g6cfc2d2e 
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/definition
@@ -1243,13 +1229,6 @@ DEBUG -
 
 			The maximum rank is ``32`` for compatibility with backend file formats.
 		
-DEBUG - ===== ATTRS (//Fe2p/fit/background0/data/intensity@target)
-DEBUG - value: /Fe2p/fit/background0/data/intensity 
-DEBUG - classpath: ['NXentry', 'NXfit', 'NXpeak', 'NXdata', 'NX_NUMBER']
-DEBUG - classes:
-NXdata.nxdl.xml:/DATA
-DEBUG - @target - IS NOT IN SCHEMA
-DEBUG - 
 DEBUG - ===== ATTRS (//Fe2p/fit/background0/data/intensity@units)
 DEBUG - value: counts_per_second 
 DEBUG - classpath: ['NXentry', 'NXfit', 'NXpeak', 'NXdata', 'NX_NUMBER']
@@ -1717,12 +1696,6 @@ DEBUG - classes:
 NXdata.nxdl.xml:/DATA
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
-DEBUG - ===== ATTRS (//Fe2p/fit/data/background0_intensity@units)
-DEBUG - value: counts_per_second 
-DEBUG - classpath: ['NXentry', 'NXfit', 'NXdata', 'NX_NUMBER']
-DEBUG - classes:
-NXdata.nxdl.xml:/DATA
-DEBUG - NXdata.nxdl.xml:/DATA@units - REQUIRED, but undefined unit category
 DEBUG - ===== FIELD (//Fe2p/fit/data/fit_sum): <HDF5 dataset "fit_sum": shape (1121,), type "<f8">
 DEBUG - value: [6410.278 6305.324 6338.421 ... 1492.786 1519.37  1484.025] 
 DEBUG - classpath: ['NXentry', 'NXfit', 'NXdata', 'NX_NUMBER']
@@ -1764,16 +1737,6 @@ DEBUG -
 
 			The maximum rank is ``32`` for compatibility with backend file formats.
 		
-DEBUG - ===== ATTRS (//Fe2p/fit/data/input_dependent@long_name)
-DEBUG - value: intensity 
-DEBUG - classpath: ['NXentry', 'NXfit', 'NXdata', 'NX_NUMBER']
-DEBUG - classes:
-NXdata.nxdl.xml:/DATA
-DEBUG - NXdata.nxdl.xml:/DATA@long_name - [NX_CHAR]
-DEBUG - <<OPTIONAL>>
-DEBUG - Dataset referenced as NXdata SIGNAL
-DEBUG - documentation (NXdata.nxdl.xml:/DATA/long_name):
-DEBUG - data label
 DEBUG - ===== ATTRS (//Fe2p/fit/data/input_dependent@target)
 DEBUG - value: /Fe2p/data/data 
 DEBUG - classpath: ['NXentry', 'NXfit', 'NXdata', 'NX_NUMBER']
@@ -1781,12 +1744,6 @@ DEBUG - classes:
 NXdata.nxdl.xml:/DATA
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
-DEBUG - ===== ATTRS (//Fe2p/fit/data/input_dependent@units)
-DEBUG - value: degree 
-DEBUG - classpath: ['NXentry', 'NXfit', 'NXdata', 'NX_NUMBER']
-DEBUG - classes:
-NXdata.nxdl.xml:/DATA
-DEBUG - NXdata.nxdl.xml:/DATA@units - REQUIRED, but undefined unit category
 DEBUG - ===== FIELD (//Fe2p/fit/data/input_independent): <HDF5 dataset "input_independent": shape (1121,), type "<f8">
 DEBUG - value: [736.61 736.66 736.71 ... 792.51 792.56 792.61] 
 DEBUG - classpath: ['NXentry', 'NXfit', 'NXdata', 'NX_CHAR_OR_NUMBER']
@@ -1808,29 +1765,12 @@ DEBUG -
 			Most ``AXISNAME`` fields will be sequences of numbers but if an axis is better represented using names, such as channel names,
 			an array of NX_CHAR can be provided.
 		
-DEBUG - ===== ATTRS (//Fe2p/fit/data/input_independent@long_name)
-DEBUG - value: energy 
-DEBUG - classpath: ['NXentry', 'NXfit', 'NXdata', 'NX_CHAR_OR_NUMBER']
-DEBUG - classes:
-NXdata.nxdl.xml:/AXISNAME
-DEBUG - NXdata.nxdl.xml:/AXISNAME@long_name - [NX_CHAR]
-DEBUG - <<OPTIONAL>>
-DEBUG - Dataset referenced as NXdata AXIS #0
-DEBUG - documentation (NXdata.nxdl.xml:/AXISNAME/long_name):
-DEBUG - Axis label
 DEBUG - ===== ATTRS (//Fe2p/fit/data/input_independent@target)
 DEBUG - value: /Fe2p/data/energy 
 DEBUG - classpath: ['NXentry', 'NXfit', 'NXdata', 'NX_CHAR_OR_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/AXISNAME
 DEBUG - @target - IS NOT IN SCHEMA
-DEBUG - 
-DEBUG - ===== ATTRS (//Fe2p/fit/data/input_independent@type)
-DEBUG - value: binding 
-DEBUG - classpath: ['NXentry', 'NXfit', 'NXdata', 'NX_CHAR_OR_NUMBER']
-DEBUG - classes:
-NXdata.nxdl.xml:/AXISNAME
-DEBUG - @type - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== ATTRS (//Fe2p/fit/data/input_independent@units)
 DEBUG - value: eV 
@@ -1868,12 +1808,6 @@ DEBUG - classes:
 NXdata.nxdl.xml:/DATA
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
-DEBUG - ===== ATTRS (//Fe2p/fit/data/peak0_intensity@units)
-DEBUG - value: counts_per_second 
-DEBUG - classpath: ['NXentry', 'NXfit', 'NXdata', 'NX_NUMBER']
-DEBUG - classes:
-NXdata.nxdl.xml:/DATA
-DEBUG - NXdata.nxdl.xml:/DATA@units - REQUIRED, but undefined unit category
 DEBUG - ===== FIELD (//Fe2p/fit/data/peak1_intensity): <HDF5 dataset "peak1_intensity": shape (1121,), type "<f8">
 DEBUG - value: [6273.519 6167.563 6199.657 ... 1486.197 1512.8   1477.472] 
 DEBUG - classpath: ['NXentry', 'NXfit', 'NXdata', 'NX_NUMBER']
@@ -1898,12 +1832,6 @@ DEBUG - classes:
 NXdata.nxdl.xml:/DATA
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
-DEBUG - ===== ATTRS (//Fe2p/fit/data/peak1_intensity@units)
-DEBUG - value: counts_per_second 
-DEBUG - classpath: ['NXentry', 'NXfit', 'NXdata', 'NX_NUMBER']
-DEBUG - classes:
-NXdata.nxdl.xml:/DATA
-DEBUG - NXdata.nxdl.xml:/DATA@units - REQUIRED, but undefined unit category
 DEBUG - ===== FIELD (//Fe2p/fit/data/peak2_intensity): <HDF5 dataset "peak2_intensity": shape (1121,), type "<f8">
 DEBUG - value: [6370.531 6265.394 6298.307 ... 1450.56  1477.32  1442.15 ] 
 DEBUG - classpath: ['NXentry', 'NXfit', 'NXdata', 'NX_NUMBER']
@@ -1928,12 +1856,6 @@ DEBUG - classes:
 NXdata.nxdl.xml:/DATA
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
-DEBUG - ===== ATTRS (//Fe2p/fit/data/peak2_intensity@units)
-DEBUG - value: counts_per_second 
-DEBUG - classpath: ['NXentry', 'NXfit', 'NXdata', 'NX_NUMBER']
-DEBUG - classes:
-NXdata.nxdl.xml:/DATA
-DEBUG - NXdata.nxdl.xml:/DATA@units - REQUIRED, but undefined unit category
 DEBUG - ===== FIELD (//Fe2p/fit/data/peak3_intensity): <HDF5 dataset "peak3_intensity": shape (1121,), type "<f8">
 DEBUG - value: [6278.792 6172.89  6205.038 ... 1457.149 1483.891 1448.703] 
 DEBUG - classpath: ['NXentry', 'NXfit', 'NXdata', 'NX_NUMBER']
@@ -1958,12 +1880,6 @@ DEBUG - classes:
 NXdata.nxdl.xml:/DATA
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
-DEBUG - ===== ATTRS (//Fe2p/fit/data/peak3_intensity@units)
-DEBUG - value: counts_per_second 
-DEBUG - classpath: ['NXentry', 'NXfit', 'NXdata', 'NX_NUMBER']
-DEBUG - classes:
-NXdata.nxdl.xml:/DATA
-DEBUG - NXdata.nxdl.xml:/DATA@units - REQUIRED, but undefined unit category
 DEBUG - ===== FIELD (//Fe2p/fit/label): <HDF5 dataset "label": shape (), type "|O">
 DEBUG - value: Fe2p 
 DEBUG - classpath: ['NXentry', 'NXfit', 'NX_CHAR']
@@ -2307,13 +2223,6 @@ DEBUG -
 
 			The maximum rank is ``32`` for compatibility with backend file formats.
 		
-DEBUG - ===== ATTRS (//Fe2p/fit/peak0/data/intensity@target)
-DEBUG - value: /Fe2p/fit/peak0/data/intensity 
-DEBUG - classpath: ['NXentry', 'NXfit', 'NXpeak', 'NXdata', 'NX_NUMBER']
-DEBUG - classes:
-NXdata.nxdl.xml:/DATA
-DEBUG - @target - IS NOT IN SCHEMA
-DEBUG - 
 DEBUG - ===== ATTRS (//Fe2p/fit/peak0/data/intensity@units)
 DEBUG - value: counts_per_second 
 DEBUG - classpath: ['NXentry', 'NXfit', 'NXpeak', 'NXdata', 'NX_NUMBER']
@@ -3065,13 +2974,6 @@ DEBUG -
 
 			The maximum rank is ``32`` for compatibility with backend file formats.
 		
-DEBUG - ===== ATTRS (//Fe2p/fit/peak1/data/intensity@target)
-DEBUG - value: /Fe2p/fit/peak1/data/intensity 
-DEBUG - classpath: ['NXentry', 'NXfit', 'NXpeak', 'NXdata', 'NX_NUMBER']
-DEBUG - classes:
-NXdata.nxdl.xml:/DATA
-DEBUG - @target - IS NOT IN SCHEMA
-DEBUG - 
 DEBUG - ===== ATTRS (//Fe2p/fit/peak1/data/intensity@units)
 DEBUG - value: counts_per_second 
 DEBUG - classpath: ['NXentry', 'NXfit', 'NXpeak', 'NXdata', 'NX_NUMBER']
@@ -3823,13 +3725,6 @@ DEBUG -
 
 			The maximum rank is ``32`` for compatibility with backend file formats.
 		
-DEBUG - ===== ATTRS (//Fe2p/fit/peak2/data/intensity@target)
-DEBUG - value: /Fe2p/fit/peak2/data/intensity 
-DEBUG - classpath: ['NXentry', 'NXfit', 'NXpeak', 'NXdata', 'NX_NUMBER']
-DEBUG - classes:
-NXdata.nxdl.xml:/DATA
-DEBUG - @target - IS NOT IN SCHEMA
-DEBUG - 
 DEBUG - ===== ATTRS (//Fe2p/fit/peak2/data/intensity@units)
 DEBUG - value: counts_per_second 
 DEBUG - classpath: ['NXentry', 'NXfit', 'NXpeak', 'NXdata', 'NX_NUMBER']
@@ -4581,13 +4476,6 @@ DEBUG -
 
 			The maximum rank is ``32`` for compatibility with backend file formats.
 		
-DEBUG - ===== ATTRS (//Fe2p/fit/peak3/data/intensity@target)
-DEBUG - value: /Fe2p/fit/peak3/data/intensity 
-DEBUG - classpath: ['NXentry', 'NXfit', 'NXpeak', 'NXdata', 'NX_NUMBER']
-DEBUG - classes:
-NXdata.nxdl.xml:/DATA
-DEBUG - @target - IS NOT IN SCHEMA
-DEBUG - 
 DEBUG - ===== ATTRS (//Fe2p/fit/peak3/data/intensity@units)
 DEBUG - value: counts_per_second 
 DEBUG - classpath: ['NXentry', 'NXfit', 'NXpeak', 'NXdata', 'NX_NUMBER']
@@ -11044,13 +10932,8 @@ DEBUG - Signal has been identified: /Fe2p/fit/data/input_dependent
 DEBUG - ===== FIELD (//Fe2p/fit/data/input_dependent): <HDF5 dataset "input_dependent": shape (1121,), type "<f8">
 DEBUG - value: [6258.45 6152.45 6184.5  ... 1450.56 1477.32 1442.15] 
 DEBUG - Dataset referenced as NXdata SIGNAL
-DEBUG - ===== ATTRS (//Fe2p/fit/data/input_dependent@long_name)
-DEBUG - value: intensity 
-DEBUG - Dataset referenced as NXdata SIGNAL
 DEBUG - ===== ATTRS (//Fe2p/fit/data/input_dependent@target)
 DEBUG - value: /Fe2p/data/data 
-DEBUG - ===== ATTRS (//Fe2p/fit/data/input_dependent@units)
-DEBUG - value: degree 
 DEBUG - Further auxiliary signal has been identified: fit_sum
 DEBUG - Further auxiliary signal has been identified: background0_intensity
 DEBUG - Further auxiliary signal has been identified: peak0_intensity

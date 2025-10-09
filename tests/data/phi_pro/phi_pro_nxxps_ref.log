@@ -40,7 +40,7 @@ NXroot.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//@NeXus_release)
-DEBUG - value: v2024.02.post1.dev1989+gc0f643ac 
+DEBUG - value: v2024.02.post1.dev1996+g6cfc2d2e 
 DEBUG - classpath: ['']
 DEBUG - classes:
 NXroot.nxdl.xml:
@@ -61,7 +61,7 @@ DEBUG -
             attribute must be included, specifying the URL of the repository containing that version.
         
 DEBUG - ===== ATTRS (//@NeXus_repository)
-DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/c0f643ac 
+DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/6cfc2d2e 
 DEBUG - classpath: ['']
 DEBUG - classes:
 NXroot.nxdl.xml:
@@ -109,7 +109,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXroot.nxdl.xml:/file_name):
 DEBUG - File name of original NeXus file
 DEBUG - ===== ATTRS (//@file_time)
-DEBUG - value: 2025-08-01 17:10:27.951819+02:00 
+DEBUG - value: 2025-10-09 11:00:48.018193+02:00 
 DEBUG - classpath: ['']
 DEBUG - classes:
 NXroot.nxdl.xml:
@@ -118,7 +118,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXroot.nxdl.xml:/file_time):
 DEBUG - Date and time file was originally created
 DEBUG - ===== ATTRS (//@file_update_time)
-DEBUG - value: 2025-08-01 17:10:27.951819+02:00 
+DEBUG - value: 2025-10-09 11:00:48.018193+02:00 
 DEBUG - classpath: ['']
 DEBUG - classes:
 NXroot.nxdl.xml:
@@ -1076,7 +1076,7 @@ DEBUG -
 			*It is advised* to use :ref:`NXsubentry`, instead, as the overlay position.
 		
 DEBUG - ===== ATTRS (//C1s/definition@URL)
-DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/c0f643ac 
+DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/6cfc2d2e 
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/definition
@@ -1087,7 +1087,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXentry.nxdl.xml:/definition/URL):
 DEBUG - URL of NXDL file
 DEBUG - ===== ATTRS (//C1s/definition@version)
-DEBUG - value: v2024.02.post1.dev1989+gc0f643ac 
+DEBUG - value: v2024.02.post1.dev1996+g6cfc2d2e 
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/definition
@@ -5950,6 +5950,14 @@ DEBUG - documentation (NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type):
 DEBUG - 
 DEBUG - documentation (NXsource.nxdl.xml:/type):
 DEBUG - type of radiation source (pick one from the enumerated list and spell exactly)
+DEBUG - ===== ATTRS (//C1s/instrument/source_flood_gun/type@custom)
+DEBUG - value: True 
+DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_CHAR']
+DEBUG - classes:
+NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type
+NXsource.nxdl.xml:/type
+DEBUG - @custom - IS NOT IN SCHEMA
+DEBUG - 
 DEBUG - ===== FIELD (//C1s/instrument/source_flood_gun/voltage): <HDF5 dataset "voltage": shape (), type "<f8">
 DEBUG - value: 1.0 
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_FLOAT']
@@ -6477,6 +6485,14 @@ DEBUG - documentation (NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type):
 DEBUG - 
 DEBUG - documentation (NXsource.nxdl.xml:/type):
 DEBUG - type of radiation source (pick one from the enumerated list and spell exactly)
+DEBUG - ===== ATTRS (//C1s/instrument/source_gas_cluster_ion_beam/type@custom)
+DEBUG - value: True 
+DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_CHAR']
+DEBUG - classes:
+NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type
+NXsource.nxdl.xml:/type
+DEBUG - @custom - IS NOT IN SCHEMA
+DEBUG - 
 DEBUG - ===== FIELD (//C1s/instrument/source_gas_cluster_ion_beam/voltage): <HDF5 dataset "voltage": shape (), type "<f8">
 DEBUG - value: 10.0 
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_FLOAT']
@@ -7016,6 +7032,14 @@ DEBUG - documentation (NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type):
 DEBUG - 
 DEBUG - documentation (NXsource.nxdl.xml:/type):
 DEBUG - type of radiation source (pick one from the enumerated list and spell exactly)
+DEBUG - ===== ATTRS (//C1s/instrument/source_neutral_ion_gun/type@custom)
+DEBUG - value: True 
+DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_CHAR']
+DEBUG - classes:
+NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type
+NXsource.nxdl.xml:/type
+DEBUG - @custom - IS NOT IN SCHEMA
+DEBUG - 
 DEBUG - ===== FIELD (//C1s/instrument/source_neutral_ion_gun/voltage): <HDF5 dataset "voltage": shape (), type "<f8">
 DEBUG - value: 0.11 
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_FLOAT']
@@ -8627,6 +8651,14 @@ DEBUG - documentation (NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type):
 DEBUG - 
 DEBUG - documentation (NXsource.nxdl.xml:/type):
 DEBUG - type of radiation source (pick one from the enumerated list and spell exactly)
+DEBUG - ===== ATTRS (//C1s/instrument/source_sputter_gun/type@custom)
+DEBUG - value: True 
+DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_CHAR']
+DEBUG - classes:
+NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type
+NXsource.nxdl.xml:/type
+DEBUG - @custom - IS NOT IN SCHEMA
+DEBUG - 
 DEBUG - ===== FIELD (//C1s/instrument/source_sputter_gun/voltage): <HDF5 dataset "voltage": shape (), type "<f8">
 DEBUG - value: 0.1 
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_FLOAT']
@@ -11197,7 +11229,7 @@ DEBUG -
 			*It is advised* to use :ref:`NXsubentry`, instead, as the overlay position.
 		
 DEBUG - ===== ATTRS (//Si2p/definition@URL)
-DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/c0f643ac 
+DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/6cfc2d2e 
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/definition
@@ -11208,7 +11240,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXentry.nxdl.xml:/definition/URL):
 DEBUG - URL of NXDL file
 DEBUG - ===== ATTRS (//Si2p/definition@version)
-DEBUG - value: v2024.02.post1.dev1989+gc0f643ac 
+DEBUG - value: v2024.02.post1.dev1996+g6cfc2d2e 
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/definition
@@ -16071,6 +16103,14 @@ DEBUG - documentation (NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type):
 DEBUG - 
 DEBUG - documentation (NXsource.nxdl.xml:/type):
 DEBUG - type of radiation source (pick one from the enumerated list and spell exactly)
+DEBUG - ===== ATTRS (//Si2p/instrument/source_flood_gun/type@custom)
+DEBUG - value: True 
+DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_CHAR']
+DEBUG - classes:
+NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type
+NXsource.nxdl.xml:/type
+DEBUG - @custom - IS NOT IN SCHEMA
+DEBUG - 
 DEBUG - ===== FIELD (//Si2p/instrument/source_flood_gun/voltage): <HDF5 dataset "voltage": shape (), type "<f8">
 DEBUG - value: 1.0 
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_FLOAT']
@@ -16598,6 +16638,14 @@ DEBUG - documentation (NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type):
 DEBUG - 
 DEBUG - documentation (NXsource.nxdl.xml:/type):
 DEBUG - type of radiation source (pick one from the enumerated list and spell exactly)
+DEBUG - ===== ATTRS (//Si2p/instrument/source_gas_cluster_ion_beam/type@custom)
+DEBUG - value: True 
+DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_CHAR']
+DEBUG - classes:
+NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type
+NXsource.nxdl.xml:/type
+DEBUG - @custom - IS NOT IN SCHEMA
+DEBUG - 
 DEBUG - ===== FIELD (//Si2p/instrument/source_gas_cluster_ion_beam/voltage): <HDF5 dataset "voltage": shape (), type "<f8">
 DEBUG - value: 10.0 
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_FLOAT']
@@ -17137,6 +17185,14 @@ DEBUG - documentation (NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type):
 DEBUG - 
 DEBUG - documentation (NXsource.nxdl.xml:/type):
 DEBUG - type of radiation source (pick one from the enumerated list and spell exactly)
+DEBUG - ===== ATTRS (//Si2p/instrument/source_neutral_ion_gun/type@custom)
+DEBUG - value: True 
+DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_CHAR']
+DEBUG - classes:
+NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type
+NXsource.nxdl.xml:/type
+DEBUG - @custom - IS NOT IN SCHEMA
+DEBUG - 
 DEBUG - ===== FIELD (//Si2p/instrument/source_neutral_ion_gun/voltage): <HDF5 dataset "voltage": shape (), type "<f8">
 DEBUG - value: 0.11 
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_FLOAT']
@@ -18748,6 +18804,14 @@ DEBUG - documentation (NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type):
 DEBUG - 
 DEBUG - documentation (NXsource.nxdl.xml:/type):
 DEBUG - type of radiation source (pick one from the enumerated list and spell exactly)
+DEBUG - ===== ATTRS (//Si2p/instrument/source_sputter_gun/type@custom)
+DEBUG - value: True 
+DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_CHAR']
+DEBUG - classes:
+NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type
+NXsource.nxdl.xml:/type
+DEBUG - @custom - IS NOT IN SCHEMA
+DEBUG - 
 DEBUG - ===== FIELD (//Si2p/instrument/source_sputter_gun/voltage): <HDF5 dataset "voltage": shape (), type "<f8">
 DEBUG - value: 0.1 
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_FLOAT']
@@ -21318,7 +21382,7 @@ DEBUG -
 			*It is advised* to use :ref:`NXsubentry`, instead, as the overlay position.
 		
 DEBUG - ===== ATTRS (//Sn3d5/definition@URL)
-DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/c0f643ac 
+DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/6cfc2d2e 
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/definition
@@ -21329,7 +21393,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXentry.nxdl.xml:/definition/URL):
 DEBUG - URL of NXDL file
 DEBUG - ===== ATTRS (//Sn3d5/definition@version)
-DEBUG - value: v2024.02.post1.dev1989+gc0f643ac 
+DEBUG - value: v2024.02.post1.dev1996+g6cfc2d2e 
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/definition
@@ -26192,6 +26256,14 @@ DEBUG - documentation (NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type):
 DEBUG - 
 DEBUG - documentation (NXsource.nxdl.xml:/type):
 DEBUG - type of radiation source (pick one from the enumerated list and spell exactly)
+DEBUG - ===== ATTRS (//Sn3d5/instrument/source_flood_gun/type@custom)
+DEBUG - value: True 
+DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_CHAR']
+DEBUG - classes:
+NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type
+NXsource.nxdl.xml:/type
+DEBUG - @custom - IS NOT IN SCHEMA
+DEBUG - 
 DEBUG - ===== FIELD (//Sn3d5/instrument/source_flood_gun/voltage): <HDF5 dataset "voltage": shape (), type "<f8">
 DEBUG - value: 1.0 
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_FLOAT']
@@ -26719,6 +26791,14 @@ DEBUG - documentation (NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type):
 DEBUG - 
 DEBUG - documentation (NXsource.nxdl.xml:/type):
 DEBUG - type of radiation source (pick one from the enumerated list and spell exactly)
+DEBUG - ===== ATTRS (//Sn3d5/instrument/source_gas_cluster_ion_beam/type@custom)
+DEBUG - value: True 
+DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_CHAR']
+DEBUG - classes:
+NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type
+NXsource.nxdl.xml:/type
+DEBUG - @custom - IS NOT IN SCHEMA
+DEBUG - 
 DEBUG - ===== FIELD (//Sn3d5/instrument/source_gas_cluster_ion_beam/voltage): <HDF5 dataset "voltage": shape (), type "<f8">
 DEBUG - value: 10.0 
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_FLOAT']
@@ -27258,6 +27338,14 @@ DEBUG - documentation (NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type):
 DEBUG - 
 DEBUG - documentation (NXsource.nxdl.xml:/type):
 DEBUG - type of radiation source (pick one from the enumerated list and spell exactly)
+DEBUG - ===== ATTRS (//Sn3d5/instrument/source_neutral_ion_gun/type@custom)
+DEBUG - value: True 
+DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_CHAR']
+DEBUG - classes:
+NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type
+NXsource.nxdl.xml:/type
+DEBUG - @custom - IS NOT IN SCHEMA
+DEBUG - 
 DEBUG - ===== FIELD (//Sn3d5/instrument/source_neutral_ion_gun/voltage): <HDF5 dataset "voltage": shape (), type "<f8">
 DEBUG - value: 0.11 
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_FLOAT']
@@ -28869,6 +28957,14 @@ DEBUG - documentation (NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type):
 DEBUG - 
 DEBUG - documentation (NXsource.nxdl.xml:/type):
 DEBUG - type of radiation source (pick one from the enumerated list and spell exactly)
+DEBUG - ===== ATTRS (//Sn3d5/instrument/source_sputter_gun/type@custom)
+DEBUG - value: True 
+DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_CHAR']
+DEBUG - classes:
+NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type
+NXsource.nxdl.xml:/type
+DEBUG - @custom - IS NOT IN SCHEMA
+DEBUG - 
 DEBUG - ===== FIELD (//Sn3d5/instrument/source_sputter_gun/voltage): <HDF5 dataset "voltage": shape (), type "<f8">
 DEBUG - value: 0.1 
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_FLOAT']
@@ -31439,7 +31535,7 @@ DEBUG -
 			*It is advised* to use :ref:`NXsubentry`, instead, as the overlay position.
 		
 DEBUG - ===== ATTRS (//Su1s/definition@URL)
-DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/c0f643ac 
+DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/6cfc2d2e 
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/definition
@@ -31450,7 +31546,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXentry.nxdl.xml:/definition/URL):
 DEBUG - URL of NXDL file
 DEBUG - ===== ATTRS (//Su1s/definition@version)
-DEBUG - value: v2024.02.post1.dev1989+gc0f643ac 
+DEBUG - value: v2024.02.post1.dev1996+g6cfc2d2e 
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/definition
@@ -36313,6 +36409,14 @@ DEBUG - documentation (NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type):
 DEBUG - 
 DEBUG - documentation (NXsource.nxdl.xml:/type):
 DEBUG - type of radiation source (pick one from the enumerated list and spell exactly)
+DEBUG - ===== ATTRS (//Su1s/instrument/source_flood_gun/type@custom)
+DEBUG - value: True 
+DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_CHAR']
+DEBUG - classes:
+NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type
+NXsource.nxdl.xml:/type
+DEBUG - @custom - IS NOT IN SCHEMA
+DEBUG - 
 DEBUG - ===== FIELD (//Su1s/instrument/source_flood_gun/voltage): <HDF5 dataset "voltage": shape (), type "<f8">
 DEBUG - value: 1.0 
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_FLOAT']
@@ -36840,6 +36944,14 @@ DEBUG - documentation (NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type):
 DEBUG - 
 DEBUG - documentation (NXsource.nxdl.xml:/type):
 DEBUG - type of radiation source (pick one from the enumerated list and spell exactly)
+DEBUG - ===== ATTRS (//Su1s/instrument/source_gas_cluster_ion_beam/type@custom)
+DEBUG - value: True 
+DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_CHAR']
+DEBUG - classes:
+NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type
+NXsource.nxdl.xml:/type
+DEBUG - @custom - IS NOT IN SCHEMA
+DEBUG - 
 DEBUG - ===== FIELD (//Su1s/instrument/source_gas_cluster_ion_beam/voltage): <HDF5 dataset "voltage": shape (), type "<f8">
 DEBUG - value: 10.0 
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_FLOAT']
@@ -37379,6 +37491,14 @@ DEBUG - documentation (NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type):
 DEBUG - 
 DEBUG - documentation (NXsource.nxdl.xml:/type):
 DEBUG - type of radiation source (pick one from the enumerated list and spell exactly)
+DEBUG - ===== ATTRS (//Su1s/instrument/source_neutral_ion_gun/type@custom)
+DEBUG - value: True 
+DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_CHAR']
+DEBUG - classes:
+NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type
+NXsource.nxdl.xml:/type
+DEBUG - @custom - IS NOT IN SCHEMA
+DEBUG - 
 DEBUG - ===== FIELD (//Su1s/instrument/source_neutral_ion_gun/voltage): <HDF5 dataset "voltage": shape (), type "<f8">
 DEBUG - value: 0.11 
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_FLOAT']
@@ -38990,6 +39110,14 @@ DEBUG - documentation (NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type):
 DEBUG - 
 DEBUG - documentation (NXsource.nxdl.xml:/type):
 DEBUG - type of radiation source (pick one from the enumerated list and spell exactly)
+DEBUG - ===== ATTRS (//Su1s/instrument/source_sputter_gun/type@custom)
+DEBUG - value: True 
+DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_CHAR']
+DEBUG - classes:
+NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_TYPE/type
+NXsource.nxdl.xml:/type
+DEBUG - @custom - IS NOT IN SCHEMA
+DEBUG - 
 DEBUG - ===== FIELD (//Su1s/instrument/source_sputter_gun/voltage): <HDF5 dataset "voltage": shape (), type "<f8">
 DEBUG - value: 0.1 
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_FLOAT']

@@ -19,7 +19,7 @@ DEBUG -
         of NeXus objects that are not allowed at the root level.
     
 DEBUG - ===== ATTRS (//@HDF5_Version)
-DEBUG - value: 1.14.2 
+DEBUG - value: 1.14.2
 DEBUG - classpath: ['']
 DEBUG - classes:
 NXroot.nxdl.xml:
@@ -33,14 +33,14 @@ DEBUG -
             different than other version attributes.
         
 DEBUG - ===== ATTRS (//@NX_class)
-DEBUG - value: NXroot 
+DEBUG - value: NXroot
 DEBUG - classpath: ['']
 DEBUG - classes:
 NXroot.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//@NeXus_release)
-DEBUG - value: v2024.02.post1.dev1996+g6cfc2d2e 
+DEBUG - value: v2024.02.post1.dev1996+g6cfc2d2e
 DEBUG - classpath: ['']
 DEBUG - classes:
 NXroot.nxdl.xml:
@@ -61,7 +61,7 @@ DEBUG -
             attribute must be included, specifying the URL of the repository containing that version.
         
 DEBUG - ===== ATTRS (//@NeXus_repository)
-DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/6cfc2d2e 
+DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/6cfc2d2e
 DEBUG - classpath: ['']
 DEBUG - classes:
 NXroot.nxdl.xml:
@@ -75,7 +75,7 @@ DEBUG -
             this should refer to this repository.
         
 DEBUG - ===== ATTRS (//@default)
-DEBUG - value: Survey 
+DEBUG - value: Survey
 DEBUG - classpath: ['']
 DEBUG - classes:
 NXroot.nxdl.xml:
@@ -100,7 +100,7 @@ DEBUG -
             for a summary of the discussion.
         
 DEBUG - ===== ATTRS (//@file_name)
-DEBUG - value: output.nxs 
+DEBUG - value: output.nxs
 DEBUG - classpath: ['']
 DEBUG - classes:
 NXroot.nxdl.xml:
@@ -109,7 +109,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXroot.nxdl.xml:/file_name):
 DEBUG - File name of original NeXus file
 DEBUG - ===== ATTRS (//@file_time)
-DEBUG - value: 2025-10-09 11:03:32.126740+02:00 
+DEBUG - value: 2025-10-13 15:57:24.260091+02:00
 DEBUG - classpath: ['']
 DEBUG - classes:
 NXroot.nxdl.xml:
@@ -118,7 +118,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXroot.nxdl.xml:/file_time):
 DEBUG - Date and time file was originally created
 DEBUG - ===== ATTRS (//@file_update_time)
-DEBUG - value: 2025-10-09 11:03:32.126740+02:00 
+DEBUG - value: 2025-10-13 15:57:24.260091+02:00
 DEBUG - classpath: ['']
 DEBUG - classes:
 NXroot.nxdl.xml:
@@ -127,7 +127,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXroot.nxdl.xml:/file_update_time):
 DEBUG - Date and time of last file change at close
 DEBUG - ===== ATTRS (//@h5py_version)
-DEBUG - value: 3.11.0 
+DEBUG - value: 3.11.0
 DEBUG - classpath: ['']
 DEBUG - classes:
 NXroot.nxdl.xml:
@@ -165,7 +165,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p@NX_class)
-DEBUG - value: NXentry 
+DEBUG - value: NXentry
 DEBUG - classpath: ['NXentry']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY
@@ -175,7 +175,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p@default)
-DEBUG - value: data 
+DEBUG - value: data
 DEBUG - classpath: ['NXentry']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY
@@ -447,7 +447,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/data@NX_class)
-DEBUG - value: NXdata 
+DEBUG - value: NXdata
 DEBUG - classpath: ['NXentry', 'NXdata']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/DATA
@@ -459,7 +459,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/data@axes)
-DEBUG - value: ['energy'] 
+DEBUG - value: [energy]
 DEBUG - classpath: ['NXentry', 'NXdata']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/DATA
@@ -483,7 +483,7 @@ DEBUG -
 				of strings and not a single comma separated string.
 		
 DEBUG - ===== ATTRS (//Ni2p/data@energy_indices)
-DEBUG - value: 0 
+DEBUG - value: 0
 DEBUG - classpath: ['NXentry', 'NXdata']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/DATA
@@ -500,7 +500,7 @@ DEBUG - NXmpes.nxdl.xml:/ENTRY/DATA@energy_indices - [NX_INT]
 DEBUG - documentation (NXmpes.nxdl.xml:/ENTRY/DATA/energy_indices):
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/data@signal)
-DEBUG - value: data 
+DEBUG - value: data
 DEBUG - classpath: ['NXentry', 'NXdata']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/DATA
@@ -532,7 +532,7 @@ DEBUG -
 			for a summary of the discussion.
 		
 DEBUG - ===== FIELD (//Ni2p/data/cycle0_scan0): <HDF5 dataset "cycle0_scan0": shape (502,), type "<f8">
-DEBUG - value: [18049.6  18018.73 17916.23 17901.87 17850.83 17829.87 17777.1  17823.4 ...
+DEBUG - value: [18049.6, 18018.73, 17916.23, ..., 11114.83, 11207.57, 11300.31]
 DEBUG - classpath: ['NXentry', 'NXdata', 'NX_CHAR_OR_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/AXISNAME
@@ -552,7 +552,7 @@ DEBUG -
 			an array of NX_CHAR can be provided.
 		
 DEBUG - ===== FIELD (//Ni2p/data/data): <HDF5 dataset "data": shape (502,), type "<f8">
-DEBUG - value: [18049.6  18018.73 17916.23 17901.87 17850.83 17829.87 17777.1  17823.4 ...
+DEBUG - value: [18049.6, 18018.73, 17916.23, ..., 11114.83, 11207.57, 11300.31]
 DEBUG - classpath: ['NXentry', 'NXdata', 'NX_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/DATA
@@ -570,7 +570,7 @@ DEBUG -
 			The maximum rank is ``32`` for compatibility with backend file formats.
 		
 DEBUG - ===== ATTRS (//Ni2p/data/data@long_name)
-DEBUG - value: intensity 
+DEBUG - value: intensity
 DEBUG - classpath: ['NXentry', 'NXdata', 'NX_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/DATA
@@ -580,13 +580,13 @@ DEBUG - Dataset referenced as NXdata SIGNAL
 DEBUG - documentation (NXdata.nxdl.xml:/DATA/long_name):
 DEBUG - data label
 DEBUG - ===== ATTRS (//Ni2p/data/data@units)
-DEBUG - value: counts_per_second 
+DEBUG - value: counts_per_second
 DEBUG - classpath: ['NXentry', 'NXdata', 'NX_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/DATA
 DEBUG - NXdata.nxdl.xml:/DATA@units - REQUIRED, but undefined unit category
 DEBUG - ===== FIELD (//Ni2p/data/data_errors): <HDF5 dataset "data_errors": shape (502,), type "<f8">
-DEBUG - value: [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. ...
+DEBUG - value: [0.0, 0.0, 0.0, ..., 0.0, 0.0, 0.0]
 DEBUG - classpath: ['NXentry', 'NXdata', 'NX_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/FIELDNAME_errors
@@ -608,7 +608,7 @@ DEBUG -
             Uncertainties of FIELDNAME values.
         
 DEBUG - ===== FIELD (//Ni2p/data/energy): <HDF5 dataset "energy": shape (502,), type "<f8">
-DEBUG - value: [596.61 596.71 596.81 596.91 597.01 597.11 597.21 597.31 597.41 597.51 ...
+DEBUG - value: [596.61, 596.71, 596.81, ..., 646.51, 646.61, 646.71]
 DEBUG - classpath: ['NXentry', 'NXdata', 'NX_CHAR_OR_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/AXISNAME
@@ -629,7 +629,7 @@ DEBUG -
 			an array of NX_CHAR can be provided.
 		
 DEBUG - ===== ATTRS (//Ni2p/data/energy@long_name)
-DEBUG - value: energy 
+DEBUG - value: energy
 DEBUG - classpath: ['NXentry', 'NXdata', 'NX_CHAR_OR_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/AXISNAME
@@ -639,14 +639,14 @@ DEBUG - Dataset referenced as NXdata AXIS #0
 DEBUG - documentation (NXdata.nxdl.xml:/AXISNAME/long_name):
 DEBUG - Axis label
 DEBUG - ===== ATTRS (//Ni2p/data/energy@type)
-DEBUG - value: binding 
+DEBUG - value: binding
 DEBUG - classpath: ['NXentry', 'NXdata', 'NX_CHAR_OR_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/AXISNAME
 DEBUG - @type - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/data/energy@units)
-DEBUG - value: eV 
+DEBUG - value: eV
 DEBUG - classpath: ['NXentry', 'NXdata', 'NX_CHAR_OR_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/AXISNAME
@@ -658,7 +658,7 @@ DEBUG -
 				See the section :ref:`Design-Units` for more information.
 			
 DEBUG - ===== FIELD (//Ni2p/definition): <HDF5 dataset "definition": shape (), type "|O">
-DEBUG - value: NXxps 
+DEBUG - value: NXxps
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/definition
@@ -691,7 +691,7 @@ DEBUG -
 			*It is advised* to use :ref:`NXsubentry`, instead, as the overlay position.
 		
 DEBUG - ===== ATTRS (//Ni2p/definition@URL)
-DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/6cfc2d2e 
+DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/6cfc2d2e
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/definition
@@ -702,7 +702,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXentry.nxdl.xml:/definition/URL):
 DEBUG - URL of NXDL file
 DEBUG - ===== ATTRS (//Ni2p/definition@version)
-DEBUG - value: v2024.02.post1.dev1996+g6cfc2d2e 
+DEBUG - value: v2024.02.post1.dev1996+g6cfc2d2e
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/definition
@@ -716,7 +716,7 @@ DEBUG - NXentry.nxdl.xml:/definition@version - [NX_CHAR]
 DEBUG - documentation (NXentry.nxdl.xml:/definition/version):
 DEBUG - NXDL version number
 DEBUG - ===== FIELD (//Ni2p/end_time): <HDF5 dataset "end_time": shape (), type "|O">
-DEBUG - value: 2022-04-08T12:32:06.020000+00:00 
+DEBUG - value: 2022-04-08T12:32:06.020000+00:00
 DEBUG - classpath: ['NXentry', 'NX_DATE_TIME']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/end_time
@@ -768,7 +768,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/energy_axis_calibration@NX_class)
-DEBUG - value: NXcalibration 
+DEBUG - value: NXcalibration
 DEBUG - classpath: ['NXentry', 'NXcalibration']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/energy_axis_calibration
@@ -778,7 +778,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/energy_axis_calibration/calibrated_axis): <HDF5 dataset "calibrated_axis": shape (502,), type "<f8">
-DEBUG - value: [596.61 596.71 596.81 596.91 597.01 597.11 597.21 597.31 597.41 597.51 ...
+DEBUG - value: [596.61, 596.71, 596.81, ..., 646.51, 646.61, 646.71]
 DEBUG - classpath: ['NXentry', 'NXcalibration', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/energy_axis_calibration/calibrated_axis
@@ -793,7 +793,7 @@ DEBUG -
             An array representing the axis after calibration, matching the data length
         
 DEBUG - ===== ATTRS (//Ni2p/energy_axis_calibration/calibrated_axis@units)
-DEBUG - value: eV 
+DEBUG - value: eV
 DEBUG - classpath: ['NXentry', 'NXcalibration', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/energy_axis_calibration/calibrated_axis
@@ -801,7 +801,7 @@ NXcalibration.nxdl.xml:/calibrated_axis
 DEBUG - NXmpes.nxdl.xml:/ENTRY/energy_axis_calibration/calibrated_axis@units [NX_ENERGY]
 DEBUG - NXcalibration.nxdl.xml:/calibrated_axis@units [NX_ANY]
 DEBUG - ===== FIELD (//Ni2p/energy_axis_calibration/physical_quantity): <HDF5 dataset "physical_quantity": shape (), type "|O">
-DEBUG - value: energy 
+DEBUG - value: energy
 DEBUG - classpath: ['NXentry', 'NXcalibration', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/energy_axis_calibration/physical_quantity
@@ -864,7 +864,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/instrument@NX_class)
-DEBUG - value: NXinstrument 
+DEBUG - value: NXinstrument
 DEBUG - classpath: ['NXentry', 'NXinstrument']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT
@@ -875,7 +875,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/instrument@default)
-DEBUG - value: electronanalyzer 
+DEBUG - value: electronanalyzer
 DEBUG - classpath: ['NXentry', 'NXinstrument']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT
@@ -949,7 +949,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/instrument/beam_probe@NX_class)
-DEBUG - value: NXbeam 
+DEBUG - value: NXbeam
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXbeam']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/beam_probe
@@ -960,7 +960,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/instrument/beam_probe/associated_source): <HDF5 dataset "associated_source": shape (), type "|O">
-DEBUG - value: /entry/instrument/source_probe 
+DEBUG - value: /entry/instrument/source_probe
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXbeam', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/beam_probe/associated_source
@@ -976,7 +976,7 @@ DEBUG -
                           * /entry/instrument/beam_probe/associated_source = /entry/instrument/source_probe
                     
 DEBUG - ===== FIELD (//Ni2p/instrument/beam_probe/depends_on): <HDF5 dataset "depends_on": shape (), type "|O">
-DEBUG - value: transformations/beam_direction 
+DEBUG - value: transformations/beam_direction
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXbeam', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/beam_probe/depends_on
@@ -999,7 +999,7 @@ DEBUG -
             or a refined beam direction.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/beam_probe/distance): <HDF5 dataset "distance": shape (), type "<f8">
-DEBUG - value: 0.0 
+DEBUG - value: 0.0
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXbeam', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/beam_probe/distance
@@ -1015,7 +1015,7 @@ DEBUG -
 DEBUG - documentation (NXbeam.nxdl.xml:/distance):
 DEBUG - Distance from sample. Note, it is recommended to use NXtransformations instead.
 DEBUG - ===== ATTRS (//Ni2p/instrument/beam_probe/distance@units)
-DEBUG - value: mm 
+DEBUG - value: mm
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXbeam', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/beam_probe/distance
@@ -1023,7 +1023,7 @@ NXbeam.nxdl.xml:/distance
 DEBUG - NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/beam_probe/distance@units [NX_LENGTH]
 DEBUG - NXbeam.nxdl.xml:/distance@units [NX_LENGTH]
 DEBUG - ===== FIELD (//Ni2p/instrument/beam_probe/incident_energy): <HDF5 dataset "incident_energy": shape (), type "<f8">
-DEBUG - value: 1486.61 
+DEBUG - value: 1486.61
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXbeam', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/beam_probe/incident_energy
@@ -1040,7 +1040,7 @@ DEBUG -
             :ref:`incident_wavelength </NXbeam/incident_wavelength-field>`.
        
 DEBUG - ===== ATTRS (//Ni2p/instrument/beam_probe/incident_energy@units)
-DEBUG - value: eV 
+DEBUG - value: eV
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXbeam', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/beam_probe/incident_energy
@@ -1073,7 +1073,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/instrument/device_information@NX_class)
-DEBUG - value: NXfabrication 
+DEBUG - value: NXfabrication
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXfabrication']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/device_information
@@ -1083,7 +1083,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/instrument/device_information/model): <HDF5 dataset "model": shape (), type "|O">
-DEBUG - value: XPS setup 
+DEBUG - value: XPS setup
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXfabrication', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/device_information/model
@@ -1096,7 +1096,7 @@ DEBUG -
              Version or model of the component named by the manufacturer.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/device_information/vendor): <HDF5 dataset "vendor": shape (), type "|O">
-DEBUG - value: SPECS GmbH 
+DEBUG - value: SPECS GmbH
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXfabrication', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/device_information/vendor
@@ -1143,7 +1143,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/instrument/electronanalyzer@NX_class)
-DEBUG - value: NXelectronanalyzer 
+DEBUG - value: NXelectronanalyzer
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER
@@ -1154,7 +1154,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/instrument/electronanalyzer@default)
-DEBUG - value: detector 
+DEBUG - value: detector
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER
@@ -1216,7 +1216,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/instrument/electronanalyzer/collectioncolumn@NX_class)
-DEBUG - value: NXcollectioncolumn 
+DEBUG - value: NXcollectioncolumn
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXcollectioncolumn']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/COLLECTIONCOLUMN
@@ -1228,7 +1228,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/instrument/electronanalyzer/collectioncolumn/lens_mode): <HDF5 dataset "lens_mode": shape (), type "|O">
-DEBUG - value: Large Area 
+DEBUG - value: Large Area
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXcollectioncolumn', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/COLLECTIONCOLUMN/lens_mode
@@ -1241,7 +1241,7 @@ DEBUG -
             Labelling of the lens setting in use.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/electronanalyzer/collectioncolumn/scheme): <HDF5 dataset "scheme": shape (), type "|O">
-DEBUG - value: angular dispersive 
+DEBUG - value: angular dispersive
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXcollectioncolumn', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/COLLECTIONCOLUMN/scheme
@@ -1262,7 +1262,7 @@ DEBUG -
             spatial dispersive, momentum dispersive, non-dispersive, etc.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/electronanalyzer/depends_on): <HDF5 dataset "depends_on": shape (), type "|O">
-DEBUG - value: transformations/analyzer_take_off_polar_angle 
+DEBUG - value: transformations/analyzer_take_off_polar_angle
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/depends_on
@@ -1287,7 +1287,7 @@ DEBUG -
             NXtransformations group. But NeXus allows them to be stored anywhere.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/electronanalyzer/description): <HDF5 dataset "description": shape (), type "|O">
-DEBUG - value: hemispherical 
+DEBUG - value: hemispherical
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/description
@@ -1341,7 +1341,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/instrument/electronanalyzer/detector@NX_class)
-DEBUG - value: NXelectron_detector 
+DEBUG - value: NXelectron_detector
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXelectron_detector']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ELECTRON_DETECTOR
@@ -1352,7 +1352,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/instrument/electronanalyzer/detector@default)
-DEBUG - value: raw_data 
+DEBUG - value: raw_data
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXelectron_detector']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ELECTRON_DETECTOR
@@ -1379,7 +1379,7 @@ DEBUG -
 			for a summary of the discussion.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/electronanalyzer/detector/count_time): <HDF5 dataset "count_time": shape (), type "<f8">
-DEBUG - value: 0.3 
+DEBUG - value: 0.3
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXelectron_detector', 'NX_NUMBER']
 DEBUG - classes:
 NXdetector.nxdl.xml:/count_time
@@ -1387,7 +1387,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXdetector.nxdl.xml:/count_time):
 DEBUG - Elapsed actual counting time
 DEBUG - ===== ATTRS (//Ni2p/instrument/electronanalyzer/detector/count_time@units)
-DEBUG - value: s 
+DEBUG - value: s
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXelectron_detector', 'NX_NUMBER']
 DEBUG - classes:
 NXdetector.nxdl.xml:/count_time
@@ -1588,7 +1588,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/instrument/electronanalyzer/detector/raw_data@NX_class)
-DEBUG - value: NXdata 
+DEBUG - value: NXdata
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXelectron_detector', 'NXdata']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ELECTRON_DETECTOR/raw_data
@@ -1598,7 +1598,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/instrument/electronanalyzer/detector/raw_data@signal)
-DEBUG - value: raw 
+DEBUG - value: raw
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXelectron_detector', 'NXdata']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ELECTRON_DETECTOR/raw_data
@@ -1628,7 +1628,7 @@ DEBUG -
 			for a summary of the discussion.
 		
 DEBUG - ===== FIELD (//Ni2p/instrument/electronanalyzer/detector/raw_data/cycle0_scan0): <HDF5 dataset "cycle0_scan0": shape (502,), type "<f8">
-DEBUG - value: [18049.6  18018.73 17916.23 17901.87 17850.83 17829.87 17777.1  17823.4 ...
+DEBUG - value: [18049.6, 18018.73, 17916.23, ..., 11114.83, 11207.57, 11300.31]
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXelectron_detector', 'NXdata', 'NX_CHAR_OR_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/AXISNAME
@@ -1648,7 +1648,7 @@ DEBUG -
 			an array of NX_CHAR can be provided.
 		
 DEBUG - ===== ATTRS (//Ni2p/instrument/electronanalyzer/detector/raw_data/cycle0_scan0@units)
-DEBUG - value: counts 
+DEBUG - value: counts
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXelectron_detector', 'NXdata', 'NX_CHAR_OR_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/AXISNAME
@@ -1659,7 +1659,7 @@ DEBUG -
 				See the section :ref:`Design-Units` for more information.
 			
 DEBUG - ===== FIELD (//Ni2p/instrument/electronanalyzer/detector/raw_data/raw): <HDF5 dataset "raw": shape (1, 502), type "<f8">
-DEBUG - value: [18049.6  18018.73 17916.23 17901.87 17850.83 17829.87 17777.1  17823.4 ...
+DEBUG - value: [18049.6, 18018.73, 17916.23, ..., 11114.83, 11207.57, 11300.31]
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXelectron_detector', 'NXdata', 'NX_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/DATA
@@ -1677,7 +1677,7 @@ DEBUG -
 			The maximum rank is ``32`` for compatibility with backend file formats.
 		
 DEBUG - ===== ATTRS (//Ni2p/instrument/electronanalyzer/detector/raw_data/raw@units)
-DEBUG - value: counts 
+DEBUG - value: counts
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXelectron_detector', 'NXdata', 'NX_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/DATA
@@ -1711,7 +1711,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/instrument/electronanalyzer/device_information@NX_class)
-DEBUG - value: NXfabrication 
+DEBUG - value: NXfabrication
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXfabrication']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/device_information
@@ -1722,7 +1722,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/instrument/electronanalyzer/device_information/model): <HDF5 dataset "model": shape (), type "|O">
-DEBUG - value: PHOIBOS 150 
+DEBUG - value: PHOIBOS 150
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXfabrication', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/device_information/model
@@ -1735,7 +1735,7 @@ DEBUG -
              Version or model of the component named by the manufacturer.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/electronanalyzer/device_information/vendor): <HDF5 dataset "vendor": shape (), type "|O">
-DEBUG - value: SPECS GmbH 
+DEBUG - value: SPECS GmbH
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXfabrication', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/device_information/vendor
@@ -1776,7 +1776,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/instrument/electronanalyzer/energy_resolution@NX_class)
-DEBUG - value: NXresolution 
+DEBUG - value: NXresolution
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXresolution']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/energy_resolution
@@ -1786,7 +1786,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/instrument/electronanalyzer/energy_resolution/physical_quantity): <HDF5 dataset "physical_quantity": shape (), type "|O">
-DEBUG - value: energy 
+DEBUG - value: energy
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXresolution', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/energy_resolution/physical_quantity
@@ -1807,7 +1807,7 @@ DEBUG -
              energy, momentum, time, area, etc.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/electronanalyzer/energy_resolution/resolution): <HDF5 dataset "resolution": shape (), type "<f8">
-DEBUG - value: 0.1 
+DEBUG - value: 0.1
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXresolution', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/energy_resolution/resolution
@@ -1829,7 +1829,7 @@ DEBUG -
              The resolution of the physical quantity.
         
 DEBUG - ===== ATTRS (//Ni2p/instrument/electronanalyzer/energy_resolution/resolution@units)
-DEBUG - value: eV 
+DEBUG - value: eV
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXresolution', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/energy_resolution/resolution
@@ -1839,7 +1839,7 @@ DEBUG - NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/energy_resolution/res
 DEBUG - NXelectronanalyzer.nxdl.xml:/energy_resolution/resolution@units [NX_ENERGY]
 DEBUG - NXresolution.nxdl.xml:/resolution@units [NX_ANY]
 DEBUG - ===== FIELD (//Ni2p/instrument/electronanalyzer/energy_resolution/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: estimated 
+DEBUG - value: estimated
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXresolution', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/energy_resolution/type
@@ -1892,7 +1892,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/instrument/electronanalyzer/energydispersion@NX_class)
-DEBUG - value: NXenergydispersion 
+DEBUG - value: NXenergydispersion
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXenergydispersion']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ENERGYDISPERSION
@@ -1904,7 +1904,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/instrument/electronanalyzer/energydispersion/energy_scan_mode): <HDF5 dataset "energy_scan_mode": shape (), type "|O">
-DEBUG - value: fixed_analyzer_transmission 
+DEBUG - value: fixed_analyzer_transmission
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXenergydispersion', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ENERGYDISPERSION/energy_scan_mode
@@ -1926,7 +1926,7 @@ DEBUG -
             Way of scanning the energy axis
         
 DEBUG - ===== FIELD (//Ni2p/instrument/electronanalyzer/energydispersion/pass_energy): <HDF5 dataset "pass_energy": shape (), type "<f8">
-DEBUG - value: 20.0 
+DEBUG - value: 20
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXenergydispersion', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ENERGYDISPERSION/pass_energy
@@ -1947,7 +1947,7 @@ DEBUG -
             .. _12.63: https://www.iso.org/obp/ui/en/#iso:std:iso:18115:-1:ed-3:v1:en:term:12.63
         
 DEBUG - ===== ATTRS (//Ni2p/instrument/electronanalyzer/energydispersion/pass_energy@units)
-DEBUG - value: eV 
+DEBUG - value: eV
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXenergydispersion', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ENERGYDISPERSION/pass_energy
@@ -1955,7 +1955,7 @@ NXenergydispersion.nxdl.xml:/pass_energy
 DEBUG - NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ENERGYDISPERSION/pass_energy@units [NX_ENERGY]
 DEBUG - NXenergydispersion.nxdl.xml:/pass_energy@units [NX_ENERGY]
 DEBUG - ===== FIELD (//Ni2p/instrument/electronanalyzer/energydispersion/radius): <HDF5 dataset "radius": shape (), type "<i8">
-DEBUG - value: 150 
+DEBUG - value: 150
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXenergydispersion', 'NX_NUMBER']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ENERGYDISPERSION/radius
@@ -1963,13 +1963,13 @@ DEBUG - <<RECOMMENDED>>
 DEBUG - documentation (NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ENERGYDISPERSION/radius):
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/instrument/electronanalyzer/energydispersion/radius@units)
-DEBUG - value: mm 
+DEBUG - value: mm
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXenergydispersion', 'NX_NUMBER']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ENERGYDISPERSION/radius
 DEBUG - NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ENERGYDISPERSION/radius@units [NX_LENGTH]
 DEBUG - ===== FIELD (//Ni2p/instrument/electronanalyzer/energydispersion/scheme): <HDF5 dataset "scheme": shape (), type "|O">
-DEBUG - value: hemispherical 
+DEBUG - value: hemispherical
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXenergydispersion', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ENERGYDISPERSION/scheme
@@ -1990,7 +1990,7 @@ DEBUG -
             mirror, retarding grid, etc.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/electronanalyzer/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: PHOIBOS 150 
+DEBUG - value: PHOIBOS 150
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NX_CHAR']
 DEBUG - classes:
 NXelectronanalyzer.nxdl.xml:/name
@@ -2005,7 +2005,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/electronanalyzer/slow_axes): <HDF5 dataset "slow_axes": shape (), type "|O">
-DEBUG - value: energy 
+DEBUG - value: energy
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/slow_axes
@@ -2019,7 +2019,7 @@ DEBUG -
             order of decreasing speed. See fast_axes for examples.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/electronanalyzer/work_function): <HDF5 dataset "work_function": shape (), type "<f8">
-DEBUG - value: 3.989 
+DEBUG - value: 3.989
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NX_FLOAT']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/work_function
@@ -2055,7 +2055,7 @@ DEBUG -
             accurately determine the binding energy scale.
         
 DEBUG - ===== ATTRS (//Ni2p/instrument/electronanalyzer/work_function@units)
-DEBUG - value: eV 
+DEBUG - value: eV
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NX_FLOAT']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/work_function
@@ -2089,7 +2089,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/instrument/energy_resolution@NX_class)
-DEBUG - value: NXresolution 
+DEBUG - value: NXresolution
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXresolution']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/energy_resolution
@@ -2098,7 +2098,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/instrument/energy_resolution/physical_quantity): <HDF5 dataset "physical_quantity": shape (), type "|O">
-DEBUG - value: energy 
+DEBUG - value: energy
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXresolution', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/energy_resolution/physical_quantity
@@ -2114,7 +2114,7 @@ DEBUG -
              energy, momentum, time, area, etc.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/energy_resolution/resolution): <HDF5 dataset "resolution": shape (), type "<f8">
-DEBUG - value: 0.1 
+DEBUG - value: 0.1
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXresolution', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/energy_resolution/resolution
@@ -2133,7 +2133,7 @@ DEBUG -
              The resolution of the physical quantity.
         
 DEBUG - ===== ATTRS (//Ni2p/instrument/energy_resolution/resolution@units)
-DEBUG - value: eV 
+DEBUG - value: eV
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXresolution', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/energy_resolution/resolution
@@ -2141,7 +2141,7 @@ NXresolution.nxdl.xml:/resolution
 DEBUG - NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/energy_resolution/resolution@units [NX_ENERGY]
 DEBUG - NXresolution.nxdl.xml:/resolution@units [NX_ANY]
 DEBUG - ===== FIELD (//Ni2p/instrument/energy_resolution/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: derived 
+DEBUG - value: derived
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXresolution', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/energy_resolution/type
@@ -2193,7 +2193,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/instrument/flood_gun@NX_class)
-DEBUG - value: NXactuator 
+DEBUG - value: NXactuator
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/flood_gun
@@ -2204,7 +2204,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/instrument/flood_gun@target)
-DEBUG - value: /Ni2p/instrument/flood_gun 
+DEBUG - value: /Ni2p/instrument/flood_gun
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/flood_gun
@@ -2215,7 +2215,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/instrument/flood_gun/actuation_target): <HDF5 dataset "actuation_target": shape (), type "|O">
-DEBUG - value: current 
+DEBUG - value: current
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/flood_gun/actuation_target
@@ -2232,7 +2232,7 @@ DEBUG -
              For example, this could be an instance of NXsample or a device on NXinstrument.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/flood_gun/current): <HDF5 dataset "current": shape (), type "<f8">
-DEBUG - value: 0.0 
+DEBUG - value: 0.0
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXactuator', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/flood_gun/current
@@ -2243,13 +2243,13 @@ DEBUG -
                         It can also be an 1D array of output current (without time stamps).
                     
 DEBUG - ===== ATTRS (//Ni2p/instrument/flood_gun/current@units)
-DEBUG - value: A 
+DEBUG - value: A
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXactuator', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/flood_gun/current
 DEBUG - NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/flood_gun/current@units [NX_CURRENT]
 DEBUG - ===== FIELD (//Ni2p/instrument/flood_gun/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: FG 22/35 
+DEBUG - value: FG 22/35
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/flood_gun/name
@@ -2267,7 +2267,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/flood_gun/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: low energy electron source 
+DEBUG - value: low energy electron source
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/flood_gun/type
@@ -2315,7 +2315,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/instrument/manipulator@NX_class)
-DEBUG - value: NXmanipulator 
+DEBUG - value: NXmanipulator
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR
@@ -2350,7 +2350,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/instrument/manipulator/device_information@NX_class)
-DEBUG - value: NXfabrication 
+DEBUG - value: NXfabrication
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXfabrication']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/device_information
@@ -2360,7 +2360,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/instrument/manipulator/device_information/model): <HDF5 dataset "model": shape (), type "|O">
-DEBUG - value: 5-axis manipulator 
+DEBUG - value: 5-axis manipulator
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXfabrication', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/device_information/model
@@ -2373,7 +2373,7 @@ DEBUG -
              Version or model of the component named by the manufacturer.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/manipulator/device_information/vendor): <HDF5 dataset "vendor": shape (), type "|O">
-DEBUG - value: SPECS GmbH 
+DEBUG - value: SPECS GmbH
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXfabrication', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/device_information/vendor
@@ -2420,7 +2420,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/instrument/manipulator/drain_current_ammeter@NX_class)
-DEBUG - value: NXsensor 
+DEBUG - value: NXsensor
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/drain_current_ammeter
@@ -2431,7 +2431,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/instrument/manipulator/drain_current_ammeter@target)
-DEBUG - value: /Ni2p/instrument/manipulator/drain_current_ammeter 
+DEBUG - value: /Ni2p/instrument/manipulator/drain_current_ammeter
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/drain_current_ammeter
@@ -2442,7 +2442,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/instrument/manipulator/drain_current_ammeter/measurement): <HDF5 dataset "measurement": shape (), type "|O">
-DEBUG - value: current 
+DEBUG - value: current
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/drain_current_ammeter/measurement
@@ -2475,7 +2475,7 @@ DEBUG -
 DEBUG - documentation (NXsensor.nxdl.xml:/measurement):
 DEBUG - name for measured signal
 DEBUG - ===== FIELD (//Ni2p/instrument/manipulator/drain_current_ammeter/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: ammeter 1.0 
+DEBUG - value: ammeter 1.0
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/drain_current_ammeter/name
@@ -2491,7 +2491,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/manipulator/drain_current_ammeter/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: wire 
+DEBUG - value: wire
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/drain_current_ammeter/type
@@ -2516,7 +2516,7 @@ DEBUG -
 			  wilhelmy plate
 		
 DEBUG - ===== FIELD (//Ni2p/instrument/manipulator/drain_current_ammeter/value): <HDF5 dataset "value": shape (), type "<f8">
-DEBUG - value: 0.0 
+DEBUG - value: 0.0
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/drain_current_ammeter/value
@@ -2536,7 +2536,7 @@ DEBUG -
 			- need [n] as may be a vector
 		
 DEBUG - ===== ATTRS (//Ni2p/instrument/manipulator/drain_current_ammeter/value@units)
-DEBUG - value: A 
+DEBUG - value: A
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/drain_current_ammeter/value
@@ -2580,7 +2580,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/instrument/manipulator/sample_bias_potentiostat@NX_class)
-DEBUG - value: NXactuator 
+DEBUG - value: NXactuator
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_potentiostat
@@ -2591,7 +2591,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/instrument/manipulator/sample_bias_potentiostat@target)
-DEBUG - value: /Ni2p/instrument/manipulator/sample_bias_potentiostat 
+DEBUG - value: /Ni2p/instrument/manipulator/sample_bias_potentiostat
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_potentiostat
@@ -2602,7 +2602,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/instrument/manipulator/sample_bias_potentiostat/actuation_target): <HDF5 dataset "actuation_target": shape (), type "|O">
-DEBUG - value: voltage 
+DEBUG - value: voltage
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_potentiostat/actuation_target
@@ -2624,7 +2624,7 @@ DEBUG -
              For example, this could be an instance of NXsample or a device on NXinstrument.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/manipulator/sample_bias_potentiostat/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: XPS sample potentiostat 
+DEBUG - value: XPS sample potentiostat
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_potentiostat/name
@@ -2642,7 +2642,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/manipulator/sample_bias_potentiostat/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: potentiostat 
+DEBUG - value: potentiostat
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_potentiostat/type
@@ -2695,7 +2695,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/instrument/manipulator/sample_bias_voltmeter@NX_class)
-DEBUG - value: NXsensor 
+DEBUG - value: NXsensor
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_voltmeter
@@ -2706,7 +2706,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/instrument/manipulator/sample_bias_voltmeter@target)
-DEBUG - value: /Ni2p/instrument/manipulator/sample_bias_voltmeter 
+DEBUG - value: /Ni2p/instrument/manipulator/sample_bias_voltmeter
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_voltmeter
@@ -2717,7 +2717,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/instrument/manipulator/sample_bias_voltmeter/measurement): <HDF5 dataset "measurement": shape (), type "|O">
-DEBUG - value: voltage 
+DEBUG - value: voltage
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_voltmeter/measurement
@@ -2750,7 +2750,7 @@ DEBUG -
 DEBUG - documentation (NXsensor.nxdl.xml:/measurement):
 DEBUG - name for measured signal
 DEBUG - ===== FIELD (//Ni2p/instrument/manipulator/sample_bias_voltmeter/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: XPS sample voltmeter 
+DEBUG - value: XPS sample voltmeter
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_voltmeter/name
@@ -2766,7 +2766,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/manipulator/sample_bias_voltmeter/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: oscilloscope 
+DEBUG - value: oscilloscope
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_voltmeter/type
@@ -2791,7 +2791,7 @@ DEBUG -
 			  wilhelmy plate
 		
 DEBUG - ===== FIELD (//Ni2p/instrument/manipulator/sample_bias_voltmeter/value): <HDF5 dataset "value": shape (), type "<f8">
-DEBUG - value: 0.0 
+DEBUG - value: 0.0
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_voltmeter/value
@@ -2811,7 +2811,7 @@ DEBUG -
 			- need [n] as may be a vector
 		
 DEBUG - ===== ATTRS (//Ni2p/instrument/manipulator/sample_bias_voltmeter/value@units)
-DEBUG - value: V 
+DEBUG - value: V
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_voltmeter/value
@@ -2855,7 +2855,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/instrument/manipulator/sample_heater@NX_class)
-DEBUG - value: NXactuator 
+DEBUG - value: NXactuator
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_heater
@@ -2866,7 +2866,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/instrument/manipulator/sample_heater@target)
-DEBUG - value: /Ni2p/instrument/manipulator/sample_heater 
+DEBUG - value: /Ni2p/instrument/manipulator/sample_heater
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_heater
@@ -2877,7 +2877,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/instrument/manipulator/sample_heater/actuation_target): <HDF5 dataset "actuation_target": shape (), type "|O">
-DEBUG - value: temperature 
+DEBUG - value: temperature
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_heater/actuation_target
@@ -2899,7 +2899,7 @@ DEBUG -
              For example, this could be an instance of NXsample or a device on NXinstrument.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/manipulator/sample_heater/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: Coherent Compact Evolution IR Diode LASER (DILAS) 
+DEBUG - value: Coherent Compact Evolution IR Diode LASER (DILAS)
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_heater/name
@@ -2917,7 +2917,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/manipulator/sample_heater/output_heater_power): <HDF5 dataset "output_heater_power": shape (), type "<f8">
-DEBUG - value: 0.0 
+DEBUG - value: 0.0
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_heater/output_heater_power
@@ -2931,7 +2931,7 @@ DEBUG -
                 It can also be a 1D array of heater powers (without time stamps).
             
 DEBUG - ===== ATTRS (//Ni2p/instrument/manipulator/sample_heater/output_heater_power@units)
-DEBUG - value: W 
+DEBUG - value: W
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_heater/output_heater_power
@@ -2939,7 +2939,7 @@ NXmanipulator.nxdl.xml:/sample_heater/output_heater_power
 DEBUG - NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_heater/output_heater_power@units - REQUIRED, but undefined unit category
 DEBUG - NXmanipulator.nxdl.xml:/sample_heater/output_heater_power@units [NX_POWER]
 DEBUG - ===== FIELD (//Ni2p/instrument/manipulator/sample_heater/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: IR diode laser 
+DEBUG - value: IR diode laser
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_heater/type
@@ -2992,7 +2992,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/instrument/manipulator/temperature_sensor@NX_class)
-DEBUG - value: NXsensor 
+DEBUG - value: NXsensor
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/temperature_sensor
@@ -3003,7 +3003,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/instrument/manipulator/temperature_sensor@target)
-DEBUG - value: /Ni2p/instrument/manipulator/temperature_sensor 
+DEBUG - value: /Ni2p/instrument/manipulator/temperature_sensor
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/temperature_sensor
@@ -3014,7 +3014,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/instrument/manipulator/temperature_sensor/attached_to): <HDF5 dataset "attached_to": shape (), type "|O">
-DEBUG - value: sample 
+DEBUG - value: sample
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/attached_to
@@ -3022,7 +3022,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXsensor.nxdl.xml:/attached_to):
 DEBUG - where sensor is attached to ("sample" | "can")
 DEBUG - ===== FIELD (//Ni2p/instrument/manipulator/temperature_sensor/measurement): <HDF5 dataset "measurement": shape (), type "|O">
-DEBUG - value: temperature 
+DEBUG - value: temperature
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/temperature_sensor/measurement
@@ -3055,7 +3055,7 @@ DEBUG -
 DEBUG - documentation (NXsensor.nxdl.xml:/measurement):
 DEBUG - name for measured signal
 DEBUG - ===== FIELD (//Ni2p/instrument/manipulator/temperature_sensor/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: type K thermocouple 
+DEBUG - value: type K thermocouple
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/temperature_sensor/name
@@ -3071,7 +3071,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/manipulator/temperature_sensor/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: type K thermocouple 
+DEBUG - value: type K thermocouple
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/temperature_sensor/type
@@ -3096,7 +3096,7 @@ DEBUG -
 			  wilhelmy plate
 		
 DEBUG - ===== FIELD (//Ni2p/instrument/manipulator/temperature_sensor/value): <HDF5 dataset "value": shape (), type "<f8">
-DEBUG - value: 298.0 
+DEBUG - value: 298
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/temperature_sensor/value
@@ -3117,7 +3117,7 @@ DEBUG -
 			- need [n] as may be a vector
 		
 DEBUG - ===== ATTRS (//Ni2p/instrument/manipulator/temperature_sensor/value@units)
-DEBUG - value: K 
+DEBUG - value: K
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/temperature_sensor/value
@@ -3161,7 +3161,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/instrument/pressure_gauge@NX_class)
-DEBUG - value: NXsensor 
+DEBUG - value: NXsensor
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/pressure_gauge
@@ -3172,7 +3172,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/instrument/pressure_gauge@target)
-DEBUG - value: /Ni2p/instrument/pressure_gauge 
+DEBUG - value: /Ni2p/instrument/pressure_gauge
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/pressure_gauge
@@ -3183,7 +3183,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/instrument/pressure_gauge/measurement): <HDF5 dataset "measurement": shape (), type "|O">
-DEBUG - value: pressure 
+DEBUG - value: pressure
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/pressure_gauge/measurement
@@ -3211,7 +3211,7 @@ DEBUG -
 DEBUG - documentation (NXsensor.nxdl.xml:/measurement):
 DEBUG - name for measured signal
 DEBUG - ===== FIELD (//Ni2p/instrument/pressure_gauge/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: Atmion 
+DEBUG - value: Atmion
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/pressure_gauge/name
@@ -3227,7 +3227,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Ni2p/instrument/pressure_gauge/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: hot-filament ionization gauge 
+DEBUG - value: hot-filament ionization gauge
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/pressure_gauge/type
@@ -3252,7 +3252,7 @@ DEBUG -
 			  wilhelmy plate
 		
 DEBUG - ===== FIELD (//Ni2p/instrument/pressure_gauge/value): <HDF5 dataset "value": shape (), type "<f8">
-DEBUG - value: 1e-09 
+DEBUG - value: 1.00000000e-09
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/pressure_gauge/value
@@ -3269,7 +3269,7 @@ DEBUG -
 			- need [n] as may be a vector
 		
 DEBUG - ===== ATTRS (//Ni2p/instrument/pressure_gauge/value@units)
-DEBUG - value: mbar 
+DEBUG - value: mbar
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/pressure_gauge/value
@@ -3319,7 +3319,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/instrument/source_probe@NX_class)
-DEBUG - value: NXsource 
+DEBUG - value: NXsource
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/source_probe
@@ -3331,7 +3331,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/instrument/source_probe/associated_beam): <HDF5 dataset "associated_beam": shape (), type "|O">
-DEBUG - value: /entry/instrument/beam_xray 
+DEBUG - value: /entry/instrument/beam_xray
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_probe/associated_beam
@@ -3346,7 +3346,7 @@ DEBUG -
                           * /entry/instrument/source_probe/associated_beam = /entry/instrument/beam_probe
                     
 DEBUG - ===== FIELD (//Ni2p/instrument/source_probe/probe): <HDF5 dataset "probe": shape (), type "|O">
-DEBUG - value: photon 
+DEBUG - value: photon
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_probe/probe
@@ -3367,7 +3367,7 @@ DEBUG -
 DEBUG - documentation (NXsource.nxdl.xml:/probe):
 DEBUG - type of radiation probe (pick one from the enumerated list and spell exactly)
 DEBUG - ===== FIELD (//Ni2p/instrument/source_probe/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: Synchrotron X-ray Source 
+DEBUG - value: Synchrotron X-ray Source
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_probe/type
@@ -3413,7 +3413,7 @@ DEBUG -
 DEBUG - documentation (NXsource.nxdl.xml:/type):
 DEBUG - type of radiation source (pick one from the enumerated list and spell exactly)
 DEBUG - ===== FIELD (//Ni2p/method): <HDF5 dataset "method": shape (), type "|O">
-DEBUG - value: XPS 
+DEBUG - value: XPS
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/method
@@ -3459,7 +3459,7 @@ DEBUG -
                 .. _Clause 11: https://www.iso.org/obp/ui/en/#iso:std:iso:18115:-1:ed-3:v1:en:sec:11
             
 DEBUG - ===== FIELD (//Ni2p/program_name): <HDF5 dataset "program_name": shape (), type "|O">
-DEBUG - value: SpecsLab 2 
+DEBUG - value: SpecsLab 2
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXentry.nxdl.xml:/program_name
@@ -3504,7 +3504,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/sample@NX_class)
-DEBUG - value: NXsample 
+DEBUG - value: NXsample
 DEBUG - classpath: ['NXentry', 'NXsample']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/SAMPLE
@@ -3516,7 +3516,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/sample/atom_types): <HDF5 dataset "atom_types": shape (), type "|O">
-DEBUG - value: Ni 
+DEBUG - value: Ni
 DEBUG - classpath: ['NXentry', 'NXsample', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/atom_types
@@ -3564,7 +3564,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/sample/bias_env@NX_class)
-DEBUG - value: NXenvironment 
+DEBUG - value: NXenvironment
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/bias_env
@@ -3614,7 +3614,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/sample/bias_env/potentiostat@NX_class)
-DEBUG - value: NXactuator 
+DEBUG - value: NXactuator
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/bias_env/potentiostat
@@ -3625,7 +3625,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/sample/bias_env/potentiostat@target)
-DEBUG - value: /Ni2p/instrument/manipulator/sample_bias_potentiostat 
+DEBUG - value: /Ni2p/instrument/manipulator/sample_bias_potentiostat
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/bias_env/potentiostat
@@ -3636,7 +3636,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/sample/bias_env/potentiostat/actuation_target): <HDF5 dataset "actuation_target": shape (), type "|O">
-DEBUG - value: voltage 
+DEBUG - value: voltage
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXactuator.nxdl.xml:/actuation_target
@@ -3648,7 +3648,7 @@ DEBUG -
              For example, this could be an instance of NXsample or a device on NXinstrument.
         
 DEBUG - ===== FIELD (//Ni2p/sample/bias_env/potentiostat/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: XPS sample potentiostat 
+DEBUG - value: XPS sample potentiostat
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXactuator.nxdl.xml:/name
@@ -3663,7 +3663,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Ni2p/sample/bias_env/potentiostat/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: potentiostat 
+DEBUG - value: potentiostat
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXactuator.nxdl.xml:/type
@@ -3719,7 +3719,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/sample/bias_env/voltmeter@NX_class)
-DEBUG - value: NXsensor 
+DEBUG - value: NXsensor
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/bias_env/voltmeter
@@ -3730,7 +3730,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/sample/bias_env/voltmeter@target)
-DEBUG - value: /Ni2p/instrument/manipulator/sample_bias_voltmeter 
+DEBUG - value: /Ni2p/instrument/manipulator/sample_bias_voltmeter
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/bias_env/voltmeter
@@ -3741,7 +3741,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/sample/bias_env/voltmeter/measurement): <HDF5 dataset "measurement": shape (), type "|O">
-DEBUG - value: voltage 
+DEBUG - value: voltage
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/measurement
@@ -3764,7 +3764,7 @@ DEBUG - -> surface_pressure
 DEBUG - documentation (NXsensor.nxdl.xml:/measurement):
 DEBUG - name for measured signal
 DEBUG - ===== FIELD (//Ni2p/sample/bias_env/voltmeter/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: XPS sample voltmeter 
+DEBUG - value: XPS sample voltmeter
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/name
@@ -3777,7 +3777,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Ni2p/sample/bias_env/voltmeter/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: oscilloscope 
+DEBUG - value: oscilloscope
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/type
@@ -3799,7 +3799,7 @@ DEBUG -
 			  wilhelmy plate
 		
 DEBUG - ===== FIELD (//Ni2p/sample/bias_env/voltmeter/value): <HDF5 dataset "value": shape (), type "<f8">
-DEBUG - value: 0.0 
+DEBUG - value: 0.0
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXsensor.nxdl.xml:/value
@@ -3810,13 +3810,13 @@ DEBUG -
 			- need [n] as may be a vector
 		
 DEBUG - ===== ATTRS (//Ni2p/sample/bias_env/voltmeter/value@units)
-DEBUG - value: V 
+DEBUG - value: V
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXsensor.nxdl.xml:/value
 DEBUG - NXsensor.nxdl.xml:/value@units [NX_ANY]
 DEBUG - ===== FIELD (//Ni2p/sample/chemical_formula): <HDF5 dataset "chemical_formula": shape (), type "|O">
-DEBUG - value: Ni 
+DEBUG - value: Ni
 DEBUG - classpath: ['NXentry', 'NXsample', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/chemical_formula
@@ -3846,7 +3846,7 @@ DEBUG -
 			* This is the *Hill* system used by Chemical Abstracts.
 		
 DEBUG - ===== FIELD (//Ni2p/sample/depends_on): <HDF5 dataset "depends_on": shape (), type "|O">
-DEBUG - value: transformations/sample_rotation_angle 
+DEBUG - value: transformations/sample_rotation_angle
 DEBUG - classpath: ['NXentry', 'NXsample', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/SAMPLE/depends_on
@@ -3901,7 +3901,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/sample/drain_current_env@NX_class)
-DEBUG - value: NXenvironment 
+DEBUG - value: NXenvironment
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/drain_current_env
@@ -3951,7 +3951,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/sample/drain_current_env/ammeter@NX_class)
-DEBUG - value: NXsensor 
+DEBUG - value: NXsensor
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/drain_current_env/ammeter
@@ -3962,7 +3962,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/sample/drain_current_env/ammeter@target)
-DEBUG - value: /Ni2p/instrument/manipulator/drain_current_ammeter 
+DEBUG - value: /Ni2p/instrument/manipulator/drain_current_ammeter
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/drain_current_env/ammeter
@@ -3973,7 +3973,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/sample/drain_current_env/ammeter/measurement): <HDF5 dataset "measurement": shape (), type "|O">
-DEBUG - value: current 
+DEBUG - value: current
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/measurement
@@ -3996,7 +3996,7 @@ DEBUG - -> surface_pressure
 DEBUG - documentation (NXsensor.nxdl.xml:/measurement):
 DEBUG - name for measured signal
 DEBUG - ===== FIELD (//Ni2p/sample/drain_current_env/ammeter/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: ammeter 1.0 
+DEBUG - value: ammeter 1.0
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/name
@@ -4009,7 +4009,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Ni2p/sample/drain_current_env/ammeter/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: wire 
+DEBUG - value: wire
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/type
@@ -4031,7 +4031,7 @@ DEBUG -
 			  wilhelmy plate
 		
 DEBUG - ===== FIELD (//Ni2p/sample/drain_current_env/ammeter/value): <HDF5 dataset "value": shape (), type "<f8">
-DEBUG - value: 0.0 
+DEBUG - value: 0.0
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXsensor.nxdl.xml:/value
@@ -4042,7 +4042,7 @@ DEBUG -
 			- need [n] as may be a vector
 		
 DEBUG - ===== ATTRS (//Ni2p/sample/drain_current_env/ammeter/value@units)
-DEBUG - value: A 
+DEBUG - value: A
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXsensor.nxdl.xml:/value
@@ -4079,7 +4079,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/sample/flood_gun_current_env@NX_class)
-DEBUG - value: NXenvironment 
+DEBUG - value: NXenvironment
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/flood_gun_current_env
@@ -4129,7 +4129,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/sample/flood_gun_current_env/flood_gun@NX_class)
-DEBUG - value: NXactuator 
+DEBUG - value: NXactuator
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/flood_gun_current_env/flood_gun
@@ -4140,7 +4140,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/sample/flood_gun_current_env/flood_gun@target)
-DEBUG - value: /Ni2p/instrument/flood_gun 
+DEBUG - value: /Ni2p/instrument/flood_gun
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/flood_gun_current_env/flood_gun
@@ -4151,7 +4151,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/sample/flood_gun_current_env/flood_gun/actuation_target): <HDF5 dataset "actuation_target": shape (), type "|O">
-DEBUG - value: current 
+DEBUG - value: current
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXactuator.nxdl.xml:/actuation_target
@@ -4163,17 +4163,17 @@ DEBUG -
              For example, this could be an instance of NXsample or a device on NXinstrument.
         
 DEBUG - ===== FIELD (//Ni2p/sample/flood_gun_current_env/flood_gun/current): <HDF5 dataset "current": shape (), type "<f8">
-DEBUG - value: 0.0 
+DEBUG - value: 0.0
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator']
 DEBUG - NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/sample/flood_gun_current_env/flood_gun/current@units)
-DEBUG - value: A 
+DEBUG - value: A
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator']
 DEBUG - NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/sample/flood_gun_current_env/flood_gun/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: FG 22/35 
+DEBUG - value: FG 22/35
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXactuator.nxdl.xml:/name
@@ -4188,7 +4188,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Ni2p/sample/flood_gun_current_env/flood_gun/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: low energy electron source 
+DEBUG - value: low energy electron source
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXactuator.nxdl.xml:/type
@@ -4235,7 +4235,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/sample/gas_pressure_env@NX_class)
-DEBUG - value: NXenvironment 
+DEBUG - value: NXenvironment
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/gas_pressure_env
@@ -4286,7 +4286,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/sample/gas_pressure_env/pressure_gauge@NX_class)
-DEBUG - value: NXsensor 
+DEBUG - value: NXsensor
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/gas_pressure_env/pressure_gauge
@@ -4297,7 +4297,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/sample/gas_pressure_env/pressure_gauge@target)
-DEBUG - value: /Ni2p/instrument/pressure_gauge 
+DEBUG - value: /Ni2p/instrument/pressure_gauge
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/gas_pressure_env/pressure_gauge
@@ -4308,7 +4308,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/sample/gas_pressure_env/pressure_gauge/measurement): <HDF5 dataset "measurement": shape (), type "|O">
-DEBUG - value: pressure 
+DEBUG - value: pressure
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/measurement
@@ -4331,7 +4331,7 @@ DEBUG - -> surface_pressure
 DEBUG - documentation (NXsensor.nxdl.xml:/measurement):
 DEBUG - name for measured signal
 DEBUG - ===== FIELD (//Ni2p/sample/gas_pressure_env/pressure_gauge/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: Atmion 
+DEBUG - value: Atmion
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/name
@@ -4344,7 +4344,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Ni2p/sample/gas_pressure_env/pressure_gauge/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: hot-filament ionization gauge 
+DEBUG - value: hot-filament ionization gauge
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/type
@@ -4366,7 +4366,7 @@ DEBUG -
 			  wilhelmy plate
 		
 DEBUG - ===== FIELD (//Ni2p/sample/gas_pressure_env/pressure_gauge/value): <HDF5 dataset "value": shape (), type "<f8">
-DEBUG - value: 1e-09 
+DEBUG - value: 1.00000000e-09
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXsensor.nxdl.xml:/value
@@ -4377,7 +4377,7 @@ DEBUG -
 			- need [n] as may be a vector
 		
 DEBUG - ===== ATTRS (//Ni2p/sample/gas_pressure_env/pressure_gauge/value@units)
-DEBUG - value: mbar 
+DEBUG - value: mbar
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXsensor.nxdl.xml:/value
@@ -4416,7 +4416,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/sample/history@NX_class)
-DEBUG - value: NXhistory 
+DEBUG - value: NXhistory
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXhistory']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/history
@@ -4459,7 +4459,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/sample/history/sample_preparation@NX_class)
-DEBUG - value: NXactivity 
+DEBUG - value: NXactivity
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXhistory', 'NXactivity']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/history/sample_preparation
@@ -4469,7 +4469,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/sample/history/sample_preparation/description): <HDF5 dataset "description": shape (), type "|O">
-DEBUG - value: From third party 
+DEBUG - value: From third party
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXhistory', 'NXactivity', 'NX_CHAR']
 DEBUG - classes:
 NXactivity.nxdl.xml:/description
@@ -4479,7 +4479,7 @@ DEBUG -
              Short description of the activity.
         
 DEBUG - ===== FIELD (//Ni2p/sample/history/sample_preparation/end_time): <HDF5 dataset "end_time": shape (), type "|O">
-DEBUG - value: 2022-04-08T11:06:42.200000+00:00 
+DEBUG - value: 2022-04-08T11:06:42.200000+00:00
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXhistory', 'NXactivity', 'NX_DATE_TIME']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/history/sample_preparation/end_time
@@ -4492,7 +4492,7 @@ DEBUG -
              End time of this activity. It is recommended to include local time zone information.
         
 DEBUG - ===== FIELD (//Ni2p/sample/history/sample_preparation/start_time): <HDF5 dataset "start_time": shape (), type "|O">
-DEBUG - value: 2022-04-08T11:02:38.020000+00:00 
+DEBUG - value: 2022-04-08T11:02:38.020000+00:00
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXhistory', 'NXactivity', 'NX_DATE_TIME']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/history/sample_preparation/start_time
@@ -4505,7 +4505,7 @@ DEBUG -
             Start time of this activity. It is recommended to include local time zone information.
         
 DEBUG - ===== FIELD (//Ni2p/sample/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: Ni foil 
+DEBUG - value: Ni foil
 DEBUG - classpath: ['NXentry', 'NXsample', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/name
@@ -4521,7 +4521,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Ni2p/sample/physical_form): <HDF5 dataset "physical_form": shape (), type "|O">
-DEBUG - value: foil 
+DEBUG - value: foil
 DEBUG - classpath: ['NXentry', 'NXsample', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/physical_form
@@ -4535,7 +4535,7 @@ DEBUG -
 			Examples include single crystal, foil, pellet, powder, thin film, disc, foam, gas, liquid, amorphous.
 		
 DEBUG - ===== FIELD (//Ni2p/sample/situation): <HDF5 dataset "situation": shape (), type "|O">
-DEBUG - value: vacuum 
+DEBUG - value: vacuum
 DEBUG - classpath: ['NXentry', 'NXsample', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/situation
@@ -4589,7 +4589,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/sample/temperature_env@NX_class)
-DEBUG - value: NXenvironment 
+DEBUG - value: NXenvironment
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/temperature_env
@@ -4639,7 +4639,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/sample/temperature_env/sample_heater@NX_class)
-DEBUG - value: NXactuator 
+DEBUG - value: NXactuator
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/temperature_env/sample_heater
@@ -4650,7 +4650,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/sample/temperature_env/sample_heater@target)
-DEBUG - value: /Ni2p/instrument/manipulator/sample_heater 
+DEBUG - value: /Ni2p/instrument/manipulator/sample_heater
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/temperature_env/sample_heater
@@ -4661,7 +4661,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/sample/temperature_env/sample_heater/actuation_target): <HDF5 dataset "actuation_target": shape (), type "|O">
-DEBUG - value: temperature 
+DEBUG - value: temperature
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXactuator.nxdl.xml:/actuation_target
@@ -4673,7 +4673,7 @@ DEBUG -
              For example, this could be an instance of NXsample or a device on NXinstrument.
         
 DEBUG - ===== FIELD (//Ni2p/sample/temperature_env/sample_heater/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: Coherent Compact Evolution IR Diode LASER (DILAS) 
+DEBUG - value: Coherent Compact Evolution IR Diode LASER (DILAS)
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXactuator.nxdl.xml:/name
@@ -4688,7 +4688,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Ni2p/sample/temperature_env/sample_heater/output_heater_power): <HDF5 dataset "output_heater_power": shape (), type "<f8">
-DEBUG - value: 0.0 
+DEBUG - value: 0.0
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator', 'NX_NUMBER']
 DEBUG - classes:
 NXactuator.nxdl.xml:/outputVALUE
@@ -4699,13 +4699,13 @@ DEBUG -
              For example, a heater can have the field output_power(NX_NUMBER).
         
 DEBUG - ===== ATTRS (//Ni2p/sample/temperature_env/sample_heater/output_heater_power@units)
-DEBUG - value: W 
+DEBUG - value: W
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator', 'NX_NUMBER']
 DEBUG - classes:
 NXactuator.nxdl.xml:/outputVALUE
 DEBUG - NXactuator.nxdl.xml:/outputVALUE@units [NX_ANY]
 DEBUG - ===== FIELD (//Ni2p/sample/temperature_env/sample_heater/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: IR diode laser 
+DEBUG - value: IR diode laser
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXactuator.nxdl.xml:/type
@@ -4761,7 +4761,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/sample/temperature_env/temperature_sensor@NX_class)
-DEBUG - value: NXsensor 
+DEBUG - value: NXsensor
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/temperature_env/temperature_sensor
@@ -4772,7 +4772,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Ni2p/sample/temperature_env/temperature_sensor@target)
-DEBUG - value: /Ni2p/instrument/manipulator/temperature_sensor 
+DEBUG - value: /Ni2p/instrument/manipulator/temperature_sensor
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/temperature_env/temperature_sensor
@@ -4783,7 +4783,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/sample/temperature_env/temperature_sensor/attached_to): <HDF5 dataset "attached_to": shape (), type "|O">
-DEBUG - value: sample 
+DEBUG - value: sample
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/attached_to
@@ -4791,7 +4791,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXsensor.nxdl.xml:/attached_to):
 DEBUG - where sensor is attached to ("sample" | "can")
 DEBUG - ===== FIELD (//Ni2p/sample/temperature_env/temperature_sensor/measurement): <HDF5 dataset "measurement": shape (), type "|O">
-DEBUG - value: temperature 
+DEBUG - value: temperature
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/measurement
@@ -4814,7 +4814,7 @@ DEBUG - -> surface_pressure
 DEBUG - documentation (NXsensor.nxdl.xml:/measurement):
 DEBUG - name for measured signal
 DEBUG - ===== FIELD (//Ni2p/sample/temperature_env/temperature_sensor/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: type K thermocouple 
+DEBUG - value: type K thermocouple
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/name
@@ -4827,7 +4827,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Ni2p/sample/temperature_env/temperature_sensor/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: type K thermocouple 
+DEBUG - value: type K thermocouple
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/type
@@ -4849,7 +4849,7 @@ DEBUG -
 			  wilhelmy plate
 		
 DEBUG - ===== FIELD (//Ni2p/sample/temperature_env/temperature_sensor/value): <HDF5 dataset "value": shape (), type "<f8">
-DEBUG - value: 298.0 
+DEBUG - value: 298
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXsensor.nxdl.xml:/value
@@ -4860,13 +4860,13 @@ DEBUG -
 			- need [n] as may be a vector
 		
 DEBUG - ===== ATTRS (//Ni2p/sample/temperature_env/temperature_sensor/value@units)
-DEBUG - value: K 
+DEBUG - value: K
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXsensor.nxdl.xml:/value
 DEBUG - NXsensor.nxdl.xml:/value@units [NX_ANY]
 DEBUG - ===== FIELD (//Ni2p/start_time): <HDF5 dataset "start_time": shape (), type "|O">
-DEBUG - value: 2022-04-08T11:47:02.020000+00:00 
+DEBUG - value: 2022-04-08T11:47:02.020000+00:00
 DEBUG - classpath: ['NXentry', 'NX_DATE_TIME']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/start_time
@@ -4881,7 +4881,7 @@ DEBUG -
 DEBUG - documentation (NXentry.nxdl.xml:/start_time):
 DEBUG - Starting time of measurement
 DEBUG - ===== FIELD (//Ni2p/title): <HDF5 dataset "title": shape (), type "|O">
-DEBUG - value: XPS Experiment 
+DEBUG - value: XPS Experiment
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/title
@@ -4925,7 +4925,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/user@NX_class)
-DEBUG - value: NXuser 
+DEBUG - value: NXuser
 DEBUG - classpath: ['NXentry', 'NXuser']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/USER
@@ -4935,7 +4935,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/user/affiliation): <HDF5 dataset "affiliation": shape (), type "|O">
-DEBUG - value: Max Planck Institute for Chemical Energy Conversion 
+DEBUG - value: Max Planck Institute for Chemical Energy Conversion
 DEBUG - classpath: ['NXentry', 'NXuser', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/USER/affiliation
@@ -4949,7 +4949,7 @@ DEBUG -
 DEBUG - documentation (NXuser.nxdl.xml:/affiliation):
 DEBUG - Affiliation of user
 DEBUG - ===== FIELD (//Ni2p/user/email): <HDF5 dataset "email": shape (), type "|O">
-DEBUG - value: lukas.pielsticker@cec.mpg.de 
+DEBUG - value: lukas.pielsticker@cec.mpg.de
 DEBUG - classpath: ['NXentry', 'NXuser', 'NX_CHAR']
 DEBUG - classes:
 NXuser.nxdl.xml:/email
@@ -4957,7 +4957,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXuser.nxdl.xml:/email):
 DEBUG - Email of user
 DEBUG - ===== FIELD (//Ni2p/user/identifier): <HDF5 dataset "identifier": shape (), type "|O">
-DEBUG - value: 0000-0001-9361-8333 
+DEBUG - value: 0000-0001-9361-8333
 DEBUG - classpath: ['NXentry', 'NXuser', 'NX_CHAR']
 DEBUG - classes:
 NXobject.nxdl.xml:/identifierNAME
@@ -4975,7 +4975,7 @@ DEBUG -
 			Persistent identifiers are also known as PIDs.
 		
 DEBUG - ===== FIELD (//Ni2p/user/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: Lukas Pielsticker 
+DEBUG - value: Lukas Pielsticker
 DEBUG - classpath: ['NXentry', 'NXuser', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/USER/name
@@ -5137,7 +5137,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Ni2p/xps_coordinate_system@NX_class)
-DEBUG - value: NXcoordinate_system 
+DEBUG - value: NXcoordinate_system
 DEBUG - classpath: ['NXentry', 'NXcoordinate_system']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/xps_coordinate_system
@@ -5147,7 +5147,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/xps_coordinate_system/depends_on): <HDF5 dataset "depends_on": shape (), type "|O">
-DEBUG - value: /entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation 
+DEBUG - value: /entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation
 DEBUG - classpath: ['NXentry', 'NXcoordinate_system', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/depends_on
@@ -5165,12 +5165,12 @@ DEBUG -
             transformation in the transformation chain in the NXtransformations group.
         
 DEBUG - ===== FIELD (//Ni2p/xps_coordinate_system/handedness): <HDF5 dataset "handedness": shape (), type "|O">
-DEBUG - value: left_handed 
+DEBUG - value: left_handed
 DEBUG - classpath: ['NXentry', 'NXcoordinate_system']
 DEBUG - NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Ni2p/xps_coordinate_system/origin): <HDF5 dataset "origin": shape (), type "|O">
-DEBUG - value: sample stage 
+DEBUG - value: sample stage
 DEBUG - classpath: ['NXentry', 'NXcoordinate_system', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/origin
@@ -5188,7 +5188,7 @@ DEBUG -
             *barycenter of the triangle*, *center of mass of the stone*.
         
 DEBUG - ===== FIELD (//Ni2p/xps_coordinate_system/x): <HDF5 dataset "x": shape (3,), type "<i8">
-DEBUG - value: [-1  0  0] 
+DEBUG - value: [-1, 0, 0]
 DEBUG - classpath: ['NXentry', 'NXcoordinate_system', 'NX_NUMBER']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/x
@@ -5208,7 +5208,7 @@ DEBUG -
             independent vectors that span the vector space.
         
 DEBUG - ===== ATTRS (//Ni2p/xps_coordinate_system/x@units)
-DEBUG - value: m 
+DEBUG - value: m
 DEBUG - classpath: ['NXentry', 'NXcoordinate_system', 'NX_NUMBER']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/x
@@ -5216,7 +5216,7 @@ NXcoordinate_system.nxdl.xml:/x
 DEBUG - NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/x@units - REQUIRED, but undefined unit category
 DEBUG - NXcoordinate_system.nxdl.xml:/x@units [NX_LENGTH]
 DEBUG - ===== FIELD (//Ni2p/xps_coordinate_system/y): <HDF5 dataset "y": shape (3,), type "<i8">
-DEBUG - value: [0 1 0] 
+DEBUG - value: [0, 1, 0]
 DEBUG - classpath: ['NXentry', 'NXcoordinate_system', 'NX_NUMBER']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/y
@@ -5233,7 +5233,7 @@ DEBUG -
             the j-axis in reciprocal space.
         
 DEBUG - ===== ATTRS (//Ni2p/xps_coordinate_system/y@units)
-DEBUG - value: m 
+DEBUG - value: m
 DEBUG - classpath: ['NXentry', 'NXcoordinate_system', 'NX_NUMBER']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/y
@@ -5241,7 +5241,7 @@ NXcoordinate_system.nxdl.xml:/y
 DEBUG - NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/y@units - REQUIRED, but undefined unit category
 DEBUG - NXcoordinate_system.nxdl.xml:/y@units [NX_LENGTH]
 DEBUG - ===== FIELD (//Ni2p/xps_coordinate_system/z): <HDF5 dataset "z": shape (3,), type "<i8">
-DEBUG - value: [0 0 1] 
+DEBUG - value: [0, 0, 1]
 DEBUG - classpath: ['NXentry', 'NXcoordinate_system', 'NX_NUMBER']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/z
@@ -5258,7 +5258,7 @@ DEBUG -
             the k-axis in reciprocal space.
         
 DEBUG - ===== ATTRS (//Ni2p/xps_coordinate_system/z@units)
-DEBUG - value: m 
+DEBUG - value: m
 DEBUG - classpath: ['NXentry', 'NXcoordinate_system', 'NX_NUMBER']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/z
@@ -5266,7 +5266,7 @@ NXcoordinate_system.nxdl.xml:/z
 DEBUG - NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/z@units - REQUIRED, but undefined unit category
 DEBUG - NXcoordinate_system.nxdl.xml:/z@units [NX_LENGTH]
 DEBUG - ===== FIELD (//Ni2p/xps_coordinate_system/z_direction): <HDF5 dataset "z_direction": shape (), type "|O">
-DEBUG - value: sample stage normal 
+DEBUG - value: sample stage normal
 DEBUG - classpath: ['NXentry', 'NXcoordinate_system', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/z_direction
@@ -5314,7 +5314,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey@NX_class)
-DEBUG - value: NXentry 
+DEBUG - value: NXentry
 DEBUG - classpath: ['NXentry']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY
@@ -5324,7 +5324,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey@default)
-DEBUG - value: data 
+DEBUG - value: data
 DEBUG - classpath: ['NXentry']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY
@@ -5596,7 +5596,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/data@NX_class)
-DEBUG - value: NXdata 
+DEBUG - value: NXdata
 DEBUG - classpath: ['NXentry', 'NXdata']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/DATA
@@ -5608,7 +5608,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/data@axes)
-DEBUG - value: ['energy'] 
+DEBUG - value: [energy]
 DEBUG - classpath: ['NXentry', 'NXdata']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/DATA
@@ -5632,7 +5632,7 @@ DEBUG -
 				of strings and not a single comma separated string.
 		
 DEBUG - ===== ATTRS (//Survey/data@energy_indices)
-DEBUG - value: 0 
+DEBUG - value: 0
 DEBUG - classpath: ['NXentry', 'NXdata']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/DATA
@@ -5649,7 +5649,7 @@ DEBUG - NXmpes.nxdl.xml:/ENTRY/DATA@energy_indices - [NX_INT]
 DEBUG - documentation (NXmpes.nxdl.xml:/ENTRY/DATA/energy_indices):
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/data@signal)
-DEBUG - value: data 
+DEBUG - value: data
 DEBUG - classpath: ['NXentry', 'NXdata']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/DATA
@@ -5681,7 +5681,7 @@ DEBUG -
 			for a summary of the discussion.
 		
 DEBUG - ===== FIELD (//Survey/data/cycle0_scan0): <HDF5 dataset "cycle0_scan0": shape (1201,), type "<f8">
-DEBUG - value: [40256.   40552.2  40764.   ...  9052.06  4530.62  1068.68] 
+DEBUG - value: [40256, 40552.2, 40764, ..., 9052.06, 4530.62, 1068.68]
 DEBUG - classpath: ['NXentry', 'NXdata', 'NX_CHAR_OR_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/AXISNAME
@@ -5701,7 +5701,7 @@ DEBUG -
 			an array of NX_CHAR can be provided.
 		
 DEBUG - ===== FIELD (//Survey/data/data): <HDF5 dataset "data": shape (1201,), type "<f8">
-DEBUG - value: [40256.   40552.2  40764.   ...  9052.06  4530.62  1068.68] 
+DEBUG - value: [40256, 40552.2, 40764, ..., 9052.06, 4530.62, 1068.68]
 DEBUG - classpath: ['NXentry', 'NXdata', 'NX_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/DATA
@@ -5719,7 +5719,7 @@ DEBUG -
 			The maximum rank is ``32`` for compatibility with backend file formats.
 		
 DEBUG - ===== ATTRS (//Survey/data/data@long_name)
-DEBUG - value: intensity 
+DEBUG - value: intensity
 DEBUG - classpath: ['NXentry', 'NXdata', 'NX_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/DATA
@@ -5729,13 +5729,13 @@ DEBUG - Dataset referenced as NXdata SIGNAL
 DEBUG - documentation (NXdata.nxdl.xml:/DATA/long_name):
 DEBUG - data label
 DEBUG - ===== ATTRS (//Survey/data/data@units)
-DEBUG - value: counts_per_second 
+DEBUG - value: counts_per_second
 DEBUG - classpath: ['NXentry', 'NXdata', 'NX_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/DATA
 DEBUG - NXdata.nxdl.xml:/DATA@units - REQUIRED, but undefined unit category
 DEBUG - ===== FIELD (//Survey/data/data_errors): <HDF5 dataset "data_errors": shape (1201,), type "<f8">
-DEBUG - value: [0. 0. 0. ... 0. 0. 0.] 
+DEBUG - value: [0.0, 0.0, 0.0, ..., 0.0, 0.0, 0.0]
 DEBUG - classpath: ['NXentry', 'NXdata', 'NX_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/FIELDNAME_errors
@@ -5757,7 +5757,7 @@ DEBUG -
             Uncertainties of FIELDNAME values.
         
 DEBUG - ===== FIELD (//Survey/data/energy): <HDF5 dataset "energy": shape (1201,), type "<f8">
-DEBUG - value: [ 286.61  287.61  288.61 ... 1484.61 1485.61 1486.61] 
+DEBUG - value: [286.61, 287.61, 288.61, ..., 1484.61, 1485.61, 1486.61]
 DEBUG - classpath: ['NXentry', 'NXdata', 'NX_CHAR_OR_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/AXISNAME
@@ -5778,7 +5778,7 @@ DEBUG -
 			an array of NX_CHAR can be provided.
 		
 DEBUG - ===== ATTRS (//Survey/data/energy@long_name)
-DEBUG - value: energy 
+DEBUG - value: energy
 DEBUG - classpath: ['NXentry', 'NXdata', 'NX_CHAR_OR_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/AXISNAME
@@ -5788,14 +5788,14 @@ DEBUG - Dataset referenced as NXdata AXIS #0
 DEBUG - documentation (NXdata.nxdl.xml:/AXISNAME/long_name):
 DEBUG - Axis label
 DEBUG - ===== ATTRS (//Survey/data/energy@type)
-DEBUG - value: binding 
+DEBUG - value: binding
 DEBUG - classpath: ['NXentry', 'NXdata', 'NX_CHAR_OR_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/AXISNAME
 DEBUG - @type - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/data/energy@units)
-DEBUG - value: eV 
+DEBUG - value: eV
 DEBUG - classpath: ['NXentry', 'NXdata', 'NX_CHAR_OR_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/AXISNAME
@@ -5807,7 +5807,7 @@ DEBUG -
 				See the section :ref:`Design-Units` for more information.
 			
 DEBUG - ===== FIELD (//Survey/definition): <HDF5 dataset "definition": shape (), type "|O">
-DEBUG - value: NXxps 
+DEBUG - value: NXxps
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/definition
@@ -5840,7 +5840,7 @@ DEBUG -
 			*It is advised* to use :ref:`NXsubentry`, instead, as the overlay position.
 		
 DEBUG - ===== ATTRS (//Survey/definition@URL)
-DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/6cfc2d2e 
+DEBUG - value: https://github.com/FAIRmat-NFDI/nexus_definitions/blob/6cfc2d2e
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/definition
@@ -5851,7 +5851,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXentry.nxdl.xml:/definition/URL):
 DEBUG - URL of NXDL file
 DEBUG - ===== ATTRS (//Survey/definition@version)
-DEBUG - value: v2024.02.post1.dev1996+g6cfc2d2e 
+DEBUG - value: v2024.02.post1.dev1996+g6cfc2d2e
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/definition
@@ -5865,7 +5865,7 @@ DEBUG - NXentry.nxdl.xml:/definition@version - [NX_CHAR]
 DEBUG - documentation (NXentry.nxdl.xml:/definition/version):
 DEBUG - NXDL version number
 DEBUG - ===== FIELD (//Survey/end_time): <HDF5 dataset "end_time": shape (), type "|O">
-DEBUG - value: 2022-04-08T12:32:06.020000+00:00 
+DEBUG - value: 2022-04-08T12:32:06.020000+00:00
 DEBUG - classpath: ['NXentry', 'NX_DATE_TIME']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/end_time
@@ -5917,7 +5917,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/energy_axis_calibration@NX_class)
-DEBUG - value: NXcalibration 
+DEBUG - value: NXcalibration
 DEBUG - classpath: ['NXentry', 'NXcalibration']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/energy_axis_calibration
@@ -5927,7 +5927,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/energy_axis_calibration/calibrated_axis): <HDF5 dataset "calibrated_axis": shape (1201,), type "<f8">
-DEBUG - value: [ 286.61  287.61  288.61 ... 1484.61 1485.61 1486.61] 
+DEBUG - value: [286.61, 287.61, 288.61, ..., 1484.61, 1485.61, 1486.61]
 DEBUG - classpath: ['NXentry', 'NXcalibration', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/energy_axis_calibration/calibrated_axis
@@ -5942,7 +5942,7 @@ DEBUG -
             An array representing the axis after calibration, matching the data length
         
 DEBUG - ===== ATTRS (//Survey/energy_axis_calibration/calibrated_axis@units)
-DEBUG - value: eV 
+DEBUG - value: eV
 DEBUG - classpath: ['NXentry', 'NXcalibration', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/energy_axis_calibration/calibrated_axis
@@ -5950,7 +5950,7 @@ NXcalibration.nxdl.xml:/calibrated_axis
 DEBUG - NXmpes.nxdl.xml:/ENTRY/energy_axis_calibration/calibrated_axis@units [NX_ENERGY]
 DEBUG - NXcalibration.nxdl.xml:/calibrated_axis@units [NX_ANY]
 DEBUG - ===== FIELD (//Survey/energy_axis_calibration/physical_quantity): <HDF5 dataset "physical_quantity": shape (), type "|O">
-DEBUG - value: energy 
+DEBUG - value: energy
 DEBUG - classpath: ['NXentry', 'NXcalibration', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/energy_axis_calibration/physical_quantity
@@ -6013,7 +6013,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/instrument@NX_class)
-DEBUG - value: NXinstrument 
+DEBUG - value: NXinstrument
 DEBUG - classpath: ['NXentry', 'NXinstrument']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT
@@ -6024,7 +6024,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/instrument@default)
-DEBUG - value: electronanalyzer 
+DEBUG - value: electronanalyzer
 DEBUG - classpath: ['NXentry', 'NXinstrument']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT
@@ -6098,7 +6098,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/instrument/beam_probe@NX_class)
-DEBUG - value: NXbeam 
+DEBUG - value: NXbeam
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXbeam']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/beam_probe
@@ -6109,7 +6109,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/instrument/beam_probe/associated_source): <HDF5 dataset "associated_source": shape (), type "|O">
-DEBUG - value: /entry/instrument/source_probe 
+DEBUG - value: /entry/instrument/source_probe
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXbeam', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/beam_probe/associated_source
@@ -6125,7 +6125,7 @@ DEBUG -
                           * /entry/instrument/beam_probe/associated_source = /entry/instrument/source_probe
                     
 DEBUG - ===== FIELD (//Survey/instrument/beam_probe/depends_on): <HDF5 dataset "depends_on": shape (), type "|O">
-DEBUG - value: transformations/beam_direction 
+DEBUG - value: transformations/beam_direction
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXbeam', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/beam_probe/depends_on
@@ -6148,7 +6148,7 @@ DEBUG -
             or a refined beam direction.
         
 DEBUG - ===== FIELD (//Survey/instrument/beam_probe/distance): <HDF5 dataset "distance": shape (), type "<f8">
-DEBUG - value: 0.0 
+DEBUG - value: 0.0
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXbeam', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/beam_probe/distance
@@ -6164,7 +6164,7 @@ DEBUG -
 DEBUG - documentation (NXbeam.nxdl.xml:/distance):
 DEBUG - Distance from sample. Note, it is recommended to use NXtransformations instead.
 DEBUG - ===== ATTRS (//Survey/instrument/beam_probe/distance@units)
-DEBUG - value: mm 
+DEBUG - value: mm
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXbeam', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/beam_probe/distance
@@ -6172,7 +6172,7 @@ NXbeam.nxdl.xml:/distance
 DEBUG - NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/beam_probe/distance@units [NX_LENGTH]
 DEBUG - NXbeam.nxdl.xml:/distance@units [NX_LENGTH]
 DEBUG - ===== FIELD (//Survey/instrument/beam_probe/incident_energy): <HDF5 dataset "incident_energy": shape (), type "<f8">
-DEBUG - value: 1486.61 
+DEBUG - value: 1486.61
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXbeam', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/beam_probe/incident_energy
@@ -6189,7 +6189,7 @@ DEBUG -
             :ref:`incident_wavelength </NXbeam/incident_wavelength-field>`.
        
 DEBUG - ===== ATTRS (//Survey/instrument/beam_probe/incident_energy@units)
-DEBUG - value: eV 
+DEBUG - value: eV
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXbeam', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/beam_probe/incident_energy
@@ -6222,7 +6222,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/instrument/device_information@NX_class)
-DEBUG - value: NXfabrication 
+DEBUG - value: NXfabrication
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXfabrication']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/device_information
@@ -6232,7 +6232,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/instrument/device_information/model): <HDF5 dataset "model": shape (), type "|O">
-DEBUG - value: XPS setup 
+DEBUG - value: XPS setup
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXfabrication', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/device_information/model
@@ -6245,7 +6245,7 @@ DEBUG -
              Version or model of the component named by the manufacturer.
         
 DEBUG - ===== FIELD (//Survey/instrument/device_information/vendor): <HDF5 dataset "vendor": shape (), type "|O">
-DEBUG - value: SPECS GmbH 
+DEBUG - value: SPECS GmbH
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXfabrication', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/device_information/vendor
@@ -6292,7 +6292,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/instrument/electronanalyzer@NX_class)
-DEBUG - value: NXelectronanalyzer 
+DEBUG - value: NXelectronanalyzer
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER
@@ -6303,7 +6303,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/instrument/electronanalyzer@default)
-DEBUG - value: detector 
+DEBUG - value: detector
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER
@@ -6365,7 +6365,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/instrument/electronanalyzer/collectioncolumn@NX_class)
-DEBUG - value: NXcollectioncolumn 
+DEBUG - value: NXcollectioncolumn
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXcollectioncolumn']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/COLLECTIONCOLUMN
@@ -6377,7 +6377,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/instrument/electronanalyzer/collectioncolumn/lens_mode): <HDF5 dataset "lens_mode": shape (), type "|O">
-DEBUG - value: Large Area 
+DEBUG - value: Large Area
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXcollectioncolumn', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/COLLECTIONCOLUMN/lens_mode
@@ -6390,7 +6390,7 @@ DEBUG -
             Labelling of the lens setting in use.
         
 DEBUG - ===== FIELD (//Survey/instrument/electronanalyzer/collectioncolumn/scheme): <HDF5 dataset "scheme": shape (), type "|O">
-DEBUG - value: angular dispersive 
+DEBUG - value: angular dispersive
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXcollectioncolumn', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/COLLECTIONCOLUMN/scheme
@@ -6411,7 +6411,7 @@ DEBUG -
             spatial dispersive, momentum dispersive, non-dispersive, etc.
         
 DEBUG - ===== FIELD (//Survey/instrument/electronanalyzer/depends_on): <HDF5 dataset "depends_on": shape (), type "|O">
-DEBUG - value: transformations/analyzer_take_off_polar_angle 
+DEBUG - value: transformations/analyzer_take_off_polar_angle
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/depends_on
@@ -6436,7 +6436,7 @@ DEBUG -
             NXtransformations group. But NeXus allows them to be stored anywhere.
         
 DEBUG - ===== FIELD (//Survey/instrument/electronanalyzer/description): <HDF5 dataset "description": shape (), type "|O">
-DEBUG - value: hemispherical 
+DEBUG - value: hemispherical
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/description
@@ -6490,7 +6490,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/instrument/electronanalyzer/detector@NX_class)
-DEBUG - value: NXelectron_detector 
+DEBUG - value: NXelectron_detector
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXelectron_detector']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ELECTRON_DETECTOR
@@ -6501,7 +6501,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/instrument/electronanalyzer/detector@default)
-DEBUG - value: raw_data 
+DEBUG - value: raw_data
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXelectron_detector']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ELECTRON_DETECTOR
@@ -6528,7 +6528,7 @@ DEBUG -
 			for a summary of the discussion.
         
 DEBUG - ===== FIELD (//Survey/instrument/electronanalyzer/detector/count_time): <HDF5 dataset "count_time": shape (), type "<f8">
-DEBUG - value: 0.1 
+DEBUG - value: 0.1
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXelectron_detector', 'NX_NUMBER']
 DEBUG - classes:
 NXdetector.nxdl.xml:/count_time
@@ -6536,7 +6536,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXdetector.nxdl.xml:/count_time):
 DEBUG - Elapsed actual counting time
 DEBUG - ===== ATTRS (//Survey/instrument/electronanalyzer/detector/count_time@units)
-DEBUG - value: s 
+DEBUG - value: s
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXelectron_detector', 'NX_NUMBER']
 DEBUG - classes:
 NXdetector.nxdl.xml:/count_time
@@ -6737,7 +6737,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/instrument/electronanalyzer/detector/raw_data@NX_class)
-DEBUG - value: NXdata 
+DEBUG - value: NXdata
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXelectron_detector', 'NXdata']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ELECTRON_DETECTOR/raw_data
@@ -6747,7 +6747,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/instrument/electronanalyzer/detector/raw_data@signal)
-DEBUG - value: raw 
+DEBUG - value: raw
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXelectron_detector', 'NXdata']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ELECTRON_DETECTOR/raw_data
@@ -6777,7 +6777,7 @@ DEBUG -
 			for a summary of the discussion.
 		
 DEBUG - ===== FIELD (//Survey/instrument/electronanalyzer/detector/raw_data/cycle0_scan0): <HDF5 dataset "cycle0_scan0": shape (1201,), type "<f8">
-DEBUG - value: [40256.   40552.2  40764.   ...  9052.06  4530.62  1068.68] 
+DEBUG - value: [40256, 40552.2, 40764, ..., 9052.06, 4530.62, 1068.68]
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXelectron_detector', 'NXdata', 'NX_CHAR_OR_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/AXISNAME
@@ -6797,7 +6797,7 @@ DEBUG -
 			an array of NX_CHAR can be provided.
 		
 DEBUG - ===== ATTRS (//Survey/instrument/electronanalyzer/detector/raw_data/cycle0_scan0@units)
-DEBUG - value: counts 
+DEBUG - value: counts
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXelectron_detector', 'NXdata', 'NX_CHAR_OR_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/AXISNAME
@@ -6808,7 +6808,7 @@ DEBUG -
 				See the section :ref:`Design-Units` for more information.
 			
 DEBUG - ===== FIELD (//Survey/instrument/electronanalyzer/detector/raw_data/raw): <HDF5 dataset "raw": shape (1, 1201), type "<f8">
-DEBUG - value: [40256.   40552.2  40764.   ...  9052.06  4530.62  1068.68] 
+DEBUG - value: [40256, 40552.2, 40764, ..., 9052.06, 4530.62, 1068.68]
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXelectron_detector', 'NXdata', 'NX_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/DATA
@@ -6826,7 +6826,7 @@ DEBUG -
 			The maximum rank is ``32`` for compatibility with backend file formats.
 		
 DEBUG - ===== ATTRS (//Survey/instrument/electronanalyzer/detector/raw_data/raw@units)
-DEBUG - value: counts 
+DEBUG - value: counts
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXelectron_detector', 'NXdata', 'NX_NUMBER']
 DEBUG - classes:
 NXdata.nxdl.xml:/DATA
@@ -6860,7 +6860,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/instrument/electronanalyzer/device_information@NX_class)
-DEBUG - value: NXfabrication 
+DEBUG - value: NXfabrication
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXfabrication']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/device_information
@@ -6871,7 +6871,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/instrument/electronanalyzer/device_information/model): <HDF5 dataset "model": shape (), type "|O">
-DEBUG - value: PHOIBOS 150 
+DEBUG - value: PHOIBOS 150
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXfabrication', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/device_information/model
@@ -6884,7 +6884,7 @@ DEBUG -
              Version or model of the component named by the manufacturer.
         
 DEBUG - ===== FIELD (//Survey/instrument/electronanalyzer/device_information/vendor): <HDF5 dataset "vendor": shape (), type "|O">
-DEBUG - value: SPECS GmbH 
+DEBUG - value: SPECS GmbH
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXfabrication', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/device_information/vendor
@@ -6925,7 +6925,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/instrument/electronanalyzer/energy_resolution@NX_class)
-DEBUG - value: NXresolution 
+DEBUG - value: NXresolution
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXresolution']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/energy_resolution
@@ -6935,7 +6935,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/instrument/electronanalyzer/energy_resolution/physical_quantity): <HDF5 dataset "physical_quantity": shape (), type "|O">
-DEBUG - value: energy 
+DEBUG - value: energy
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXresolution', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/energy_resolution/physical_quantity
@@ -6956,7 +6956,7 @@ DEBUG -
              energy, momentum, time, area, etc.
         
 DEBUG - ===== FIELD (//Survey/instrument/electronanalyzer/energy_resolution/resolution): <HDF5 dataset "resolution": shape (), type "<f8">
-DEBUG - value: 1.0 
+DEBUG - value: 1
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXresolution', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/energy_resolution/resolution
@@ -6978,7 +6978,7 @@ DEBUG -
              The resolution of the physical quantity.
         
 DEBUG - ===== ATTRS (//Survey/instrument/electronanalyzer/energy_resolution/resolution@units)
-DEBUG - value: eV 
+DEBUG - value: eV
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXresolution', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/energy_resolution/resolution
@@ -6988,7 +6988,7 @@ DEBUG - NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/energy_resolution/res
 DEBUG - NXelectronanalyzer.nxdl.xml:/energy_resolution/resolution@units [NX_ENERGY]
 DEBUG - NXresolution.nxdl.xml:/resolution@units [NX_ANY]
 DEBUG - ===== FIELD (//Survey/instrument/electronanalyzer/energy_resolution/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: estimated 
+DEBUG - value: estimated
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXresolution', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/energy_resolution/type
@@ -7041,7 +7041,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/instrument/electronanalyzer/energydispersion@NX_class)
-DEBUG - value: NXenergydispersion 
+DEBUG - value: NXenergydispersion
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXenergydispersion']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ENERGYDISPERSION
@@ -7053,7 +7053,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/instrument/electronanalyzer/energydispersion/energy_scan_mode): <HDF5 dataset "energy_scan_mode": shape (), type "|O">
-DEBUG - value: fixed_analyzer_transmission 
+DEBUG - value: fixed_analyzer_transmission
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXenergydispersion', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ENERGYDISPERSION/energy_scan_mode
@@ -7075,7 +7075,7 @@ DEBUG -
             Way of scanning the energy axis
         
 DEBUG - ===== FIELD (//Survey/instrument/electronanalyzer/energydispersion/pass_energy): <HDF5 dataset "pass_energy": shape (), type "<f8">
-DEBUG - value: 20.0 
+DEBUG - value: 20
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXenergydispersion', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ENERGYDISPERSION/pass_energy
@@ -7096,7 +7096,7 @@ DEBUG -
             .. _12.63: https://www.iso.org/obp/ui/en/#iso:std:iso:18115:-1:ed-3:v1:en:term:12.63
         
 DEBUG - ===== ATTRS (//Survey/instrument/electronanalyzer/energydispersion/pass_energy@units)
-DEBUG - value: eV 
+DEBUG - value: eV
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXenergydispersion', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ENERGYDISPERSION/pass_energy
@@ -7104,7 +7104,7 @@ NXenergydispersion.nxdl.xml:/pass_energy
 DEBUG - NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ENERGYDISPERSION/pass_energy@units [NX_ENERGY]
 DEBUG - NXenergydispersion.nxdl.xml:/pass_energy@units [NX_ENERGY]
 DEBUG - ===== FIELD (//Survey/instrument/electronanalyzer/energydispersion/radius): <HDF5 dataset "radius": shape (), type "<i8">
-DEBUG - value: 150 
+DEBUG - value: 150
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXenergydispersion', 'NX_NUMBER']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ENERGYDISPERSION/radius
@@ -7112,13 +7112,13 @@ DEBUG - <<RECOMMENDED>>
 DEBUG - documentation (NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ENERGYDISPERSION/radius):
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/instrument/electronanalyzer/energydispersion/radius@units)
-DEBUG - value: mm 
+DEBUG - value: mm
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXenergydispersion', 'NX_NUMBER']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ENERGYDISPERSION/radius
 DEBUG - NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ENERGYDISPERSION/radius@units [NX_LENGTH]
 DEBUG - ===== FIELD (//Survey/instrument/electronanalyzer/energydispersion/scheme): <HDF5 dataset "scheme": shape (), type "|O">
-DEBUG - value: hemispherical 
+DEBUG - value: hemispherical
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NXenergydispersion', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/ENERGYDISPERSION/scheme
@@ -7139,7 +7139,7 @@ DEBUG -
             mirror, retarding grid, etc.
         
 DEBUG - ===== FIELD (//Survey/instrument/electronanalyzer/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: PHOIBOS 150 
+DEBUG - value: PHOIBOS 150
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NX_CHAR']
 DEBUG - classes:
 NXelectronanalyzer.nxdl.xml:/name
@@ -7154,7 +7154,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Survey/instrument/electronanalyzer/slow_axes): <HDF5 dataset "slow_axes": shape (), type "|O">
-DEBUG - value: energy 
+DEBUG - value: energy
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/slow_axes
@@ -7168,7 +7168,7 @@ DEBUG -
             order of decreasing speed. See fast_axes for examples.
         
 DEBUG - ===== FIELD (//Survey/instrument/electronanalyzer/work_function): <HDF5 dataset "work_function": shape (), type "<f8">
-DEBUG - value: 3.989 
+DEBUG - value: 3.989
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NX_FLOAT']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/work_function
@@ -7204,7 +7204,7 @@ DEBUG -
             accurately determine the binding energy scale.
         
 DEBUG - ===== ATTRS (//Survey/instrument/electronanalyzer/work_function@units)
-DEBUG - value: eV 
+DEBUG - value: eV
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXelectronanalyzer', 'NX_FLOAT']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/ELECTRONANALYZER/work_function
@@ -7238,7 +7238,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/instrument/energy_resolution@NX_class)
-DEBUG - value: NXresolution 
+DEBUG - value: NXresolution
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXresolution']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/energy_resolution
@@ -7247,7 +7247,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/instrument/energy_resolution/physical_quantity): <HDF5 dataset "physical_quantity": shape (), type "|O">
-DEBUG - value: energy 
+DEBUG - value: energy
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXresolution', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/energy_resolution/physical_quantity
@@ -7263,7 +7263,7 @@ DEBUG -
              energy, momentum, time, area, etc.
         
 DEBUG - ===== FIELD (//Survey/instrument/energy_resolution/resolution): <HDF5 dataset "resolution": shape (), type "<f8">
-DEBUG - value: 1.0 
+DEBUG - value: 1
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXresolution', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/energy_resolution/resolution
@@ -7282,7 +7282,7 @@ DEBUG -
              The resolution of the physical quantity.
         
 DEBUG - ===== ATTRS (//Survey/instrument/energy_resolution/resolution@units)
-DEBUG - value: eV 
+DEBUG - value: eV
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXresolution', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/energy_resolution/resolution
@@ -7290,7 +7290,7 @@ NXresolution.nxdl.xml:/resolution
 DEBUG - NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/energy_resolution/resolution@units [NX_ENERGY]
 DEBUG - NXresolution.nxdl.xml:/resolution@units [NX_ANY]
 DEBUG - ===== FIELD (//Survey/instrument/energy_resolution/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: derived 
+DEBUG - value: derived
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXresolution', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/energy_resolution/type
@@ -7342,7 +7342,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/instrument/flood_gun@NX_class)
-DEBUG - value: NXactuator 
+DEBUG - value: NXactuator
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/flood_gun
@@ -7353,7 +7353,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/instrument/flood_gun@target)
-DEBUG - value: /Survey/instrument/flood_gun 
+DEBUG - value: /Survey/instrument/flood_gun
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/flood_gun
@@ -7364,7 +7364,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/instrument/flood_gun/actuation_target): <HDF5 dataset "actuation_target": shape (), type "|O">
-DEBUG - value: current 
+DEBUG - value: current
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/flood_gun/actuation_target
@@ -7381,7 +7381,7 @@ DEBUG -
              For example, this could be an instance of NXsample or a device on NXinstrument.
         
 DEBUG - ===== FIELD (//Survey/instrument/flood_gun/current): <HDF5 dataset "current": shape (), type "<f8">
-DEBUG - value: 0.0 
+DEBUG - value: 0.0
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXactuator', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/flood_gun/current
@@ -7392,13 +7392,13 @@ DEBUG -
                         It can also be an 1D array of output current (without time stamps).
                     
 DEBUG - ===== ATTRS (//Survey/instrument/flood_gun/current@units)
-DEBUG - value: A 
+DEBUG - value: A
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXactuator', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/flood_gun/current
 DEBUG - NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/flood_gun/current@units [NX_CURRENT]
 DEBUG - ===== FIELD (//Survey/instrument/flood_gun/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: FG 22/35 
+DEBUG - value: FG 22/35
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/flood_gun/name
@@ -7416,7 +7416,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Survey/instrument/flood_gun/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: low energy electron source 
+DEBUG - value: low energy electron source
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/flood_gun/type
@@ -7464,7 +7464,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/instrument/manipulator@NX_class)
-DEBUG - value: NXmanipulator 
+DEBUG - value: NXmanipulator
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR
@@ -7499,7 +7499,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/instrument/manipulator/device_information@NX_class)
-DEBUG - value: NXfabrication 
+DEBUG - value: NXfabrication
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXfabrication']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/device_information
@@ -7509,7 +7509,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/instrument/manipulator/device_information/model): <HDF5 dataset "model": shape (), type "|O">
-DEBUG - value: 5-axis manipulator 
+DEBUG - value: 5-axis manipulator
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXfabrication', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/device_information/model
@@ -7522,7 +7522,7 @@ DEBUG -
              Version or model of the component named by the manufacturer.
         
 DEBUG - ===== FIELD (//Survey/instrument/manipulator/device_information/vendor): <HDF5 dataset "vendor": shape (), type "|O">
-DEBUG - value: SPECS GmbH 
+DEBUG - value: SPECS GmbH
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXfabrication', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/device_information/vendor
@@ -7569,7 +7569,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/instrument/manipulator/drain_current_ammeter@NX_class)
-DEBUG - value: NXsensor 
+DEBUG - value: NXsensor
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/drain_current_ammeter
@@ -7580,7 +7580,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/instrument/manipulator/drain_current_ammeter@target)
-DEBUG - value: /Survey/instrument/manipulator/drain_current_ammeter 
+DEBUG - value: /Survey/instrument/manipulator/drain_current_ammeter
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/drain_current_ammeter
@@ -7591,7 +7591,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/instrument/manipulator/drain_current_ammeter/measurement): <HDF5 dataset "measurement": shape (), type "|O">
-DEBUG - value: current 
+DEBUG - value: current
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/drain_current_ammeter/measurement
@@ -7624,7 +7624,7 @@ DEBUG -
 DEBUG - documentation (NXsensor.nxdl.xml:/measurement):
 DEBUG - name for measured signal
 DEBUG - ===== FIELD (//Survey/instrument/manipulator/drain_current_ammeter/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: ammeter 1.0 
+DEBUG - value: ammeter 1.0
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/drain_current_ammeter/name
@@ -7640,7 +7640,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Survey/instrument/manipulator/drain_current_ammeter/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: wire 
+DEBUG - value: wire
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/drain_current_ammeter/type
@@ -7665,7 +7665,7 @@ DEBUG -
 			  wilhelmy plate
 		
 DEBUG - ===== FIELD (//Survey/instrument/manipulator/drain_current_ammeter/value): <HDF5 dataset "value": shape (), type "<f8">
-DEBUG - value: 0.0 
+DEBUG - value: 0.0
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/drain_current_ammeter/value
@@ -7685,7 +7685,7 @@ DEBUG -
 			- need [n] as may be a vector
 		
 DEBUG - ===== ATTRS (//Survey/instrument/manipulator/drain_current_ammeter/value@units)
-DEBUG - value: A 
+DEBUG - value: A
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/drain_current_ammeter/value
@@ -7729,7 +7729,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/instrument/manipulator/sample_bias_potentiostat@NX_class)
-DEBUG - value: NXactuator 
+DEBUG - value: NXactuator
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_potentiostat
@@ -7740,7 +7740,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/instrument/manipulator/sample_bias_potentiostat@target)
-DEBUG - value: /Survey/instrument/manipulator/sample_bias_potentiostat 
+DEBUG - value: /Survey/instrument/manipulator/sample_bias_potentiostat
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_potentiostat
@@ -7751,7 +7751,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/instrument/manipulator/sample_bias_potentiostat/actuation_target): <HDF5 dataset "actuation_target": shape (), type "|O">
-DEBUG - value: voltage 
+DEBUG - value: voltage
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_potentiostat/actuation_target
@@ -7773,7 +7773,7 @@ DEBUG -
              For example, this could be an instance of NXsample or a device on NXinstrument.
         
 DEBUG - ===== FIELD (//Survey/instrument/manipulator/sample_bias_potentiostat/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: XPS sample potentiostat 
+DEBUG - value: XPS sample potentiostat
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_potentiostat/name
@@ -7791,7 +7791,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Survey/instrument/manipulator/sample_bias_potentiostat/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: potentiostat 
+DEBUG - value: potentiostat
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_potentiostat/type
@@ -7844,7 +7844,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/instrument/manipulator/sample_bias_voltmeter@NX_class)
-DEBUG - value: NXsensor 
+DEBUG - value: NXsensor
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_voltmeter
@@ -7855,7 +7855,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/instrument/manipulator/sample_bias_voltmeter@target)
-DEBUG - value: /Survey/instrument/manipulator/sample_bias_voltmeter 
+DEBUG - value: /Survey/instrument/manipulator/sample_bias_voltmeter
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_voltmeter
@@ -7866,7 +7866,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/instrument/manipulator/sample_bias_voltmeter/measurement): <HDF5 dataset "measurement": shape (), type "|O">
-DEBUG - value: voltage 
+DEBUG - value: voltage
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_voltmeter/measurement
@@ -7899,7 +7899,7 @@ DEBUG -
 DEBUG - documentation (NXsensor.nxdl.xml:/measurement):
 DEBUG - name for measured signal
 DEBUG - ===== FIELD (//Survey/instrument/manipulator/sample_bias_voltmeter/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: XPS sample voltmeter 
+DEBUG - value: XPS sample voltmeter
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_voltmeter/name
@@ -7915,7 +7915,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Survey/instrument/manipulator/sample_bias_voltmeter/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: oscilloscope 
+DEBUG - value: oscilloscope
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_voltmeter/type
@@ -7940,7 +7940,7 @@ DEBUG -
 			  wilhelmy plate
 		
 DEBUG - ===== FIELD (//Survey/instrument/manipulator/sample_bias_voltmeter/value): <HDF5 dataset "value": shape (), type "<f8">
-DEBUG - value: 0.0 
+DEBUG - value: 0.0
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_voltmeter/value
@@ -7960,7 +7960,7 @@ DEBUG -
 			- need [n] as may be a vector
 		
 DEBUG - ===== ATTRS (//Survey/instrument/manipulator/sample_bias_voltmeter/value@units)
-DEBUG - value: V 
+DEBUG - value: V
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_bias_voltmeter/value
@@ -8004,7 +8004,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/instrument/manipulator/sample_heater@NX_class)
-DEBUG - value: NXactuator 
+DEBUG - value: NXactuator
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_heater
@@ -8015,7 +8015,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/instrument/manipulator/sample_heater@target)
-DEBUG - value: /Survey/instrument/manipulator/sample_heater 
+DEBUG - value: /Survey/instrument/manipulator/sample_heater
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_heater
@@ -8026,7 +8026,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/instrument/manipulator/sample_heater/actuation_target): <HDF5 dataset "actuation_target": shape (), type "|O">
-DEBUG - value: temperature 
+DEBUG - value: temperature
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_heater/actuation_target
@@ -8048,7 +8048,7 @@ DEBUG -
              For example, this could be an instance of NXsample or a device on NXinstrument.
         
 DEBUG - ===== FIELD (//Survey/instrument/manipulator/sample_heater/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: Coherent Compact Evolution IR Diode LASER (DILAS) 
+DEBUG - value: Coherent Compact Evolution IR Diode LASER (DILAS)
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_heater/name
@@ -8066,7 +8066,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Survey/instrument/manipulator/sample_heater/output_heater_power): <HDF5 dataset "output_heater_power": shape (), type "<f8">
-DEBUG - value: 0.0 
+DEBUG - value: 0.0
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_heater/output_heater_power
@@ -8080,7 +8080,7 @@ DEBUG -
                 It can also be a 1D array of heater powers (without time stamps).
             
 DEBUG - ===== ATTRS (//Survey/instrument/manipulator/sample_heater/output_heater_power@units)
-DEBUG - value: W 
+DEBUG - value: W
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_heater/output_heater_power
@@ -8088,7 +8088,7 @@ NXmanipulator.nxdl.xml:/sample_heater/output_heater_power
 DEBUG - NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_heater/output_heater_power@units - REQUIRED, but undefined unit category
 DEBUG - NXmanipulator.nxdl.xml:/sample_heater/output_heater_power@units [NX_POWER]
 DEBUG - ===== FIELD (//Survey/instrument/manipulator/sample_heater/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: IR diode laser 
+DEBUG - value: IR diode laser
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/sample_heater/type
@@ -8141,7 +8141,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/instrument/manipulator/temperature_sensor@NX_class)
-DEBUG - value: NXsensor 
+DEBUG - value: NXsensor
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/temperature_sensor
@@ -8152,7 +8152,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/instrument/manipulator/temperature_sensor@target)
-DEBUG - value: /Survey/instrument/manipulator/temperature_sensor 
+DEBUG - value: /Survey/instrument/manipulator/temperature_sensor
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/temperature_sensor
@@ -8163,7 +8163,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/instrument/manipulator/temperature_sensor/attached_to): <HDF5 dataset "attached_to": shape (), type "|O">
-DEBUG - value: sample 
+DEBUG - value: sample
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/attached_to
@@ -8171,7 +8171,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXsensor.nxdl.xml:/attached_to):
 DEBUG - where sensor is attached to ("sample" | "can")
 DEBUG - ===== FIELD (//Survey/instrument/manipulator/temperature_sensor/measurement): <HDF5 dataset "measurement": shape (), type "|O">
-DEBUG - value: temperature 
+DEBUG - value: temperature
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/temperature_sensor/measurement
@@ -8204,7 +8204,7 @@ DEBUG -
 DEBUG - documentation (NXsensor.nxdl.xml:/measurement):
 DEBUG - name for measured signal
 DEBUG - ===== FIELD (//Survey/instrument/manipulator/temperature_sensor/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: type K thermocouple 
+DEBUG - value: type K thermocouple
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/temperature_sensor/name
@@ -8220,7 +8220,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Survey/instrument/manipulator/temperature_sensor/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: type K thermocouple 
+DEBUG - value: type K thermocouple
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/temperature_sensor/type
@@ -8245,7 +8245,7 @@ DEBUG -
 			  wilhelmy plate
 		
 DEBUG - ===== FIELD (//Survey/instrument/manipulator/temperature_sensor/value): <HDF5 dataset "value": shape (), type "<f8">
-DEBUG - value: 298.0 
+DEBUG - value: 298
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/temperature_sensor/value
@@ -8266,7 +8266,7 @@ DEBUG -
 			- need [n] as may be a vector
 		
 DEBUG - ===== ATTRS (//Survey/instrument/manipulator/temperature_sensor/value@units)
-DEBUG - value: K 
+DEBUG - value: K
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXmanipulator', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/MANIPULATOR/temperature_sensor/value
@@ -8310,7 +8310,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/instrument/pressure_gauge@NX_class)
-DEBUG - value: NXsensor 
+DEBUG - value: NXsensor
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/pressure_gauge
@@ -8321,7 +8321,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/instrument/pressure_gauge@target)
-DEBUG - value: /Survey/instrument/pressure_gauge 
+DEBUG - value: /Survey/instrument/pressure_gauge
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/pressure_gauge
@@ -8332,7 +8332,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/instrument/pressure_gauge/measurement): <HDF5 dataset "measurement": shape (), type "|O">
-DEBUG - value: pressure 
+DEBUG - value: pressure
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/pressure_gauge/measurement
@@ -8360,7 +8360,7 @@ DEBUG -
 DEBUG - documentation (NXsensor.nxdl.xml:/measurement):
 DEBUG - name for measured signal
 DEBUG - ===== FIELD (//Survey/instrument/pressure_gauge/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: Atmion 
+DEBUG - value: Atmion
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/pressure_gauge/name
@@ -8376,7 +8376,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Survey/instrument/pressure_gauge/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: hot-filament ionization gauge 
+DEBUG - value: hot-filament ionization gauge
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/pressure_gauge/type
@@ -8401,7 +8401,7 @@ DEBUG -
 			  wilhelmy plate
 		
 DEBUG - ===== FIELD (//Survey/instrument/pressure_gauge/value): <HDF5 dataset "value": shape (), type "<f8">
-DEBUG - value: 1e-09 
+DEBUG - value: 1.00000000e-09
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/pressure_gauge/value
@@ -8418,7 +8418,7 @@ DEBUG -
 			- need [n] as may be a vector
 		
 DEBUG - ===== ATTRS (//Survey/instrument/pressure_gauge/value@units)
-DEBUG - value: mbar 
+DEBUG - value: mbar
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/pressure_gauge/value
@@ -8468,7 +8468,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/instrument/source_probe@NX_class)
-DEBUG - value: NXsource 
+DEBUG - value: NXsource
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/INSTRUMENT/source_probe
@@ -8480,7 +8480,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/instrument/source_probe/associated_beam): <HDF5 dataset "associated_beam": shape (), type "|O">
-DEBUG - value: /entry/instrument/beam_xray 
+DEBUG - value: /entry/instrument/beam_xray
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_probe/associated_beam
@@ -8495,7 +8495,7 @@ DEBUG -
                           * /entry/instrument/source_probe/associated_beam = /entry/instrument/beam_probe
                     
 DEBUG - ===== FIELD (//Survey/instrument/source_probe/probe): <HDF5 dataset "probe": shape (), type "|O">
-DEBUG - value: photon 
+DEBUG - value: photon
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_probe/probe
@@ -8516,7 +8516,7 @@ DEBUG -
 DEBUG - documentation (NXsource.nxdl.xml:/probe):
 DEBUG - type of radiation probe (pick one from the enumerated list and spell exactly)
 DEBUG - ===== FIELD (//Survey/instrument/source_probe/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: Synchrotron X-ray Source 
+DEBUG - value: Synchrotron X-ray Source
 DEBUG - classpath: ['NXentry', 'NXinstrument', 'NXsource', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/INSTRUMENT/source_probe/type
@@ -8562,7 +8562,7 @@ DEBUG -
 DEBUG - documentation (NXsource.nxdl.xml:/type):
 DEBUG - type of radiation source (pick one from the enumerated list and spell exactly)
 DEBUG - ===== FIELD (//Survey/method): <HDF5 dataset "method": shape (), type "|O">
-DEBUG - value: XPS 
+DEBUG - value: XPS
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/method
@@ -8608,7 +8608,7 @@ DEBUG -
                 .. _Clause 11: https://www.iso.org/obp/ui/en/#iso:std:iso:18115:-1:ed-3:v1:en:sec:11
             
 DEBUG - ===== FIELD (//Survey/program_name): <HDF5 dataset "program_name": shape (), type "|O">
-DEBUG - value: SpecsLab 2 
+DEBUG - value: SpecsLab 2
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXentry.nxdl.xml:/program_name
@@ -8653,7 +8653,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/sample@NX_class)
-DEBUG - value: NXsample 
+DEBUG - value: NXsample
 DEBUG - classpath: ['NXentry', 'NXsample']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/SAMPLE
@@ -8665,7 +8665,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/sample/atom_types): <HDF5 dataset "atom_types": shape (), type "|O">
-DEBUG - value: Ni 
+DEBUG - value: Ni
 DEBUG - classpath: ['NXentry', 'NXsample', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/atom_types
@@ -8713,7 +8713,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/sample/bias_env@NX_class)
-DEBUG - value: NXenvironment 
+DEBUG - value: NXenvironment
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/bias_env
@@ -8763,7 +8763,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/sample/bias_env/potentiostat@NX_class)
-DEBUG - value: NXactuator 
+DEBUG - value: NXactuator
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/bias_env/potentiostat
@@ -8774,7 +8774,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/sample/bias_env/potentiostat@target)
-DEBUG - value: /Survey/instrument/manipulator/sample_bias_potentiostat 
+DEBUG - value: /Survey/instrument/manipulator/sample_bias_potentiostat
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/bias_env/potentiostat
@@ -8785,7 +8785,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/sample/bias_env/potentiostat/actuation_target): <HDF5 dataset "actuation_target": shape (), type "|O">
-DEBUG - value: voltage 
+DEBUG - value: voltage
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXactuator.nxdl.xml:/actuation_target
@@ -8797,7 +8797,7 @@ DEBUG -
              For example, this could be an instance of NXsample or a device on NXinstrument.
         
 DEBUG - ===== FIELD (//Survey/sample/bias_env/potentiostat/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: XPS sample potentiostat 
+DEBUG - value: XPS sample potentiostat
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXactuator.nxdl.xml:/name
@@ -8812,7 +8812,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Survey/sample/bias_env/potentiostat/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: potentiostat 
+DEBUG - value: potentiostat
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXactuator.nxdl.xml:/type
@@ -8868,7 +8868,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/sample/bias_env/voltmeter@NX_class)
-DEBUG - value: NXsensor 
+DEBUG - value: NXsensor
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/bias_env/voltmeter
@@ -8879,7 +8879,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/sample/bias_env/voltmeter@target)
-DEBUG - value: /Survey/instrument/manipulator/sample_bias_voltmeter 
+DEBUG - value: /Survey/instrument/manipulator/sample_bias_voltmeter
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/bias_env/voltmeter
@@ -8890,7 +8890,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/sample/bias_env/voltmeter/measurement): <HDF5 dataset "measurement": shape (), type "|O">
-DEBUG - value: voltage 
+DEBUG - value: voltage
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/measurement
@@ -8913,7 +8913,7 @@ DEBUG - -> surface_pressure
 DEBUG - documentation (NXsensor.nxdl.xml:/measurement):
 DEBUG - name for measured signal
 DEBUG - ===== FIELD (//Survey/sample/bias_env/voltmeter/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: XPS sample voltmeter 
+DEBUG - value: XPS sample voltmeter
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/name
@@ -8926,7 +8926,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Survey/sample/bias_env/voltmeter/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: oscilloscope 
+DEBUG - value: oscilloscope
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/type
@@ -8948,7 +8948,7 @@ DEBUG -
 			  wilhelmy plate
 		
 DEBUG - ===== FIELD (//Survey/sample/bias_env/voltmeter/value): <HDF5 dataset "value": shape (), type "<f8">
-DEBUG - value: 0.0 
+DEBUG - value: 0.0
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXsensor.nxdl.xml:/value
@@ -8959,13 +8959,13 @@ DEBUG -
 			- need [n] as may be a vector
 		
 DEBUG - ===== ATTRS (//Survey/sample/bias_env/voltmeter/value@units)
-DEBUG - value: V 
+DEBUG - value: V
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXsensor.nxdl.xml:/value
 DEBUG - NXsensor.nxdl.xml:/value@units [NX_ANY]
 DEBUG - ===== FIELD (//Survey/sample/chemical_formula): <HDF5 dataset "chemical_formula": shape (), type "|O">
-DEBUG - value: Ni 
+DEBUG - value: Ni
 DEBUG - classpath: ['NXentry', 'NXsample', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/chemical_formula
@@ -8995,7 +8995,7 @@ DEBUG -
 			* This is the *Hill* system used by Chemical Abstracts.
 		
 DEBUG - ===== FIELD (//Survey/sample/depends_on): <HDF5 dataset "depends_on": shape (), type "|O">
-DEBUG - value: transformations/sample_rotation_angle 
+DEBUG - value: transformations/sample_rotation_angle
 DEBUG - classpath: ['NXentry', 'NXsample', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/SAMPLE/depends_on
@@ -9050,7 +9050,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/sample/drain_current_env@NX_class)
-DEBUG - value: NXenvironment 
+DEBUG - value: NXenvironment
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/drain_current_env
@@ -9100,7 +9100,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/sample/drain_current_env/ammeter@NX_class)
-DEBUG - value: NXsensor 
+DEBUG - value: NXsensor
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/drain_current_env/ammeter
@@ -9111,7 +9111,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/sample/drain_current_env/ammeter@target)
-DEBUG - value: /Survey/instrument/manipulator/drain_current_ammeter 
+DEBUG - value: /Survey/instrument/manipulator/drain_current_ammeter
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/drain_current_env/ammeter
@@ -9122,7 +9122,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/sample/drain_current_env/ammeter/measurement): <HDF5 dataset "measurement": shape (), type "|O">
-DEBUG - value: current 
+DEBUG - value: current
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/measurement
@@ -9145,7 +9145,7 @@ DEBUG - -> surface_pressure
 DEBUG - documentation (NXsensor.nxdl.xml:/measurement):
 DEBUG - name for measured signal
 DEBUG - ===== FIELD (//Survey/sample/drain_current_env/ammeter/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: ammeter 1.0 
+DEBUG - value: ammeter 1.0
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/name
@@ -9158,7 +9158,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Survey/sample/drain_current_env/ammeter/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: wire 
+DEBUG - value: wire
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/type
@@ -9180,7 +9180,7 @@ DEBUG -
 			  wilhelmy plate
 		
 DEBUG - ===== FIELD (//Survey/sample/drain_current_env/ammeter/value): <HDF5 dataset "value": shape (), type "<f8">
-DEBUG - value: 0.0 
+DEBUG - value: 0.0
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXsensor.nxdl.xml:/value
@@ -9191,7 +9191,7 @@ DEBUG -
 			- need [n] as may be a vector
 		
 DEBUG - ===== ATTRS (//Survey/sample/drain_current_env/ammeter/value@units)
-DEBUG - value: A 
+DEBUG - value: A
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXsensor.nxdl.xml:/value
@@ -9228,7 +9228,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/sample/flood_gun_current_env@NX_class)
-DEBUG - value: NXenvironment 
+DEBUG - value: NXenvironment
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/flood_gun_current_env
@@ -9278,7 +9278,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/sample/flood_gun_current_env/flood_gun@NX_class)
-DEBUG - value: NXactuator 
+DEBUG - value: NXactuator
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/flood_gun_current_env/flood_gun
@@ -9289,7 +9289,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/sample/flood_gun_current_env/flood_gun@target)
-DEBUG - value: /Survey/instrument/flood_gun 
+DEBUG - value: /Survey/instrument/flood_gun
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/flood_gun_current_env/flood_gun
@@ -9300,7 +9300,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/sample/flood_gun_current_env/flood_gun/actuation_target): <HDF5 dataset "actuation_target": shape (), type "|O">
-DEBUG - value: current 
+DEBUG - value: current
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXactuator.nxdl.xml:/actuation_target
@@ -9312,17 +9312,17 @@ DEBUG -
              For example, this could be an instance of NXsample or a device on NXinstrument.
         
 DEBUG - ===== FIELD (//Survey/sample/flood_gun_current_env/flood_gun/current): <HDF5 dataset "current": shape (), type "<f8">
-DEBUG - value: 0.0 
+DEBUG - value: 0.0
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator']
 DEBUG - NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/sample/flood_gun_current_env/flood_gun/current@units)
-DEBUG - value: A 
+DEBUG - value: A
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator']
 DEBUG - NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/sample/flood_gun_current_env/flood_gun/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: FG 22/35 
+DEBUG - value: FG 22/35
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXactuator.nxdl.xml:/name
@@ -9337,7 +9337,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Survey/sample/flood_gun_current_env/flood_gun/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: low energy electron source 
+DEBUG - value: low energy electron source
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXactuator.nxdl.xml:/type
@@ -9384,7 +9384,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/sample/gas_pressure_env@NX_class)
-DEBUG - value: NXenvironment 
+DEBUG - value: NXenvironment
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/gas_pressure_env
@@ -9435,7 +9435,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/sample/gas_pressure_env/pressure_gauge@NX_class)
-DEBUG - value: NXsensor 
+DEBUG - value: NXsensor
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/gas_pressure_env/pressure_gauge
@@ -9446,7 +9446,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/sample/gas_pressure_env/pressure_gauge@target)
-DEBUG - value: /Survey/instrument/pressure_gauge 
+DEBUG - value: /Survey/instrument/pressure_gauge
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/gas_pressure_env/pressure_gauge
@@ -9457,7 +9457,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/sample/gas_pressure_env/pressure_gauge/measurement): <HDF5 dataset "measurement": shape (), type "|O">
-DEBUG - value: pressure 
+DEBUG - value: pressure
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/measurement
@@ -9480,7 +9480,7 @@ DEBUG - -> surface_pressure
 DEBUG - documentation (NXsensor.nxdl.xml:/measurement):
 DEBUG - name for measured signal
 DEBUG - ===== FIELD (//Survey/sample/gas_pressure_env/pressure_gauge/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: Atmion 
+DEBUG - value: Atmion
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/name
@@ -9493,7 +9493,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Survey/sample/gas_pressure_env/pressure_gauge/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: hot-filament ionization gauge 
+DEBUG - value: hot-filament ionization gauge
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/type
@@ -9515,7 +9515,7 @@ DEBUG -
 			  wilhelmy plate
 		
 DEBUG - ===== FIELD (//Survey/sample/gas_pressure_env/pressure_gauge/value): <HDF5 dataset "value": shape (), type "<f8">
-DEBUG - value: 1e-09 
+DEBUG - value: 1.00000000e-09
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXsensor.nxdl.xml:/value
@@ -9526,7 +9526,7 @@ DEBUG -
 			- need [n] as may be a vector
 		
 DEBUG - ===== ATTRS (//Survey/sample/gas_pressure_env/pressure_gauge/value@units)
-DEBUG - value: mbar 
+DEBUG - value: mbar
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXsensor.nxdl.xml:/value
@@ -9565,7 +9565,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/sample/history@NX_class)
-DEBUG - value: NXhistory 
+DEBUG - value: NXhistory
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXhistory']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/history
@@ -9608,7 +9608,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/sample/history/sample_preparation@NX_class)
-DEBUG - value: NXactivity 
+DEBUG - value: NXactivity
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXhistory', 'NXactivity']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/history/sample_preparation
@@ -9618,7 +9618,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/sample/history/sample_preparation/description): <HDF5 dataset "description": shape (), type "|O">
-DEBUG - value: From third party 
+DEBUG - value: From third party
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXhistory', 'NXactivity', 'NX_CHAR']
 DEBUG - classes:
 NXactivity.nxdl.xml:/description
@@ -9628,7 +9628,7 @@ DEBUG -
              Short description of the activity.
         
 DEBUG - ===== FIELD (//Survey/sample/history/sample_preparation/end_time): <HDF5 dataset "end_time": shape (), type "|O">
-DEBUG - value: 2022-04-08T11:06:42.200000+00:00 
+DEBUG - value: 2022-04-08T11:06:42.200000+00:00
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXhistory', 'NXactivity', 'NX_DATE_TIME']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/history/sample_preparation/end_time
@@ -9641,7 +9641,7 @@ DEBUG -
              End time of this activity. It is recommended to include local time zone information.
         
 DEBUG - ===== FIELD (//Survey/sample/history/sample_preparation/start_time): <HDF5 dataset "start_time": shape (), type "|O">
-DEBUG - value: 2022-04-08T11:02:38.020000+00:00 
+DEBUG - value: 2022-04-08T11:02:38.020000+00:00
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXhistory', 'NXactivity', 'NX_DATE_TIME']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/history/sample_preparation/start_time
@@ -9654,7 +9654,7 @@ DEBUG -
             Start time of this activity. It is recommended to include local time zone information.
         
 DEBUG - ===== FIELD (//Survey/sample/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: Ni foil 
+DEBUG - value: Ni foil
 DEBUG - classpath: ['NXentry', 'NXsample', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/name
@@ -9670,7 +9670,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Survey/sample/physical_form): <HDF5 dataset "physical_form": shape (), type "|O">
-DEBUG - value: foil 
+DEBUG - value: foil
 DEBUG - classpath: ['NXentry', 'NXsample', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/physical_form
@@ -9684,7 +9684,7 @@ DEBUG -
 			Examples include single crystal, foil, pellet, powder, thin film, disc, foam, gas, liquid, amorphous.
 		
 DEBUG - ===== FIELD (//Survey/sample/situation): <HDF5 dataset "situation": shape (), type "|O">
-DEBUG - value: vacuum 
+DEBUG - value: vacuum
 DEBUG - classpath: ['NXentry', 'NXsample', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/situation
@@ -9738,7 +9738,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/sample/temperature_env@NX_class)
-DEBUG - value: NXenvironment 
+DEBUG - value: NXenvironment
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/temperature_env
@@ -9788,7 +9788,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/sample/temperature_env/sample_heater@NX_class)
-DEBUG - value: NXactuator 
+DEBUG - value: NXactuator
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/temperature_env/sample_heater
@@ -9799,7 +9799,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/sample/temperature_env/sample_heater@target)
-DEBUG - value: /Survey/instrument/manipulator/sample_heater 
+DEBUG - value: /Survey/instrument/manipulator/sample_heater
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/temperature_env/sample_heater
@@ -9810,7 +9810,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/sample/temperature_env/sample_heater/actuation_target): <HDF5 dataset "actuation_target": shape (), type "|O">
-DEBUG - value: temperature 
+DEBUG - value: temperature
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXactuator.nxdl.xml:/actuation_target
@@ -9822,7 +9822,7 @@ DEBUG -
              For example, this could be an instance of NXsample or a device on NXinstrument.
         
 DEBUG - ===== FIELD (//Survey/sample/temperature_env/sample_heater/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: Coherent Compact Evolution IR Diode LASER (DILAS) 
+DEBUG - value: Coherent Compact Evolution IR Diode LASER (DILAS)
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXactuator.nxdl.xml:/name
@@ -9837,7 +9837,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Survey/sample/temperature_env/sample_heater/output_heater_power): <HDF5 dataset "output_heater_power": shape (), type "<f8">
-DEBUG - value: 0.0 
+DEBUG - value: 0.0
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator', 'NX_NUMBER']
 DEBUG - classes:
 NXactuator.nxdl.xml:/outputVALUE
@@ -9848,13 +9848,13 @@ DEBUG -
              For example, a heater can have the field output_power(NX_NUMBER).
         
 DEBUG - ===== ATTRS (//Survey/sample/temperature_env/sample_heater/output_heater_power@units)
-DEBUG - value: W 
+DEBUG - value: W
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator', 'NX_NUMBER']
 DEBUG - classes:
 NXactuator.nxdl.xml:/outputVALUE
 DEBUG - NXactuator.nxdl.xml:/outputVALUE@units [NX_ANY]
 DEBUG - ===== FIELD (//Survey/sample/temperature_env/sample_heater/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: IR diode laser 
+DEBUG - value: IR diode laser
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXactuator', 'NX_CHAR']
 DEBUG - classes:
 NXactuator.nxdl.xml:/type
@@ -9910,7 +9910,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/sample/temperature_env/temperature_sensor@NX_class)
-DEBUG - value: NXsensor 
+DEBUG - value: NXsensor
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/temperature_env/temperature_sensor
@@ -9921,7 +9921,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== ATTRS (//Survey/sample/temperature_env/temperature_sensor@target)
-DEBUG - value: /Survey/instrument/manipulator/temperature_sensor 
+DEBUG - value: /Survey/instrument/manipulator/temperature_sensor
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/SAMPLE/temperature_env/temperature_sensor
@@ -9932,7 +9932,7 @@ NXobject.nxdl.xml:
 DEBUG - @target - IS NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/sample/temperature_env/temperature_sensor/attached_to): <HDF5 dataset "attached_to": shape (), type "|O">
-DEBUG - value: sample 
+DEBUG - value: sample
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/attached_to
@@ -9940,7 +9940,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXsensor.nxdl.xml:/attached_to):
 DEBUG - where sensor is attached to ("sample" | "can")
 DEBUG - ===== FIELD (//Survey/sample/temperature_env/temperature_sensor/measurement): <HDF5 dataset "measurement": shape (), type "|O">
-DEBUG - value: temperature 
+DEBUG - value: temperature
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/measurement
@@ -9963,7 +9963,7 @@ DEBUG - -> surface_pressure
 DEBUG - documentation (NXsensor.nxdl.xml:/measurement):
 DEBUG - name for measured signal
 DEBUG - ===== FIELD (//Survey/sample/temperature_env/temperature_sensor/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: type K thermocouple 
+DEBUG - value: type K thermocouple
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/name
@@ -9976,7 +9976,7 @@ DEBUG -
             Name of the component.
         
 DEBUG - ===== FIELD (//Survey/sample/temperature_env/temperature_sensor/type): <HDF5 dataset "type": shape (), type "|O">
-DEBUG - value: type K thermocouple 
+DEBUG - value: type K thermocouple
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_CHAR']
 DEBUG - classes:
 NXsensor.nxdl.xml:/type
@@ -9998,7 +9998,7 @@ DEBUG -
 			  wilhelmy plate
 		
 DEBUG - ===== FIELD (//Survey/sample/temperature_env/temperature_sensor/value): <HDF5 dataset "value": shape (), type "<f8">
-DEBUG - value: 298.0 
+DEBUG - value: 298
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXsensor.nxdl.xml:/value
@@ -10009,13 +10009,13 @@ DEBUG -
 			- need [n] as may be a vector
 		
 DEBUG - ===== ATTRS (//Survey/sample/temperature_env/temperature_sensor/value@units)
-DEBUG - value: K 
+DEBUG - value: K
 DEBUG - classpath: ['NXentry', 'NXsample', 'NXenvironment', 'NXsensor', 'NX_FLOAT']
 DEBUG - classes:
 NXsensor.nxdl.xml:/value
 DEBUG - NXsensor.nxdl.xml:/value@units [NX_ANY]
 DEBUG - ===== FIELD (//Survey/start_time): <HDF5 dataset "start_time": shape (), type "|O">
-DEBUG - value: 2022-04-08T11:47:02.020000+00:00 
+DEBUG - value: 2022-04-08T11:47:02.020000+00:00
 DEBUG - classpath: ['NXentry', 'NX_DATE_TIME']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/start_time
@@ -10030,7 +10030,7 @@ DEBUG -
 DEBUG - documentation (NXentry.nxdl.xml:/start_time):
 DEBUG - Starting time of measurement
 DEBUG - ===== FIELD (//Survey/title): <HDF5 dataset "title": shape (), type "|O">
-DEBUG - value: XPS Experiment 
+DEBUG - value: XPS Experiment
 DEBUG - classpath: ['NXentry', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/title
@@ -10074,7 +10074,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/user@NX_class)
-DEBUG - value: NXuser 
+DEBUG - value: NXuser
 DEBUG - classpath: ['NXentry', 'NXuser']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/USER
@@ -10084,7 +10084,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/user/affiliation): <HDF5 dataset "affiliation": shape (), type "|O">
-DEBUG - value: Max Planck Institute for Chemical Energy Conversion 
+DEBUG - value: Max Planck Institute for Chemical Energy Conversion
 DEBUG - classpath: ['NXentry', 'NXuser', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/USER/affiliation
@@ -10098,7 +10098,7 @@ DEBUG -
 DEBUG - documentation (NXuser.nxdl.xml:/affiliation):
 DEBUG - Affiliation of user
 DEBUG - ===== FIELD (//Survey/user/email): <HDF5 dataset "email": shape (), type "|O">
-DEBUG - value: lukas.pielsticker@cec.mpg.de 
+DEBUG - value: lukas.pielsticker@cec.mpg.de
 DEBUG - classpath: ['NXentry', 'NXuser', 'NX_CHAR']
 DEBUG - classes:
 NXuser.nxdl.xml:/email
@@ -10106,7 +10106,7 @@ DEBUG - <<OPTIONAL>>
 DEBUG - documentation (NXuser.nxdl.xml:/email):
 DEBUG - Email of user
 DEBUG - ===== FIELD (//Survey/user/identifier): <HDF5 dataset "identifier": shape (), type "|O">
-DEBUG - value: 0000-0001-9361-8333 
+DEBUG - value: 0000-0001-9361-8333
 DEBUG - classpath: ['NXentry', 'NXuser', 'NX_CHAR']
 DEBUG - classes:
 NXobject.nxdl.xml:/identifierNAME
@@ -10124,7 +10124,7 @@ DEBUG -
 			Persistent identifiers are also known as PIDs.
 		
 DEBUG - ===== FIELD (//Survey/user/name): <HDF5 dataset "name": shape (), type "|O">
-DEBUG - value: Lukas Pielsticker 
+DEBUG - value: Lukas Pielsticker
 DEBUG - classpath: ['NXentry', 'NXuser', 'NX_CHAR']
 DEBUG - classes:
 NXmpes.nxdl.xml:/ENTRY/USER/name
@@ -10286,7 +10286,7 @@ DEBUG -
         respectively) that exists within the same group.
 	
 DEBUG - ===== ATTRS (//Survey/xps_coordinate_system@NX_class)
-DEBUG - value: NXcoordinate_system 
+DEBUG - value: NXcoordinate_system
 DEBUG - classpath: ['NXentry', 'NXcoordinate_system']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/xps_coordinate_system
@@ -10296,7 +10296,7 @@ NXobject.nxdl.xml:
 DEBUG - @NX_class [NX_CHAR]
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/xps_coordinate_system/depends_on): <HDF5 dataset "depends_on": shape (), type "|O">
-DEBUG - value: /entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation 
+DEBUG - value: /entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation
 DEBUG - classpath: ['NXentry', 'NXcoordinate_system', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/depends_on
@@ -10314,12 +10314,12 @@ DEBUG -
             transformation in the transformation chain in the NXtransformations group.
         
 DEBUG - ===== FIELD (//Survey/xps_coordinate_system/handedness): <HDF5 dataset "handedness": shape (), type "|O">
-DEBUG - value: left_handed 
+DEBUG - value: left_handed
 DEBUG - classpath: ['NXentry', 'NXcoordinate_system']
 DEBUG - NOT IN SCHEMA
 DEBUG - 
 DEBUG - ===== FIELD (//Survey/xps_coordinate_system/origin): <HDF5 dataset "origin": shape (), type "|O">
-DEBUG - value: sample stage 
+DEBUG - value: sample stage
 DEBUG - classpath: ['NXentry', 'NXcoordinate_system', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/origin
@@ -10337,7 +10337,7 @@ DEBUG -
             *barycenter of the triangle*, *center of mass of the stone*.
         
 DEBUG - ===== FIELD (//Survey/xps_coordinate_system/x): <HDF5 dataset "x": shape (3,), type "<i8">
-DEBUG - value: [-1  0  0] 
+DEBUG - value: [-1, 0, 0]
 DEBUG - classpath: ['NXentry', 'NXcoordinate_system', 'NX_NUMBER']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/x
@@ -10357,7 +10357,7 @@ DEBUG -
             independent vectors that span the vector space.
         
 DEBUG - ===== ATTRS (//Survey/xps_coordinate_system/x@units)
-DEBUG - value: m 
+DEBUG - value: m
 DEBUG - classpath: ['NXentry', 'NXcoordinate_system', 'NX_NUMBER']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/x
@@ -10365,7 +10365,7 @@ NXcoordinate_system.nxdl.xml:/x
 DEBUG - NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/x@units - REQUIRED, but undefined unit category
 DEBUG - NXcoordinate_system.nxdl.xml:/x@units [NX_LENGTH]
 DEBUG - ===== FIELD (//Survey/xps_coordinate_system/y): <HDF5 dataset "y": shape (3,), type "<i8">
-DEBUG - value: [0 1 0] 
+DEBUG - value: [0, 1, 0]
 DEBUG - classpath: ['NXentry', 'NXcoordinate_system', 'NX_NUMBER']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/y
@@ -10382,7 +10382,7 @@ DEBUG -
             the j-axis in reciprocal space.
         
 DEBUG - ===== ATTRS (//Survey/xps_coordinate_system/y@units)
-DEBUG - value: m 
+DEBUG - value: m
 DEBUG - classpath: ['NXentry', 'NXcoordinate_system', 'NX_NUMBER']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/y
@@ -10390,7 +10390,7 @@ NXcoordinate_system.nxdl.xml:/y
 DEBUG - NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/y@units - REQUIRED, but undefined unit category
 DEBUG - NXcoordinate_system.nxdl.xml:/y@units [NX_LENGTH]
 DEBUG - ===== FIELD (//Survey/xps_coordinate_system/z): <HDF5 dataset "z": shape (3,), type "<i8">
-DEBUG - value: [0 0 1] 
+DEBUG - value: [0, 0, 1]
 DEBUG - classpath: ['NXentry', 'NXcoordinate_system', 'NX_NUMBER']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/z
@@ -10407,7 +10407,7 @@ DEBUG -
             the k-axis in reciprocal space.
         
 DEBUG - ===== ATTRS (//Survey/xps_coordinate_system/z@units)
-DEBUG - value: m 
+DEBUG - value: m
 DEBUG - classpath: ['NXentry', 'NXcoordinate_system', 'NX_NUMBER']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/z
@@ -10415,7 +10415,7 @@ NXcoordinate_system.nxdl.xml:/z
 DEBUG - NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/z@units - REQUIRED, but undefined unit category
 DEBUG - NXcoordinate_system.nxdl.xml:/z@units [NX_LENGTH]
 DEBUG - ===== FIELD (//Survey/xps_coordinate_system/z_direction): <HDF5 dataset "z_direction": shape (), type "|O">
-DEBUG - value: sample stage normal 
+DEBUG - value: sample stage normal
 DEBUG - classpath: ['NXentry', 'NXcoordinate_system', 'NX_CHAR']
 DEBUG - classes:
 NXxps.nxdl.xml:/ENTRY/xps_coordinate_system/z_direction
@@ -10442,22 +10442,22 @@ DEBUG -
 DEBUG - NXdata group has been identified: /Survey/data
 DEBUG - ===== GROUP (//Survey/data [NXxps::/NXentry/NXdata]): <HDF5 group "/Survey/data" (4 members)>
 DEBUG - ===== ATTRS (//Survey/data@NX_class)
-DEBUG - value: NXdata 
+DEBUG - value: NXdata
 DEBUG - ===== ATTRS (//Survey/data@axes)
-DEBUG - value: ['energy'] 
+DEBUG - value: [energy]
 DEBUG - ===== ATTRS (//Survey/data@energy_indices)
-DEBUG - value: 0 
+DEBUG - value: 0
 DEBUG - ===== ATTRS (//Survey/data@signal)
-DEBUG - value: data 
+DEBUG - value: data
 DEBUG - 
 DEBUG - Signal has been identified: /Survey/data/data
 DEBUG - ===== FIELD (//Survey/data/data): <HDF5 dataset "data": shape (1201,), type "<f8">
-DEBUG - value: [40256.   40552.2  40764.   ...  9052.06  4530.62  1068.68] 
+DEBUG - value: [40256, 40552.2, 40764, ..., 9052.06, 4530.62, 1068.68]
 DEBUG - Dataset referenced as NXdata SIGNAL
 DEBUG - ===== ATTRS (//Survey/data/data@long_name)
-DEBUG - value: intensity 
+DEBUG - value: intensity
 DEBUG - Dataset referenced as NXdata SIGNAL
 DEBUG - ===== ATTRS (//Survey/data/data@units)
-DEBUG - value: counts_per_second 
+DEBUG - value: counts_per_second
 DEBUG - 
 DEBUG - For Axis #0, 1 axes have been identified: [<HDF5 dataset "energy": shape (1201,), type "<f8">]

@@ -1,6 +1,6 @@
 # Data from Phi VersaProbe 4 instruments
 
-The reader supports [Phi MultiPak](https://www.phi.com/surface-analysis-equipment/genesis.html#software:multi-pak-data-reduction-software/) .spe (single spectra) and .pro (sputter profile / external parameter scan / ....) files, which is the propietary format of PHI Electronics used for their VersaProbe 4 instrumens. The Phi MultiPak software version that was used to measure this data is SS 3.3.3.2.1. 
+The reader supports [Phi MultiPak](https://www.phi.com/surface-analysis-equipment/genesis.html#software:multi-pak-data-reduction-software/) .spe (single spectra) and .pro (sputter profile / external parameter scan / ....) files, which is the proprietary format of PHI Electronics used for their VersaProbe 4 instruments. The Phi MultiPak software version that was used to measure this data is SS 3.3.3.2.1. 
 
 <!-- How is this data structured -->
 

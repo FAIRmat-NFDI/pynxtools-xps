@@ -14,7 +14,7 @@ You will have to write a new sub-reader inside pynxtools-xps. There are multiple
 
 ### Development install
 
-You should start with an devlopment install of the package with its dependencies:
+You should start with a development install of the package with its dependencies:
 
 ```shell
 git clone https://github.com/FAIRmat-NFDI/pynxtools-xps.git \\
@@ -27,7 +27,7 @@ python -m pip install -e ".[dev,consistency_with_pynxtools]"
 ```
 
 There is also a [pre-commit hook](https://pre-commit.com/#intro) available
-which formats the code and checks the linting before actually commiting.
+which formats the code and checks the linting before actually committing.
 It can be installed with
 ```shell
 pre-commit install

@@ -1,2 +1,34 @@
 # Custom Dictionary Words
 
+Brockhauser
+Dobener
+Florian
+HHTP
+Hetaba
+Kratos
+Laurenz
+Lukas
+Mozumder
+NFDI
+Nefedov
+PBTTT
+Pielsticker
+RDMS
+Rettig
+Sandor
+Sann
+Scienta
+Tougaard
+VAMAS
+Walid
+Zenodo
+dataconverter
+gltf
+lineshapes
+mpes
+orcid
+pynxtools
+scienta
+unfindable
+zenodo
+

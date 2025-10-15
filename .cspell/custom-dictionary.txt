@@ -1,10 +1,11 @@
 # Custom Dictionary Words
-
 Brockhauser
 Dobener
 Florian
+Forschungsgemeinschaft
 Gießen
 HHTP
+Justus
 Hetaba
 Kratos
 Laurenz
@@ -20,6 +21,7 @@ Sandor
 Sann
 Scienta
 Tougaard
+Universität
 VAMAS
 Walid
 Zenodo
@@ -32,4 +34,3 @@ pynxtools
 scienta
 unfindable
 zenodo
-

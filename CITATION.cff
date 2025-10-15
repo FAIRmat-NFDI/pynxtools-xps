@@ -35,7 +35,7 @@ keywords:
 abstract:
   pynxtools-xps is a reader plugin for pynxtools (https://github.com/FAIRmat-NFDI/pynxtools)
   written in Python. pynxtools-xps is a tool for reading and translating data from various
-  propietary and open data formats from technology partners and the wider X-ray photoelectron spectroscopy
+  proprietary and open data formats from technology partners and the wider X-ray photoelectron spectroscopy
   community and standardizing it such that it is compliant with the NeXus application definition NXmpes and NXxps
   (https://fairmat-nfdi.github.io/nexus_definitions/).
 

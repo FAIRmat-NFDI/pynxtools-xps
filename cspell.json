@@ -22,7 +22,6 @@
     ],
     "words": [],
     "ignoreWords": [],
-    "ignoreRegExpList": ["\\bNX\\w*\\b", "https?://[\\S]+"],
-                 
+    "ignoreRegExpList": ["\\bNX\\w*\\b", "https?://[\\S]+"],      
     "language": "en-US"
 }

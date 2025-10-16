@@ -4,13 +4,13 @@ hide: toc
 
 # Documentation for pynxtools-xps
 
-pynxtools-xps is a free, and open-source data software for harmonizing X-ray photolectron spectroscopy data and metadata for research data management using [NeXus](https://www.nexusformat.org/), implemented with the goal to make scientific research data FAIR (findable, accessible, interoperable and reusable).
+pynxtools-xps is a free, and open-source data software for harmonizing X-ray photoelectron spectroscopy data and metadata for research data management using [NeXus](https://www.nexusformat.org/), implemented with the goal to make scientific research data FAIR (findable, accessible, interoperable and reusable).
 
-pynxtools-xps, which is a plugin for [pynxtools](https://github.com/FAIRmat-NFDI/pynxtools), provides a tool for reading data from various propietary and open data formats from technology partners and the wider XPS community and standardizing it such that it is compliant with the NeXus application definition [`NXmpes`](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXmpes.html) and [`NXxps`](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXxps.html), which is an extension of `NXmpes`. pynxtools-xps is developed both as a standalone reader and as a tool within [NOMAD](https://nomad-lab.eu/), which is the open-source data management platform for materials science we are developing with [FAIRmat](https://www.fairmat-nfdi.eu/fairmat/).
+pynxtools-xps, which is a plugin for [pynxtools](https://github.com/FAIRmat-NFDI/pynxtools), provides a tool for reading data from various proprietary and open data formats from technology partners and the wider XPS community and standardizing it such that it is compliant with the NeXus application definition [`NXmpes`](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXmpes.html) and [`NXxps`](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXxps.html), which is an extension of `NXmpes`. pynxtools-xps is developed both as a standalone reader and as a tool within [NOMAD](https://nomad-lab.eu/), which is the open-source data management platform for materials science we are developing with [FAIRmat](https://www.fairmat-nfdi.eu/fairmat/).
 
 pynxtools-xps solves the challenge of using heterogeneous and unfindable data formats which is common in X-ray Photoelectron Spectroscopy. In addition, it provides an interface for writing readers for different file formats to be mapped to NeXus.
 
-pynxtools-xps is useful for scientists from the XPS community that deal with heterogeneous data, for technology partners and data providers looking for ways to make their data FAIRer, and for research groups that want to organize thier data using NeXus and NOMAD.
+pynxtools-xps is useful for scientists from the XPS community that deal with heterogeneous data, for technology partners and data providers looking for ways to make their data FAIRer, and for research groups that want to organize their data using NeXus and NOMAD.
 
 <div markdown="block" class="home-grid">
 <div markdown="block"> 
@@ -59,8 +59,8 @@ The reader decides which data parser to use based on the file extension of the f
 
 - .ibw: [Igor Binary Wave Format](https://www.wavemetrics.com/) files, exported from [Scienta Omicron](https://scientaomicron.com/en)
 - .npl: VAMAS files, ISO standard data transfer format ([ISO 14976](https://www.iso.org/standard/24269.html)), both in regular and irregular format
-- .spe, .pro: [Phi MultiPak](https://www.phi.com/surface-analysis-equipment/genesis.html#software:multi-pak-data-reduction-software/) files, propietary format of PHI Electronics
-- .sle: [SpecsLabProdigy](https://www.specs-group.com/nc/specs/products/detail/prodigy/) files, propietary format of SPECS GmbH (1 and v4)
+- .spe, .pro: [Phi MultiPak](https://www.phi.com/surface-analysis-equipment/genesis.html#software:multi-pak-data-reduction-software/) files, proprietary format of PHI Electronics
+- .sle: [SpecsLabProdigy](https://www.specs-group.com/nc/specs/products/detail/prodigy/) files, proprietary format of SPECS GmbH (1 and v4)
 - .xml: SpecsLab 2files, XML format from SPECS GmbH (v1.6)
 - .vms: VAMAS files, ISO standard data transfer format ([ISO 14976](https://www.iso.org/standard/24269.html)), both in regular and irregular format
 - .xy: SpecsLabProdigy export format in XY format (including all export settings)

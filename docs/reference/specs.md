@@ -1,6 +1,6 @@
 # Data from SPECS instruments
 
-The reader supports [SpecsLabProdigy](https://www.specs-group.com/nc/specs/products/detail/prodigy/) files, which is the propietary format of SPECS GmbH. Currently, the following file extensions are supported:
+The reader supports [SpecsLabProdigy](https://www.specs-group.com/nc/specs/products/detail/prodigy/) files, which is the proprietary format of SPECS GmbH. Currently, the following file extensions are supported:
 
 - .sle: [SpecsLabProdigy](https://www.specs-group.com/nc/specs/products/detail/prodigy/) file software version: v1.6, >v4)
 - .xml: SpecsLab 2files, XML format from SPECS GmbH (software version: v4.63 tested, other versions also work)

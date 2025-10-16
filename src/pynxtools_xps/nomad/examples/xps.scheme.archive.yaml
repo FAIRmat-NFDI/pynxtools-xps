@@ -1,7 +1,9 @@
 definitions:
-  name: XPS ELN data schema
+  name: 'XPS_ELN_Example'
+  eln:
+    label: 'XPS ELN Example'
   sections:
-    ELN for XPS:
+    ELN_for_XPS:
       base_sections:
       - pynxtools.nomad.dataconverter.ElnYamlConverter
       - nomad.datamodel.data.EntryData
@@ -11,6 +13,7 @@ definitions:
           nxdl: NXmpes
         eln:
           hide: []
+          label: 'ELN for XPS'
       quantities:
         title:
           type: str
@@ -96,7 +99,7 @@ definitions:
                 m_annotations:
                   eln:
                     component: StringEditQuantity
-                description: 'ORCID identifier of the user.'              
+                description: 'ORCID identifier of the user.'
         instrument:
           section:
             m_annotations:

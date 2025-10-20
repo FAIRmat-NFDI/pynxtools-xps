@@ -33,7 +33,10 @@ from pynxtools_xps.vms.vamas_comment_handler import handle_comments
 READER_NAME = "xps"
 READER_CLASS = get_reader(READER_NAME)
 # TODO: make tests for all supported application definitions possible
-NXDLS = ["NXxps"]  # READER_CLASS.supported_nxdls
+NXDLS = READER_CLASS.supported_nxdls
+caplog_level = "WARNING"
+ignore_undocumented = True
+
 
 test_cases = [
     ("phi_spe", "phi-spe-reader", {}),
@@ -62,18 +65,34 @@ test_params = []
 for test_case in test_cases:
     # ToDo: make tests for all supported appdefs possible
     for nxdl in NXDLS:
+        ref_log_file = f"{test_case[0]}_{nxdl.lower()}_ref.log"
         test_params += [
             pytest.param(
-                nxdl, test_case[0], test_case[2], id=f"{test_case[1]}-{nxdl.lower()}"
+                nxdl, test_case[0], ref_log_file, id=f"{test_case[1]}-{nxdl.lower()}"
             )
         ]
 
+# ToDo: make tests for all supported appdefs possible
+test_params = [
+    pytest.param(
+        nxdl,
+        test_case[0],
+        f"{test_case[0]}_{nxdl.lower()}_ref.log",
+        test_case[2],
+        id=f"{test_case[1]}-{nxdl}",
+    )
+    for test_case in test_cases
+    for nxdl in READER_CLASS.supported_nxdls
+]
+
 
 @pytest.mark.parametrize(
-    "nxdl, sub_reader_data_dir, ignore_sections",
+    "nxdl, sub_reader_data_dir, ref_log_file, ignore_sections",
     test_params,
 )
-def test_nexus_conversion(nxdl, sub_reader_data_dir, ignore_sections, tmp_path, caplog):
+def test_nexus_conversion(
+    nxdl, sub_reader_data_dir, ref_log_file, ignore_sections, tmp_path, caplog
+):
     """
     Test XPS reader
 
@@ -86,6 +105,9 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, ignore_sections, tmp_path, 
         Test data directory that contains all the files required for running the data
         conversion through one of the sub-readers. All of these data dirs
         are placed within tests/data/...
+    ref_log_file: str
+            Full path string to the reference log file generated from the same
+            set of input files.
     ignore_sections: Dict[str, List[str]]
         Subsections of the log file to ignore.
     tmp_path : pathlib.PosixPath
@@ -108,15 +130,24 @@ def test_nexus_conversion(nxdl, sub_reader_data_dir, ignore_sections, tmp_path, 
         *[os.path.dirname(__file__), "data", sub_reader_data_dir]
     )
 
+    ref_log_path = os.path.join(files_or_dir, ref_log_file)
+
     test = ReaderTest(
         nxdl=nxdl,
         reader_name=READER_NAME,
         files_or_dir=files_or_dir,
         tmp_path=tmp_path,
         caplog=caplog,
+        ref_log_path=ref_log_path,
     )
-    test.convert_to_nexus(caplog_level="WARNING", ignore_undocumented=True)
+    test.convert_to_nexus(
+        caplog_level=caplog_level, ignore_undocumented=ignore_undocumented
+    )
+    test.validate_nexus_file(
+        caplog_level=caplog_level, ignore_undocumented=ignore_undocumented
+    )
     test.check_reproducibility_of_nexus(ignore_sections=ignore_sections)
+    test.parse_nomad()
 
 
 def read_comment_file(filepath: str):

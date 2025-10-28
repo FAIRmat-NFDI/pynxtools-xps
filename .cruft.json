@@ -1,0 +1,19 @@
+{
+  "template": "git@github.com:FAIRmat-NFDI/pynxtools-plugin-template.git",
+  "commit": "8d2c3e6a1f8426c482b4e4359221ddabedb6e982",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "reader_name": "xps",
+      "supported_nxdl": "NXmpes",
+      "short_description": "A pynxtools reader plugin for X-ray photoelectron spectroscopy (XPS) data",
+      "author_name": "The NOMAD authors",
+      "author_email": "fairmat@physik.hu-berlin.de",
+      "license": "MIT",
+      "vscode_settings": "True",
+      "include_nomad_app": "False",
+      "include_nomad_example_upload": "True"
+    }
+  },
+  "directory": null
+}

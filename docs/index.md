@@ -13,7 +13,7 @@ pynxtools-xps solves the challenge of using heterogeneous and unfindable data fo
 pynxtools-xps is useful for scientists from the XPS community that deal with heterogeneous data, for technology partners and data providers looking for ways to make their data FAIRer, and for research groups that want to organize their data using NeXus and NOMAD.
 
 <div markdown="block" class="home-grid">
-<div markdown="block"> 
+<div markdown="block">
 
 ### Tutorial
 
@@ -23,6 +23,7 @@ A series of tutorials giving you an overview on how to store or convert your XPS
 - [Standalone usage](tutorial/standalone.md)
 - [How to use a NeXus/HDF5 file](tutorial/nexusio.md)
 - [Usage in NOMAD](tutorial/nomad.md)
+- [Development guide](tutorial/contributing.md)
 
 </div>
 <div markdown="block">
@@ -78,10 +79,16 @@ You can find more information regarding the readers for data from different tech
 </div>
 </div>
 
+<h2> Contact </h2>
+
+For questions or suggestions:
+
+- Open an issue on the [`pynxtools-xps` GitHub](https://github.com/FAIRmat-NFDI/pynxtools-xps/issues)
+- Join our [Discord channel](https://discord.gg/Gyzx3ukUw8)
+- Get in contact with our [lead developers](contact.md).
+
 <h2>Project and community</h2>
 
-- [NOMAD code guidelines](https://nomad-lab.eu/prod/v1/staging/docs/reference/code_guidelines.html) 
-
-Any questions or suggestions? [Get in touch!](https://www.fair-di.eu/fairmat/about-fairmat/team-fairmat)
+- [NOMAD code guidelines](https://nomad-lab.eu/prod/v1/staging/docs/reference/code_guidelines.html)
 
 [The work is funded by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) - 460197019 (FAIRmat).](https://gepris.dfg.de/gepris/projekt/460197019?language=en)

@@ -30,7 +30,7 @@ repos:
           - --config
           - cspell.json
           - README.md
-          # - CITATION.cff
-          # - docs/**/*
+          - CITATION.cff
+          - docs/**/*
           # - src/pynxtools_xps/**/*.py
           # - tests/**/*.py

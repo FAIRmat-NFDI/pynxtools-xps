@@ -1,7 +1,7 @@
 site_name: Documentation for pynxtools-xps
 site_description: |
   The documentation for the pynxtools-xps plugin.
-site_author: The FAIRmat Authors
+site_author: The FAIRmat authors
 repo_url: https://github.com/FAIRmat-NFDI/pynxtools-xps
 edit_uri: ""
 
@@ -12,6 +12,7 @@ nav:
     - tutorial/standalone.md
     - tutorial/nexusio.md
     - tutorial/nomad.md
+    - tutorial/contributing.md
   - How-To Guides:
     - how-tos/build_a_reader.md
   - Explanation:
@@ -28,8 +29,6 @@ nav:
 
 plugins:
   - search
-  - macros:
-      module_name: src/pynxtools_xps/mkdocs
 
 theme:
   name: material

@@ -24,17 +24,19 @@ authors:
   - given-names: Sandor
     family-names: Brockhauser
     orcid: https://orcid.org/0000-0002-9700-4803
-doi: 10.5281/zenodo.13951684
 repository-code: https://github.com/FAIRmat-NFDI/pynxtools-xps
+doi: 10.5281/zenodo.13951684
 url: https://zenodo.org/records/13951684
 keywords:
-  - X-ray Photoelectron Spectroscopy
-  - NOMAD
-  - pynxtools
   - NeXus
+  - pynxtools
+  - NOMAD
+  - X-ray Photoelectron Spectroscopy
 abstract:
   pynxtools-xps is a reader plugin for pynxtools (https://github.com/FAIRmat-NFDI/pynxtools)
-  written in Python. pynxtools-xps is a tool for reading and translating data from various
+  written in Python.
+  
+  pynxtools-xps is a tool for reading and translating data from various
   proprietary and open data formats from technology partners and the wider X-ray photoelectron spectroscopy
   community and standardizing it such that it is compliant with the NeXus application definition NXmpes and NXxps
   (https://fairmat-nfdi.github.io/nexus_definitions/).
@@ -44,7 +46,7 @@ abstract:
 
   The work is funded by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) - 460197019 (FAIRmat)
   (https://gepris.dfg.de/gepris/projekt/460197019?language=en).
-license: Apache-2.0
+license: Apache Software License 2.0
 funding:
   - name: Deutsche Forschungsgemeinschaft
     award-number: 460197019

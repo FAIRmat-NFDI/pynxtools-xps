@@ -27,7 +27,7 @@ import re
 import struct
 import warnings
 from pathlib import Path
-from typing import Any, Union
+from typing import Any
 
 import numpy as np
 import pytz
@@ -809,9 +809,9 @@ class PhiParser:  # pylint: disable=too-few-public-methods
     def _check_encoding(self):
         """Check if the binary data is single or double encoded."""
         datasize = sum(
-            [s["spectrum_header"][8] * s["spectrum_header"][9] for s in self.spectra]
+            s["spectrum_header"][8] * s["spectrum_header"][9] for s in self.spectra
         )
-        binary_size = sum([s["spectrum_header"][-2] for s in self.spectra])
+        binary_size = sum(s["spectrum_header"][-2] for s in self.spectra)
 
         encodings_map = {
             "double": ["<d", 8],

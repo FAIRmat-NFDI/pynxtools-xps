@@ -28,7 +28,7 @@ import re
 from collections.abc import Callable, Iterable
 from pathlib import Path
 from re import Pattern
-from typing import Any, Optional, Union
+from typing import Any
 
 import numpy as np
 from pynxtools.dataconverter.helpers import extract_atom_types
@@ -687,9 +687,7 @@ class XPSReader(MultiFormatReader):
         def get_all_keys(template_key: str) -> list[str]:
             pattern = re.compile(rf"^/ENTRY\[{escaped_entry}]/{template_key}([^/]+)")
 
-            keys = set(
-                match[1] for key in self.xps_data if (match := pattern.search(key))
-            )
+            keys = {match[1] for key in self.xps_data if (match := pattern.search(key))}
 
             return sorted(keys)
 

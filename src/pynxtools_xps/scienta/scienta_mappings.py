@@ -21,7 +21,6 @@ Mappings for Scienta reader.
 
 import datetime
 import re
-from typing import Optional
 
 import numpy as np
 

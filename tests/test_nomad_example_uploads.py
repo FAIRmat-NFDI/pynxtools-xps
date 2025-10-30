@@ -15,17 +15,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Test for NOMAD examples in XPS reader plugin."""
+"""Tests for the NOMAD examples."""
 
 import os
 
 import pytest
 
 try:
-    import nomad
+    import nomad  # noqa: F401
 except ImportError:
     pytest.skip(
-        "Skipping NOMAD example tests because nomad is not installed",
+        "Skipping NOMAD example tests because nomad-lab is not installed",
         allow_module_level=True,
     )
 
@@ -35,7 +35,7 @@ from pynxtools.testing.nomad_example import (
     parse_nomad_examples,
 )
 
-from pynxtools_xps.nomad.entrypoints import xps_example
+from pynxtools_xps.nomad.example_uploads import xps_example_upload_entry_point
 
 EXAMPLE_PATH = os.path.join(
     os.path.dirname(__file__),
@@ -43,7 +43,8 @@ EXAMPLE_PATH = os.path.join(
     "src",
     "pynxtools_xps",
     "nomad",
-    "examples",
+    "example_uploads",
+    "example",
 )
 
 
@@ -60,9 +61,9 @@ def test_parse_nomad_examples(mainfile):
     ("entrypoint", "example_path"),
     [
         pytest.param(
-            xps_example,
+            xps_example_upload_entry_point,
             EXAMPLE_PATH,
-            id="xps_example",
+            id="xps_example_upload_entry_point",
         ),
     ],
 )

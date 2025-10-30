@@ -29,7 +29,7 @@ import re
 import warnings
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 
 import numpy as np
 import xarray as xr
@@ -600,13 +600,13 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
 
         for i, line in enumerate(cycle_data):
             if spec_pattern.match(line):
-                name_dict = dict(
-                    (a.strip(), int(b.strip()))
+                name_dict = {
+                    a.strip(): int(b.strip())
                     for a, b in (
                         element.split(": ")
                         for element in line.strip(self.prefix).strip().split(", ")
                     )
-                )
+                }
                 name = "".join(
                     [
                         f"{key.lower()}_{val}_"
@@ -733,10 +733,10 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
                 channel = _normalize_ext_channel_label(match.group(1))[0]
 
             if line.startswith(self.prefix) and line.strip(self.prefix).strip():
-                key, val = [
+                key, val = (
                     item.strip()
                     for item in line.strip(self.prefix).strip().split(":", 1)
-                ]
+                )
                 if key == "Acquisition Date":
                     scan_settings[key] = self._parse_datetime(val)
 

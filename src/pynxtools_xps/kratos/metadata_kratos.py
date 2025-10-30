@@ -22,7 +22,7 @@ passed to MPES nxdl (NeXus Definition Language) template.
 
 import re
 from pathlib import Path
-from typing import Any, Union
+from typing import Any
 
 from pynxtools_xps.kratos.kratos_data_model import KratosMetadata
 from pynxtools_xps.reader_utils import convert_pascal_to_snake, extract_unit

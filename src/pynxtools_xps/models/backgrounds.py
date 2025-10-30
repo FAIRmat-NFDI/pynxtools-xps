@@ -19,12 +19,11 @@ Backgrounds for peak fitting.
 """
 
 from collections.abc import Callable
-from typing import Optional, cast
+from typing import cast
 
 import numpy as np
 
 # Workaround for different functions for trapezoid in numpy
-import numpy.typing as npt
 import scipy
 
 NPTrapezoidType = Callable[..., np.typing.NDArray[np.float64]]

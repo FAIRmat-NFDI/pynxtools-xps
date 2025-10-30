@@ -46,7 +46,7 @@ def _extract_energy_units(energy_units: str) -> str:
 
 def _separate_dimension_scale(scale: str) -> np.typing.ArrayLike:
     """
-    Seperate the str of the dimension scale into a numpy array
+    Separate the str of the dimension scale into a numpy array
 
     Parameters
     ----------

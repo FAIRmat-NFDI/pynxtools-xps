@@ -32,5 +32,5 @@ repos:
           - README.md
           - CITATION.cff
           - docs/**/*
-          # - src/pynxtools_xps/**/*.py
-          # - tests/**/*.py
+          - src/pynxtools_xps/**/*.py
+          - tests/**/*.py

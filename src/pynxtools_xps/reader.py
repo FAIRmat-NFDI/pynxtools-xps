@@ -72,7 +72,7 @@ SCAN_COUNT = "_scan"
 
 
 def _get_channel_vars(data_vars: list[str]) -> list[str]:
-    """Get all data vars that containt _chan."""
+    """Get all data vars that contain _chan."""
     return [data_var for data_var in data_vars if CHAN_COUNT in data_var]
 
 
@@ -157,13 +157,13 @@ class XPSReader(MultiFormatReader):
 
     __prmt_metadata_file_ext__: dict[str, str] = {".csv": ".txt"}
 
-    __vendors__: list[str] = ["kratos", "phi", "scienta", "specs", "unkwown"]
-    __prmt_vndr_cls: dict[str, dict[str, Any]] = {
+    __vendors__: list[str] = ["kratos", "phi", "scienta", "specs", "unknown"]
+    __prmt_vendor_cls: dict[str, dict[str, Any]] = {
         ".csv": {"unknown": CsvMapperVamasResult},
         ".h5": {"scienta": MapperScienta},
         ".hdf5": {"scienta": MapperScienta},
         ".ibw": {"scienta": MapperScienta},
-        ".npl": {"unkwown": VamasMapper},
+        ".npl": {"unknown": VamasMapper},
         ".pro": {"phi": MapperPhi},
         ".spe": {"phi": MapperPhi},
         ".sle": {"specs": SleMapperSpecs},
@@ -171,7 +171,7 @@ class XPSReader(MultiFormatReader):
             "scienta": MapperScienta,
             "unknown": TxtMapperVamasExport,
         },
-        ".vms": {"unkwown": VamasMapper},
+        ".vms": {"unknown": VamasMapper},
         ".xml": {"specs": XmlMapperSpecs},
         ".xy": {"specs": XyMapperSpecs},
     }
@@ -181,7 +181,7 @@ class XPSReader(MultiFormatReader):
         f"data files: {__prmt_file_ext__}, metadata files: {__prmt_metadata_file_ext__}."
     )
 
-    __vndr_err_msg__: str = (
+    __vendor_err_msg__: str = (
         f"Need an XPS data file from one of the following vendors: {__vendors__}"
     )
 
@@ -304,13 +304,13 @@ class XPSReader(MultiFormatReader):
             """
             _, file_ext = os.path.splitext(file_path)
 
-            vendor_dict = XPSReader.__prmt_vndr_cls[file_ext]
+            vendor_dict = XPSReader.__prmt_vendor_cls[file_ext]
 
             if len(vendor_dict) == 1:
                 return list(vendor_dict.keys())[0]
             if file_ext == ".txt":
                 return _check_for_vendors_txt(file_path)
-            raise ValueError(XPSReader.__vndr_err_msg__)
+            raise ValueError(XPSReader.__vendor_err_msg__)
 
         def _check_for_vendors_txt(file_path: str) -> str:
             """
@@ -322,7 +322,7 @@ class XPSReader(MultiFormatReader):
                 str: vendor (str): Vendor name if that name is in the txt file or "unknown"
 
             """
-            vendor_dict = XPSReader.__prmt_vndr_cls[".txt"]
+            vendor_dict = XPSReader.__prmt_vendor_cls[".txt"]
 
             with open(file_path, encoding="utf-8") as txt_file:
                 contents = txt_file.read()
@@ -343,7 +343,7 @@ class XPSReader(MultiFormatReader):
         if file_ext in XPSReader.__prmt_file_ext__:
             vendor = _check_for_vendors(file_path)
 
-            parser = XPSReader.__prmt_vndr_cls[file_ext][vendor]()
+            parser = XPSReader.__prmt_vendor_cls[file_ext][vendor]()
             parser.parse_file(file_path, **self.kwargs)
             data_dict = parser.data_dict
 
@@ -362,7 +362,7 @@ class XPSReader(MultiFormatReader):
         elif file_ext in XPSReader.__prmt_metadata_file_ext__:
             vendor = _check_for_vendors(file_path)
 
-            metadata_parser = XPSReader.__prmt_vndr_cls[file_ext][vendor]()
+            metadata_parser = XPSReader.__prmt_vendor_cls[file_ext][vendor]()
             metadata_parser.parse_file(file_path, **self.kwargs)
 
             main_file_ext = XPSReader.__prmt_metadata_file_ext__[file_ext]
@@ -505,7 +505,7 @@ class XPSReader(MultiFormatReader):
     def _get_analyzer_names(self) -> list[str]:
         """
         Returns a list of analyzer names which should be constructed
-        from the data. Defaults to creating a single analyer named
+        from the data. Defaults to creating a single analyzer named
         "analyzer".
 
         Currently, this is not used, but can be changed if there are
@@ -546,7 +546,7 @@ class XPSReader(MultiFormatReader):
         Check if there are multiple of some class and, if so, change the
         keys and values in the config file.
 
-        This replaces all occureces of "detector" and "electronanalyzer"
+        This replaces all occurences of "detector" and "electronanalyzer"
         in the config dict by the respective names (e.g., detector0, detector1)
         and removes the generic term if there are multiple different instances.
 

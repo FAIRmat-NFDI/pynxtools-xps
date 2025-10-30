@@ -21,8 +21,8 @@ jobs:
         cspell --config cspell.json \
         "README.md" "CITATION.cff" \
         "docs/**/*" \
-        "src/pynxtools_xps/**/.py" \
-        "tests/**/.py"
+        "src/pynxtools_xps/**/*.py" \
+        "tests/**/*.py"
 
     - name: Fail on errors
       run: |

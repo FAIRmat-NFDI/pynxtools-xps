@@ -199,7 +199,7 @@ cython_debug/
 *.txt
 build/
 .python-version
-
+!.cspell/custom-dictionary.txt
 !examples/scienta/txt/Cu-*.txt
 !examples/vms/vms_txt_export.txt
 !tests/data/scienta_txt/Ag_*.txt

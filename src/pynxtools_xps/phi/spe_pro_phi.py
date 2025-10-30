@@ -912,24 +912,24 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         """
 
-        def shorten_supkey(supkey: str):
+        def shorten_sup_key(sup_key: str):
             """Shorted the key for some nested dicts."""
             shortened_key_map = {
                 "xray_source": "xray",
                 "xray_settings": "xray",
                 "stage_positions": "stage",
             }
-            if supkey in shortened_key_map:
-                return shortened_key_map[supkey]
-            return supkey
+            if sup_key in shortened_key_map:
+                return shortened_key_map[sup_key]
+            return sup_key
 
         flattened_dict = {}
 
         for key, value in self.metadata.dict().items():
             if isinstance(value, dict):
-                for subkey, subvalue in value.items():
-                    supkey = shorten_supkey(key)
-                    flattened_dict[f"{supkey}_{subkey}"] = subvalue
+                for sub_key, sub_value in value.items():
+                    sup_key = shorten_sup_key(key)
+                    flattened_dict[f"{sup_key}_{sub_key}"] = sub_value
             else:
                 flattened_dict[key] = value
 

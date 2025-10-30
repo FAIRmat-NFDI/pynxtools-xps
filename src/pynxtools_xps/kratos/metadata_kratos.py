@@ -212,8 +212,8 @@ class KratosParser:
 
         for key, value in self.metadata.dict().items():
             if isinstance(value, dict):
-                for subkey, subvalue in value.items():
-                    flattened_dict[f"{key}_{subkey}"] = subvalue
+                for sub_key, sub_value in value.items():
+                    flattened_dict[f"{key}_{sub_key}"] = sub_value
             else:
                 flattened_dict[key] = value
                 setup_unit(flattened_dict, key)

@@ -354,7 +354,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
         header, data = self._separate_header()
         self.export_settings = self._parse_export_settings(header)
 
-        # Recursively read XPS data from flar 'lines' list.
+        # Recursively read XPS data from flat 'lines' list.
         groups = self._handle_groups(data)
 
         return self._flatten_dict(groups)
@@ -886,7 +886,7 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
     def _parse_datetime(self, date: str) -> str:
         """
         Parse datetime into a datetime.datetime object and return a
-        sring value in ISO format.
+        string value in ISO format.
 
         Parameters
         ----------

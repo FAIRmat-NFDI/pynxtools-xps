@@ -597,7 +597,7 @@ class TextParserColumns(TextParser):
                 for name in names:
                     if (
                         not any(
-                            subdict.get("name") == name for subdict in data.values()
+                            sub_dict.get("name") == name for sub_dict in data.values()
                         )
                         and "CPS" not in name
                     ):
@@ -626,8 +626,8 @@ class TextParserColumns(TextParser):
                 lineshape_in = []
                 for name, value in zip(new_names, values):
                     matching_key = name
-                    for key, subdict in data.items():
-                        if subdict.get("name") == name:
+                    for key, sub_dict in data.items():
+                        if sub_dict.get("name") == name:
                             matching_key = key
                             break
 
@@ -637,20 +637,20 @@ class TextParserColumns(TextParser):
                     else:
                         data[matching_key]["data_cps"].append(_format_value(value))
         flattened = {}
-        for i, (supkey, subdict) in enumerate(data.items()):
-            for subkey, value in subdict.items():
-                if supkey == value:
+        for i, (sup_key, sub_dict) in enumerate(data.items()):
+            for sub_key, value in sub_dict.items():
+                if sup_key == value:
                     continue
                 if value and any(str(val).strip() for val in value):
-                    if "data" in subkey:
+                    if "data" in sub_key:
                         value = np.array(value)
-                    flattened[f"{supkey}/{subkey}"] = value
+                    flattened[f"{sup_key}/{sub_key}"] = value
 
             for param in ("Area", "FWHM", "Position", "data"):
                 if param in fit_data and i < len(fit_data[param]):
                     param_value = _format_value(fit_data[param][i])
                     if param_value:
-                        flattened[f"{supkey}/{param.lower()}"] = param_value
+                        flattened[f"{sup_key}/{param.lower()}"] = param_value
 
         if self.uniform_energy_steps:
             uniform = False
@@ -780,10 +780,10 @@ class CsvMapperVamasResult(XPSMapper):
             for key in filtered_keys:
                 value = existing_dict[key]
                 if value in self.data_dict:
-                    subdict = self.data_dict[value]
-                    for subkey in update_with & subdict.keys():
-                        new_key = f"{key.rsplit('name', 1)[0]}{subkey}"
-                        existing_dict[new_key] = subdict[subkey]
+                    sub_dict = self.data_dict[value]
+                    for sub_key in update_with & sub_dict.keys():
+                        new_key = f"{key.rsplit('name', 1)[0]}{sub_key}"
+                        existing_dict[new_key] = sub_dict[sub_key]
 
 
 class CsvResultParser:

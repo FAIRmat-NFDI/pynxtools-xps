@@ -147,7 +147,7 @@ def check_uniform_step_width(lst: list[float]) -> bool:
         lst (list): List of data points.
 
     Returns:
-        bool: False if list is non-uniformally spaced.
+        bool: False if list is non-uniformly spaced.
 
     """
     start = lst[0]
@@ -207,7 +207,7 @@ def interpolate_arrays(x: list[float], array_list: list[np.ndarray]):
     Parameters
     ----------
     x : list
-        List of non-uniformally spaced data points.
+        List of non-uniformly spaced data points.
     array_list : list
         List of arrays to be interpolated according to new x axis.
 
@@ -281,7 +281,7 @@ def re_map_values(
     dictionary: dict[str, Any], map_functions: dict[str, Any]
 ) -> dict[str, Any]:
     """
-    Map the values in a dicitionary using functions defined in a
+    Map the values in a dictionary using functions defined in a
     mapping functions dictionary.
 
     This is often used to map some metadata in a vendor file format

@@ -2,7 +2,9 @@
 
 ## Introduction
 
-This example demonstrates how NOMAD can convert, standardize, and store XPS data. It shows the generation of a NeXus file according to the [`NXxps`](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXxps.html#nxxps) application definition and a successive analysis of an example data set.
+This example demonstrates how NOMAD can convert, standardize, and store XPS data. 
+
+It shows the generation of a NeXus file according to the [`NXxps`](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXxps.html#nxxps) application definition and a successive analysis of an example data set.
 
 ## Viewing uploaded data
 
@@ -27,4 +29,4 @@ Double-clicking the notebook will open the example in the Jupyter main window. E
 
 If you're interested in using this pipeline and NOMAD in general you'll find support at [FAIRmat](https://www.fairmat-nfdi.eu/fairmat/).
 
-For questions regarding the experiment or this specific example contact [Lukas Pielsticker](https://www.fairmat-nfdi.eu/fairmat/about-fairmat/team-fairmat) or the rest of the [FAIRmat team](https://www.fairmat-nfdi.eu/fairmat/about-fairmat/team-fairmat).
+For questions regarding the experiment or this specific example [contact the developers](https://fairmat-nfdi.github.io/pynxtools-xps/contact.html) of this example upload.

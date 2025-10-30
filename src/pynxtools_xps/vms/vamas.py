@@ -27,7 +27,7 @@ import warnings
 from copy import deepcopy
 from itertools import groupby
 from pathlib import Path
-from typing import Any, Union
+from typing import Any
 
 import numpy as np
 import xarray as xr
@@ -783,7 +783,7 @@ class VamasParser:
 
             settings["n_values"] = int(block.num_ord_values / block.no_variables)
 
-            # Remap to the MPES-prefered keys and values .
+            # Remap to the MPES-preferred keys and values .
             re_map_keys(settings, KEY_MAP)
             re_map_values(settings, VALUE_MAP)
 

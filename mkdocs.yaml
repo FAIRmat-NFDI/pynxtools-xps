@@ -1,35 +1,34 @@
-site_name: Documentation
+site_name: Documentation for pynxtools-xps
 site_description: |
   The documentation for the pynxtools-xps plugin.
-site_author: The NOMAD Authors
+site_author: The FAIRmat authors
 repo_url: https://github.com/FAIRmat-NFDI/pynxtools-xps
 edit_uri: ""
 
 nav:
   - Home: index.md
   - Tutorials:
-      - tutorial/installation.md
-      - tutorial/standalone.md
-      - tutorial/nexusio.md
-      - tutorial/nomad.md
+    - tutorial/installation.md
+    - tutorial/standalone.md
+    - tutorial/nexusio.md
+    - tutorial/nomad.md
+    - tutorial/contributing.md
   - How-To Guides:
-      - how-tos/build_a_reader.md
+    - how-tos/build_a_reader.md
   - Explanation:
-      - explanation/implementation.md
-      - explanation/appdefs.md
-      - explanation/contextualization.md
-      - explanation/data_processing.md
-      - explanation/nomad_integration.md
+    - explanation/implementation.md
+    - explanation/appdefs.md
+    - explanation/contextualization.md
+    - explanation/data_processing.md
+    - explanation/nomad_integration.md
   - Reference:
-      - reference/specs.md
-      - reference/scienta.md
-      - reference/phi.md
-      - reference/vms.md
+    - reference/specs.md
+    - reference/scienta.md
+    - reference/phi.md
+    - reference/vms.md
 
 plugins:
   - search
-  - macros:
-      module_name: src/pynxtools_xps/mkdocs
 
 theme:
   name: material
@@ -45,6 +44,7 @@ theme:
     - navigation.footer
     - content.code.copy
     - content.code.annotate
+    - search.suggest
   custom_dir: docs/theme
   icon:
     repo: fontawesome/brands/github
@@ -65,6 +65,8 @@ markdown_extensions:
   - pymdownx.emoji
   - mkdocs-click
   - pymdownx.extra
+  - pymdownx.tabbed:
+    alternate_style: true
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid

@@ -132,7 +132,7 @@ class XmlMapperSpecs(XPSMapper):
                 offset_id = round(mcd_energy_offset / scan_delta)
                 offset_ids.append(int(offset_id - 1 if offset_id > 0 else offset_id))
 
-            # Skiping entry without count data
+            # Skipping entry without count data
             if not mcd_energy_offsets:
                 continue
             mcd_energy_offsets = np.array(mcd_energy_offsets)
@@ -185,7 +185,7 @@ class XmlMapperSpecs(XPSMapper):
                             )
                         )
 
-                        # Storing callibrated and after accumulated each scan counts
+                        # Storing calibrated and after accumulated each scan counts
                         if row == mcd_num - 1:
                             self._xps_dict["data"][entry][scan_nm] = xr.DataArray(
                                 data=channel_counts[0, :],
@@ -209,7 +209,7 @@ class XmlMapperSpecs(XPSMapper):
                             )
                         )
 
-                        # Storing callibrated and after accumulated each scan counts
+                        # Storing calibrated and after accumulated each scan counts
                         if row == mcd_num - 1:
                             self._xps_dict["data"][entry][scan_nm] = xr.DataArray(
                                 data=channel_counts[0, :],
@@ -252,9 +252,9 @@ class XmlParserSpecs:
         self.metadata_dict: dict = {}
         self.entry_to_data: dict = {}
         self._root_path = "/ENTRY"
-        self.tail_part_frm_struct = ""
-        self.tail_part_frm_othr = ""
-        self.child_nm_reslvers = "__child_name_resolver__"
+        self.tail_part_from_struct = ""
+        self.tail_part_from_other = ""
+        self.child_nm_resolvers = "__child_name_resolver__"
 
     def parse_file(self, file: str, **kwargs):
         """Start parsing process and parse children recursively.
@@ -263,7 +263,7 @@ class XmlParserSpecs:
         ----------
         """
         root_element = EmtT.parse(file).getroot()
-        root_element.attrib[self.child_nm_reslvers] = []  # type: ignore[assignment]
+        root_element.attrib[self.child_nm_resolvers] = []  # type: ignore[assignment]
         child_num = len(root_element)
         parent_path = self._root_path
         skip_child = -1
@@ -330,8 +330,8 @@ class XmlParserSpecs:
         element.attrib["__parent__"] = parent_element  # type: ignore[assignment]
         element.attrib["__odr_siblings__"] = child_elmt_ind  # type: ignore[assignment]
 
-        if self.child_nm_reslvers not in parent_element.attrib.keys():
-            parent_element.attrib[self.child_nm_reslvers] = []  # type: ignore[assignment]
+        if self.child_nm_resolvers not in parent_element.attrib.keys():
+            parent_element.attrib[self.child_nm_resolvers] = []  # type: ignore[assignment]
 
         elmt_tag = element.tag
 
@@ -365,15 +365,15 @@ class XmlParserSpecs:
         child_num = len(element_)
         elmt_attr = element_.attrib
 
-        section_nm_reslvr = ""
+        section_nm_resolver = ""
         key_name = "name"
         if key_name in elmt_attr.keys():
-            section_nm_reslvr = f"{elmt_attr[key_name]}"
-            section_nm_reslvr = self.check_for_siblings_with_same_name(
-                section_nm_reslvr, element_
+            section_nm_resolver = f"{elmt_attr[key_name]}"
+            section_nm_resolver = self.check_for_siblings_with_same_name(
+                section_nm_resolver, element_
             )
 
-            parent_path = f"{parent_path}/{section_nm_reslvr}"
+            parent_path = f"{parent_path}/{section_nm_resolver}"
 
         child_elmt_ind = 0
         while child_num > 0:
@@ -386,22 +386,22 @@ class XmlParserSpecs:
     def struct_fc_name_sc_value(self, element_, first_child, parent_path, skip_child):
         """Struct representing parameter with first child (fc) 'name'
         and second child(sc) 'value'."""
-        section_nm_reslvr = ""
+        section_nm_resolver = ""
         units = ["mV", "degree", "W", "kV", "ns"]
 
-        section_nm_reslvr = self.restructure_value(first_child.text, first_child.tag)
-        section_nm_reslvr = self.check_for_siblings_with_same_name(
-            section_nm_reslvr, element_
+        section_nm_resolver = self.restructure_value(first_child.text, first_child.tag)
+        section_nm_resolver = self.check_for_siblings_with_same_name(
+            section_nm_resolver, element_
         )
         skip_child += 1
         # Separating the units
         for unit in units:
-            if f"_[{unit}]" in section_nm_reslvr:
-                section_nm_reslvr, _ = section_nm_reslvr.split("_")
-                self.metadata_dict[f"{parent_path}/{section_nm_reslvr}/@units"] = unit
+            if f"_[{unit}]" in section_nm_resolver:
+                section_nm_resolver, _ = section_nm_resolver.split("_")
+                self.metadata_dict[f"{parent_path}/{section_nm_resolver}/@units"] = unit
 
-        parent_path, self.tail_part_frm_struct = self.check_last_part_repetition(
-            parent_path, self.tail_part_frm_struct, section_nm_reslvr
+        parent_path, self.tail_part_from_struct = self.check_last_part_repetition(
+            parent_path, self.tail_part_from_struct, section_nm_resolver
         )
 
         return parent_path, skip_child
@@ -415,12 +415,12 @@ class XmlParserSpecs:
         skip_child += 1
         child_txt = self.restructure_value(first_child.text, first_child.tag)
 
-        section_nm_reslvr = f"{elmt_attr[key_type_name]}_{child_txt}"
-        section_nm_reslvr = self.check_for_siblings_with_same_name(
-            section_nm_reslvr, element_
+        section_nm_resolver = f"{elmt_attr[key_type_name]}_{child_txt}"
+        section_nm_resolver = self.check_for_siblings_with_same_name(
+            section_nm_resolver, element_
         )
 
-        parent_path = f"{parent_path}/{section_nm_reslvr}"
+        parent_path = f"{parent_path}/{section_nm_resolver}"
 
         return parent_path, skip_child
 
@@ -441,7 +441,7 @@ class XmlParserSpecs:
 
         # Resolving struct name section is here
         skip_child = -1
-        section_nm_reslvr = ""
+        section_nm_resolver = ""
         first_child = element_[0]
         second_child = element_[1]
 
@@ -449,12 +449,12 @@ class XmlParserSpecs:
         key_value = "value"
         key_type_name = "type_name"
         if key_name in elmt_attr.keys():
-            section_nm_reslvr = elmt_attr[key_name]
-            section_nm_reslvr = self.check_for_siblings_with_same_name(
-                section_nm_reslvr, element_
+            section_nm_resolver = elmt_attr[key_name]
+            section_nm_resolver = self.check_for_siblings_with_same_name(
+                section_nm_resolver, element_
             )
-            parent_path, self.tail_part_frm_struct = self.check_last_part_repetition(
-                parent_path, self.tail_part_frm_struct, section_nm_reslvr
+            parent_path, self.tail_part_from_struct = self.check_last_part_repetition(
+                parent_path, self.tail_part_from_struct, section_nm_resolver
             )
 
         elif key_name not in elmt_attr.keys():
@@ -474,13 +474,13 @@ class XmlParserSpecs:
 
             else:
                 # Check twin siblings
-                section_nm_reslvr = self.restructure_value(
+                section_nm_resolver = self.restructure_value(
                     elmt_attr[key_type_name], "string"
                 )
-                section_nm_reslvr = (
-                    section_nm_reslvr + "_" + str(elmt_attr["__odr_siblings__"])
+                section_nm_resolver = (
+                    section_nm_resolver + "_" + str(elmt_attr["__odr_siblings__"])
                 )
-                parent_path = f"{parent_path}/{section_nm_reslvr}"
+                parent_path = f"{parent_path}/{section_nm_resolver}"
 
         child_elmt_ind = 0
         while child_num > 0:
@@ -509,11 +509,13 @@ class XmlParserSpecs:
 
         if child_num == 0:
             if "name" in elmt_attr.keys():
-                section_nm_reslvr = f"{elmt_attr['name']}"
+                section_nm_resolver = f"{elmt_attr['name']}"
                 value = self.restructure_value(element_.text, element_.tag)
 
-                parent_path, self.tail_part_frm_othr = self.check_last_part_repetition(
-                    parent_path, self.tail_part_frm_othr, section_nm_reslvr
+                parent_path, self.tail_part_from_other = (
+                    self.check_last_part_repetition(
+                        parent_path, self.tail_part_from_other, section_nm_resolver
+                    )
                 )
                 self.metadata_dict[f"{parent_path}"] = value
             else:
@@ -526,28 +528,28 @@ class XmlParserSpecs:
                 child_elmt.text, child_elmt.tag
             )
 
-    def check_for_siblings_with_same_name(self, reslv_name, new_sblings_elmt):
+    def check_for_siblings_with_same_name(self, resolved_name, new_siblings_elmt):
         """Check for the same name in the same level. For elments with the same
         write the name _1, _2... .
         """
-        child_nm_reslvr_li = new_sblings_elmt.attrib["__parent__"].attrib[
-            self.child_nm_reslvers
+        child_nm_resolver_li = new_siblings_elmt.attrib["__parent__"].attrib[
+            self.child_nm_resolvers
         ]
-        if reslv_name not in child_nm_reslvr_li:
-            parent = new_sblings_elmt.attrib["__parent__"]
-            parent.attrib[self.child_nm_reslvers].append(reslv_name)
+        if resolved_name not in child_nm_resolver_li:
+            parent = new_siblings_elmt.attrib["__parent__"]
+            parent.attrib[self.child_nm_resolvers].append(resolved_name)
         else:
-            last_twin_sib_nm = child_nm_reslvr_li[-1]
+            last_twin_sib_nm = child_nm_resolver_li[-1]
             try:
                 ind = last_twin_sib_nm.split("_")[-1]
-                reslv_name = f"{reslv_name}_{int(ind) + 1}"
-                parent = new_sblings_elmt.attrib["__parent__"]
-                parent.attrib[self.child_nm_reslvers].append(reslv_name)
+                resolved_name = f"{resolved_name}_{int(ind) + 1}"
+                parent = new_siblings_elmt.attrib["__parent__"]
+                parent.attrib[self.child_nm_resolvers].append(resolved_name)
             except ValueError:
-                reslv_name = f"{reslv_name}_1"
-                parent = new_sblings_elmt.attrib["__parent__"]
-                parent.attrib[self.child_nm_reslvers].append(reslv_name)
-        return reslv_name
+                resolved_name = f"{resolved_name}_1"
+                parent = new_siblings_elmt.attrib["__parent__"]
+                parent.attrib[self.child_nm_resolvers].append(resolved_name)
+        return resolved_name
 
     def check_last_part_repetition(
         self, parent_path: str, pre_tail_part: str, new_tail_part: str
@@ -657,7 +659,7 @@ class XmlParserSpecs:
         cumulative_counts: np.ndarray = None,
     ) -> tuple[str, np.ndarray]:
         """
-        Sum the counts over different scans. Each ScanSeaq contains
+        Sum the counts over different scans. Each ScanSeq contains
         multiple scans under the same physical environment. The
         multiple scans are usually taken to make the peaks visible and
         distinguishable.

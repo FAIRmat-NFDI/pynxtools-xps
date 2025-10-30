@@ -19,7 +19,7 @@
 Comment handler for .vms files.
 """
 
-from typing import Any, Literal, Union
+from typing import Any, Literal
 
 from pynxtools_xps.kratos.metadata_kratos import KratosParser
 from pynxtools_xps.phi.spe_pro_phi import PhiParser
@@ -161,7 +161,7 @@ def _handle_misc_comments(
     for sep in ("=", ":"):
         for line in comment_list:
             try:
-                key, value_str = [part.strip(" ") for part in line.split(sep, 1)]
+                key, value_str = (part.strip(" ") for part in line.split(sep, 1))
                 key = convert_pascal_to_snake(key)
                 value, unit = split_value_and_unit(value_str)
 

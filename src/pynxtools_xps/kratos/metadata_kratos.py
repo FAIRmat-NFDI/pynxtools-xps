@@ -22,7 +22,7 @@ passed to MPES nxdl (NeXus Definition Language) template.
 
 import re
 from pathlib import Path
-from typing import Any, Union
+from typing import Any
 
 from pynxtools_xps.kratos.kratos_data_model import KratosMetadata
 from pynxtools_xps.reader_utils import convert_pascal_to_snake, extract_unit
@@ -212,8 +212,8 @@ class KratosParser:
 
         for key, value in self.metadata.dict().items():
             if isinstance(value, dict):
-                for subkey, subvalue in value.items():
-                    flattened_dict[f"{key}_{subkey}"] = subvalue
+                for sub_key, sub_value in value.items():
+                    flattened_dict[f"{key}_{sub_key}"] = sub_value
             else:
                 flattened_dict[key] = value
                 setup_unit(flattened_dict, key)

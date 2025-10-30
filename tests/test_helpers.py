@@ -63,7 +63,7 @@ def test_get_units_for_key(unit_key: str, unit_map: dict[str, str], expected_uni
         # Test cases with explicit units
         ("x_position", "0 mm", {}, 0, "mm"),
         ("polar_rotation", "0 deg", {}, 0, "deg"),
-        ("analyser_work_function", "4.506eV", {}, 4.506, "eV"),
+        ("analyzer_work_function", "4.506eV", {}, 4.506, "eV"),
         ("temperature", "300K", {}, 300, "K"),
         ("pressure", "1.01bar", {}, 1.01, "bar"),
         # Test cases without explicit units

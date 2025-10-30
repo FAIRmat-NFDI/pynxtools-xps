@@ -18,7 +18,11 @@ jobs:
 
     - name: Run cspell
       run: |
-        cspell --config cspell.json "docs/explanation/**/*" "docs/how-tos/**/*" "docs/reference/**/*" "docs/tutorial/**/*"  "docs/*.md" "CITATION.cff" "README.md"
+        cspell --config cspell.json \
+        "README.md" "CITATION.cff" \
+        "docs/**/*" \
+        "src/pynxtools_xps/**/*.py" \
+        "tests/**/*.py"
 
     - name: Fail on errors
       run: |
@@ -26,4 +30,3 @@ jobs:
           echo "There are spelling errors in your code. Please fix them and try again."
           exit 1
         fi
-

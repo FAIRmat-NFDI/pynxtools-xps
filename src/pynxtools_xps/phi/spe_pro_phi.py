@@ -27,7 +27,7 @@ import re
 import struct
 import warnings
 from pathlib import Path
-from typing import Any, Union
+from typing import Any
 
 import numpy as np
 import pytz
@@ -809,9 +809,9 @@ class PhiParser:  # pylint: disable=too-few-public-methods
     def _check_encoding(self):
         """Check if the binary data is single or double encoded."""
         datasize = sum(
-            [s["spectrum_header"][8] * s["spectrum_header"][9] for s in self.spectra]
+            s["spectrum_header"][8] * s["spectrum_header"][9] for s in self.spectra
         )
-        binary_size = sum([s["spectrum_header"][-2] for s in self.spectra])
+        binary_size = sum(s["spectrum_header"][-2] for s in self.spectra)
 
         encodings_map = {
             "double": ["<d", 8],
@@ -912,24 +912,24 @@ class PhiParser:  # pylint: disable=too-few-public-methods
 
         """
 
-        def shorten_supkey(supkey: str):
+        def shorten_sup_key(sup_key: str):
             """Shorted the key for some nested dicts."""
             shortened_key_map = {
                 "xray_source": "xray",
                 "xray_settings": "xray",
                 "stage_positions": "stage",
             }
-            if supkey in shortened_key_map:
-                return shortened_key_map[supkey]
-            return supkey
+            if sup_key in shortened_key_map:
+                return shortened_key_map[sup_key]
+            return sup_key
 
         flattened_dict = {}
 
         for key, value in self.metadata.dict().items():
             if isinstance(value, dict):
-                for subkey, subvalue in value.items():
-                    supkey = shorten_supkey(key)
-                    flattened_dict[f"{supkey}_{subkey}"] = subvalue
+                for sub_key, sub_value in value.items():
+                    sup_key = shorten_sup_key(key)
+                    flattened_dict[f"{sup_key}_{sub_key}"] = sub_value
             else:
                 flattened_dict[key] = value
 

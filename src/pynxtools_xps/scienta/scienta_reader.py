@@ -27,7 +27,7 @@ import re
 import warnings
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Optional, Union, cast
+from typing import Any, cast
 
 import h5py
 import jsonschema

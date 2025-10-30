@@ -6,9 +6,9 @@ build-backend = "setuptools.build_meta"
 name = "pynxtools-xps"
 dynamic = ["version"]
 authors = [
-    { name = "The NOMAD Authors" },
+    { name = "The NOMAD authors", email = "fairmat@physik.hu-berlin.de" },
 ]
-description = "A reader for transferring XPS data from vendor formats to NeXus and NOMAD."
+description = "pynxtools-xps is a pynxtools reader plugin for X-ray photoelectron spectroscopy (XPS) data."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
@@ -25,18 +25,17 @@ dependencies = [
     "jsonschema>=4.0.0",
     "igor2",
 ]
+
 [project.optional-dependencies]
 dev = [
     "mypy",
-    "ruff>=0.12.0",
+    "ruff>=0.14.0",
     "pytest",
     "pytest-cov",
     "pytest-timeout",
-    "structlog",
     "types-pyyaml",
     "types-pytz",
     "types-requests",
-    "uv",
     "pre-commit",
 ]
 docs = [
@@ -47,16 +46,22 @@ docs = [
     "pymdown-extensions",
     "mkdocs-click"
 ]
+nomad = ["nomad-lab[parsing, infrastructure]>=1.3.17"]
 
 [project.urls]
 "Homepage" = "https://github.com/FAIRmat-NFDI/pynxtools-xps"
 "Bug Tracker" = "https://github.com/FAIRmat-NFDI/pynxtools-xps/issues"
 
-[project.entry-points."pynxtools.reader"]
+[project.entry-points.'pynxtools.reader']
 xps = "pynxtools_xps.reader:XPSReader"
 
 [project.entry-points.'nomad.plugin']
-xps_example = "pynxtools_xps.nomad.entrypoints:xps_example"
+xps_example_upload_entry_point = "pynxtools_xps.nomad.example_uploads:xps_example_upload_entry_point"
+
+[tool.uv]
+extra-index-url = [
+    "https://gitlab.mpcdf.mpg.de/api/v4/projects/2187/packages/pypi/simple",
+]
 
 [tool.setuptools.packages.find]
 where = [
@@ -71,7 +76,7 @@ version_scheme = "no-guess-dev"
 local_scheme = "node-and-date"
 
 [tool.ruff]
-include = ["src/*.py", "tests/*.py"]
+include = ["src/pynxtools_xps/*.py", "tests/*.py"]
 line-length = 88
 indent-width = 4
 
@@ -81,9 +86,9 @@ select = [
     "W", # pycodestyle
     "PL", # pylint
     "UP", # pyupgrade
-    # "F401", # remove unused import
+    "F401", # remove unused import
     "I001", # sort imports
-    "NPY201", # upgrade to numpy>2
+    "NPY201", # upgrade numpy v2
 ]
 ignore = [
     "E501", # Line too long ({width} > {limit} characters)

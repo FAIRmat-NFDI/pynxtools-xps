@@ -19,7 +19,7 @@ jobs:
       - name: Install uv and set the python version to ${{ matrix.python-version }}
         uses: astral-sh/setup-uv@v5
         with:
-          python-version: ${{ matrix.python-version }}         
+          python-version: ${{ matrix.python-version }}
       - name: Install nomad
         run: |
           uv pip install nomad-lab[infrastructure]@git+https://gitlab.mpcdf.mpg.de/nomad-lab/nomad-FAIR.git

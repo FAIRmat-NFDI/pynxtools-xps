@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Entry points for XPS examples."""
+"""Entry points for XPS example uploads."""
 
 try:
     from nomad.config.models.plugins import ExampleUploadEntryPoint
@@ -24,15 +24,15 @@ except ImportError as exc:
         "Could not import nomad package. Please install the package 'nomad-lab'."
     ) from exc
 
-xps_example = ExampleUploadEntryPoint(
+xps_example_upload_entry_point = ExampleUploadEntryPoint(
     title="X-ray Photoelectron Spectroscopy (XPS)",
     category="NeXus Experiment Examples",
     description="""
         This example demonstrates how NOMAD can convert, standardize, and store X-ray Photoelectron Spectroscopy (XPS) data.
         It shows the generation of a NeXus file according to the
         [`NXxps`](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXxps.html#nxxps)
-        application definition from an example measurement file and a subseqeuent analysis of that data set.
+        application definition from an example measurement file and a subsequent analysis of that data set.
     """,
     plugin_package="pynxtools_xps",
-    resources=["nomad/examples/*"],
+    resources=["nomad/example_uploads/example/*"],
 )

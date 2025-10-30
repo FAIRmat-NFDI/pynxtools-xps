@@ -506,7 +506,7 @@ class SleProdigyParser(ABC):
         Parameters
         ----------
         data : list
-            Array of measured daata .
+            Array of measured data
         n_channels : int
             Number of channels to be summed.
 
@@ -568,7 +568,7 @@ class SleProdigyParser(ABC):
     #         offset_ids.append(
     #             int(offset_id - 1 if offset_id > 0 else offset_id))
     #
-    #     # Skiping entry without count data
+    #     # Skipping entry without count data
     #     if not mcd_energy_offsets:
     #         continue
     #     mcd_energy_offsets = np.array(mcd_energy_offsets)
@@ -624,7 +624,7 @@ class SleProdigyParser(ABC):
     #                     xr.DataArray(data=channel_counts[row + 1, :],
     #                                  coords={"BE": binding_energy})
     #
-    #                 # Storing callibrated and after accumulated each scan counts
+    #                 # Storing calibrated and after accumulated each scan counts
     #                 if row == mcd_num - 1:
     #                     self._xps_dict["data"][entry][scan_nm] = \
     #                         xr.DataArray(data=channel_counts[0, :],
@@ -645,13 +645,13 @@ class SleProdigyParser(ABC):
     #                     xr.DataArray(data=channel_counts[row + 1, :],
     #                                  coords={"BE": binding_energy})
     #
-    #                 # Storing callibrated and after accumulated each scan counts
+    #                 # Storing calibrated and after accumulated each scan counts
     #                 if row == mcd_num - 1:
     #                     self._xps_dict["data"][entry][scan_nm] = \
     #                         xr.DataArray(data=channel_counts[0, :],
     #                                      coords={"BE": binding_energy})
     #
-    #     # Skiping entry without count data
+    #     # Skipping entry without count data
     #     if not mcd_energy_offsets:
     #         continue
     #     mcd_energy_offsets = np.array(mcd_energy_offsets)
@@ -707,7 +707,7 @@ class SleProdigyParser(ABC):
     #                     xr.DataArray(data=channel_counts[row + 1, :],
     #                                  coords={"BE": binding_energy})
     #
-    #                 # Storing callibrated and after accumulated each scan counts
+    #                 # Storing calibrated and after accumulated each scan counts
     #                 if row == mcd_num - 1:
     #                     self._xps_dict["data"][entry][scan_nm] = \
     #                         xr.DataArray(data=channel_counts[0, :],
@@ -728,7 +728,7 @@ class SleProdigyParser(ABC):
     #                     xr.DataArray(data=channel_counts[row + 1, :],
     #                                  coords={"BE": binding_energy})
     #
-    #                 # Storing callibrated and after accumulated each scan counts
+    #                 # Storing calibrated and after accumulated each scan counts
     #                 if row == mcd_num - 1:
     #                     self._xps_dict["data"][entry][scan_nm] = \
     #                         xr.DataArray(data=channel_counts[0, :],
@@ -842,8 +842,8 @@ class SleProdigyParser(ABC):
 
     def _attach_device_protocols(self):
         """
-        Get the device protocol for each node and add the paramaters of
-        the Phoibos to the spectra table. Occassionally these are not
+        Get the device protocol for each node and add the parameters of
+        the Phoibos to the spectra table. Occasionally these are not
         recorded, if this is the case just skip the group.
 
         Returns
@@ -853,7 +853,7 @@ class SleProdigyParser(ABC):
         """
         # iterate through each spectrum
         for spectrum in self.spectra:
-            # conver the xml xps id to the node ID and get the device protocol
+            # convert the xml xps id to the node ID and get the device protocol
             cur = self.con.cursor()
             protocol_node_id = self._get_sql_node_id(spectrum["device_group_id"])
             query = (
@@ -864,8 +864,8 @@ class SleProdigyParser(ABC):
             # if a record was accessed then parse, if not skip
             if result:
                 protocol = ET.fromstring(result[0])
-                protocal_params = self._get_one_device_protocol(protocol)
-                spectrum.update(protocal_params)
+                protocol_params = self._get_one_device_protocol(protocol)
+                spectrum.update(protocol_params)
 
     def _get_one_device_protocol(self, protocol):
         """
@@ -878,11 +878,11 @@ class SleProdigyParser(ABC):
 
         Returns
         -------
-        protocal_params : dict
+        protocol_params : dict
             All parameters given in the device protocol.
 
         """
-        protocal_params = {}
+        protocol_params = {}
         for device in protocol.iter("Command"):
             if "Phoibos" in device.attrib["UniqueDeviceName"]:
                 # iterate through the parameters and add to spectrum
@@ -892,16 +892,16 @@ class SleProdigyParser(ABC):
                         param_text = float(parameter.text)
                     else:
                         param_text = parameter.text
-                    protocal_params[parameter.attrib["name"]] = param_text
+                    protocol_params[parameter.attrib["name"]] = param_text
             elif "XRC1000" in device.attrib["UniqueDeviceName"]:
                 for parameter in device.iter("Parameter"):
                     if parameter.attrib["type"] == "double":
                         param_text = float(parameter.text)
                     else:
                         param_text = parameter.text
-                    protocal_params[parameter.attrib["name"]] = param_text
+                    protocol_params[parameter.attrib["name"]] = param_text
 
-        return protocal_params
+        return protocol_params
 
     def _get_one_scan(self, raw_id):
         """
@@ -909,7 +909,7 @@ class SleProdigyParser(ABC):
 
         The detector data is stored in the SQLite database as a blob.
         This function decodes the blob into python float. The blob can be
-        enoded as float or double in the SQLite table.
+        encoded as float or double in the SQLite table.
 
         Parameters
         ----------
@@ -1073,7 +1073,7 @@ class SleProdigyParser(ABC):
         """
         Get the SQL internal ID for the NodeID taken from XML.
 
-        Sometimes the NodeID used in XML does not eaxtly map to the IDs for
+        Sometimes the NodeID used in XML does not exactly map to the IDs for
         Spectra in the SQL tables. To fix this, there is a node mapping.
 
         Parameters
@@ -1223,7 +1223,7 @@ class SleProdigyParser(ABC):
         Parameters
         ----------
         data : list
-            Array of measured daata .
+            Array of measured data
         n : int
             Number of channels to be summed.
 

@@ -67,7 +67,7 @@ test_cases: list[tuple[str, list[Any], dict[Any, Any], str]] = [
     ("vms_txt_export", [], {}, "vms-txt-export-reader"),
 ]
 
-test_params = []
+test_params: list[Any] = []
 for test_case in test_cases:
     for nxdl in NXDLS:
         test_params += [

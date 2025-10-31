@@ -33,10 +33,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install uv and set the python version to$${{ env.python-version }}
+      - name: Install uv and set the python version to ${{ env.python-version }}
         uses: astral-sh/setup-uv@v5
         with:
-          python-version:$${{ env.python-version }}
+          python-version: ${{ env.python-version }}
 
       - name: Install Cruft
         run: uv pip install cruft

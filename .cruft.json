@@ -1,6 +1,6 @@
 {
   "template": "git@github.com:FAIRmat-NFDI/pynxtools-plugin-template.git",
-  "commit": "52bfba6e873a1409a92b820b1684553149f8331f",
+  "commit": "283723a9ec41980126412c794cab37e8a60428fe",
   "checkout": null,
   "context": {
     "cookiecutter": {
@@ -14,11 +14,17 @@
       "vscode_settings": true,
       "include_nomad_app": false,
       "include_nomad_example_upload": true,
+      "__technique": "XPS",
+      "__reader_class": "XPSReader",
+      "__package_name": "pynxtools-xps",
+      "__module_name": "pynxtools_xps",
+      "__nomad_example": "xps_example_upload_entry_point",
+      "__nomad_app": "xps_app_entry_point",
       "_copy_without_render": [
         "*.html"
       ],
       "_template": "git@github.com:FAIRmat-NFDI/pynxtools-plugin-template.git",
-      "_commit": "52bfba6e873a1409a92b820b1684553149f8331f"
+      "_commit": "283723a9ec41980126412c794cab37e8a60428fe"
     }
   },
   "directory": null

@@ -2,6 +2,13 @@
 
 ## What should you should know before this tutorial?
 
+To get started, it does not hurt to read the following `pynxtools` tutorial:
+
+- [Guide on getting started with `pynxtools`, NeXus, and NOMAD](https://fairmat-nfdi.github.io/pynxtools/getting-started.html)
+- [Installation tutorial for `pynxtools`](https://fairmat-nfdi.github.io/pynxtools/tutorial/installation.html)
+
+## What you will know at the end of this tutorial?
+
 You will know
 
 - how to install `pynxtools-xps`

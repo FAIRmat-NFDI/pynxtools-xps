@@ -35,6 +35,7 @@ jobs:
           coverage run -m pytest -sv --show-capture=no tests
       - name: Submit to coveralls
         continue-on-error: true
+        if: ${{ matrix.python-version == '3.12' }}
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

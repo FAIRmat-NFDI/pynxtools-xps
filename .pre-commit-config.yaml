@@ -2,8 +2,11 @@ repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.0
     hooks:
-      - id: ruff-check    # runs Ruff as a linter
-      - id: ruff-format   # runs Ruff as a formatter
+      - id: ruff-check
+        files: ^(src/pynxtools_xps|tests)/.*\.py$
+      - id: ruff-format
+        files: ^(src/pynxtools_xps|tests)/.*\.py$
+
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.7.1

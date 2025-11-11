@@ -32,7 +32,7 @@ Note that none of the supported file format have data/values for all required an
 
 ### Examples
 
-You can find examples how to use `pynxtools-xps` for your XPS research data pipeline in [`src/pynxtools-xps/nomad/examples`](../../src/pynxtools_xps/nomad/examples/). These are designed for working with [`NOMAD`](https://nomad-lab.eu/) and its [`NOMAD Remote Tools Hub (NORTH)`](https://nomad-lab.eu/prod/v1/gui/analyze/north). Feel invited to try out the respective tutorial [here](tutorial/nomad.md).
+You can find examples how to use `pynxtools-xps` for your XPS research data pipeline in [`src/pynxtools-xps/nomad/examples](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/src/pynxtools_xps/nomad/examples/). These are designed for working with [`NOMAD`](https://nomad-lab.eu/) and its [`NOMAD Remote Tools Hub (NORTH)`](https://nomad-lab.eu/prod/v1/gui/analyze/north). Feel invited to try out the [respective tutorial](nomad.md).
 
 There are also small example files with raw and converted data for using the `pynxtools` dataconverter with the `mpes` reader and the `NXmpes` application definition in the [`examples`](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/) folder.
 

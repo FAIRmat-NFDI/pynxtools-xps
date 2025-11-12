@@ -111,7 +111,7 @@ def convert_snake_to_pascal(str_value: str):
     return str_value.replace("_", " ").title().replace(" ", "")
 
 
-def convert_pascal_to_snake(str_value: str):
+def convert_pascal_to_snake(str_value: str) -> str:
     """Convert PascalCase text to snake_case, preserving bracketed content."""
 
     def replace_non_bracketed(match):

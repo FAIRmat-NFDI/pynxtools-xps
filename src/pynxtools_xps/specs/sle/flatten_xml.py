@@ -21,19 +21,18 @@ to a list of dictionaries, with each dictionary representing one spectrum.
 """
 
 import copy
-from typing import Dict, Any, List
+from typing import Any
+
 from lxml import etree as ET
 
-
+from pynxtools_xps.specs.sle.utils import format_key_and_value, iterate_xml_at_tag
 from pynxtools_xps.value_mappers import (
     MEASUREMENT_METHOD_MAP,
     convert_measurement_method,
 )
 
-from pynxtools_xps.specs.sle.utils import format_key_and_value, iterate_xml_at_tag
 
-
-def extract_devices(elem: ET.Element) -> Dict[str, Any]:
+def extract_devices(elem: ET.Element) -> dict[str, Any]:
     """
     Extract all device settings.
 
@@ -65,7 +64,7 @@ def extract_devices(elem: ET.Element) -> Dict[str, Any]:
     return device_settings
 
 
-def extract_device_commands(elem: ET.Element) -> Dict[str, Any]:
+def extract_device_commands(elem: ET.Element) -> dict[str, Any]:
     """
     Retrieve device commands.
 
@@ -89,7 +88,7 @@ def extract_device_commands(elem: ET.Element) -> Dict[str, Any]:
     return {unique_device_name: device_settings}
 
 
-def extract_device_info(elem: ET.Element) -> Dict[str, Any]:
+def extract_device_info(elem: ET.Element) -> dict[str, Any]:
     """
     Retrieve device information.
 
@@ -112,7 +111,7 @@ def extract_device_info(elem: ET.Element) -> Dict[str, Any]:
     return {unique_name: device_settings}
 
 
-def step_profiling(elem: ET.Element) -> Dict[str, Any]:
+def step_profiling(elem: ET.Element) -> dict[str, Any]:
     """
     Retrieve metadata for one StepProfiling group.
 
@@ -133,7 +132,7 @@ def step_profiling(elem: ET.Element) -> Dict[str, Any]:
     return profiling_settings
 
 
-def _get_group_metadata(spectrum_group: ET.Element) -> Dict[str, Any]:
+def _get_group_metadata(spectrum_group: ET.Element) -> dict[str, Any]:
     """
     Retrieve metadata for one spectrum group.
 
@@ -156,7 +155,7 @@ def _get_group_metadata(spectrum_group: ET.Element) -> Dict[str, Any]:
     return settings
 
 
-def _extract_comm_settings(elem: ET.Element) -> Dict[str, Any]:
+def _extract_comm_settings(elem: ET.Element) -> dict[str, Any]:
     """
     Retrieve metadata for common settings of one spectrum group.
 
@@ -195,7 +194,7 @@ def _extract_comm_settings(elem: ET.Element) -> Dict[str, Any]:
     return common_settings
 
 
-def _get_spectrum_metadata(elem: ET.Element) -> Dict[str, Any]:
+def _get_spectrum_metadata(elem: ET.Element) -> dict[str, Any]:
     """
     Retrieve metadata for one spectrum.
 
@@ -246,7 +245,7 @@ FUNC_MAP = {
 
 
 def process_xml_element(
-    elem: ET.Element, settings: Dict[str, Any], collect: List[Dict[str, Any]]
+    elem: ET.Element, settings: dict[str, Any], collect: list[dict[str, Any]]
 ):
     if elem.tag in FUNC_MAP:
         elem_settings = FUNC_MAP[elem.tag](elem)
@@ -263,7 +262,7 @@ def process_xml_element(
     return settings
 
 
-def flatten_schedule(xml: ET.Element) -> List[Dict[str, Any]]:
+def flatten_schedule(xml: ET.Element) -> list[dict[str, Any]]:
     """
     Flatten the nested XML schedule, keeping only the needed metadata.
 
@@ -282,18 +281,18 @@ def flatten_schedule(xml: ET.Element) -> List[Dict[str, Any]]:
 
     for measurement_type in MEASUREMENT_METHOD_MAP:
         for group in xml.iter(measurement_type):
-            data: Dict[str, Any] = {}
+            data: dict[str, Any] = {}
 
             try:
-                analyis_method, analyis_method_long = convert_measurement_method(
+                analysis_method, analysis_method_long = convert_measurement_method(
                     measurement_type
                 )
             except ValueError:
-                analyis_method = convert_measurement_method(measurement_type)
+                analysis_method = convert_measurement_method(measurement_type)
                 analysis_method_long = "X-ray photoelectron spectroscopy"
 
-            data["analysis_method"] = analyis_method
-            data["analysis_method_long_name"] = analyis_method_long
+            data["analysis_method"] = analysis_method
+            data["analysis_method_long_name"] = analysis_method_long
 
             data["device_group_id"] = group.attrib["ID"]
 
@@ -304,7 +303,7 @@ def flatten_schedule(xml: ET.Element) -> List[Dict[str, Any]]:
     return collect
 
 
-def flatten_context(xml: ET.Element) -> Dict[str, Any]:
+def flatten_context(xml: ET.Element) -> dict[str, Any]:
     """
     Flatten the nested XML context, keeping only the needed metadata.
 
@@ -322,7 +321,7 @@ def flatten_context(xml: ET.Element) -> Dict[str, Any]:
     if xml is None:
         return {}
 
-    device_metadata: Dict[str, Any] = {}
+    device_metadata: dict[str, Any] = {}
 
     for elem in xml.iter("DeviceContext"):
         process_xml_element(elem, device_metadata, [])
@@ -330,7 +329,7 @@ def flatten_context(xml: ET.Element) -> Dict[str, Any]:
     return device_metadata
 
 
-def flatten_metainfo(xml: ET.Element) -> Dict[str, Any]:
+def flatten_metainfo(xml: ET.Element) -> dict[str, Any]:
     """
     Flatten the nested XML metainfo, keeping only the needed metadata.
 
@@ -348,7 +347,7 @@ def flatten_metainfo(xml: ET.Element) -> Dict[str, Any]:
     if xml is None:
         return {}
 
-    metainfo: Dict[str, Any] = {}
+    metainfo: dict[str, Any] = {}
 
     for elem in xml.iter("Parameter"):
         process_xml_element(elem, metainfo, [])

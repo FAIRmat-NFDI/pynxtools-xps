@@ -54,7 +54,7 @@
         "beam_azimuth_angle/@depends_on":"/entry/geometries/xps_coordinate_system"
       }
     },
-    "ELECTRONANALYSER[electronanalyser]":{
+    "ELECTRONANALYZER[electronanalyzer]":{
       "depends_on":"transformations/analyser_take_off_polar_angle",
       "transformations":{
         "analyser_take_off_polar_angle":0.0,

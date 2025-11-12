@@ -546,7 +546,7 @@ class XPSReader(MultiFormatReader):
         Check if there are multiple of some class and, if so, change the
         keys and values in the config file.
 
-        This replaces all occurences of "detector" and "electronanalyzer"
+        This replaces all occurrences of "detector" and "electronanalyzer"
         in the config dict by the respective names (e.g., detector0, detector1)
         and removes the generic term if there are multiple different instances.
 

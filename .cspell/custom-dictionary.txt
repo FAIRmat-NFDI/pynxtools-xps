@@ -118,7 +118,6 @@ neutraliser
 nxdata
 nxdls
 nxfit
-occurences
 orcid
 panode
 pnts

@@ -18,23 +18,21 @@
 Mappings for Specs Lab Prodigy SLE format reader.
 """
 
-from typing import Any, Union
+from typing import Any
+
 from lxml import etree as ET
 
-
 from pynxtools_xps.reader_utils import (
-    convert_pascal_to_snake,
-    _re_map_single_value,
     _format_value,
+    _re_map_single_value,
+    convert_pascal_to_snake,
     extract_unit,
 )
-
 from pynxtools_xps.value_mappers import (
-    convert_energy_type,
     convert_energy_scan_mode,
+    convert_energy_type,
     parse_datetime,
 )
-
 
 KEY_MAP: dict[str, str | dict[str, str]] = {
     # SQL spectrum metadata
@@ -135,7 +133,7 @@ UNITS: dict[str, str] = {
 POSSIBLE_DATE_FORMATS: list[str] = ["%Y-%b-%d %H:%M:%S.%f"]
 
 
-def format_key_and_value(key: str, value_str: str) -> tuple[Any, str]:
+def format_key_and_value(key: str, value_str: str) -> tuple[str, Any]:
     """
     Formats a key and a corresponding value string according to a series of transformations.
 
@@ -155,18 +153,16 @@ def format_key_and_value(key: str, value_str: str) -> tuple[Any, str]:
             - The formatted key (converted to snake_case and remapped if needed).
             - The formatted value, with numeric value processed and remapped according to `VALUE_MAP`.
     """
-    key = KEY_MAP.get(key, convert_pascal_to_snake(key))
+    key = KEY_MAP.get(key, convert_pascal_to_snake(key))  # type: ignore[assignment]
 
     value, unit = extract_unit(key, value_str)
     value = _format_value(value)
-    value = _re_map_single_value(key, value, VALUE_MAP)
+    value = _re_map_single_value(key, value, VALUE_MAP)  # type: ignore[assignment]
 
     return key, value
 
 
-def iterate_xml_at_tag(
-    xml_elem: ET.Element, tag: str
-) -> dict[str, Union[str, float, int]]:
+def iterate_xml_at_tag(xml_elem: ET.Element, tag: str) -> dict[str, str | float | int]:
     """
     Iterates through XML elements at the specified tag and formats their attributes.
 
@@ -184,14 +180,14 @@ def iterate_xml_at_tag(
         A dictionary containing formatted attribute values keyed by their corresponding names.
     """
 
-    subelem = xml_elem.find(tag)
+    sub_elem = xml_elem.find(tag)
 
     settings: dict[str, Any] = {}
 
     special_key_map: str | dict[str, str] = KEY_MAP.get(tag, {})
 
-    if subelem is not None and isinstance(special_key_map, dict):
-        for param in subelem.iter():
+    if sub_elem is not None and isinstance(special_key_map, dict):
+        for param in sub_elem.iter():
             for key, value in param.attrib.items():
                 key = special_key_map.get(key, key)
                 key, value = format_key_and_value(key, value)

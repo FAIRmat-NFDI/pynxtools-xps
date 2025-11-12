@@ -26,7 +26,7 @@
       }
     },
     "/ENTRY/INSTRUMENT[instrument]":{
-      "@default":"electronanalyser",
+      "@default":"electronanalyzer",
       "device_information":{
         "vendor":"@eln",
         "model":"@eln",
@@ -69,7 +69,7 @@
         "extent":null,
         "associated_source":"/entry/instrument/source_xray"
       },
-      "ELECTRONANALYSER[electronanalyser]":{
+      "ELECTRONANALYZER[electronanalyzer]":{
         "@default":"detector",
         "name":"@eln",
         "description":"@eln",

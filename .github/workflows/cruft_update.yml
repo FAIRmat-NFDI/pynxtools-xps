@@ -4,7 +4,6 @@ name: Update repository with Cruft
 permissions:
   contents: write
   pull-requests: write
-  workflows: write
 
 on:
   schedule:

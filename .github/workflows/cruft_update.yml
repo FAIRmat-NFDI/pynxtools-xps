@@ -63,6 +63,12 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "GitHub"
 
+          # If we're in CI, modify .cruft.json to skip workflows
+          if [ "${{ github.action_path }}" != "" ]; then
+            tmp=$(mktemp)
+            jq '.skip = ([".github/workflows/*"])' .cruft.json > "$tmp" && mv "$tmp" .cruft.json
+          fi
+
           cruft update --skip-apply-ask --refresh-private-variables
           # git restore --staged .
 

@@ -1,5 +1,7 @@
 {
   "/ENTRY":{
+    "definition": "NXxps",
+    "definition/@version": "@eln",
     "@default":"data",
     "title":"@eln",
     "start_time":"@eln",
@@ -56,8 +58,8 @@
     "beam_probe":{
       "distance":"@eln",
       "distance/@units":"@eln",
-      "incident_energy":"@attrs:excitation_energy",
-      "incident_energy/@units":"@attrs:excitation_energy/@units",
+      "incident_energy": "@eln.instrument.beam_probe.incident_energy.value",
+      "incident_energy/@units": "@eln.instrument.beam_probe.incident_energy.unit",
       "incident_energy_spread":null,
       "incident_energy_spread/@units":null,
       "incident_polarization":null,
@@ -70,9 +72,9 @@
       "name":"@attrs:name",
       "description":"@eln",
       "voltage_range":"@attrs:voltage_energy_range",
-      "voltage_range/@units":"@attrs:voltage_energy_range/@units",
-      "work_function":"@attrs:work_function",
-      "work_function/@units":"@attrs:work_function/@units",
+      "voltage_range/@units":"@attrs:voltage_energy_range/@unit",
+      "work_function": "@eln.instrument.electronanalyzer.work_function.value",
+      "work_function/@units": "@eln.instrument.electronanalyzer.work_function.unit",
       "fast_axes":null,
       "slow_axes":"energy",
       "device_information":{
@@ -81,12 +83,13 @@
         "identifier":"@eln",
         "identifier/@type": "@eln"
       },
-      "energy_resolution":{
-        "physical_quantity":"energy",
-        "type":"estimated",
-        "resolution":"@attrs:step_size",
-        "resolution/@units":"@attrs:step_size/@units"
+      "energy_resolution": {
+        "physical_quantity": "energy",
+        "type": "@eln",
+        "resolution": "@eln.instrument.energy_resolution.resolution.value",
+        "resolution/@units": "@eln.instrument.energy_resolution.resolution.unit"
       },
+
       "transmission_function":{
         "@signal":"relative_intensity",
         "@axes":["kinetic_energy"],
@@ -277,6 +280,23 @@
     "physical_form":"@eln",
     "situation":"@eln",
     "chemical_formula":"@eln",
+    "composition": "@eln.sample.composition",
+    "sample_type": "@eln.sample.sample_type",
+    "substrate_coverage": "@eln.sample.substrate_coverage.value",
+    "substrate_coverage/@units": "@eln.sample.substrate_coverage.unit",
+    "particle_size_distribution": "@eln.sample.particle_size_distribution.value",
+    "particle_size_distribution/@uncertainty": "@eln.sample.particle_size_distribution.uncertainty",
+    "particle_size_distribution/@units": "@eln.sample.particle_size_distribution.unit",
+    "sample_size": "@eln.sample.sample_size.value",
+    "sample_size/@units": "@eln.sample.sample_size.unit",
+    "sample_temperature": "@eln.sample.sample_temperature.value",
+    "sample_temperature/@units": "@eln.sample.sample_temperature.unit",
+    "relative_humidity": "@eln.sample.relative_humidity.value",
+    "relative_humidity/@units": "@eln.sample.relative_humidity.unit",
+    "concentration": "@eln.sample.concentration.value",
+    "concentration/@units": "@eln.sample.concentration.unit",
+    "particle_number_concentration": "@eln.sample.particle_number_concentration.value",
+    "particle_number_concentration/@units": "@eln.sample.particle_number_concentration.unit",
     "history":{
       "sample_preparation":{
         "start_time":"@eln",
@@ -321,5 +341,28 @@
     "energy/@type":"@attrs:energy/@type",
     "energy/@units":"@attrs:energy/@units",
     "@energy_indices":0
+  },
+  "/ENTRY/measurement_conditions": {
+  "sweeps": "@eln.measurement_conditions.sweeps",
+  "temperature": "@eln.measurement_conditions.temperature",
+  "pressure": "@eln.measurement_conditions.pressure",
+  "peak_number": "@eln.measurement_conditions.peak_number",
+  "peak_labels": "@eln.measurement_conditions.peak_labels",
+  "peak_positions": "@eln.measurement_conditions.peak_positions",
+  "peak_positions_err": "@eln.measurement_conditions.peak_positions_err",
+  "area": "@eln.measurement_conditions.area",
+  "area_err": "@eln.measurement_conditions.area_err",
+  "FWHM_L": "@eln.measurement_conditions.FWHM_L",
+  "FWHM_L_err": "@eln.measurement_conditions.FWHM_L_err",
+  "FWHM_G": "@eln.measurement_conditions.FWHM_G",
+  "FWHM_G_err": "@eln.measurement_conditions.FWHM_G_err",
+  "FWHM_T": "@eln.measurement_conditions.FWHM_T",
+  "FWHM_T_err": "@eln.measurement_conditions.FWHM_T_err",
+  "peak_asymmetry": "@eln.measurement_conditions.peak_asymmetry",
+  "peak_asymmetry_err": "@eln.measurement_conditions.peak_asymmetry_err"
+  },
+  "/ENTRY/entry_definitions/*": {
+  "definition": "@eln.entry_definitions.*.definition",
+  "definition/@version": "@eln.entry_definitions.*.definition@version"
   }
 }

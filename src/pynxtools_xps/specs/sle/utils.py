@@ -155,7 +155,7 @@ def format_key_and_value(key: str, value_str: str) -> tuple[str, Any]:
     """
     key = KEY_MAP.get(key, convert_pascal_to_snake(key))  # type: ignore[assignment]
 
-    value, unit = extract_unit(key, value_str)
+    value, unit = extract_unit(key, value_str, UNITS)
     value = _format_value(value)
     value = _re_map_single_value(key, value, VALUE_MAP)  # type: ignore[assignment]
 

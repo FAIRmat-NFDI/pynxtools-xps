@@ -492,7 +492,6 @@ class SleProdigyParser:
             node_id = self._get_sql_node_id(spectrum["spectrum_id"])
             if node_id is None:
                 node_id = spectrum["spectrum_id"]
-
             raw_ids = self._get_raw_ids(node_id)
             if not raw_ids:
                 logger.warning(f"No raw_ids found for node {node_id}")
@@ -596,14 +595,14 @@ class SleProdigyParser:
             if "energy" not in spectrum["data"]:
                 e0 = spectrum.get("electron_energy", 0.0)
                 step = spectrum.get("step_size", 1.0)
-                npts = len(spectrum["data"]["x"])
-                energy_axis = e0 - (np.arange(npts) * step)
+                n_points = len(spectrum["data"]["x"])
+                energy_axis = e0 - (np.arange(n_points) * step)
                 spectrum["data"]["energy"] = energy_axis
                 spectrum["energy"] = energy_axis
 
             if spectrum.get("transmission_function/relative_intensity") is None:
-                npts = len(spectrum["data"]["x"])
-                spectrum["transmission_function/relative_intensity"] = np.ones(npts)
+                n_points = len(spectrum["data"]["x"])
+                spectrum["transmission_function/relative_intensity"] = np.ones(n_points)
 
             # TODO: make this working
             # extension_channels = self._get_extension_channel_info(node_id)
@@ -634,7 +633,7 @@ class SleProdigyParser:
             detectors[f"detector{detector_no}"] = detector
         return detectors
 
-    def _get_transmission(self, node_id: int) -> np.ndarray:
+    def _get_transmission(self, node_id: int) -> np.ndarray | None:
         """
         Get the transmission function data.
 
@@ -651,15 +650,15 @@ class SleProdigyParser:
         try:
             query = f'SELECT TransmissionData, TransmissionLen FROM Spectrum WHERE Node="{node_id}"'
             result = self._execute_sql_query(query)[0]
-            blob, nvals = result
+            blob, n_values = result
 
             if blob is None:
                 return None
 
             transmission_data = np.frombuffer(blob, dtype=np.float32)
 
-            if nvals and len(transmission_data) >= nvals:
-                transmission_data = transmission_data[:nvals]
+            if n_values and len(transmission_data) >= n_values:
+                transmission_data = transmission_data[:n_values]
 
             return transmission_data
 
@@ -694,16 +693,16 @@ class SleProdigyParser:
                 elif all(k in asp.attrib for k in ("Ebin", "End", "ValuesPerCurve")):
                     ebin = float(asp.attrib.get("Ebin", 0))
                     end = float(asp.attrib.get("End", 0))
-                    npts = int(asp.attrib.get("ValuesPerCurve", 1))
-                    if npts > 1:
-                        abscissa_info["StepSize"] = (end - ebin) / (npts - 1)
+                    n_points = int(asp.attrib.get("ValuesPerCurve", 1))
+                    if n_points > 1:
+                        abscissa_info["StepSize"] = (end - ebin) / (n_points - 1)
 
                 if "ValuesPerCurve" in asp.attrib:
                     abscissa_info["NumValues"] = int(asp.attrib["ValuesPerCurve"])
 
             return abscissa_info if abscissa_info else None
 
-    def _get_extension_channel_info(self, node_id):
+    def _get_extension_channel_info(self, node_id) -> list[dict[str, Any]] | None:
         def _parse_channel_name(channel_name):
             device = re.findall(r"\((.*?)\)", channel_name)[0]
             unit = re.findall(r"\[(.*?)\]", channel_name)[0]
@@ -842,6 +841,9 @@ class SleProdigyParser:
     def _get_detector_data(self, node_id: int) -> list[np.ndarray]:
         """
         Get the detector data from sle file.
+        The detector data is stored in the SQLite database as a blob.
+        To know which blobs belong to which scans, one needs to first get the
+        raw_id from the RawData table.
 
         Parameters
         ----------
@@ -856,14 +858,22 @@ class SleProdigyParser:
         query = f'SELECT RawID FROM RawData WHERE Node="{node_id}"'
         raw_ids = [i[0] for i in self._execute_sql_query(query)]
 
-        detector_data: list[Any] = []
+        # patch
+        if len(raw_ids) > 1:
+            detector_data = []
+            for raw_id in raw_ids:
+                detector_data += np.array([self._get_one_scan(raw_id)])
+        else:
+            raw_id = raw_ids[0]
+            detector_data = self._get_one_scan(raw_id)
+        # detector_data: list[Any] = []
 
-        for raw_id in raw_ids:
-            scan = self._get_one_scan(raw_id)
-            # Ensure scan is always an ndarray
-            if not isinstance(scan, np.ndarray):
-                scan = np.array(scan, dtype=float)
-            detector_data.append(scan)
+        # for raw_id in raw_ids:
+        #     scan = self._get_one_scan(raw_id)
+        #     # Ensure scan is always an ndarray
+        #     if not isinstance(scan, np.ndarray):
+        #         scan = np.array(scan, dtype=float)
+        #     detector_data.append(scan)
 
         return detector_data
 
@@ -991,7 +1001,6 @@ class SleProdigyParser:
                 if k in KEY_MAP
             }
             combined = copy.copy(combined)
-
             # Default energy type if missing
             if "EnergyType" not in combined.keys():
                 combined["EnergyType"] = "Binding"
@@ -1016,9 +1025,9 @@ class SleProdigyParser:
                         ):
                             ebin = float(spec_xml.attrib.get("Ebin", 0))
                             end = float(spec_xml.attrib.get("End", 0))
-                            npts = int(spec_xml.attrib.get("NumValues", 1))
-                            if npts > 1:
-                                spectrum["step_size"] = (end - ebin) / (npts - 1)
+                            n_points = int(spec_xml.attrib.get("NumValues", 1))
+                            if n_points > 1:
+                                spectrum["step_size"] = (end - ebin) / (n_points - 1)
                                 break
 
                 except Exception as e:
@@ -1318,7 +1327,6 @@ class SleProdigyParser:
                 spec["data"] = {}
             if "x" not in spec["data"] or spec["data"]["x"] is None:
                 spec["data"]["x"] = self._get_energy_data(spec)
-
             if "energy" not in spec or spec["energy"] is None:
                 if "x" in spec["data"] and spec["data"]["x"] is not None:
                     spec["energy"] = np.array(spec["data"]["x"])

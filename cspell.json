@@ -24,7 +24,10 @@
     "en_US",
     "python"
   ],
-  "words": [],
+  "words": [
+    "npts",
+    "nvals"
+  ],
   "ignoreWords": [],
   "ignoreRegExpList": ["\\bNX\\w*\\b", "https?://[\\S]+"],
   "language": "en-US"

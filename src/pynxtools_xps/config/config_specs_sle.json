@@ -56,8 +56,8 @@
     "beam_probe":{
       "distance":"@eln",
       "distance/@units":"@eln",
-      "incident_energy": "@attrs:excitation_energy",
-      "incident_energy/@units": "@attrs:excitation_energy/@units",
+      "incident_energy":"@attrs:excitation_energy",
+      "incident_energy/@units":"@attrs:excitation_energy/@units",
       "incident_energy_spread":null,
       "incident_energy_spread/@units":null,
       "incident_polarization":null,
@@ -81,13 +81,12 @@
         "identifier":"@eln",
         "identifier/@type": "@eln"
       },
-      "energy_resolution": {
-        "physical_quantity": "energy",
-        "type": "@eln",
-        "resolution": "@eln.instrument.energy_resolution.resolution.value",
-        "resolution/@units": "@eln.instrument.energy_resolution.resolution.unit"
+      "energy_resolution":{
+        "physical_quantity":"energy",
+        "type":"estimated",
+        "resolution":"@attrs:step_size",
+        "resolution/@units":"@attrs:step_size/@units"
       },
-
       "transmission_function":{
         "@signal":"relative_intensity",
         "@axes":["kinetic_energy"],

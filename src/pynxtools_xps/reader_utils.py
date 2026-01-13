@@ -491,8 +491,23 @@ def extract_unit(
     """
     Extract numeric value + unit.
 
-    Handles cases where unit_missing is None (older SLE files).
+    Example:
+        analyzer_work_function = "4.506eV"
+        -> (4.506, "eV")
+
+    Args:
+        key (str): Key associated with the value.
+        value_str (str): Combined numeric value and unit as a string.
+        unit_missing (Optional[dict[str, str]]): Optional dictionary with default units
+            for keys missing units. Defaults to None.
+
+    Returns:
+        tuple[Union[int, float, str], Optional[str]]:
+            - A tuple with the numeric value (int, float, or str) and the unit.
+            - If no unit is found in `value_str`, it uses `unit_missing` if available.
+            - If no unit is found in either, returns None for the unit.
     """
+
     if not value_str:
         return "", ""
 
@@ -501,9 +516,9 @@ def extract_unit(
     # If no unit was parsed, fall back safely.
     if not unit:
         if isinstance(unit_missing, dict):
-            unit = unit_missing.get(key, "")
+            unit = unit_missing.get(key)
         else:
-            unit = ""
+            unit = None
 
     return value, unit
 

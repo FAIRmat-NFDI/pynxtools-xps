@@ -592,14 +592,6 @@ class SleProdigyParser:
                 )
                 raise ValueError("Missing x-axis / abscissa information")
 
-            if "energy" not in spectrum["data"]:
-                e0 = spectrum.get("electron_energy", 0.0)
-                step = spectrum.get("step_size", 1.0)
-                n_points = len(spectrum["data"]["x"])
-                energy_axis = e0 - (np.arange(n_points) * step)
-                spectrum["data"]["energy"] = energy_axis
-                spectrum["energy"] = energy_axis
-
             if spectrum.get("transmission_function/relative_intensity") is None:
                 n_points = len(spectrum["data"]["x"])
                 spectrum["transmission_function/relative_intensity"] = np.ones(n_points)
@@ -867,13 +859,6 @@ class SleProdigyParser:
             raw_id = raw_ids[0]
             detector_data = self._get_one_scan(raw_id)
         # detector_data: list[Any] = []
-
-        # for raw_id in raw_ids:
-        #     scan = self._get_one_scan(raw_id)
-        #     # Ensure scan is always an ndarray
-        #     if not isinstance(scan, np.ndarray):
-        #         scan = np.array(scan, dtype=float)
-        #     detector_data.append(scan)
 
         return detector_data
 

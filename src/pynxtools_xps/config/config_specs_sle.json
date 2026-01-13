@@ -70,9 +70,9 @@
       "name":"@attrs:name",
       "description":"@eln",
       "voltage_range":"@attrs:voltage_energy_range",
-      "voltage_range/@units":"@attrs:voltage_energy_range/@unit",
-      "work_function": "@eln.instrument.electronanalyzer.work_function.value",
-      "work_function/@units": "@eln.instrument.electronanalyzer.work_function.unit",
+      "voltage_range/@units":"@attrs:voltage_energy_range/@units",
+      "work_function":"@attrs:work_function",
+      "work_function/@units":"@attrs:work_function/@units",
       "fast_axes":null,
       "slow_axes":"energy",
       "device_information":{
@@ -322,9 +322,5 @@
     "energy/@type":"@attrs:energy/@type",
     "energy/@units":"@attrs:energy/@units",
     "@energy_indices":0
-  },
-  "/ENTRY/entry_definitions/*": {
-  "definition": "@eln.entry_definitions.*.definition",
-  "definition/@version": "@eln.entry_definitions.*.definition@version"
   }
 }

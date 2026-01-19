@@ -13,15 +13,15 @@ available in CasaXPS, including the most commonly used linear, Shirley, and Toug
 
 ## Modeling of data fitting in NeXus
 
-NeXus contains a base class for modelling fit procedures called [`NXfit`](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXfit.html). ``NXfit`` contains
+NeXus contains a base class for modelling fit procedures called [`NXfit`](https://fairmat-nfdi.github.io/nexus_definitions/classes/base_classes/NXfit.html). ``NXfit`` contains
 
 - the data to be modelled
-- one or more instances of [`NXpeak`](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXpeak.html) to define individual peaks in the model. These map to the components in CasaXPS
-- one or more instances of [`NXpeak`](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXpeak.html) to define the background to be subtracted during the fit. These map to the regions in CasaXPS.
-- two instances of [`NXfit_function`](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXfit_function.html) to describe the function used for the global fit (`global_fit_function`) and for the optimization (`error_function`).
+- one or more instances of [`NXpeak`](https://fairmat-nfdi.github.io/nexus_definitions/classes/base_classes/NXpeak.html) to define individual peaks in the model. These map to the components in CasaXPS
+- one or more instances of [`NXpeak`](https://fairmat-nfdi.github.io/nexus_definitions/classes/base_classes/NXpeak.html) to define the background to be subtracted during the fit. These map to the regions in CasaXPS.
+- two instances of [`NXfit_function`](https://fairmat-nfdi.github.io/nexus_definitions/classes/base_classes/NXfit_function.html) to describe the function used for the global fit (`global_fit_function`) and for the optimization (`error_function`).
 - information about the fitting sum (envelope) and the residual of the fit
 
-The application definition `NXxps` implements an [`NXfit` group](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXxps.html#nxxps-entry-fit-group) to model peak fitting in XPS. Aside from the terms defined in the base class `NXfit`, it also contains some information more specific to XPS fits, like the atomic concentration of each species in the fit model.
+The application definition `NXxps` implements an [`NXfit` group](https://fairmat-nfdi.github.io/nexus_definitions/classes/applications/NXxps.html#nxxps-entry-fit-group) to model peak fitting in XPS. Aside from the terms defined in the base class `NXfit`, it also contains some information more specific to XPS fits, like the atomic concentration of each species in the fit model.
 
 ## How-to convert peak fitting in CasaXPS into a NeXus file
 

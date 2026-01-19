@@ -30,7 +30,7 @@ xps_example_upload_entry_point = ExampleUploadEntryPoint(
     description="""
         This example demonstrates how NOMAD can convert, standardize, and store X-ray Photoelectron Spectroscopy (XPS) data.
         It shows the generation of a NeXus file according to the
-        [`NXxps`](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXxps.html#nxxps)
+        [`NXxps`](https://fairmat-nfdi.github.io/nexus_definitions/classes/applications/NXxps.html#nxxps)
         application definition from an example measurement file and a subsequent analysis of that data set.
     """,
     plugin_package="pynxtools_xps",

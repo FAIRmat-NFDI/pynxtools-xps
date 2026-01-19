@@ -31,7 +31,7 @@ NPTrapezoidType = Callable[..., np.typing.NDArray[np.float64]]
 if np.lib.NumpyVersion(np.__version__) >= "2.0.0":
     np_trapezoid = cast(NPTrapezoidType, getattr(np, "trapezoid"))
 else:
-    np_trapezoid = cast(NPTrapezoidType, np.trapz)  # noqa: NPY201
+    np_trapezoid = cast(NPTrapezoidType, getattr(np, "trapz"))  # noqa: NPY201
 
 
 class LinearBackground:

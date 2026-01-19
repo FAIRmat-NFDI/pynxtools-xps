@@ -1,6 +1,6 @@
 # The XPS coordinate system
 
-The application definition [NXxps](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXxps.html) defines a coordinate system based on the sample stage, which is the same coordinate system as in the [ISO standard](https://www.iso.org/standard/24269.html) for surface chemical analysis.
+The application definition [NXxps](https://fairmat-nfdi.github.io/nexus_definitions/classes/applications/NXxps.html) defines a coordinate system based on the sample stage, which is the same coordinate system as in the [ISO standard](https://www.iso.org/standard/24269.html) for surface chemical analysis.
 
 ![The XPS coordinate system](../assets/xps_cs.png)
 

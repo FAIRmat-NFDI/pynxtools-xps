@@ -52,6 +52,6 @@ You should add test data and add your reader to the `test_params` in the `test_r
 
 # Further details
 
-[NXmpes](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXmpes.html)
+[NXmpes](https://fairmat-nfdi.github.io/nexus_definitions/classes/applications/NXmpes.html)
 
-[NXxps](https://fairmat-nfdi.github.io/nexus_definitions/classes/contributed_definitions/NXxps.html)
+[NXxps](https://fairmat-nfdi.github.io/nexus_definitions/classes/applications/NXxps.html)

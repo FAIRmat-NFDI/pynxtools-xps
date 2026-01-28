@@ -62,7 +62,7 @@ class XPSMapper(ABC):
 
     def __init__(self):
         self.file: str | Path = ""
-        self.raw_data: list[str] = []
+        self.raw_data: list[dict[str, Any]] = []
         self._xps_dict: dict[str, Any] = {}
 
         self.parser = None
@@ -116,6 +116,11 @@ def convert_pascal_to_snake(str_value: str) -> str:
 
     def replace_non_bracketed(match):
         content = match.group(0)
+
+        # If already ALL CAPS (with optional underscores), just lowercase
+        if content.isupper():
+            return content.lower()
+
         snake_case = re.sub(r"(?<!^)(?=[A-Z])", "_", content)
         return re.sub(r"\s+", "_", snake_case).replace("__", "_")
 

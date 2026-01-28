@@ -17,14 +17,8 @@
 # pylint: disable=too-many-lines,too-many-instance-attributes
 """
 Parser for reading XPS (X-ray Photoelectron Spectroscopy) data from native
-Specs Lab Prodigy SLE format, to be passed to mpes nxdl
+Specs Lab Prodigy SLE format, to be passed to MPES NXDL
 (NeXus Definition Language) template.
-"""
-
-"""
-Parser for reading XPS (X-ray Photoelectron Spectroscopy) metadata from
-SPECS Lab Prodigy, to be passed to MPES nxdl (NeXus Definition Language)
-template.
 """
 
 import copy
@@ -59,7 +53,7 @@ from pynxtools_xps.specs.sle.utils import (
     KEY_MAP,
     UNITS,
     VALUE_MAP,
-    format_key_and_value,
+    format_key_value_and_unit,
     iterate_xml_at_tag,
 )
 from pynxtools_xps.value_mappers import get_units_for_key
@@ -256,9 +250,6 @@ class SleMapperSpecs(XPSMapper):
             if units is not None:
                 self._xps_dict[f"{mpes_key}/@units"] = units
 
-        # self._xps_dict[f'{path_map["electronanalyzer"]}/name'] = spectrum["devices"][0]
-        # self._xps_dict[f'{path_map["source"]}/name'] = spectrum["devices"][1]
-
         # Create keys for writing to data
         scan_key = construct_data_key(spectrum)
 
@@ -314,6 +305,12 @@ class SleMapperSpecs(XPSMapper):
                 data=averaged, coords={"energy": energy}
             )
             self._xps_dict[f"{entry}/{scan_key}/@units"] = "counts_per_second"
+
+            # Add unit for detector data
+            detector_data_units: str = get_units_for_key("detector/raw_data/raw", UNITS)
+            self._xps_dict[f"{entry_parent}/detector/raw_data/raw/@units"] = (
+                detector_data_units if detector_data_units is not None else "counts"
+            )
 
 
 class SleProdigyParser:
@@ -620,7 +617,7 @@ class SleProdigyParser:
         for detector_no, sub_elem in enumerate(elem.iter("Detector")):
             detector = {}
             for key, value in sub_elem.attrib.items():
-                key, value = format_key_and_value(key, value)
+                key, value, unit = format_key_value_and_unit(key, value)
                 detector[key] = value
             detectors[f"detector{detector_no}"] = detector
         return detectors
@@ -906,16 +903,17 @@ class SleProdigyParser:
             All parameters given in the device protocol.
 
         """
-        protocol_params: dict[str, dict[str, Any]] = {}
+        protocol_params: dict[str, Any] = {}
         for elem in protocol.iter("Command"):
             unique_device_name = elem.attrib["UniqueDeviceName"]
-            protocol_params[unique_device_name] = cast(dict[str, Any], {})
 
             for parameter in elem.iter("Parameter"):
-                key, value = format_key_and_value(
+                key, value, unit = format_key_value_and_unit(
                     parameter.attrib["name"], parameter.text
                 )
-                protocol_params[unique_device_name][key] = value
+                protocol_params[f"{unique_device_name}/{key}"] = value
+                if unit:
+                    protocol_params[f"{unique_device_name}/{key}/@units"] = unit
 
         return protocol_params
 

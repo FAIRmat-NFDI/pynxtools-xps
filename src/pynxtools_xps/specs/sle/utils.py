@@ -18,8 +18,10 @@
 Mappings for Specs Lab Prodigy SLE format reader.
 """
 
+import re
 from typing import Any
 
+import numpy as np
 from lxml import etree as ET
 
 from pynxtools_xps.reader_utils import (
@@ -29,6 +31,7 @@ from pynxtools_xps.reader_utils import (
     extract_unit,
 )
 from pynxtools_xps.value_mappers import (
+    UNIT_MAP,
     convert_energy_scan_mode,
     convert_energy_type,
     parse_datetime,
@@ -69,7 +72,7 @@ KEY_MAP: dict[str, str | dict[str, str]] = {
     "Entrance": "entrance_slit",
     "Exit": "exit_slit",
     "Epass": "pass_energy",
-    "VoltageRange": "voltage_range",
+    "VoltageRange": "voltage_energy_range",
     # spectrometer settings
     "Coil Current [mA]": "coil_current [mA]",
     "Pre Defl Y [nU]": "pre_deflector_y_current [nU]",
@@ -132,34 +135,87 @@ UNITS: dict[str, str] = {
 
 POSSIBLE_DATE_FORMATS: list[str] = ["%Y-%b-%d %H:%M:%S.%f"]
 
+_UNIT_IN_KEY_RE = re.compile(r"^(?P<key>.+?)\s*\[(?P<unit>[^\]]+)\]$")
 
-def format_key_and_value(key: str, value_str: str) -> tuple[str, Any]:
+
+def extract_unit_from_key(
+    key: str,
+    unit_map: dict[str, str | None],
+) -> tuple[str, str | None]:
     """
-    Formats a key and a corresponding value string according to a series of transformations.
+    Extract and normalize a unit embedded in a key name.
 
-    This function:
-    1. Maps the key based on a predefined dictionary (`KEY_MAP`).
-    2. Converts the key from PascalCase to snake_case.
-    3. Extracts the numeric value and unit from the value string.
-    4. Formats the numeric part of the value according to its expected type.
-    5. Remaps the value to a new format if specified in `VALUE_MAP`.
+    The function detects units of the form ``"<key> [<unit>]"`` where the unit
+    is enclosed in square brackets at the end of the key. If found, the unit
+    is removed from the key and normalized using ``unit_map``.
+
+    Special handling is applied for ambiguous units such as ``"nU"``, where
+    the resolved unit depends on the semantic meaning of the key.
 
     Args:
-        key (str): The key associated with the value, which may need mapping and formatting.
-        value_str (str): The value string to format and separate into numeric value and unit.
+        key (str): Formatted key name, potentially containing an embedded unit.
+        unit_map (dict[str, str | None]): Mapping from raw units to normalized
+            units. A mapped value of ``None`` explicitly disables the unit.
 
     Returns:
-        tuple[Any, str]:
-            - The formatted key (converted to snake_case and remapped if needed).
-            - The formatted value, with numeric value processed and remapped according to `VALUE_MAP`.
+        tuple[str, str | None]:
+            - Key with any embedded unit removed.
+            - Normalized unit, or None if no unit was found or it was disabled.
+    """
+    match = _UNIT_IN_KEY_RE.match(key)
+    if not match:
+        return key, None
+
+    base_key = match.group("key")
+    raw_unit = match.group("unit")
+
+    # Exceptional case: ambiguous "nU" unit
+    if raw_unit == "nU":
+        if base_key.endswith("voltage"):
+            return base_key, "V"
+        if base_key.endswith("current"):
+            return base_key, "A"
+
+    # Default normalization via unit map
+    unit = unit_map.get(raw_unit, raw_unit)
+
+    return base_key, unit
+
+
+def format_key_value_and_unit(
+    key: str, value_str: str
+) -> tuple[str, str | int | float | bool | np.ndarray | None, str | None]:
+    """
+    Formats a key and value string and extracts an associated unit.
+
+    This reader-level helper:
+    1. Maps the key using `KEY_MAP` and converts it to snake_case.
+    2. Extracts the numeric value and unit from the value string.
+    3. Falls back to extracting the unit from the key if not present in the value.
+    4. Formats the numeric part of the value (int / float when possible).
+    5. Remaps the value if specified in `VALUE_MAP`.
+
+    Args:
+        key (str): Raw key name as found in the input.
+        value_str (str): Raw value string, potentially containing a unit.
+
+    Returns:
+        tuple[str, int | float | str, str | None]:
+            - Formatted key (snake_case, mapped if applicable).
+            - Formatted value (numeric when possible, otherwise unchanged).
+            - Extracted unit, or None if no unit could be determined.
     """
     key = KEY_MAP.get(key, convert_pascal_to_snake(key))  # type: ignore[assignment]
 
     value, unit = extract_unit(key, value_str, UNITS)
+
+    if not unit:
+        key, unit = extract_unit_from_key(key, UNIT_MAP)
+
     value = _format_value(value)
     value = _re_map_single_value(key, value, VALUE_MAP)  # type: ignore[assignment]
 
-    return key, value
+    return key, value, unit
 
 
 def iterate_xml_at_tag(xml_elem: ET.Element, tag: str) -> dict[str, str | float | int]:
@@ -190,7 +246,9 @@ def iterate_xml_at_tag(xml_elem: ET.Element, tag: str) -> dict[str, str | float 
         for param in sub_elem.iter():
             for key, value in param.attrib.items():
                 key = special_key_map.get(key, key)
-                key, value = format_key_and_value(key, value)
+                key, value, unit = format_key_value_and_unit(key, value)
                 settings[key] = value
+                if unit:
+                    settings[f"{key}/@units"] = unit
 
     return settings

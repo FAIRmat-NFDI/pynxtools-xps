@@ -76,7 +76,7 @@ BOOL_MAP: dict[str, bool] = {
     "Off": False,
 }
 
-UNIT_MAP: dict[str, str] = {
+UNIT_MAP: dict[str, str | None] = {
     "a.u.": "counts",
     "Counts": "counts",
     "counts/s": "counts_per_second",
@@ -90,7 +90,7 @@ UNIT_MAP: dict[str, str] = {
     "eV/atom": "eV",
     "microm": "micrometer",
     "d": "degree",
-    "nU": "V",  # workaround for SPECS SLE reader
+    "nU": "",  # workaround for SPECS SLE reader
     "s-1": "1/s",  # workaround for SPECS XY reader
     "norm": None,  # workaround for SPECS XY reader
 }

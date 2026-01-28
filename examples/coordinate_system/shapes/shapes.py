@@ -160,7 +160,7 @@ if __name__ == "__main__":
     }
 
     for shape, (shape_func, args) in shapes.items():
-        indices, vertices = shape_func(*args)
+        indices, vertices = shape_func(*args)   # type: ignore[operator]
         filename = os.path.join(folder, f"{shape}.stl")
         save_to_stl(indices, vertices, filename)
         print(f"STL file saved as '{shape}.stl'")

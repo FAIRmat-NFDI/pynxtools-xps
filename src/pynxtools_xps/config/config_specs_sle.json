@@ -39,7 +39,7 @@
     },
     "source_probe":{
       "type":"@eln",
-      "name":"@attrs:name",
+      "name":"@attrs:XRC1000/unique_device_name",
       "probe":"@eln",
       "current":"@attrs:emission_current",
       "current/@units":"@attrs:emission_current/@units",
@@ -67,7 +67,7 @@
     },
     "ELECTRONANALYZER[electronanalyzer]":{
       "@default":"detector",
-      "name":"@attrs:name",
+      "name":"@attrs:Phoibos1D/unique_device_name",
       "description":"@eln",
       "voltage_range":"@attrs:voltage_energy_range",
       "voltage_range/@units":"@attrs:voltage_energy_range/@units",
@@ -266,7 +266,7 @@
     },
     "calibration_object":{
       "type":"file",
-      "file_name":"@attrs:transmission_correction/transmission_function/file"
+      "file_name":"@attrs:transmission_function/file"
     }
   },
   "/ENTRY/SAMPLE[sample]":{

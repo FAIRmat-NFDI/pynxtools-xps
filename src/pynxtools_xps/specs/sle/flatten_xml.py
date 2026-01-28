@@ -25,7 +25,7 @@ from typing import Any
 
 from lxml import etree as ET
 
-from pynxtools_xps.specs.sle.utils import format_key_and_value, iterate_xml_at_tag
+from pynxtools_xps.specs.sle.utils import format_key_value_and_unit, iterate_xml_at_tag
 from pynxtools_xps.value_mappers import (
     MEASUREMENT_METHOD_MAP,
     convert_measurement_method,
@@ -53,13 +53,15 @@ def extract_devices(elem: ET.Element) -> dict[str, Any]:
     for key, value in elem.attrib.items():
         if key == "Name":
             key = "command"
-        key, value = format_key_and_value(key, value)
+        key, value, unit = format_key_value_and_unit(key, value)
         device_settings[key] = value
 
     for param in elem.iter("Parameter"):
-        key, value = format_key_and_value(param.attrib["name"], param.text)
+        key, value, unit = format_key_value_and_unit(param.attrib["name"], param.text)
 
         device_settings[key] = value
+        if unit:
+            device_settings[f"{key}/@units"] = unit
 
     return device_settings
 
@@ -85,7 +87,9 @@ def extract_device_commands(elem: ET.Element) -> dict[str, Any]:
 
     device_settings = extract_devices(elem)
 
-    return {unique_device_name: device_settings}
+    return {
+        f"{unique_device_name}/{key}": value for key, value in device_settings.items()
+    }
 
 
 def extract_device_info(elem: ET.Element) -> dict[str, Any]:
@@ -108,7 +112,7 @@ def extract_device_info(elem: ET.Element) -> dict[str, Any]:
 
     device_settings = extract_devices(elem)
 
-    return {unique_name: device_settings}
+    return {f"{unique_name}/{key}": value for key, value in device_settings.items()}
 
 
 def step_profiling(elem: ET.Element) -> dict[str, Any]:
@@ -214,6 +218,8 @@ def _get_spectrum_metadata(elem: ET.Element) -> dict[str, Any]:
 
     spectrum_settings["spectrum_id"] = elem.attrib["ID"]
     spectrum_settings["spectrum_type"] = elem.attrib["Name"]
+    # Workaround for transitions list
+    spectrum_settings["transitions"] = [spectrum_settings["spectrum_type"]]
 
     spectrum_types = {
         "FixedEnergiesSettings": "Alignment",

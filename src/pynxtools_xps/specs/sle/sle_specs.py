@@ -612,7 +612,7 @@ class SleProdigyParser:
         query = f'SELECT Data FROM NodeData WHERE Node="{node_id}"'
         elem = ET.fromstring(self._execute_sql_query(query)[0][0])
 
-        detectors = {}
+        detectors: dict[str, Any] = {}
 
         detectors["info"] = iterate_xml_at_tag(elem, "DetectorCalibration")
 

@@ -94,6 +94,7 @@ electronanalyzer
 elments
 elmt
 energydispersion
+frombuffer
 gcib
 gltf
 headerlines
@@ -109,6 +110,7 @@ lmfit
 lukaspie
 mainfile
 maxit
+metainfo
 microm
 monochromatized
 monochromator

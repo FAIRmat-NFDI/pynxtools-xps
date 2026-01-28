@@ -34,7 +34,6 @@ dev = [
     "pytest-cov",
     "pytest-timeout",
     "types-pyyaml",
-    "types-pytz",
     "types-requests",
     "pre-commit",
 ]

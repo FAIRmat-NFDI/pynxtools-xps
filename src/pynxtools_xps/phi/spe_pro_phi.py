@@ -28,9 +28,9 @@ import struct
 import warnings
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import numpy as np
-import pytz
 import xarray as xr
 
 from pynxtools_xps.phi.phi_data_model import (
@@ -976,7 +976,10 @@ def _parse_datetime(value: str):
     """
     year, month, day = value.strip().split(" ")
     date_object = datetime.datetime(
-        year=int(year), month=int(month), day=int(day), tzinfo=pytz.timezone("UTC")
+        year=int(year),
+        month=int(month),
+        day=int(day),
+        tzinfo=ZoneInfo("UTC"),
     )
 
     return date_object.isoformat()

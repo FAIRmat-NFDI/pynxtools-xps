@@ -395,6 +395,8 @@ class SleProdigyParser:
         self._attach_node_ids()
         self._get_spectrum_metadata_from_sql()
         self._remove_empty_nodes()
+        # ToDO: Figure out what to do with the detector data
+        # self._get_detector_data()
         self._attach_device_protocols()
 
         self._check_encoding()
@@ -827,7 +829,7 @@ class SleProdigyParser:
         query = f'SELECT RawId FROM RawData WHERE Node="{node_id}"'
         return len(self._execute_sql_query(query))
 
-    def _get_detector_data(self, node_id: int) -> list[np.ndarray]:
+    def _get_detector_data(self):
         """
         Get the detector data from sle file.
         The detector data is stored in the SQLite database as a blob.
@@ -844,20 +846,17 @@ class SleProdigyParser:
         detector_data : list[NDArray[np.float_]]
             List of numpy arrays with measured data.
         """
-        query = f'SELECT RawID FROM RawData WHERE Node="{node_id}"'
-        raw_ids = [i[0] for i in self._execute_sql_query(query)]
+        for spectrum in self.spectra:
+            node_id = spectrum.get("node_id")
+            query = f'SELECT RawID FROM RawData WHERE Node="{node_id}"'
+            raw_ids = [i[0] for i in self._execute_sql_query(query)]
 
-        # patch
-        if len(raw_ids) > 1:
-            detector_data = []
+            detector_data: list[np.ndarray] = []
+
             for raw_id in raw_ids:
-                detector_data += np.array([self._get_one_scan(raw_id)])
-        else:
-            raw_id = raw_ids[0]
-            detector_data = self._get_one_scan(raw_id)
-        # detector_data: list[Any] = []
+                detector_data.append(self._get_one_scan(raw_id))
 
-        return detector_data
+            spectrum["detector_data"] = detector_data
 
     def _attach_device_protocols(self):
         """

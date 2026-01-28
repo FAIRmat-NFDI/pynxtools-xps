@@ -12,7 +12,7 @@
     "experiment_facility":"@eln",
     "experiment_laboratory":"@eln",
     "program_name":"@attrs:software_version",
-    "acquisition_filename":"@attrs:acquisition_filename",
+    "acquisition_filename":"@attrs:acquisition_filename"
   },
   "/ENTRY/USER[user]":{
     "name":"['@attrs:user_name', 'user']",

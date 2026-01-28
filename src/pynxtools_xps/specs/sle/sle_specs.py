@@ -327,8 +327,8 @@ class SleProdigyParser:
     ]
 
     def __init__(self):
-        self.con: sqlite3.Conncetion = None
-        self.cur = sqlite3.Cursor = None
+        self.con: sqlite3.Connection = None
+        self.cur: sqlite3.Cursor = None
 
         self.spectra: list[dict[str, Any]] = []
         self.xml_schedule: ET.Element = None
@@ -423,7 +423,7 @@ class SleProdigyParser:
         self.cur = self.con.cursor()
 
     def _execute_sql_query(self, query: str):
-        """Excute a query on the file."""
+        """Execute a query on the file."""
         return execute_sql_query_with_cur(self.cur, query)
 
     def _get_version(self):
@@ -861,7 +861,7 @@ class SleProdigyParser:
     def _attach_device_protocols(self):
         """
         Get the device protocol for each node and add the parameters to
-        the spectra table. Occassionally these are not
+        the spectra table. Occasionally these are not
         recorded, if this is the case just skip the group.
 
         Returns

@@ -2,7 +2,7 @@
 
 This tutorial will guide you through on how to set up a working environment for developing `pynxtools-xps`.
 
-## What should you should know before this tutorial?
+## What should you know before this tutorial?
 
 - You should read the [guide on getting started with `pynxtools`](https://fairmat-nfdi.github.io/pynxtools/getting-started.html).
 - You should read the [installation tutorial](installation.md).
@@ -24,7 +24,7 @@ You will know
 
 ### Setup
 
-It is recommended to use python 3.12 with a dedicated virtual environment for this package. Learn how to manage [python versions](https://github.com/pyenv/pyenv) and [virtual environments](https://realpython.com/python-virtual-environments-a-primer/). We recommend using [`uv`](https://github.com/astral-sh/uv), an extremely fast Python package and project manager. In this tutorial, you will find paralleled descriptions, using either `uv` or a more classical approach using `venv` and `pip`.
+It is recommended to use python 3.12 with a dedicated virtual environment for this package. Learn how to manage [python versions](https://github.com/pyenv/pyenv) and [virtual environments](https://realpython.com/python-virtual-environments-a-primer/). We recommend using [`uv`](https://github.com/astral-sh/uv), an extremely fast Python package and project manager. In this tutorial, you will find parallel descriptions, using either `uv` or a more classical approach using `venv` and `pip`.
 
 Start by creating a virtual environment:
 
@@ -75,7 +75,7 @@ Next, we install the package in editable mode (together with its dependencies):
 
 ### Linting and formatting
 
-We are using ruff and mypy for linting, formatting, and type checking. It is recommended to use the [pre-commit hook](https://pre-commit.com/#intro) available for ruff which formats the code and checks the linting before actually making an actual Git commit.
+We are using ruff and mypy for linting, formatting, and type checking. It is recommended to use the [pre-commit hook](https://pre-commit.com/#intro) available for ruff which formats the code and checks the linting before making a Git commit.
 
 Install the precommit by running
 

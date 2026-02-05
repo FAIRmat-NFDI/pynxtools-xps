@@ -1,7 +1,7 @@
 site_name: Documentation for pynxtools-xps
 site_description: |
   The documentation for the pynxtools-xps plugin.
-site_author: The FAIRmat authors
+site_author: The NOMAD authors
 repo_url: https://github.com/FAIRmat-NFDI/pynxtools-xps
 edit_uri: ""
 

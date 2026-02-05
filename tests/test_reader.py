@@ -100,9 +100,9 @@ def test_nexus_conversion(
         Test data directory that contains all the files required for running the data
         conversion through one of the sub-readers. All of these data dirs
         are placed within tests/data/...
-    ignore_lines: Dict[str, List[str]]
+    ignore_lines: dict[str, list[str]]
         Lines within the log files to ignore.
-    ignore_sections: Dict[str, List[str]]
+    ignore_sections: dict[str, list[str]]
         Subsections of the log files to ignore.
     tmp_path : pathlib.PosixPath
         Pytest fixture variable, used to clean up the files generated during

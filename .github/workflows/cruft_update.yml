@@ -16,20 +16,7 @@ env:
 jobs:
   update:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-      matrix:
-        include:
-          - add-paths: .
-            body: Use this to merge the changes to this repository.
-            branch: cruft/update
-            commit-message: "chore: accept new Cruft update"
-            title: New updates detected with Cruft
-          - add-paths: .cruft.json
-            body: Use this to reject the changes in this repository.
-            branch: cruft/reject
-            commit-message: "chore: reject new Cruft update"
-            title: Reject new updates detected with Cruft
+
     steps:
       - uses: actions/checkout@v4
 
@@ -53,9 +40,8 @@ jobs:
           else
             echo "No .cruft.json file"
           fi
-
           echo "has_changes=$CHANGES" >> "$GITHUB_OUTPUT"
-        
+
       - name: Run update if available
         if: steps.check.outputs.has_changes == '1'
         run: |

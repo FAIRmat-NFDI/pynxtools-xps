@@ -1,6 +1,6 @@
 # Installation guide
 
-## What should you should know before this tutorial?
+## What should you know before this tutorial?
 
 To get started, it does not hurt to read the following `pynxtools` tutorial:
 
@@ -18,7 +18,7 @@ You will know
 
 It is recommended to use python 3.12 with a dedicated virtual environment for this package. Learn how to manage [python versions](https://github.com/pyenv/pyenv) and [virtual environments](https://realpython.com/python-virtual-environments-a-primer/).
 
-There are many alternatives to managing virtual environments and package dependencies (requirements). We recommend using [`uv`](https://github.com/astral-sh/uv), an extremely fast Python package and project manager. In this tutorial, you will find paralleled descriptions, using either `uv` or a more classical approach using `venv` and `pip`.
+There are many alternatives to managing virtual environments and package dependencies (requirements). We recommend using [`uv`](https://github.com/astral-sh/uv), an extremely fast Python package and project manager. In this tutorial, you will find parallel descriptions, using either `uv` or a more classical approach using `venv` and `pip`.
 
 Start by creating a virtual environment:
 

@@ -1,7 +1,7 @@
 {
     "platform": "PC",
-    "technique": "X-ray photoelectron spectroscopy (XPS)",
-    "technique_ex": "X-ray photoelectron spectroscopy (XPS)",
+    "technique": "('XPS', 'X-ray photoelectron spectroscopy')",
+    "technique_ex": "('XPS', 'X-ray photoelectron spectroscopy')",
     "file_type": "depth_profile",
     "file_description": "(1, SnO2_10nm)",
     "software_version": "SS 3.3.3.2",

@@ -52,12 +52,12 @@ ENERGY_SCAN_MODE_MAP: dict[str, str] = {
     "SnapshotFAT": "snapshot",
 }
 
-MEASUREMENT_METHOD_MAP: dict[str, str] = {
-    "XPS": "X-ray photoelectron spectroscopy (XPS)",
-    "UPS": "ultraviolet photoelectron spectroscopy (UPS)",
-    "ElectronSpectroscopy": "electron spectroscopy for chemical analysis (ESCA)",
-    "NAPXPS": "near ambient pressure X-ray photoelectron spectroscopy (NAPXPS)",
-    "ARXPS": "angle-resolved X-ray photoelectron spectroscopy (ARXPS)",
+MEASUREMENT_METHOD_MAP: dict[str, tuple[str, str]] = {
+    "XPS": ("XPS", "X-ray photoelectron spectroscopy"),
+    "UPS": ("UPS", "ultraviolet photoelectron spectroscopy"),
+    "ESCA": ("XPS", "electron spectroscopy for chemical analysis"),
+    "NAPXPS": ("NAPXPS", "near ambient pressure X-ray photoelectron spectroscopy"),
+    "ARXPS": ("ARXPS", "angle-resolved X-ray photoelectron spectroscopy"),
 }
 
 ACQUSITION_MODE_MAP: dict[str, str] = {
@@ -76,7 +76,7 @@ BOOL_MAP: dict[str, bool] = {
     "Off": False,
 }
 
-UNIT_MAP: dict[str, str] = {
+UNIT_MAP: dict[str, str | None] = {
     "a.u.": "counts",
     "Counts": "counts",
     "counts/s": "counts_per_second",
@@ -90,7 +90,7 @@ UNIT_MAP: dict[str, str] = {
     "eV/atom": "eV",
     "microm": "micrometer",
     "d": "degree",
-    "nU": "V",  # workaround for SPECS SLE reader
+    "nU": "",  # workaround for SPECS SLE reader
     "s-1": "1/s",  # workaround for SPECS XY reader
     "norm": None,  # workaround for SPECS XY reader
 }
@@ -179,10 +179,8 @@ def parse_datetime(
             datetime_obj = datetime.datetime.strptime(datetime_string, date_fmt)
 
             if tzinfo is not None:
-                # Apply the specified timezone to the datetime object
                 datetime_obj = datetime_obj.replace(tzinfo=tzinfo)
 
-            # Convert to ISO 8601 format
             return datetime_obj.isoformat()
 
         except ValueError:

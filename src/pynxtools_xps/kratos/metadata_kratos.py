@@ -168,10 +168,9 @@ class KratosParser:
             Value of correct type and internal structure.
 
         """
-
         if key in self.value_function_map:
             map_fn = self.value_function_map[key]
-            if key == "date_created":
+            if "date" in key:
                 value = map_fn(value, POSSIBLE_DATE_FORMATS)
             else:
                 value = map_fn(value)

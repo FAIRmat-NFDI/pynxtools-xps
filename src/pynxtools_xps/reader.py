@@ -697,7 +697,7 @@ class XPSReader(MultiFormatReader):
             if isinstance(path, str) and path.endswith(".unit"):
                 data_func = lambda: list(xr_data.coords)
             else:
-                data_func = lambda: get_signals(path.split(":*.")[-1])
+                data_func = lambda: get_signals(path.rsplit(":*.", maxsplit=1)[-1])
 
         PatternHandler = dict[Pattern[str], Callable[[], Any]]
 
@@ -707,9 +707,9 @@ class XPSReader(MultiFormatReader):
             re.compile(
                 r"DATA\[[^\]]+\]/(?:DATA\[[^\]]+\]|AXISNAME\[[^\]]+\])(?:/@units)?"
             ): data_func,
-            re.compile(
-                r"ELECTRON_DETECTOR\[[a-zA-Z0-9_]+\]/raw_data"
-            ): lambda: get_signals("channels"),
+            re.compile(r"ELECTRON_DETECTOR\[[a-zA-Z0-9_]+\]/raw_data"): lambda: (
+                get_signals("channels")
+            ),
         }
 
         # Function to match and return the handler result
@@ -770,23 +770,23 @@ class XPSReader(MultiFormatReader):
 
         # Channels or scans by suffix
         for suffix, extractor in {
-            ".scans": lambda name: xr_data.get(name),
-            ".channels": lambda name: xr_data.get(name),
+            ".scans": xr_data.get,
+            ".channels": xr_data.get,
         }.items():
             if path.endswith(suffix):
-                name = path.split(suffix)[0]
+                name = path.split(suffix, maxsplit=1)[0]
                 data = extractor(name)
                 return np.array(data) if data is not None else None
 
         # Axis or coordinate data
         if path.endswith(".axes"):
-            axis = path.split(".axes")[0]
+            axis = path.split(".axes", maxsplit=1)[0]
             coord = xr_data.coords.get(axis)
             return np.array(coord.values) if coord is not None else None
 
         # Units for internal channels
         if path.endswith(".unit"):
-            channel = path.split(".unit")[0]
+            channel = path.split(".unit", maxsplit=1)[0]
             pattern = re.compile(
                 rf"^/ENTRY\[{escaped_entry}]/{re.escape(channel)}/@units"
             )
@@ -794,7 +794,7 @@ class XPSReader(MultiFormatReader):
 
         # External channels and units
         if path.endswith((".external", ".external_unit")):
-            channel = path.split(".external")[0]
+            channel = path.split(".external", maxsplit=1)[0]
             if path.endswith("_unit"):
                 pattern = re.compile(
                     rf"^/ENTRY\[{escaped_entry}]/external_{re.escape(channel)}/@units"

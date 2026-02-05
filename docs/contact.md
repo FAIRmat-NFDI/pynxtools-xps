@@ -1,6 +1,6 @@
 # Get in contact
 
-NOMAD, `pynxtools` and `pynxtools-xps` are open source project that warmly welcome community projects, contributions, suggestions, bug fixes, and constructive feedback. `pynxtools` is build mainly within FAIRmat Area B - Experiment.
+NOMAD, `pynxtools`, and `pynxtools-xps` are open source project that warmly welcome community projects, contributions, suggestions, bug fixes, and constructive feedback. `pynxtools` is build mainly within FAIRmat Area B - Experiment.
 
 You can reach us through different channels. You can send an email directly to one of the main contributors:
 

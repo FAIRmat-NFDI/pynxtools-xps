@@ -5,7 +5,7 @@
     "start_time":"@attrs:acquisition_file_date",
     "end_time":"@eln",
     "method":"@attrs:technique",
-    "method/@long_name":"@attrs:/technique_long_name",    
+    "method/@long_name":"@attrs:/technique_long_name",
     "transitions":"@attrs:transitions",
     "identifierNAME[identifier_experiment]":"@attrs:experiment_id",
     "experiment_institution":"@eln",

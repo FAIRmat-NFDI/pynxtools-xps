@@ -127,9 +127,9 @@ def convert_pascal_to_snake(str_value: str) -> str:
     pattern = r"(\[.*?\]|[^[]+)"
     parts = re.sub(
         pattern,
-        lambda m: m.group(0)
-        if m.group(0).startswith("[")
-        else replace_non_bracketed(m),
+        lambda m: (
+            m.group(0) if m.group(0).startswith("[") else replace_non_bracketed(m)
+        ),
         str_value,
     )
 

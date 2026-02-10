@@ -9,7 +9,7 @@ It shows the generation of a NeXus file according to the [`NXxps`](https://fairm
 ## Viewing uploaded data
 
 Below, you find an overview of your uploaded data.
-Click on the `> /` button to get a list of your file or select **FILES** from the top menu of this upload.
+Click on the `> /` button to get a list of your files or select **FILES** from the top menu of this upload.
 
 The general structure of this example is the following:
 

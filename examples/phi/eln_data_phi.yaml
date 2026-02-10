@@ -6,7 +6,7 @@ user:
   name: Sebastian Benz
   affiliation: Justus-Liebig-Universität Gießen, AG Spektroskopie und Optik
   email: null
-  identifier_orcid: null
+  identifierNAME[identifier_orcid]: null
 instrument:
   energy_resolution:
     type: calibrated
@@ -20,7 +20,7 @@ instrument:
     device_information:
       vendor: PHI Electronics
       model: VersaProbe 4 X-ray Source
-      identifier: v1.0
+      identifierNAME[identifier]: v1.0
   beam_probe:
     distance:
       value: 0.0
@@ -138,13 +138,9 @@ instrument:
     current:
       value: 0.0
       unit: A
-    current_log:
-      value:
-        value: null
-        unit: null
 sample:
   name: SnO2 10nnm
-  identifier: "123456789"
+  identifierNAME[identifier]: "123456789"
   chemical_formula: SnO2
   physical_form: pellet
   situation: vacuum

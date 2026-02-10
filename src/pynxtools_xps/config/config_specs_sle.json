@@ -9,7 +9,7 @@
     "experiment_institution":"@eln",
     "experiment_facility":"@eln",
     "experiment_laboratory":"@eln",
-    "identifier_entry":"@eln",
+    "identifierNAME[identifier_entry]":"@eln",
     "program_name":"@eln"
   },
   "/ENTRY/USER[user]":{
@@ -17,8 +17,8 @@
     "affiliation":"@eln",
     "address":"@eln",
     "email":"@eln",
-    "identifier_orcid":"@eln",
-    "identifier_orcid/@type": "ORCID"
+    "identifierNAME[identifier_orcid]":"@eln",
+    "identifierNAME[identifier_orcid]/@type": "ORCID"
   },
   "/ENTRY/INSTRUMENT[instrument]":{
     "@default":"electronanalyzer",
@@ -26,7 +26,7 @@
       "vendor":"@eln",
       "model":"@eln",
       "identifier":"@eln",
-      "identifier/@type": "@eln"
+      "identifier/@type":"@eln"
     },
     "energy_resolution":{
       "physical_quantity":"energy",
@@ -268,8 +268,8 @@
   },
   "/ENTRY/SAMPLE[sample]":{
     "name":"@eln",
-    "identifier":"@eln",
-    "identifier/@type": "@eln",
+    "identifierNAME[identifier]":"@eln",
+    "identifierNAME[identifier]/@type":"@eln",
     "atom_types":"@eln",
     "physical_form":"@eln",
     "situation":"@eln",

@@ -25,7 +25,8 @@ jobs:
           uv pip install nomad-lab[infrastructure]@git+https://gitlab.mpcdf.mpg.de/nomad-lab/nomad-FAIR.git
       - name: Install package and pynxtools master branch
         run: |
-          uv pip install ".[dev]"
+          # Editable install is necessary for coveralls to work
+          uv pip install -e ".[dev]"
           uv pip install coverage coveralls
       - name: Install pynxtools master branch
         run: |

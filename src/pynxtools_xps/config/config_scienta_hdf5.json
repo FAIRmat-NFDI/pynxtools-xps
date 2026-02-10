@@ -21,11 +21,8 @@
     "affiliation":"@eln",
     "address":"@eln",
     "email":"@eln",
-    "IDENTIFIER[orcid]":{
-      "service":"@eln",
-      "identifier":"@eln",
-      "is_persistent":"@eln"
-    }
+    "identifierNAME[identifier_orcid]":"@eln",
+    "identifierNAME[identifier_orcid]/@type":"@eln"
   },
   "/ENTRY/INSTRUMENT[instrument]":{
     "@default":"electronanalyzer",
@@ -173,13 +170,13 @@
         "name":"@eln",
         "actuation_target":"@eln",
         "type":"@eln",
-        "heater_power":"@eln",
-        "heater_power/@units":"@eln",
+        "output_heater_power":"@eln",
+        "output_heater_power/@units":"@eln",
         "PID_CONTROLLER[pid_controller]/setpoint":"@eln",
         "PID_CONTROLLER[pid_controller]/setpoint/@units":"@eln"
       },
       "cryostat":null,
-      "drain_current_amperemeter":{
+      "drain_current_ammeter":{
         "name":"@eln",
         "measurement":"@eln",
         "type":"@eln",
@@ -252,7 +249,7 @@
       "voltmeter":"@link:/entry/instrument/manipulator/sample_bias_voltmeter"
     },
     "drain_current_env":{
-      "amperemeter":"@link:/entry/instrument/manipulator/drain_current_amperemeter"
+      "ammeter":"@link:/entry/instrument/manipulator/drain_current_ammeter"
     },
     "flood_gun_current_env":{
       "flood_gun":"@link:/entry/instrument/flood_gun"

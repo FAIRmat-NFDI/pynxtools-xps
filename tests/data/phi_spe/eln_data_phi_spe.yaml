@@ -6,7 +6,7 @@ user:
   name: Sebastian Benz
   affiliation: Justus-Liebig-Universität Gießen, AG Spektroskopie und Optik
   email: null
-  identifier_orcid: null
+  identifierNAME[identifier_orcid]: null
 instrument:
   energy_resolution:
     type: calibrated
@@ -20,19 +20,19 @@ instrument:
     device_information:
       vendor: PHI Electronics
       model: VersaProbe 4 X-ray Source
-      identifier: v1.0
+      identifierNAME[identifier]: v1.0
   beam_probe:
     distance:
       value: 0.0
       unit: mm
   source_TYPE[source_gas_cluster_ion_beam]:
-    type_other: argon gas cluster ion beam gun
+    type: argon gas cluster ion beam gun
     description: argon cluster GCIB
   source_TYPE[source_neutral_ion_gun]:
-    type_other: monoatomic neutral ion beam gun
+    type: monoatomic neutral ion beam gun
     description: monoatomic ion source
   source_TYPE[source_sputter_gun]:
-    type_other: ion sputter gun
+    type: ion sputter gun
     description: sputter gun
   electronanalyzer:
     description: hemispherical
@@ -53,7 +53,7 @@ instrument:
         identifier: null
     energydispersion:
       scheme: hemispherical
-      diameter:
+      radius:
         unit: mm
         value: 150
       device_information:
@@ -140,7 +140,7 @@ instrument:
       unit: A
 sample:
   name: SnO2 10nnm
-  identifier: Sample1
+  identifierNAME[identifier]: Sample1
   chemical_formula: SnO2
   physical_form: pellet
   situation: vacuum

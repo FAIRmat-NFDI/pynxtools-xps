@@ -1,6 +1,6 @@
 {
   "template": "https://github.com/FAIRmat-NFDI/pynxtools-plugin-template.git",
-  "commit": "6e257e9df1a74c78595bf45d50c27c4774f3a5f5",
+  "commit": "fd28d9fbb5463af44d47d8cdee098f854f3751e6",
   "checkout": null,
   "context": {
     "cookiecutter": {
@@ -24,12 +24,12 @@
       "__module_name": "pynxtools_xps",
       "__nomad_example": "xps_example_upload_entry_point",
       "__nomad_app": "xps_app_entry_point",
-      "__north_tool_EP_name": "north_tool",
+      "__north_tool_entry_point": "xps_north_tool_entry_point",
       "_copy_without_render": [
         "*.html"
       ],
       "_template": "https://github.com/FAIRmat-NFDI/pynxtools-plugin-template.git",
-      "_commit": "6e257e9df1a74c78595bf45d50c27c4774f3a5f5"
+      "_commit": "fd28d9fbb5463af44d47d8cdee098f854f3751e6"
     }
   },
   "directory": null

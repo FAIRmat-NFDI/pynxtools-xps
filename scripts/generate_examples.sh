@@ -1,11 +1,28 @@
 #!/bin/bash
-READER=xps
-NXDL=NXxps
+
+# ----------------------------------------------------------------------
+# Global options
+# Set to true to enable --ignore-undocumented for all conversions
+# ----------------------------------------------------------------------
+IGNORE_UNDOCUMENTED=true
+
+DATACONVERTER_EXTRA_ARGS=()
+if [ "$IGNORE_UNDOCUMENTED" = true ]; then
+  DATACONVERTER_EXTRA_ARGS+=(--ignore-undocumented)
+fi
+
+echo "$DATACONVERTER_EXTRA_ARGS"
+
+READER="xps"
+NXDL="NXxps"
 
 function update_cs_example {
   echo "Update coordinate system example"
   cd coordinate_system/
-  dataconverter config_vms_cs_fixed.json --reader xps --nxdl NXxps --output vms-cs-fixed.nxs
+  dataconverter config_vms_cs_fixed.json \
+    --reader $READER --nxdl $NXDL \
+    "${DATACONVERTER_EXTRA_ARGS[@]}" \
+    --output vms-cs-fixed.nxs
   cd ..
 }
 
@@ -13,54 +30,100 @@ function update_phi_examples {
   echo "Update Phi examples"
   cd phi/
   echo "Update .spe (single spectrum) example"
-  dataconverter SnO2_10nm.spe eln_data_phi.yaml --reader $READER --nxdl $NXDL --output SnO2_10nm.spe.nxs
+  dataconverter SnO2_10nm.spe eln_data_phi.yaml \
+    --reader $READER --nxdl $NXDL \
+    "${DATACONVERTER_EXTRA_ARGS[@]}" \
+    --output SnO2_10nm.spe.nxs
+
   echo
   echo "Update .pro (depth_profiling) example"
-  dataconverter SnO2_10nm_1.pro eln_data_phi.yaml --reader $READER --nxdl $NXDL --output SnO2_10nm_1.pro.nxs
+  dataconverter SnO2_10nm_1.pro eln_data_phi.yaml \
+    --reader $READER --nxdl $NXDL \
+    "${DATACONVERTER_EXTRA_ARGS[@]}" \
+    --output SnO2_10nm_1.pro.nxs
   cd ..
 }
 
 function update_scienta_examples {
   echo "Update scienta examples"
   cd scienta/
+
   cd ibw/
   echo "Update .ibw example"
-  dataconverter Cu-HHTP_*.ibw eln_data_scienta_ibw.yaml --reader $READER --nxdl $NXDL --output Cu-HHTP.ibw.nxs
+  dataconverter Cu-HHTP_*.ibw eln_data_scienta_ibw.yaml \
+    --reader $READER --nxdl $NXDL \
+    "${DATACONVERTER_EXTRA_ARGS[@]}" \
+    --output Cu-HHTP.ibw.nxs
+
   cd ../txt
   echo "Update .txt example"
-  dataconverter Cu-HHTP_*.txt eln_data_scienta_txt.yaml --reader $READER --nxdl $NXDL --output Cu-HHTP.txt.nxs
+  dataconverter Cu-HHTP_*.txt eln_data_scienta_txt.yaml \
+    --reader $READER --nxdl $NXDL \
+    "${DATACONVERTER_EXTRA_ARGS[@]}" \
+    --output Cu-HHTP.txt.nxs
+
   cd ../..
 }
 
 function update_specs_examples {
   echo "Update SPECS examples"
   cd specs/
+
   cd sle/
   echo "Update .sle example"
-  dataconverter EX439_S718_Au.sle eln_data_sle.yaml --reader $READER --nxdl $NXDL --output Au_25_mbar_O2_no_align.nxs
+  dataconverter EX439_S718_Au.sle eln_data_sle.yaml \
+    --reader $READER --nxdl $NXDL \
+    "${DATACONVERTER_EXTRA_ARGS[@]}" \
+    --output Au_25_mbar_O2_no_align.nxs
+
   cd ../xml
   echo "Update .xml example"
-  dataconverter In-situ_PBTTT_XPS_SPECS.xml eln_data_xml.yaml --reader $READER --nxdl $NXDL --output In-situ_PBTTT.nxs
+  dataconverter In-situ_PBTTT_XPS_SPECS.xml eln_data_xml.yaml \
+    --reader $READER --nxdl $NXDL \
+    "${DATACONVERTER_EXTRA_ARGS[@]}" \
+    --output In-situ_PBTTT.nxs
+
   cd ../xy
   echo "Update .xy example"
-  dataconverter MgFe2O4.xy eln_data_xy.yaml --reader $READER --nxdl $NXDL --output MgFe2O4.nxs
+  dataconverter MgFe2O4.xy eln_data_xy.yaml \
+    --reader $READER --nxdl $NXDL \
+    "${DATACONVERTER_EXTRA_ARGS[@]}" \
+    --output MgFe2O4.nxs
+
   cd ../..
 }
 
 function update_vms_examples {
   echo "Update VAMAS examples"
   cd vms/
+
   echo "Update REGULAR file conversion example"
-  dataconverter regular.vms eln_data_vms.yaml --reader $READER --nxdl $NXDL --output regular.vms.nxs
+  dataconverter regular.vms eln_data_vms.yaml \
+    --reader $READER --nxdl $NXDL \
+    "${DATACONVERTER_EXTRA_ARGS[@]}" \
+    --output regular.vms.nxs
+
   echo
-  echo "Update REGULAR file conversion example"
-  dataconverter irregular.vms eln_data_vms.yaml --reader $READER --nxdl $NXDL --output irregular.vms.nxs
+  echo "Update IRREGULAR file conversion example"
+  dataconverter irregular.vms eln_data_vms.yaml \
+    --reader $READER --nxdl $NXDL \
+    "${DATACONVERTER_EXTRA_ARGS[@]}" \
+    --output irregular.vms.nxs
+
   cd txt_export/
   echo "Update txt export example"
-  dataconverter vms_txt_export.txt eln_data_vms_txt_export.yaml --reader $READER --nxdl $NXDL --output vms_txt_export.nxs
+  dataconverter vms_txt_export.txt eln_data_vms_txt_export.yaml \
+    --reader $READER --nxdl $NXDL \
+    "${DATACONVERTER_EXTRA_ARGS[@]}" \
+    --output vms_txt_export.nxs
+
   cd ../data_analysis
   echo "Update data analysis example"
-  dataconverter FeO* eln.yaml --reader $READER --nxdl $NXDL --ignore-undocumented --output vms_data_analysis.nxs
+  dataconverter FeO* eln.yaml \
+    --reader $READER --nxdl $NXDL \
+    "${DATACONVERTER_EXTRA_ARGS[@]}" \
+    --output vms_data_analysis.nxs
+
   cd ../..
 }
 

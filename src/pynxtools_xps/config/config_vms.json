@@ -8,7 +8,7 @@
     "transitions":"@attrs:transitions",
     "program_name":"@eln",
     "experiment_institution":"@attrs:institute_id",
-    "identifier_experiment":"['@attrs:experiment_id', '@eln']",
+    "identifierNAME[identifier_experiment]":"['@attrs:experiment_id', '@eln']",
     "experiment_facility":"@eln",
     "experiment_laboratory":"@eln",
     "identifier_entry":"@eln",
@@ -17,7 +17,6 @@
   },
   "/ENTRY/xps_coordinate_system":{
     "origin":"sample stage",
-    "handedness":"left_handed",
     "z_direction":"sample stage normal",
     "depends_on":"/entry/geometries/xps_coordinate_system/coordinate_transformations/z_rotation",
     "x":[-1, 0 , 0],
@@ -32,8 +31,8 @@
     "affiliation":"@eln",
     "address":"@eln",
     "email":"@eln",
-    "identifier":"@eln",
-    "identifier/@type":"@eln"
+    "identifierNAME[identifier]":"@eln",
+    "identifierNAME[identifier]/@type":"@eln"
   },
   "/ENTRY/INSTRUMENT[instrument]":{
     "@default":"electronanalyzer",
@@ -354,8 +353,8 @@
   },
   "/ENTRY/SAMPLE[sample]":{
     "name":"['@attrs:sample_name', '@eln']",
-    "identifier":"@eln",
-    "identifier/@type":"@eln",
+    "identifierNAME[identifier]":"@eln",
+    "identifierNAME[identifier]/@type":"@eln",
     "atom_types":"@eln",
     "chemical_formula":"@eln",
     "physical_form":"@eln",

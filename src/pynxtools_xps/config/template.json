@@ -9,7 +9,6 @@
     },
     "/ENTRY/xps_coordinate_system":{
       "origin":"sample stage",
-      "handedness":"left_handed",
       "z_direction":"sample stage normal",
       "depends_on":null,
       "x":[-1, 0 , 0],
@@ -314,8 +313,8 @@
     },
     "ENTRY/SAMPLE[sample]":{
       "name":null,
-      "identifier":null,
-      "identifier/@type":null,
+      "identifierNAME[identifier]":null,
+      "identifierNAME[identifier]/@type":null,
       "chemical_formula":null,
       "atom_types":null,
       "physical_form":null,

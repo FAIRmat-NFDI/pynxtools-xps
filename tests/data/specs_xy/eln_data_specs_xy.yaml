@@ -1,5 +1,5 @@
 title: EX439_S718_Au in 25 mbar O2
-identifier_entry: EX439
+identifierNAME[identifier_entry]: EX439
 experiment_institution: Max Planck Institute for Chemical Energy Conversion
 experiment_facility: Surface and Interface Analysis Group
 experiment_laboratory: Near-Ambient Pressure XPS Lab
@@ -9,7 +9,7 @@ user:
   affiliation: Max Planck Institute for Chemical Energy Conversion
   address: Lukas Pielsticker
   email: lukas.pielsticker@cec.mpg.de
-  identifier_orcid: 0000-0001-9361-8333
+  identifierNAME[identifier_orcid]: 0000-0001-9361-8333
 instrument:
   device_information:
     vendor: SPECS GmbH
@@ -34,6 +34,11 @@ instrument:
   electronanalyzer:
     description: hemispherical
     name: PHOIBOS 150 NAP-XPS analyzer
+    energy_resolution:
+      type: calibrated
+      resolution:
+        value: 0.2
+        unit: eV
     device_information:
       vendor: SPECS GmbH
       model: PHOIBOS 150 NAP
@@ -137,7 +142,7 @@ instrument:
         unit: null
 sample:
   name: Polycristalline Au foil
-  identifier: S718
+  identifierNAME[identifier]: S718
   chemical_formula: Au
   physical_form: foil
   situation: vacuum

@@ -15,8 +15,7 @@ user@box:~$ dataconverter config_vms_cs_fixed.json --reader xps --nxdl NXxps --i
 The file `vms-cs.glb` contains a 3D representation (in [gltf/glb](https://en.wikipedia.org/wiki/GlTF) format) of the NXtransformation matrices in the NeXus file. It was created using the [nexus3d tool](https://github.com/domna/nexus3d) with the following command (using the [STL](<https://en.wikipedia.org/wiki/STL_(file_format)>) objects located in the `shapes/` subfolder):
 
 ```console
-user@box:~$ pip install nexus3d
+user@box:~$ uv pip install nexus3d
 user@box:~$ python shapes/shapes.py
 user@box:~$ nexus3d vms-cs-fixed.nxs -fo vms-cs.glb --blender -c config-stl.json -s 1
 ```
-

@@ -6,7 +6,7 @@
     "end_time":"@eln",
     "method":"@attrs:technique",
     "transitions":"@attrs:transitions",
-    "identifier_experiment":"@attrs:experiment_id",
+    "identifierNAME[identifier_experiment]":"@attrs:experiment_id",
     "experiment_institution":"@eln",
     "experiment_facility":"@eln",
     "experiment_laboratory":"@eln",
@@ -18,8 +18,8 @@
     "affiliation":"@eln",
     "address":"@eln",
     "email":"@eln",
-    "identifier_orcid":"@eln",
-    "identifier_orcid/@type":"@eln"
+    "identifierNAME[identifier_orcid]":"@eln",
+    "identifierNAME[identifier_orcid]/@type":"@eln"
   },
   "/ENTRY/INSTRUMENT[instrument]":{
     "@default":"electronanalyzer",
@@ -545,8 +545,8 @@
   },
   "/ENTRY/SAMPLE[sample]":{
     "name":"@eln",
-    "identifier":"@eln",
-    "identifier/@type":"@eln",
+    "identifierNAME[identifier]":"@eln",
+    "identifierNAME[identifier]/@type":"@eln",
     "atom_types":"@eln",
     "chemical_formula":"@eln",
     "physical_form":"@eln",

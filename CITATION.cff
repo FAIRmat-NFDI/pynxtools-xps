@@ -15,6 +15,15 @@ authors:
   - given-names: Florian
     family-names: Dobener
     orcid: https://orcid.org/0000-0003-1987-6224
+  - given-names: Vikas
+    family-names: Kumar
+    orcid: https://orcid.org/0000-0002-5630-7306
+  - given-names: Jack J.
+    family-names: Lin
+    orcid: https://orcid.org/0000-0002-4453-1263
+  - given-names: Nønne L.
+    family-names: Prisle
+    orcid: https://orcid.org/0000-0002-2041-6105
   - given-names: Walid
     family-names: Hetaba
     orcid: https://orcid.org/0000-0003-4728-0786
@@ -46,9 +55,13 @@ abstract:
 
   The work is funded by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) - 460197019 (FAIRmat)
   (https://gepris.dfg.de/gepris/projekt/460197019?language=en).
+  Contributions by V.K., J.J.L., and N.L.P. were funded by the Academy of Finland (AKA) - 351476 (BRILLIANT-AI).
 license: Apache Software License 2.0
 funding:
   - name: Deutsche Forschungsgemeinschaft
     award-number: 460197019
     title: FAIRmat - FAIR Data Infrastructure for Condensed-Matter Physics and the Chemical Physics of Solids
     award-uri: https://gepris.dfg.de/gepris/projekt/460197019?language=en
+  - name: Academy of Finland
+    award-number: 351476
+    title: Amplifying the atmospheric science impact of rare ultra-brilliant synchrotron light experiments with novel AI methods (BRILLIANT-AI)

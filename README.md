@@ -44,4 +44,4 @@ Lukas Pielsticker
 
 ## How to cite this work
 
-Pielsticker, L., Mozumder, R., Dobener, F., Hetaba, W., Rettig, L., & Brockhauser, S. (2025). pynxtools-xps: A pynxtools reader plugin for X-ray photoelectron spectroscopy (XPS) data. Zenodo. https://doi.org/10.5281/zenodo.13951684
+Pielsticker, L., Mozumder, R., Dobener, F., Kumar, V., Lin, J.J., Prisle, N.L., Hetaba, W., Rettig, L., & Brockhauser, S. (2025). pynxtools-xps: A pynxtools reader plugin for X-ray photoelectron spectroscopy (XPS) data. Zenodo. https://doi.org/10.5281/zenodo.13951684

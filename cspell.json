@@ -20,6 +20,7 @@
   ],
   "dictionaries": [
     "custom-dictionary",
+    "scientific_terms_US",
     "en_US",
     "python"
   ],

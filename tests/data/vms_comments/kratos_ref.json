@@ -26,7 +26,7 @@
     "collimation": "Slot",
     "lens_mode": "Hybrid",
     "resolution": 20.0,
-    "resolution/@units": "",
+    "resolution/@units": null,
     "deflection_x": 0.0,
     "deflection_y": 0.0,
     "deflection_x_units": "mm",

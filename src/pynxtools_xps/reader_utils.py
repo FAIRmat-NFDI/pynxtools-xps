@@ -62,7 +62,7 @@ class XPSMapper(ABC):
 
     def __init__(self):
         self.file: str | Path = ""
-        self.raw_data: list[str] = []
+        self.raw_data: list[dict[str, Any]] = []
         self._xps_dict: dict[str, Any] = {}
 
         self.parser = None
@@ -82,7 +82,7 @@ class XPSMapper(ABC):
 
     def parse_file(self, file: str | Path, **kwargs):
         """
-        Parse the file using the Scienta TXT parser.
+        Parse the file using the selected parser.
 
         """
         self.file = file
@@ -111,15 +111,29 @@ def convert_snake_to_pascal(str_value: str):
     return str_value.replace("_", " ").title().replace(" ", "")
 
 
-def convert_pascal_to_snake(str_value: str):
-    """Convert pascal case text to snake case."""
-    # Convert CamelCase to snake_case
-    snake_case = re.sub(r"(?<!^)(?=[A-Z])", "_", str_value)
+def convert_pascal_to_snake(str_value: str) -> str:
+    """Convert PascalCase text to snake_case, preserving bracketed content."""
 
-    # Convert whitespace to underscores and remove extra underscores
-    snake_case_cleaned = re.sub(r"\s+", "_", snake_case).replace("__", "_")
+    def replace_non_bracketed(match):
+        content = match.group(0)
 
-    return snake_case_cleaned.lower()
+        # If already ALL CAPS (with optional underscores), just lowercase
+        if content.isupper():
+            return content.lower()
+
+        snake_case = re.sub(r"(?<!^)(?=[A-Z])", "_", content)
+        return re.sub(r"\s+", "_", snake_case).replace("__", "_")
+
+    pattern = r"(\[.*?\]|[^[]+)"
+    parts = re.sub(
+        pattern,
+        lambda m: (
+            m.group(0) if m.group(0).startswith("[") else replace_non_bracketed(m)
+        ),
+        str_value,
+    )
+
+    return parts.lower()
 
 
 def safe_arange_with_edges(start: float, stop: float, step: float) -> np.ndarray:
@@ -303,9 +317,13 @@ def re_map_values(
         dictionary (dict[str, Any]): Dictionary with changed values.
 
     """
-    for key, map_fn in map_functions.items():
+    for key, value in map_functions.items():
+        if isinstance(value, tuple):
+            map_fn, kwargs = value
+        else:
+            map_fn, kwargs = value, {}
         if key in dictionary:
-            dictionary[key] = map_fn(dictionary[key])
+            dictionary[key] = map_fn(dictionary[key], **kwargs)
     return dictionary
 
 
@@ -476,11 +494,7 @@ def extract_unit(
     key: str, value_str: str, unit_missing: dict[str, str] | None = None
 ) -> tuple[int | float | str, str]:
     """
-    Extract a numeric value and its associated unit from a metadata string.
-
-    The function identifies and separates numerical and unit components from
-    the `value_str` string. If no unit is found in `value_str`, it checks the
-    `unit_missing` dictionary for a default unit.
+    Extract numeric value + unit.
 
     Example:
         analyzer_work_function = "4.506eV"
@@ -493,16 +507,23 @@ def extract_unit(
             for keys missing units. Defaults to None.
 
     Returns:
-        tuple[Union[int, float, str], str]:
+        tuple[Union[int, float, str], Optional[str]]:
             - A tuple with the numeric value (int, float, or str) and the unit.
             - If no unit is found in `value_str`, it uses `unit_missing` if available.
-            - If no unit is found in either, returns an empty string for the unit.
-
+            - If no unit is found in either, returns None for the unit.
     """
+
+    if not value_str:
+        return "", ""
+
     value, unit = split_value_and_unit(value_str)
 
+    # If no unit was parsed, fall back safely.
     if not unit:
-        unit = unit_missing.get(key, "")
+        if isinstance(unit_missing, dict):
+            unit = unit_missing.get(key)
+        else:
+            unit = None
 
     return value, unit
 

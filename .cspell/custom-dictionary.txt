@@ -30,6 +30,7 @@ HHTP
 Hetaba
 Justus
 Kratos
+Kumar
 LINESHAPES
 Laurenz
 Lineshape
@@ -45,9 +46,11 @@ NAPXPS
 NFDI
 Nefedov
 Nefedovs
+Nønne
 PBTTT
 Phoibos
 Pielsticker
+Prisle
 RDMS
 Rettig
 SDPSC
@@ -66,6 +69,7 @@ Udet
 Universität
 VAMAS
 Vamas
+Vikas
 Walid
 Workfunction
 Zenodo

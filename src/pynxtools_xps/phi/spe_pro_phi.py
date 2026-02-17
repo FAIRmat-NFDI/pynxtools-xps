@@ -74,7 +74,7 @@ SETTINGS_MAP: dict[str, str] = {
     "s_c_a_multiplier_voltage": "sca_multiplier_voltage",
     "C60IonGun": "c60_ion_gun",
     "t_f_c_parameters": "tfc_parameters",
-    "image_size_x_y": "image_size",
+    "image_size_xy": "image_size",
     "float_volt": "float_voltage",
     "float_enable": "float_enabled",
     "grid_volt": "grid_voltage",

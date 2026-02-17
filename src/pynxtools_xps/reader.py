@@ -874,7 +874,9 @@ class XPSReader(MultiFormatReader):
         **kwargs,
     ) -> dict:
         self.overwrite_keys = _check_multiple_extensions(file_paths)
-        self.set_config_file(kwargs.get("config_file"))
+
+        if "config_file" in kwargs:
+            self.set_config_file(kwargs.get("config_file"))
 
         template = super().read(template, file_paths, objects, suppress_warning=True)
         self.set_nxdata_defaults(template)

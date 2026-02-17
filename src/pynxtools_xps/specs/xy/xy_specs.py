@@ -39,6 +39,7 @@ from pynxtools_xps.reader_utils import (
     check_uniform_step_width,
     construct_data_key,
     construct_entry_name,
+    convert_pascal_to_snake,
     get_minimal_step,
     re_map_keys,
     re_map_values,
@@ -55,39 +56,23 @@ from pynxtools_xps.value_mappers import (
 logger = logging.getLogger("pynxtools")
 
 SETTINGS_MAP: dict[str, str] = {
-    "Group": "group_id",
-    "Scan Mode": "scan_mode",
-    "Analyzer Lens Voltage": "analyzer_lens_voltage",
-    "Calibration File": "calibration_file",
-    "Transmission File": "transmission_file",
-    "Analyzer Slit": "entrance_slit",
-    "Iris Diameter": "iris_diameter",
-    "Energy Axis": "x_units",
-    "Source": "source_label",
-    "Polar Angle": "source_polar_angle",
-    "Azimuth Angle": "source_azimuth_angle",
+    "group": "group_id",
+    "analyzer_slit": "entrance_slit",
+    "energy_axis": "x_units",
+    "source": "source_label",
+    "polar_angle": "source_polar_angle",
+    "azimuth_angle": "source_azimuth_angle",
     "ex_energy": "excitation_energy",
-    "Acquisition Date": "time_stamp",
-    "Analysis Method": "analysis_method",
-    "Analyzer": "analyzer_name",
-    "Analyzer Lens": "lens_mode",
-    "Analyzer Lens Mode": "lens_mode",
-    "Scan Variable": "scan_variable",
-    "Curves/Scan": "curves_per_scan",
-    "Values/Curve": "n_values",
-    "Step Size": "step_size",
-    "Dwell Time": "dwell_time",
-    "Excitation Energy": "excitation_energy",
-    "Kinetic Energy": "kinetic_energy",
-    "Pass Energy": "pass_energy",
-    "Bias Voltage": "bias_voltage_electrons",
-    "Binding Energy": "start_energy",
-    "Detector Voltage": "detector_voltage",
-    "Eff. Workfunction": "work_function",
-    "Normalized By": "normalized_by",
-    "Comment": "comments",
-    "Spectrum ID": "spectrum_id",
-    "Note": "note",
+    # "acquisition_date": "time_stamp",
+    "analyzer": "analyzer_name",
+    "analyzer_lens": "lens_mode",
+    "analyzer_lens_mode": "lens_mode",
+    "curves/scan": "curves_per_scan",
+    "values/curve": "n_values",
+    "bias_voltage": "bias_voltage_electrons",
+    "binding_energy": "start_energy",
+    "eff._workfunction": "work_function",
+    "comment": "comments",
 }
 
 VALUE_MAP: dict[str, Any] = {
@@ -194,7 +179,7 @@ class XyMapperSpecs(XPSMapper):
 
         data = spectrum["data"]
 
-        if self.parser.export_settings["Transmission Function"]:
+        if self.parser.export_settings.get("transmission_function"):
             self._xps_dict["transmission_function"] = data["transmission"]
             self._xps_dict["transmission_function/units"] = "counts_per_second"
 
@@ -208,7 +193,7 @@ class XyMapperSpecs(XPSMapper):
         if entry not in self._xps_dict["data"]:
             self._xps_dict["data"][entry] = xr.Dataset()
 
-        if not self.parser.export_settings["Separate Channel Data"]:
+        if not self.parser.export_settings["separate_channel_data"]:
             averaged_channels = intensity
         else:
             all_channel_data = [
@@ -223,7 +208,7 @@ class XyMapperSpecs(XPSMapper):
                     warnings.simplefilter("ignore", category=RuntimeWarning)
                     averaged_channels = np.mean(all_channel_data, axis=0)
 
-        if not self.parser.export_settings["Separate Scan Data"]:
+        if not self.parser.export_settings["separate_scan_data"]:
             averaged_scans = intensity
         else:
             all_scan_data = [
@@ -253,7 +238,7 @@ class XyMapperSpecs(XPSMapper):
         )
 
         if (
-            self.parser.export_settings["Separate Channel Data"]
+            self.parser.export_settings["separate_channel_data"]
             and self.write_channels_to_data
         ):
             # Write channel data to '_chan'.
@@ -265,7 +250,7 @@ class XyMapperSpecs(XPSMapper):
                 )
             )
 
-        if self.parser.export_settings["External Channel Data"]:
+        if self.parser.export_settings["external_channel_data"]:
             self._xps_dict[f"{entry_parent}/aux_signals"] = []
             for ext_channel, channel_data in list(spectrum["data"].items()):
                 if ext_channel not in [x_axis_name, y_axis_name, "transmission"]:
@@ -374,10 +359,13 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
             All lines in the XY file.
 
         """
-        with open(file, encoding="utf-8") as xy_file:
-            lines = xy_file.readlines()
-
-        return lines
+        for encoding in ("utf-8", "cp1252"):
+            try:
+                with open(file, encoding=encoding) as xy_file:
+                    return xy_file.readlines()
+            except UnicodeDecodeError:
+                continue
+        raise ValueError("Unable to decode file with known encodings.")
 
     def _separate_header(self):
         """
@@ -424,7 +412,8 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
             else:
                 setting = line.split(":", 1)[1].strip()
                 setting_bool = bool_map.get(setting, setting)
-                export_settings[line.split(":", 1)[0].strip()] = setting_bool
+                key = convert_pascal_to_snake(line.split(":", 1)[0].strip())
+                export_settings[key] = setting_bool
 
         export_settings = re_map_keys(export_settings, SETTINGS_MAP)
         export_settings = re_map_values(export_settings, VALUE_MAP)
@@ -505,8 +494,9 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
                 if not setting.startswith(self.prefix):
                     region_data = region_data[i:]
                     break
-                setting_name = setting.split(self.prefix)[-1].strip().split(":")[0]
-
+                setting_name = convert_pascal_to_snake(
+                    setting.split(self.prefix)[-1].strip().split(":")[0]
+                )
                 parts = setting.split(self.prefix)[-1].strip().split(":")
 
                 try:
@@ -589,9 +579,9 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
 
         """
         spec_pattern_str = rf"{self.prefix} Cycle: \d, Curve: \d"
-        if self.export_settings["Separate Scan Data"]:
+        if self.export_settings["separate_scan_data"]:
             spec_pattern_str += r", Scan: \d"
-        if self.export_settings["Separate Channel Data"]:
+        if self.export_settings["separate_channel_data"]:
             spec_pattern_str += r", Channel: \d"
         spec_pattern = re.compile(spec_pattern_str, re.IGNORECASE)
 
@@ -723,8 +713,8 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
 
         in_remote_channel = False
 
-        if self.export_settings["External Channel Data"]:
-            remote_ch_pattern_str = rf"{re.escape(self.prefix)} External Channel Data Cycle: \d+,\s*(.+?)\s*\(Remote Out Device\)"
+        if self.export_settings["external_channel_data"]:
+            remote_ch_pattern_str = rf"{re.escape(self.prefix)} external_channel_data Cycle: \d+,\s*(.+?)\s*\(Remote Out Device\)"
             remote_ch_pattern = re.compile(remote_ch_pattern_str, re.IGNORECASE)
 
         for line in scan_data:
@@ -737,10 +727,11 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
                     item.strip()
                     for item in line.strip(self.prefix).strip().split(":", 1)
                 )
-                if key == "Acquisition Date":
+                key = convert_pascal_to_snake(key)
+                if key == "acquisition_date":
                     scan_settings[key] = self._parse_datetime(val)
 
-                if key == "ColumnLabels":
+                if key == "column_labels":
                     if in_remote_channel:
                         column_labels = val.strip().split(" ", 1)
                         column_labels = [

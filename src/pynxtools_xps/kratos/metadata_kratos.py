@@ -45,7 +45,6 @@ KEYS_WITH_UNITS: list[str] = [
     "filament_bias",
     "charge_balance",
     "emission_current",
-    "resolution",
     "energy_start",
     "energy_end",
     "energy_centre",
@@ -58,6 +57,7 @@ KEYS_WITH_UNITS: list[str] = [
 
 UNIT_MISSING: dict[str, str] = {
     "sample_tilt": "degree",
+    "resolution": "eV",
 }
 
 POSSIBLE_DATE_FORMATS: list[str] = ["%d.%m.%Y %H:%M", "%d/%m/%Y %H:%M"]

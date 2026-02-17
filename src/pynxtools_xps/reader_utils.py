@@ -121,12 +121,25 @@ def convert_pascal_to_snake(str_value: str) -> str:
         if content.isupper():
             return content.lower()
 
-        # split camel/pascal case
-        snake_case = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "_", content)
+        # split acronym -> word (TFCParameters -> TFC_Parameters)
+        snake_case = re.sub(
+            r"(?<=[A-Z])(?=[A-Z][a-z])",
+            "_",
+            content,
+        )
+
+        # split camel/pascal case (myVariable -> my_Variable)
+        snake_case = re.sub(
+            r"(?<=[a-z0-9])(?=[A-Z])",
+            "_",
+            snake_case,
+        )
+
         # normalize separators
         snake_case = re.sub(r"[\s\-]+", "_", snake_case)
+
         # collapse duplicate underscores
-        return re.sub(r"\s+", "_", snake_case).replace("__", "_")
+        return re.sub(r"_+", "_", snake_case)
 
     pattern = r"(\[.*?\]|[^[]+)"
     parts = re.sub(

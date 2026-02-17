@@ -135,9 +135,7 @@ class XyMapperSpecs(XPSMapper):
             Flattened dictionary to be passed to MPES template.
 
         """
-        if "write_channels_to_data" in kwargs:
-            self.write_channels_to_data = kwargs["write_channels_to_data"]
-
+        self.write_channels_to_data = kwargs.pop("write_channels_to_data", False)
         return super().parse_file(file, **kwargs)
 
     def construct_data(self):
@@ -437,6 +435,36 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
             Entries are as group_name: group_data.
 
         """
+
+        def _parse_group_header(group_data: list[str]):
+            sections: dict[str, list[str]] = OrderedDict()
+
+            current_section = "group_settings"
+            sections[current_section] = []
+
+            region_start = 0
+
+            for i, line in enumerate(group_data):
+                stripped = line.strip(self.prefix).strip()
+
+                if stripped.startswith("Region:"):
+                    region_start = i
+                    break
+
+                # ignore empty comment lines
+                if not stripped:
+                    continue
+
+                # section header: no colon
+                if ":" not in stripped:
+                    current_section = convert_pascal_to_snake(stripped)
+                    sections[current_section] = []
+                    continue
+
+                sections[current_section].append(line)
+
+            return sections, group_data[region_start:]
+
         grouped_list = [
             list(g)
             for _, g in itertools.groupby(
@@ -452,11 +480,43 @@ class XyProdigyParser:  # pylint: disable=too-few-public-methods
             group_settings = re_map_keys(group_settings, SETTINGS_MAP)
             group_settings = re_map_values(group_settings, VALUE_MAP)
 
-            group = self._handle_regions(group_data)
+            sections, region_data = _parse_group_header(group_data)
+            group: Unknown = self._handle_regions(group_data)
+            for section_name, lines in sections.items():
+                section_settings = self._handle_settings_block(lines)
+                if section_name == "group_settings":
+                    group_settings.update(section_settings)
+                elif section_name.endswith("_parameters"):
+                    prefix = section_name.removesuffix("_parameters")
+                    group_settings.update(
+                        {
+                            f"{prefix}_{key}": value
+                            for key, value in section_settings.items()
+                        }
+                    )
+
             group["group_settings"] = group_settings
             groups[name] = group
 
         return groups
+
+    def _handle_settings_block(self, lines: list[str]) -> dict[str, str]:
+        settings = {}
+
+        for line in lines:
+            content = line.split(self.prefix)[-1].strip()
+            key, *rest = content.split(":", 1)
+
+            if not rest:
+                continue
+
+            key = convert_pascal_to_snake(key)
+            settings[key] = rest[0].strip()
+
+        # settings = re_map_keys(settings, SETTINGS_MAP)
+        # settings = re_map_values(settings, VALUE_MAP)
+
+        return settings
 
     def _handle_regions(self, group_data: list[str]):
         """

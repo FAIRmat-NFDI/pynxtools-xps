@@ -188,8 +188,8 @@ class XPSReader(MultiFormatReader):
     def __init__(self, config_file: str | None = None, *args, **kwargs):
         super().__init__(config_file, *args, **kwargs)
 
-        self.xps_data_dicts: list[dict[str, Any]] = []
-        self.xps_data: dict[str, Any] = {}
+        self.parsed_data_dicts: list[dict[str, Any]] = []
+        self.parsed_data: dict[str, Any] = {}
         self.eln_data: dict[str, Any] = {}
 
         self.extensions: dict[str, Callable] = {
@@ -357,7 +357,7 @@ class XPSReader(MultiFormatReader):
                 replace=False,
             )
 
-            self.xps_data_dicts += [parser.data_dict]
+            self.parsed_data_dicts += [parser.data_dict]
 
         elif file_ext in XPSReader.__prmt_metadata_file_ext__:
             vendor = _check_for_vendors(file_path)
@@ -368,7 +368,7 @@ class XPSReader(MultiFormatReader):
             main_file_ext = XPSReader.__prmt_metadata_file_ext__[file_ext]
 
             main_file_dicts = [
-                d for d in self.xps_data_dicts if d.get("file_ext") == main_file_ext
+                d for d in self.parsed_data_dicts if d.get("file_ext") == main_file_ext
             ]
 
             metadata_parser.update_main_file_dict(main_file_dicts)
@@ -384,7 +384,7 @@ class XPSReader(MultiFormatReader):
         entries: list[str] = []
 
         try:
-            for entry in self.xps_data["data"]:
+            for entry in self.parsed_data["data"]:
                 entries += [entry]
         except KeyError:
             pass
@@ -467,11 +467,11 @@ class XPSReader(MultiFormatReader):
 
             return common_entries, dict_indices
 
-        common_entries, dict_indices = check_for_same_entries(self.xps_data_dicts)
+        common_entries, dict_indices = check_for_same_entries(self.parsed_data_dicts)
 
         if common_entries and not self.overwrite_keys:
             for entry, indices in zip(common_entries, dict_indices):
-                dicts_with_common_entries = [self.xps_data_dicts[i] for i in indices]
+                dicts_with_common_entries = [self.parsed_data_dicts[i] for i in indices]
 
                 for i, data_dict in enumerate(dicts_with_common_entries):
                     for key, value in data_dict.copy().items():
@@ -488,19 +488,19 @@ class XPSReader(MultiFormatReader):
                             data_dict[new_key] = value
                             del data_dict[key]
 
-        for data_dict in self.xps_data_dicts:
+        for data_dict in self.parsed_data_dicts:
             # If there are multiple input data files of the same type,
             # make sure that existing keys are not overwritten.
             existing = [
-                (key, self.xps_data[key], data_dict[key])
-                for key in set(self.xps_data).intersection(data_dict)
+                (key, self.parsed_data[key], data_dict[key])
+                for key in set(self.parsed_data).intersection(data_dict)
             ]
 
-            self.xps_data = {**self.xps_data, **data_dict}
+            self.parsed_data = {**self.parsed_data, **data_dict}
 
             if not self.overwrite_keys:
                 for key, value1, value2 in existing:
-                    self.xps_data[key] = concatenate_values(value1, value2)
+                    self.parsed_data[key] = concatenate_values(value1, value2)
 
     def _get_analyzer_names(self) -> list[str]:
         """
@@ -527,7 +527,7 @@ class XPSReader(MultiFormatReader):
         detectors: list[str] = []
 
         try:
-            for entry, entry_values in self.xps_data["data"].items():
+            for entry, entry_values in self.parsed_data["data"].items():
                 for data_var in entry_values:
                     if CHAN_COUNT in data_var:
                         detector_num = data_var.split(CHAN_COUNT)[-1]
@@ -642,7 +642,7 @@ class XPSReader(MultiFormatReader):
         """
         Get the metadata that was stored in the main file.
         """
-        return self.get_metadata(self.xps_data, path, self.callbacks.entry_name)
+        return self.get_metadata(self.parsed_data, path, self.callbacks.entry_name)
 
     def get_eln_data(self, key: str, path: str) -> Any:
         """
@@ -668,7 +668,7 @@ class XPSReader(MultiFormatReader):
         """
         entry = self.callbacks.entry_name
         escaped_entry = re.escape(entry)
-        xr_data = self.xps_data["data"].get(entry)
+        xr_data = self.parsed_data["data"].get(entry)
 
         def get_signals(key: str) -> list[str]:
             if key == "scans":
@@ -687,7 +687,9 @@ class XPSReader(MultiFormatReader):
         def get_all_keys(template_key: str) -> list[str]:
             pattern = re.compile(rf"^/ENTRY\[{escaped_entry}]/{template_key}([^/]+)")
 
-            keys = {match[1] for key in self.xps_data if (match := pattern.search(key))}
+            keys = {
+                match[1] for key in self.parsed_data if (match := pattern.search(key))
+            }
 
             return sorted(keys)
 
@@ -746,7 +748,7 @@ class XPSReader(MultiFormatReader):
         """
         entry = self.callbacks.entry_name
         escaped_entry = re.escape(entry)
-        xr_data = self.xps_data["data"].get(entry)
+        xr_data = self.parsed_data["data"].get(entry)
 
         # Average or errors
         if path.startswith(("average", "errors")):
@@ -790,7 +792,7 @@ class XPSReader(MultiFormatReader):
             pattern = re.compile(
                 rf"^/ENTRY\[{escaped_entry}]/{re.escape(channel)}/@units"
             )
-            return self._search_first(self.xps_data, pattern)
+            return self._search_first(self.parsed_data, pattern)
 
         # External channels and units
         if path.endswith((".external", ".external_unit")):
@@ -799,13 +801,15 @@ class XPSReader(MultiFormatReader):
                 pattern = re.compile(
                     rf"^/ENTRY\[{escaped_entry}]/external_{re.escape(channel)}/@units"
                 )
-                return self._search_first(self.xps_data, pattern)
+                return self._search_first(self.parsed_data, pattern)
             else:
                 pattern = re.compile(
                     rf"^/ENTRY\[{escaped_entry}]/external_{re.escape(channel)}$"
                 )
                 matches = [
-                    value for key, value in self.xps_data.items() if pattern.search(key)
+                    value
+                    for key, value in self.parsed_data.items()
+                    if pattern.search(key)
                 ]
                 return np.array(matches).squeeze() if matches else None
 
@@ -878,7 +882,7 @@ class XPSReader(MultiFormatReader):
         if "config_file" in kwargs:
             self.set_config_file(kwargs.get("config_file"))
 
-        template = super().read(template, file_paths, objects, suppress_warning=True)
+        template = super().read(template, file_paths, objects, suppress_warning=False)
         self.set_nxdata_defaults(template)
 
         final_template = Template()

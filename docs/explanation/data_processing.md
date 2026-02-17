@@ -29,8 +29,7 @@ The application definition `NXxps` implements an [`NXfit` group](https://fairmat
 
 Three files are needed for the example conversion:
 
-1. The VAMAS (.vms) file containing the original (meta)data and the definition of the peak fitting in the VAMAS
-comments
+1. The VAMAS (.vms) file containing the original (meta)data and the definition of the peak fitting in the VAMAS comments
 2. The lineshapes of the measurement data as well as the peak fitting, exported from CasaXPS as a TXT file.
 This file can be obtained by using the `Save Tab ASCII` to TXT button in CasaXPS and choosing "Rows of Tables" as the export option.
 3. The analysis results (incl. the atomic concentrations), exported from CasaXPS as a CSV file. This file can be obtained from the `Quantify` window in CasaXPS and exporting the "Comps" report from the "Report" tab. You can learn more about XPS quantification in CasaXPS [here](http://www.casaxps.com/casaxps-training/quantification/quant.htm).
@@ -38,6 +37,7 @@ This file can be obtained by using the `Save Tab ASCII` to TXT button in CasaXPS
 You can have a look a the example conversion to understand which exported files are expected for the data reader to work.
 
 ## Example conversion
+
 See [here](../reference/vms.md#data-analysis-and-peak-fitting) for an example of converting VAMAS data containing
 data analysis results from CasaXPS. The resulting file looks like this:
 

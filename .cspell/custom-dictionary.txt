@@ -111,6 +111,7 @@ linescan
 lineshape
 lineshapes
 lmfit
+lmfitxps
 lukaspie
 mainfile
 maxit

@@ -19,8 +19,7 @@ Backgrounds for peak fitting.
 """
 
 from collections.abc import Callable
-import logging
-from typing import cast, Optional
+from typing import cast
 
 import numpy as np
 import scipy

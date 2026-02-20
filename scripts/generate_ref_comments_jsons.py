@@ -22,7 +22,7 @@ Regenerate reference JSON files for testing the VAMAS comment extraction.
 import os
 import json
 import numpy as np
-from pynxtools_xps.vms.vamas_comment_handler import handle_comments
+from pynxtools_xps.parsers.vms.comment_handler import handle_comments
 
 
 def read_comment_file(filepath: str):

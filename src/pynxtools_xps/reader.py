@@ -22,7 +22,6 @@ file into mpes nxdl (NeXus Definition Language) template.
 
 import copy
 import datetime
-import logging
 import os
 import re
 from collections.abc import Callable, Iterable
@@ -36,18 +35,21 @@ from pynxtools.dataconverter.readers.multi.reader import MultiFormatReader
 from pynxtools.dataconverter.readers.utils import parse_yml
 from pynxtools.dataconverter.template import Template
 
-from pynxtools_xps.phi.spe_pro_phi import MapperPhi
-from pynxtools_xps.reader_utils import check_units
-from pynxtools_xps.scienta.scienta_reader import MapperScienta
-from pynxtools_xps.specs.sle.sle_specs import SleMapperSpecs
-from pynxtools_xps.specs.xml.xml_specs import XmlMapperSpecs
-from pynxtools_xps.specs.xy.xy_specs import XyMapperSpecs
-from pynxtools_xps.vms.vamas import VamasMapper
-from pynxtools_xps.vms.vamas_export import CsvMapperVamasResult, TxtMapperVamasExport
+from pynxtools_xps.logging import _logger
+from pynxtools_xps.numerics import check_units
+from pynxtools_xps.parsers import (
+    PHIMapper,
+    ScientaMapper,
+    SpecsSLEMapper,
+    SpecsXMLMapper,
+    SpecsXYMapper,
+    VamasExportMapper,
+    VamasMapper,
+    VamasResultMapper,
+)
+from pynxtools_xps.parsers.base import _XPSMapper
 
-logger = logging.getLogger("pynxtools")
-
-CONVERT_DICT = {
+_CONVERT_DICT = {
     "unit": "@units",
     "version": "@version",
     "user": "USER[user]",
@@ -65,15 +67,15 @@ CONVERT_DICT = {
     "substance": "SUBSTANCE[substance]",
 }
 
-REPLACE_NESTED: dict[str, str] = {}
+_REPLACE_NESTED: dict[str, str] = {}
 
-CHAN_COUNT = "_chan"
-SCAN_COUNT = "_scan"
+_CHAN_COUNT = "_chan"
+_SCAN_COUNT = "_scan"
 
 
 def _get_channel_vars(data_vars: list[str]) -> list[str]:
     """Get all data vars that contain _chan."""
-    return [data_var for data_var in data_vars if CHAN_COUNT in data_var]
+    return [data_var for data_var in data_vars if _CHAN_COUNT in data_var]
 
 
 def _get_scan_vars(data_vars: list[str]) -> list[str]:
@@ -81,11 +83,11 @@ def _get_scan_vars(data_vars: list[str]) -> list[str]:
     return [
         data_var
         for data_var in data_vars
-        if SCAN_COUNT in data_var and CHAN_COUNT not in data_var
+        if _SCAN_COUNT in data_var and _CHAN_COUNT not in data_var
     ]
 
 
-def concatenate_values(value1: Any, value2: Any) -> Any:
+def _concatenate_values(value1: Any, value2: Any) -> Any:
     """
     Concatenate two values of same type to be stored
     in xps_data_dict. Dicts are merged and every other object is
@@ -140,7 +142,18 @@ class XPSReader(MultiFormatReader):
     reader_dir: Path = Path(__file__).parent
     config_file: str | Path | None = reader_dir.joinpath("config", "template.json")
 
-    __prmt_file_ext__: list[str] = [
+    mappers: list[type[_XPSMapper]] = [
+        PHIMapper,
+        ScientaMapper,
+        SpecsSLEMapper,
+        SpecsXMLMapper,
+        SpecsXYMapper,
+        VamasMapper,
+        VamasResultMapper,
+        VamasExportMapper,
+    ]
+
+    supported_file_extensions: list[str] = [
         ".h5",
         ".hdf5",
         ".ibw",
@@ -155,34 +168,34 @@ class XPSReader(MultiFormatReader):
         ".txt",  # This is last because of the processing_order
     ]
 
-    __prmt_metadata_file_ext__: dict[str, str] = {".csv": ".txt"}
+    supported_metadata_file_extensions: dict[str, str] = {".csv": ".txt"}
 
-    __vendors__: list[str] = ["kratos", "phi", "scienta", "specs", "unknown"]
-    __prmt_vendor_cls: dict[str, dict[str, Any]] = {
-        ".csv": {"unknown": CsvMapperVamasResult},
-        ".h5": {"scienta": MapperScienta},
-        ".hdf5": {"scienta": MapperScienta},
-        ".ibw": {"scienta": MapperScienta},
+    supported_vendors: list[str] = ["kratos", "phi", "scienta", "specs", "unknown"]
+    vendor_map: dict[str, dict[str, Any]] = {
+        ".csv": {"unknown": VamasResultMapper},
+        ".h5": {"scienta": ScientaMapper},
+        ".hdf5": {"scienta": ScientaMapper},
+        ".ibw": {"scienta": ScientaMapper},
         ".npl": {"unknown": VamasMapper},
-        ".pro": {"phi": MapperPhi},
-        ".spe": {"phi": MapperPhi},
-        ".sle": {"specs": SleMapperSpecs},
+        ".pro": {"phi": PHIMapper},
+        ".spe": {"phi": PHIMapper},
+        ".sle": {"specs": SpecsSLEMapper},
         ".txt": {
-            "scienta": MapperScienta,
-            "unknown": TxtMapperVamasExport,
+            "scienta": ScientaMapper,
+            "unknown": VamasExportMapper,
         },
         ".vms": {"unknown": VamasMapper},
-        ".xml": {"specs": XmlMapperSpecs},
-        ".xy": {"specs": XyMapperSpecs},
+        ".xml": {"specs": SpecsXMLMapper},
+        ".xy": {"specs": SpecsXYMapper},
     }
 
-    __file_err_msg__: str = (
+    file_err_msg: str = (
         "Need an XPS data file with one of the following extensions: "
-        f"data files: {__prmt_file_ext__}, metadata files: {__prmt_metadata_file_ext__}."
+        f"data files: {supported_file_extensions}, metadata files: {supported_metadata_file_extensions}."
     )
 
-    __vendor_err_msg__: str = (
-        f"Need an XPS data file from one of the following vendors: {__vendors__}"
+    vendor_err_msg: str = (
+        f"Need an XPS data file from one of the following vendors: {supported_vendors}"
     )
 
     def __init__(self, config_file: str | None = None, *args, **kwargs):
@@ -199,13 +212,13 @@ class XPSReader(MultiFormatReader):
         }
 
         self.processing_order: list[str] = (
-            XPSReader.__prmt_file_ext__
-            + list(XPSReader.__prmt_metadata_file_ext__.keys())
+            XPSReader.supported_file_extensions
+            + list(XPSReader.supported_metadata_file_extensions.keys())
             + list(self.extensions.keys())
         )
 
-        for ext in XPSReader.__prmt_file_ext__ + list(
-            XPSReader.__prmt_metadata_file_ext__.keys()
+        for ext in XPSReader.supported_file_extensions + list(
+            XPSReader.supported_metadata_file_extensions.keys()
         ):
             self.extensions[ext] = self.handle_data_file
 
@@ -218,7 +231,7 @@ class XPSReader(MultiFormatReader):
         if replace:
             if self.config_file is not None:
                 if file_path != self.config_file:
-                    logger.info(
+                    _logger.info(
                         f"Config file already set. Replaced by the new file {file_path}."
                     )
             self.config_file = file_path
@@ -233,7 +246,7 @@ class XPSReader(MultiFormatReader):
         Loads ELN file and handles specific cases.
         """
 
-        def combine_and_unique_string(string: str, elements: list[str]) -> str:
+        def _combine_and_unique_string(string: str, elements: list[str]) -> str:
             """
             Combines a comma-separated string and a list into a single string with unique elements.
 
@@ -253,8 +266,8 @@ class XPSReader(MultiFormatReader):
 
         eln_data = parse_yml(
             file_path,
-            convert_dict=CONVERT_DICT,
-            replace_nested=REPLACE_NESTED,
+            convert_dict=_CONVERT_DICT,
+            replace_nested=_REPLACE_NESTED,
             parent_key="/ENTRY",
         )
 
@@ -281,11 +294,13 @@ class XPSReader(MultiFormatReader):
                             if modified_key not in self.eln_data:
                                 self.eln_data[modified_key] = ", ".join(atom_types)
                             else:
-                                self.eln_data[modified_key] = combine_and_unique_string(
-                                    self.eln_data[modified_key], atom_types
+                                self.eln_data[modified_key] = (
+                                    _combine_and_unique_string(
+                                        self.eln_data[modified_key], atom_types
+                                    )
                                 )
                         else:
-                            logger.info(
+                            _logger.info(
                                 f"{key} from ELN was not parsed to atom_types because {modified_key} already exists."
                             )
 
@@ -304,13 +319,13 @@ class XPSReader(MultiFormatReader):
             """
             _, file_ext = os.path.splitext(file_path)
 
-            vendor_dict = XPSReader.__prmt_vendor_cls[file_ext]
+            vendor_dict = XPSReader.vendor_map[file_ext]
 
             if len(vendor_dict) == 1:
                 return list(vendor_dict.keys())[0]
             if file_ext == ".txt":
                 return _check_for_vendors_txt(file_path)
-            raise ValueError(XPSReader.__vendor_err_msg__)
+            raise ValueError(XPSReader.vendor_err_msg)
 
         def _check_for_vendors_txt(file_path: str) -> str:
             """
@@ -322,7 +337,7 @@ class XPSReader(MultiFormatReader):
                 str: vendor (str): Vendor name if that name is in the txt file or "unknown"
 
             """
-            vendor_dict = XPSReader.__prmt_vendor_cls[".txt"]
+            vendor_dict = XPSReader.vendor_map[".txt"]
 
             with open(file_path, encoding="utf-8") as txt_file:
                 contents = txt_file.read()
@@ -340,10 +355,10 @@ class XPSReader(MultiFormatReader):
 
         _, file_ext = os.path.splitext(file_path)
 
-        if file_ext in XPSReader.__prmt_file_ext__:
+        if file_ext in XPSReader.supported_file_extensions:
             vendor = _check_for_vendors(file_path)
 
-            parser = XPSReader.__prmt_vendor_cls[file_ext][vendor]()
+            parser = XPSReader.vendor_map[file_ext][vendor]()
             parser.parse_file(file_path, **self.kwargs)
             data_dict = parser.data_dict
 
@@ -359,13 +374,13 @@ class XPSReader(MultiFormatReader):
 
             self.parsed_data_dicts += [parser.data_dict]
 
-        elif file_ext in XPSReader.__prmt_metadata_file_ext__:
+        elif file_ext in XPSReader.supported_metadata_file_extensions:
             vendor = _check_for_vendors(file_path)
 
-            metadata_parser = XPSReader.__prmt_vendor_cls[file_ext][vendor]()
+            metadata_parser = XPSReader.vendor_map[file_ext][vendor]()
             metadata_parser.parse_file(file_path, **self.kwargs)
 
-            main_file_ext = XPSReader.__prmt_metadata_file_ext__[file_ext]
+            main_file_ext = XPSReader.supported_metadata_file_extensions[file_ext]
 
             main_file_dicts = [
                 d for d in self.parsed_data_dicts if d.get("file_ext") == main_file_ext
@@ -500,7 +515,7 @@ class XPSReader(MultiFormatReader):
 
             if not self.overwrite_keys:
                 for key, value1, value2 in existing:
-                    self.parsed_data[key] = concatenate_values(value1, value2)
+                    self.parsed_data[key] = _concatenate_values(value1, value2)
 
     def _get_analyzer_names(self) -> list[str]:
         """
@@ -529,8 +544,8 @@ class XPSReader(MultiFormatReader):
         try:
             for entry, entry_values in self.parsed_data["data"].items():
                 for data_var in entry_values:
-                    if CHAN_COUNT in data_var:
-                        detector_num = data_var.split(CHAN_COUNT)[-1]
+                    if _CHAN_COUNT in data_var:
+                        detector_num = data_var.split(_CHAN_COUNT)[-1]
                         detector_nm = f"detector{detector_num}"
                         detectors += [detector_nm]
         except KeyError:
@@ -541,7 +556,7 @@ class XPSReader(MultiFormatReader):
 
         return list(dict.fromkeys(detectors))
 
-    def process_multiple_entities(self) -> None:
+    def _process_multiple_entities(self) -> None:
         """
         Check if there are multiple of some class and, if so, change the
         keys and values in the config file.
@@ -588,7 +603,7 @@ class XPSReader(MultiFormatReader):
                         self.config_dict[modified_key] = modified_value
                         del self.config_dict[config_key]
 
-    def get_metadata(
+    def _get_metadata(
         self,
         metadata_dict: dict[str, Any],
         path: str,
@@ -642,7 +657,7 @@ class XPSReader(MultiFormatReader):
         """
         Get the metadata that was stored in the main file.
         """
-        return self.get_metadata(self.parsed_data, path, self.callbacks.entry_name)
+        return self._get_metadata(self.parsed_data, path, self.callbacks.entry_name)
 
     def get_eln_data(self, key: str, path: str) -> Any:
         """
@@ -767,7 +782,7 @@ class XPSReader(MultiFormatReader):
                 xr_data.data_vars
             )
             return np.array(
-                [xr_data[var].data for var in data_vars if SCAN_COUNT in var]
+                [xr_data[var].data for var in data_vars if _SCAN_COUNT in var]
             )
 
         # Channels or scans by suffix
@@ -882,7 +897,7 @@ class XPSReader(MultiFormatReader):
         if "config_file" in kwargs:
             self.set_config_file(kwargs.get("config_file"))
 
-        template = super().read(template, file_paths, objects, suppress_warning=False)
+        template = super().read(template, file_paths, objects, suppress_warning=True)
         self.set_nxdata_defaults(template)
 
         final_template = Template()

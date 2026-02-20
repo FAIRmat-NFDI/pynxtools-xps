@@ -13,16 +13,16 @@ function update_ref_file {
 }
 
 folders=(
-  "phi_pro"
-  "phi_spe"
-  "scienta_ibw"
-  "scienta_txt"
-  "specs_sle"
-  "specs_xml"
-  "specs_xy"
-  "vms_irregular"
-  "vms_regular"
-  "vms_txt_export"
+  # "phi_pro"
+  # "phi_spe"
+  # "scienta_ibw"
+  # "scienta_txt"
+  # "specs_sle"
+  # "specs_xml"
+  # "specs_xy"
+  # "vms_irregular"
+  # "vms_regular"
+  # "vms_txt_export"
   "vms_analysis"
 )
 

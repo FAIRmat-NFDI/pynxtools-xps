@@ -5,6 +5,6 @@
     "spectrum_id": 20,
     "analyzer_lens": "LargeArea:1.5kV",
     "analyzer_slit": "4:7x20c\\C:mesh",
-    "scan_mode": "fixed_analyzer_transmission",
+    "scan_mode": "FixedAnalyzerTransmission",
     "kinetic_energy_start": 136.61
 }

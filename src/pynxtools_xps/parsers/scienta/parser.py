@@ -25,7 +25,7 @@ import re
 import warnings
 from abc import abstractmethod
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, ClassVar, cast
 
 import h5py
 import jsonschema
@@ -46,41 +46,11 @@ from pynxtools_xps.parsers.scienta.data_model import (
     scienta_igor_peak_schema,
 )
 from pynxtools_xps.parsers.scienta.metadata import (
+    _check_valid_value,
     _construct_date_time,
-    # TODO: replace by _context
-    # _get_key_value_pair,
+    _context,
+    _get_key_value_unit,
 )
-
-# TODO: replace these
-# from pynxtools_xps.mapping import (
-#     _convert_energy_type,
-#     convert_units,
-#     get_units_for_key,
-# )
-
-
-# TODO: do we need this? If so, can it be more general?
-def _check_valid_value(value: str | int | float | bool | np.ndarray) -> bool:
-    """
-    Check if a value is valid.
-
-    Strings and arrays are considered valid if they are non-empty.
-    Numbers and booleans are always considered valid.
-
-    Args:
-        value (str | int | float | bool | np.ndarray):
-            The value to check. Can be a scalar, string, or NumPy array.
-
-    Returns:
-        bool: True if the value is valid, False otherwise.
-    """
-    if isinstance(value, str | int | float) and value is not None:
-        return True
-    if isinstance(value, bool):
-        return True
-    if isinstance(value, np.ndarray) and value.size != 0:
-        return True
-    return False
 
 
 def _flatten_dict(
@@ -114,25 +84,14 @@ class ScientaMapper(_XPSMapper):
     dictionaries.
     """
 
-    config_file = {
+    config_file: ClassVar[str | dict[str, str]] = {
         ".h5": "config_scienta_hdf5.json",
         ".hdf5": "config_scienta_hdf5.json",
         ".ibw": "config_scienta.json",
         ".txt": "config_scienta.json",
     }
 
-    supported_file_extensions = [
-        ".h5",
-        ".hdf5",
-        ".ibw",
-        ".txt",
-    ]
-
-    __file_err_msg__ = (
-        "The Scienta reader currently only allows files with "
-        "the following extensions: "
-        f"{supported_file_extensions}."
-    )
+    # TODO: should be done by the individual parsers
 
     def _select_parser(self):
         """
@@ -144,9 +103,9 @@ class ScientaMapper(_XPSMapper):
             Parser for reading .txt or .ibw files exported by Scienta.
 
         """
-        if str(self.file).endswith(".txt"):
+        if self.file.suffix == ".txt":
             return ScientaTXTParser()
-        elif str(self.file).endswith(".ibw"):
+        elif self.file.suffix == ".ibw":
             try:
                 with open(str(self.file), "rb") as f:
                     data_ibw = binarywave.load(f)
@@ -157,15 +116,18 @@ class ScientaMapper(_XPSMapper):
             except json.JSONDecodeError:
                 return ScientaIgorParserOld()
             return ScientaIgorParser()
-        elif str(self.file).endswith((".h5", ".hdf5")):
+        elif self.file.suffix in (".h5", ".hdf5"):
             return ScientaHDF5Parser()
-        raise ValueError(MapperScienta.__file_err_msg__)
+        # TODO: remove
+        raise ValueError(
+            f"File format {file.suffix} not supported by the Scienta parser."
+        )
 
-    def construct_data(self):
+    def construct_data(self, parsed_data: list[dict[str, Any]]):
         """Map Parser data to NXmpes-ready dict."""
         # pylint: disable=duplicate-code
 
-        for spectrum in spectra:
+        for spectrum in parsed_data:
             self._update_xps_dict_with_spectrum(spectrum)
 
     def _update_xps_dict_with_spectrum(self, spectrum: dict[str, Any]):
@@ -196,10 +158,9 @@ class ScientaMapper(_XPSMapper):
                 key = key.replace("entry/", "", 1)
             mpes_key = f"{entry_parent}/{key}"
             self._data[mpes_key] = value
-            # TODO: use _context
-            # units = convert_units(get_units_for_key(key, UNITS))
-            # if units is not None:
-            #     self._data[f"{mpes_key}/@units"] = units
+            unit = _context.default_units.get(key)
+            if unit is not None:
+                self._data[f"{mpes_key}/@units"] = _context.map_unit(unit)
 
         try:
             self._fill_with_data_txt_ibw(spectrum, entry, entry_parent)
@@ -218,8 +179,7 @@ class ScientaMapper(_XPSMapper):
         if axis_units:
             for axis_name, unit in axis_units.items():
                 unit_key = f"{entry_parent}/{axis_name}/@units"
-                # TODO: use _context
-                # self._data[unit_key] = convert_units(unit)
+                self._data[unit_key] = _context.map_unit(unit)
 
         # Create key for writing to data
         scan_key = _construct_data_key(spectrum)
@@ -292,14 +252,17 @@ class ScientaMapper(_XPSMapper):
 class ScientaTXTParser(_XPSParser):
     """Parser for Scienta TXT exports."""
 
+    config_file: ClassVar[str] = "config_scienta.json"
+    supported_file_extensions: ClassVar[tuple[str, ...]] = (".txt",)
+
     # pylint: disable=too-few-public-methods
 
     def __init__(self):
+        super().__init__()
         self.lines: list[str] = []
         self.header = ScientaHeader()
-        self.spectra: list[dict[str, Any]] = []
 
-    def parse_file(self, file: str | Path, **kwargs):
+    def _parse(self, file: Path, **kwargs) -> None:
         """
         Parse the file's data and metadata into a flat
         list of dictionaries.
@@ -310,19 +273,12 @@ class ScientaTXTParser(_XPSParser):
         file : str
             Filepath of the TXT file to be read.
 
-        Returns
-        -------
-        self.spectra
-            Flat list of dictionaries containing one spectrum each.
-
         """
         self._read_lines(file)
         self._parse_header()
 
         for region_id in range(1, self.header.no_of_regions + 1):
             self._parse_region(region_id)
-
-        return self.spectra
 
     def _read_lines(self, file: str | Path):
         """
@@ -358,8 +314,7 @@ class ScientaTXTParser(_XPSParser):
         self.lines = self.lines[n_headerlines:]
 
         for line in headerlines:
-            # TODO: use _context
-            key, value = None, None  # _get_key_value_pair(line)
+            key, value, _ = _get_key_value_unit(line)
             if key:
                 setattr(self.header, key, value)
         self.header.validate_types()
@@ -417,18 +372,14 @@ class ScientaTXTParser(_XPSParser):
                 ]
             ):
                 # Read instrument meta data for this region.
-                key, value = None, None  # _get_key_value_pair(line)
-                if _check_valid_value(value):
-                    setattr(region, key, value)
+                key, value, _ = _get_key_value_unit(line)
+                setattr(region, key, value)
 
             if bool_variables["in_ui_info"]:
-                key, value = None, None  # _get_key_value_pair(line)
-                # key, value = _get_key_value_pair(line)
+                key, value, _ = _get_key_value_unit(line)
                 if _check_valid_value(value):
                     if bool_variables["in_manipulator"]:
                         key = f"manipulator_{key}"
-                        # TODO: use _context?
-                        # value = _re_map_single_value(key, value, VALUE_MAP)
                     setattr(region, key, value)
 
             if bool_variables["in_data"]:
@@ -457,16 +408,20 @@ class ScientaTXTParser(_XPSParser):
         region_dict["axis_labels"] = ["energy"]
         region_dict["data_labels"] = ["intensity"]
 
-        self.spectra.append(region_dict)
+        self._data.append(region_dict)
 
 
 class _ScientaIgorParser(_XPSParser):
     """Parser for Scienta IBW exports."""
 
+    config_file: ClassVar[str] = "config_scienta.json"
+    supported_file_extensions: ClassVar[tuple[str, ...]] = (".ibw",)
+
     def __init__(self):
+        super().__init__()
         self.lines: list[str] = []
 
-    def parse_file(self, file: str | Path, **kwargs):
+    def _parse(self, file: Path, **kwargs) -> None:
         """
         Reads the igor binarywave files and returns a list of
         dictionary containing the wave data.
@@ -475,11 +430,6 @@ class _ScientaIgorParser(_XPSParser):
         ----------
         file : str
             Filepath of the TXT file to be read.
-
-        Returns
-        -------
-        self.spectra
-            Flat list of dictionaries containing one spectrum each.
 
         """
         ibw = binarywave.load(file)
@@ -508,20 +458,20 @@ class _ScientaIgorParser(_XPSParser):
 
         for i, (dim, unit) in enumerate(axes_labels_with_units):
             if dim in ("kinetic_energy", "binding_energy", "analyser_energy"):
-                # TODO: use _context
-                # spectrum["energy_scale"] = _convert_energy_type(dim)
+                spectrum["energy_scale"] = _context.map_value("energy_scale", dim)
                 dim = "energy"
             spectrum["data"][dim] = self.axis_for_dim(wave_header, dim=i)
             spectrum["axis_labels"].append(dim)
-            # TODO: use _context
-            # spectrum["units"][dim] = convert_units(unit)
+            if not unit:
+                unit = _context.get_default_unit(dim)
+            spectrum["units"][dim] = _context.map_unit(unit)
 
         for label, unit in data_labels_with_units:
             spectrum["data"][label] = data
             spectrum["data_labels"].append(label)
-            # TODO: use _context
-            # spectrum["units"][label] = convert_units(unit)
-            # Convert date and time to ISO8601 date time.
+            if not unit:
+                unit = _context.get_default_unit(label)
+            spectrum["units"][label] = _context.map_unit(unit)
 
         spectrum["igor_binary_wave_format_version"] = ibw_version
 
@@ -529,8 +479,6 @@ class _ScientaIgorParser(_XPSParser):
         spectrum |= region_metadata
 
         self._data.append(spectrum)
-
-        return self.data
 
     @abstractmethod
     def _parse_note(self, bnote: bytes) -> dict[str, Any]:
@@ -651,9 +599,7 @@ class ScientaIgorParserOld(_ScientaIgorParser):
         notes: dict[str, Any] = {}
 
         for line in note.split("\n"):
-            # TODO: use value
-            # key, value = _get_key_value_pair(line)
-            key, value = None, None  # remove
+            key, value, unit = _get_key_value_unit(line)
             if key:
                 notes[key] = value
 
@@ -736,7 +682,10 @@ class ScientaIgorParserPEAK(_ScientaIgorParser):
 
 
 class ScientaHDF5Parser(_XPSParser):
-    def parse_file(self, file: str | Path, **kwargs):
+    config_file: ClassVar[str] = "config_scienta_hdf5.json"
+    supported_file_extensions: ClassVar[tuple[str, ...]] = (".h5", ".hdf5")
+
+    def _parse(self, file: Path, **kwargs) -> None:
         """
         Reads the igor binarywave files and returns a list of
         dictionary containing the wave data.
@@ -825,5 +774,3 @@ class ScientaHDF5Parser(_XPSParser):
             hdf5_data["data_axes"] = ["energy"]
 
         self._data = [hdf5_data]
-
-        return self.data

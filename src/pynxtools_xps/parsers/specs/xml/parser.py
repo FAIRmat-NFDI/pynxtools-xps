@@ -24,11 +24,12 @@ import copy
 import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import ClassVar
 
 import numpy as np
 import xarray as xr
 
-from pynxtools_xps.mapping import Any
+from pynxtools_xps.mapping import Any, _convert_energy_scan_mode
 from pynxtools_xps.parsers.base import _align_name_part, _XPSMapper, _XPSParser
 from pynxtools_xps.parsers.specs.xml.metadata import _context
 
@@ -75,15 +76,12 @@ class SpecsXMLMapper(_XPSMapper):
         Returns flat list of dictionaries containing one spectrum each.
 
         """
-        self.file = file
         self.parser = self._select_parser()
-        metadata_dict, parsed_data = self.parser.parse_file(file, **kwargs)
+        self.parser.parse_file(file, **kwargs)
 
-        self._data = {**self._data, **metadata_dict}
+        self.construct_data(self.parser.data)
 
-        self.construct_data(parsed_data)
-
-        return self.data
+        self._data = {**self._data, **self.parser.metadata_dict}
 
     # pylint: disable=too-many-locals,too-many-statements, too-many-branches
     # TODO: Fix the typing issues
@@ -243,15 +241,19 @@ class SpecsXMLMapper(_XPSMapper):
 class SpecsXMLParser(_XPSParser):
     """Parser for SpecsLab2 XML data"""
 
+    config_file: ClassVar[str] = "config_specs_sle.json"
+    supported_file_extensions: ClassVar[tuple[str, ...]] = (".xml",)
+
     def __init__(self) -> None:
+        # TODO: self._data is different then elsewhere
+        # self._data: dict = {}
         self.metadata_dict: dict = {}
-        self.entry_to_data: dict = {}
         self._root_path = "/ENTRY"
         self.tail_part_from_struct = ""
         self.tail_part_from_other = ""
         self.child_nm_resolvers = "__child_name_resolver__"
 
-    def parse_file(self, file: str | Path, **kwargs):
+    def _parse(self, file: Path, **kwargs) -> None:
         """Start parsing process and parse children recursively.
 
         Parameters
@@ -283,19 +285,23 @@ class SpecsXMLParser(_XPSParser):
                     if _KEY_PARTS[i] == "RegionData_":
                         str_to_replace += "regions/"
                     str_to_replace += f"{_KEY_PARTS[i]}{match.group(1)}/"
+            # TODO: _context not used at all
+            # # key, format, unit = _context.format(key, value)
             key = key.replace(str_to_replace, f"[{entry_name}]/")
 
-            key, format, unit = _context.format(key, value)
+            # TODO: this should be done earlier, without the ENTRY/ notation
+            for suffix, func in _context.value_map.items():
+                if key.endswith(suffix):
+                    value = func(value)
+
             metadata_dict[key] = value
 
-            if unit:
-                metadata_dict[f"{key}/@units"] = value
+            # if unit:
+            #     metadata_dict[f"{key}/@units"] = value
 
         self.metadata_dict = metadata_dict
 
         self.collect_raw_data_to_construct_data()
-
-        return self.metadata_dict, self.entry_to_data
 
     def pass_child_through_parsers(
         self,
@@ -741,65 +747,68 @@ class SpecsXMLParser(_XPSParser):
                     entry = ""
 
             if entry and (entry not in entry_list):
-                self.entry_to_data[entry] = {"raw_data": copy.deepcopy(raw_dict)}
+                self._data[entry] = {"raw_data": copy.deepcopy(raw_dict)}
                 entry_list.append(entry)
 
+            if not entry:
+                continue
+
             if "region/curves_per_scan" in key:
-                self.entry_to_data[entry]["raw_data"]["curves_per_scan"] = val
+                self._data[entry]["raw_data"]["curves_per_scan"] = val
             elif "region/values_per_curve" in key:
-                self.entry_to_data[entry]["raw_data"]["values_per_curve"] = val
+                self._data[entry]["raw_data"]["values_per_curve"] = val
 
             elif "region/excitation_energy" in key:
-                self.entry_to_data[entry]["raw_data"]["excitation_energy"] = val
+                self._data[entry]["raw_data"]["excitation_energy"] = val
 
             elif "region/scan_mode/name" in key:
                 val = _convert_energy_scan_mode(val)
-                self.entry_to_data[entry]["raw_data"]["scan_mode"] = val
+                self._data[entry]["raw_data"]["scan_mode"] = val
 
             elif "region/kinetic_energy" in key:
                 if "region/kinetic_energy_base" not in key:
-                    self.entry_to_data[entry]["raw_data"]["kinetic_energy"] = val
+                    self._data[entry]["raw_data"]["kinetic_energy"] = val
                     continue
                 if "region/kinetic_energy_base" in key:
-                    self.entry_to_data[entry]["raw_data"]["kinetic_energy_base"] = val
+                    self._data[entry]["raw_data"]["kinetic_energy_base"] = val
                     continue
 
             elif "region/effective_workfunction" in key:
-                self.entry_to_data[entry]["raw_data"]["effective_workfunction"] = val
+                self._data[entry]["raw_data"]["effective_workfunction"] = val
 
             elif "region/scan_delta" in key:
-                self.entry_to_data[entry]["raw_data"]["scan_delta"] = val
+                self._data[entry]["raw_data"]["scan_delta"] = val
 
             elif "region/pass_energy" in key:
-                self.entry_to_data[entry]["raw_data"]["pass_energy"] = val
+                self._data[entry]["raw_data"]["pass_energy"] = val
 
             elif "mcd_head" in key:
-                self.entry_to_data[entry]["raw_data"]["mcd_head"] = val
+                self._data[entry]["raw_data"]["mcd_head"] = val
 
             elif "mcd_tail" in key:
-                self.entry_to_data[entry]["raw_data"]["mcd_tail"] = val
+                self._data[entry]["raw_data"]["mcd_tail"] = val
 
             elif "shift" in key:
-                self.entry_to_data[entry]["raw_data"]["mcd_shifts"].append(val)
-                self.entry_to_data[entry]["raw_data"]["mcd_num"] += 1
+                self._data[entry]["raw_data"]["mcd_shifts"].append(val)
+                self._data[entry]["raw_data"]["mcd_num"] += 1
 
             elif "gain" in key:
-                self.entry_to_data[entry]["raw_data"]["mcd_gains"].append(val)
+                self._data[entry]["raw_data"]["mcd_gains"].append(val)
 
             elif "position" in key:
-                self.entry_to_data[entry]["raw_data"]["mcd_poss"].append(val)
+                self._data[entry]["raw_data"]["mcd_poss"].append(val)
 
             # construct scan names e.g cycles2_scan0
             if "cycles/Cycle_" in key:
                 _, last_part = key.split("cycles/Cycle_")
                 if "/time" in last_part:
-                    self.entry_to_data[entry]["raw_data"]["time"] = val
+                    self._data[entry]["raw_data"]["time"] = val
                     continue
                 if "/parameters/Loop" in last_part:
-                    self.entry_to_data[entry]["raw_data"]["loop_no"] = val
+                    self._data[entry]["raw_data"]["loop_no"] = val
                     continue
                 parts = last_part.split("/")
                 cycle_num, scan_num = parts[0], parts[-2].split("_")[1]
                 scan_name = f"cycle{cycle_num}_scan{scan_num}"
 
-                self.entry_to_data[entry]["raw_data"]["scans"][scan_name] = val
+                self._data[entry]["raw_data"]["scans"][scan_name] = val

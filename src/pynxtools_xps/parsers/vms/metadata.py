@@ -19,6 +19,8 @@
 Metadata mapping for the VAMAS parser.
 """
 
+from typing import Any
+
 from pynxtools_xps.mapping import (
     _convert_energy_scan_mode,
     _convert_energy_type,
@@ -26,6 +28,24 @@ from pynxtools_xps.mapping import (
     _MetadataContext,
     _ValueMap,
 )
+
+
+def _drop_unused_keys(dictionary: dict[str, Any], keys_to_drop: list[str]) -> None:
+    """
+    Remove unwanted keys from a dictionary.
+
+    Args:
+        dictionary (dict[str, Any]):
+            Dictionary containing data and metadata for a spectrum.
+        keys_to_drop (list[str]):
+            List of keys that should be removed from the dictionary.
+
+    Returns:
+        None
+    """
+    for key in keys_to_drop:
+        dictionary.pop(key, None)
+
 
 EXP_MODES = [
     "MAP",
@@ -61,7 +81,7 @@ _KEY_MAP: dict[str, str] = {
     "sample_id": "sample_name",
     "technique": "analysis_method",
     "source_energy": "excitation_energy",
-    "analyzer_mode": "scan_mode",
+    "analyzer_mode": "energy_scan_mode",
     "resolution": "pass_energy",
     "transition_label": "transition",
     "abscissa_label": "energy_label",
@@ -75,10 +95,21 @@ _KEY_MAP: dict[str, str] = {
     "species_label": "element",
 }
 
+
+def _convert_vamas_unit(unit: str) -> str | None:
+    """Map VAMAS unit abbreviations to standard units, or None for dimensionless."""
+    _VAMAS_UNIT_ABBREVIATIONS: dict[str, str | None] = {
+        "d": None,  # VAMAS 'd' = dimensionless/unspecified
+    }
+    return _VAMAS_UNIT_ABBREVIATIONS.get(unit, unit)
+
+
 _VALUE_MAP: _ValueMap = {
     "analysis_method": _convert_measurement_method,
     "energy_label": _convert_energy_type,
-    "scan_mode": _convert_energy_scan_mode,
+    "energy_scan_mode": _convert_energy_scan_mode,
+    "y_units_1": _convert_vamas_unit,
+    "y_units_2": _convert_vamas_unit,
 }
 
 _UNIT_MAP: dict[str, str | None] = {}

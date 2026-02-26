@@ -70,6 +70,8 @@ ENERGY_SCAN_MODE_MAP: dict[str, str] = {
     "FRR": "fixed_retardation_ratio",
     "Snapshot": "snapshot",
     "SnapshotFAT": "snapshot",
+    "ConstantFinalState": "constant_final_state",
+    "ConstantInitialState": "constant_initial_state",
 }
 
 ACQUSITION_MODE_MAP: dict[str, str] = {
@@ -134,6 +136,12 @@ def parse_datetime(
     str
         Datetime in ISO 8601 format.
     """
+    # If the string is already in ISO 8601 format, return it directly.
+    try:
+        return datetime.datetime.fromisoformat(datetime_string.strip()).isoformat()
+    except ValueError:
+        pass
+
     for date_fmt in possible_date_formats:
         if date_fmt == "%Y-%m-%dT%H:%M:%S.%f%z":
             # strptime only supports six digits for microseconds
@@ -167,29 +175,28 @@ def convert_pascal_to_snake(value: str) -> str:
     def replace_non_bracketed(match):
         content = match.group(0)
 
-        # If already ALL CAPS (with optional underscores), just lowercase
         if content.isupper():
-            return content.lower()
+            snake_case = content.lower()
+        else:
+            snake_case = re.sub(
+                r"(?<=[A-Z])(?=[A-Z][a-z])",
+                "_",
+                content,
+            )
 
-        # split acronym -> word (TFCParameters -> TFC_Parameters)
-        snake_case = re.sub(
-            r"(?<=[A-Z])(?=[A-Z][a-z])",
-            "_",
-            content,
-        )
+            snake_case = re.sub(
+                r"(?<=[a-z0-9])(?=[A-Z])",
+                "_",
+                snake_case,
+            )
 
-        # split camel/pascal case (myVariable -> my_Variable)
-        snake_case = re.sub(
-            r"(?<=[a-z0-9])(?=[A-Z])",
-            "_",
-            snake_case,
-        )
+            snake_case = re.sub(r"[\s\-]+", "_", snake_case)
 
-        # normalize separators
-        snake_case = re.sub(r"[\s\-]+", "_", snake_case)
+            snake_case = re.sub(r"_+", "_", snake_case)
 
-        # collapse duplicate underscores
-        return re.sub(r"_+", "_", snake_case)
+            snake_case = snake_case.lower()
+
+        return snake_case
 
     pattern = r"(\[.*?\]|[^[]+)"
     parts = re.sub(
@@ -200,10 +207,14 @@ def convert_pascal_to_snake(value: str) -> str:
         value,
     )
 
-    return parts.lower()
+    return parts
 
 
-# TODO: is datetime proper here?
+def update_dict_without_overwrite(d1: dict[str, Any], d2: dict[str, Any]):
+    """Update d1 with d2, but don't overwrite existing keys."""
+    d1.update({k: v for k, v in d2.items() if k not in d1})
+
+
 _Value: TypeAlias = str | int | float | np.ndarray | datetime.datetime | None
 _ValueMap: TypeAlias = dict[str, Callable[[Any], Any]]
 
@@ -238,15 +249,8 @@ def _split_key_and_unit(
     if not match:
         return key, None
 
-    base_key = match.group("key").strip()
+    base_key = match.group("key").strip().rstrip("_")
     unit = match.group("unit")
-
-    # Exceptional case: ambiguous "nU" unit
-    if unit == "nU":
-        if base_key.endswith("voltage"):
-            return base_key, "V"
-        if base_key.endswith("current"):
-            return base_key, "A"
 
     return base_key, unit
 
@@ -311,7 +315,6 @@ class _MetadataContext:
 
     def parse_value_and_unit(
         self,
-        key: str,
         value: _Value,
     ) -> tuple[_Value, str | None]:
         """
@@ -347,7 +350,17 @@ class _MetadataContext:
         if unit is not None:
             return key, unit
 
-        return _split_key_and_unit(key)
+        key, unit = _split_key_and_unit(key)
+        key = self.normalize_key(key)
+
+        # Exceptional case: ambiguous "nU" unit
+        if unit in ("nu", "nU"):
+            if key.endswith("voltage"):
+                return key, "V"
+            if key.endswith("current"):
+                return key, "A"
+
+        return key, unit
 
     def _format_value(self, value: _Value) -> _Value:
         """
@@ -370,6 +383,14 @@ class _MetadataContext:
             # Check for decimal to ensure float, even if the decimal part is zero
             return float(value) if "." in value or "e" in value.lower() else int(value)
         return value
+
+    def get_default_unit(self, key: str) -> str | None:
+        """Get default units for a given key"""
+        return self.default_units.get(key)
+
+    def map_unit(self, unit: str | None) -> str | None:
+        """Map a unit given the unit_map"""
+        return self.unit_map.get(unit, unit) if unit else None
 
     def map_value(self, key: str, value: _Value) -> _Value:
         """
@@ -405,14 +426,14 @@ class _MetadataContext:
 
         key = self.normalize_key(key)
 
-        value, unit = self.parse_value_and_unit(key, value)
+        value, unit = self.parse_value_and_unit(value)
 
         key, unit = self.resolve_unit_from_key(key, unit)
 
         if unit is None:
-            unit = self.default_units.get(key)
+            unit = self.get_default_unit(key)
 
-        unit = self.unit_map.get(unit, unit) if unit else None
+        unit = self.map_unit(unit)
 
         value = self.map_value(key, value)
         value = self._format_value(value)
@@ -420,38 +441,7 @@ class _MetadataContext:
         return key, value, unit
 
 
-# TODO: this is broken, needs to be properly fixed because it is used
-# def _setattr_with_datacls_type(self, datacls: dataclass, attr: str, value: _Value):
-#     """
-#     Set attribute of dataclass instance with the field_type
-#     defined in the dataclass.
-#     """
-#     field_type = type(getattr(datacls, attr))
-#     setattr(datacls, attr, field_type(value))
-
-
-# ToDO: is the regex still needed? If not, remove entirely
-# def get_units_for_key(unit_key: str, unit_map: dict[str, str]) -> str:
-#     """
-#     Get correct units for a given key from a dictionary with unit map.
-#     Parameters
-#     ----------
-#     unit_key : str
-#        Key of type <mapping>:<spectrum_key>, e.g.
-#        detector/detector_voltage
-#     Returns
-#     -------
-#     str
-#         Unit for that unit_key.
-#     """
-#     regex_match = re.search(r"\[([A-Za-z0-9_]+)\]", unit_key)
-#     if regex_match is None:
-#         return unit_map.get(unit_key, None)
-#     return regex_match.group(1)
-
-
-# ToDO: these should be not needed eventually
-def _re_map_keys(
+def _format_dict(
     dictionary: dict[str, Any], context: _MetadataContext
 ) -> dict[str, Any]:
     """
@@ -478,25 +468,12 @@ def _re_map_keys(
         dictionary (dict[str, Any]): Dictionary with changed keys.
 
     """
-    for key in list(dictionary.keys()):
-        new_key = context.normalize_key(key)
-        if new_key != key:
-            dictionary[new_key] = dictionary.pop(key)
+    mapped: dict[str, Any] = {}
 
-    return dictionary
-
-
-def _re_map_values(
-    dictionary: dict[str, Any], context: _MetadataContext
-) -> dict[str, Any]:
-    """
-    Map the values in a dictionary using _MetadataContext mapper. defined in a
-    mapping functions dictionary.
-
-    Returns:
-        dictionary (dict[str, Any]): Dictionary with changed values.
-
-    """
     for key, value in dictionary.items():
-        dictionary[key] = context.map_value(key, value)
-    return dictionary
+        key, value, unit = context.format(key, value)
+        mapped[key] = value
+        if unit:
+            mapped[f"{key}/@units"] = unit
+
+    return mapped

@@ -54,7 +54,7 @@ class ScientaRegion(_XPSDataclass):
     detector_last_x_channel: int = 0
     detector_first_y_channel: int = 0
     detector_last_y_channel: int = 0
-    number_of_slices: str = ""
+    number_of_slices: int = 0
     data_file: str = ""
     sequence_file: str = ""
     spectrum_type: str = ""
@@ -65,7 +65,7 @@ class ScientaRegion(_XPSDataclass):
     spectrum_comment: str = ""
     start_date: str = ""
     time: str = ""
-    time_stamp: str = ""
+    time_stamp: str | None = None
     time_per_spectrum_channel: float = 0.0
     detector_mode: str = ""
 

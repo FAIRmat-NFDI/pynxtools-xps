@@ -134,7 +134,7 @@
         "scheme":"@eln",
         "pass_energy":"['@attrs:pass_energy', '@eln']",
         "pass_energy/@units":"['@attrs:pass_energy/@units', '@eln']",
-        "energy_scan_mode":"['@attrs:scan_mode', '@eln']",
+        "energy_scan_mode":"['@attrs:energy_scan_mode', '@eln']",
         "radius":"@eln",
         "radius/@units":"@eln",
         "device_information":{

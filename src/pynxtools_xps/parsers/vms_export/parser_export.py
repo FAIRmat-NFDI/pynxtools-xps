@@ -23,9 +23,9 @@ import itertools
 import operator
 import re
 import warnings
-from abc import ABC, abstractmethod
-from collections import Counter
-from typing import Any
+from abc import abstractmethod
+from pathlib import Path
+from typing import Any, ClassVar
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -41,39 +41,9 @@ from pynxtools_xps.parsers.base import (
     _construct_data_key,
     _construct_entry_name,
     _XPSMapper,
+    _XPSParser,
 )
-from pynxtools_xps.parsers.vms_export.metadata import _context
-
-
-def _handle_repetitions(input_list: list[str]) -> list[str]:
-    """
-    Process a list of strings to handle repeated items by appending a suffix
-    to each duplicate item. The suffix is in the format '_n', where 'n' is the
-    occurrence number of that item in the list.
-
-    Parameters:
-    - input_list (List[str]): A list of strings where repeated items are
-      identified and renamed with a suffix.
-
-    Returns:
-    - List[str]: A new list where repeated items are modified by appending
-      a suffix to make them unique.
-    """
-    counts = Counter(input_list)
-    result = []
-    occurrences = {}
-
-    for item in input_list:
-        if counts[item] > 1:
-            # If the item has been seen before, add a suffix
-            if item not in occurrences:
-                occurrences[item] = 0
-            occurrences[item] += 1
-            result.append(f"{item}_{occurrences[item]}")
-        else:
-            result.append(item)
-
-    return result
+from pynxtools_xps.parsers.vms_export.metadata import _context, _handle_repetitions
 
 
 def _select_from_list(input_list: list[str], skip: int, keep_middle: int) -> list[str]:
@@ -127,7 +97,7 @@ class VamasExportMapper(_XPSMapper):
         }
         super().__init__()
 
-    def _get_file_type(self, file):
+    def _get_file_type(self, file: Path):
         """
         Check which export option was used in CasaXPS.
 
@@ -231,17 +201,20 @@ class VamasExportMapper(_XPSMapper):
         )
 
 
-class TextParser(ABC):  # pylint: disable=too-few-public-methods
+class TextParser(_XPSParser):  # pylint: disable=too-few-public-methods
     """
     Parser for ASCI files exported from CasaXPS.
     """
+
+    config_file: ClassVar[str] = "config_vms.json"
+    supported_file_extensions: ClassVar[tuple[str, ...]] = (".txt",)
 
     def __init__(self):
         self.lines: list[str] = []
         self.n_headerlines: int = 7
         self.uniform_energy_steps: bool = True
 
-    def parse_file(self, file, uniform_energy_steps=True, **kwargs):
+    def _parse(self, file: Path, **kwargs) -> None:
         """
         Parse the file into a list of dictionaries.
 
@@ -263,14 +236,16 @@ class TextParser(ABC):  # pylint: disable=too-few-public-methods
             DESCRIPTION.
 
         """
-        if "n_headerlines" in kwargs:
-            self.n_headerlines = kwargs["n_headerlines"]
-
-        self.uniform_energy_steps = uniform_energy_steps
+        self.n_headerlines = kwargs.pop("n_headerlines", self.n_headerlines)
+        self.uniform_energy_steps = kwargs.pop(
+            "uniform_energy_steps",
+            self.uniform_energy_steps,
+        )
 
         self._read_lines(file)
         blocks = self._parse_blocks()
-        return self._build_list_of_dicts(blocks)
+
+        self._data = self._build_list_of_dicts(blocks)
 
     def _read_lines(self, file):
         """
@@ -291,7 +266,7 @@ class TextParser(ABC):  # pylint: disable=too-few-public-methods
                 self.lines += [line]
 
     @abstractmethod
-    def _parse_blocks(self):
+    def _parse_blocks(self) -> list[list[str]]:
         """
         Extract spectrum blocks from full data string.
 
@@ -325,7 +300,7 @@ class TextParser(ABC):  # pylint: disable=too-few-public-methods
             List of dicts with spectrum data and metadata.
 
         """
-        return []
+        ...
 
     def _separate_header_and_data(self, block):
         """
@@ -353,13 +328,13 @@ class TextParserRows(TextParser):
         super().__init__()
         self.n_headerlines: int = 7
 
-    def _parse_blocks(self):
+    def _parse_blocks(self) -> list[list[str]]:
         """
         With the 'Rows of Tables' option, there is only one block
         with common metadata.
 
         """
-        return self.lines
+        return [self.lines]
 
     def _build_list_of_dicts(self, blocks):
         """
@@ -377,6 +352,7 @@ class TextParserRows(TextParser):
             List of dicts with spectrum data and metadata.
 
         """
+        lines = blocks[0]
         header, data_lines = self._separate_header_and_data(blocks)
         settings = self._parse_header(header)
         data = self._parse_data(data_lines)
@@ -407,7 +383,7 @@ class TextParserRows(TextParser):
             try:
                 group_name = spec_header.split(":")[1]
                 region = spec_header.split(":")[2]
-                y_units = _convert_units(spec_header.split(":")[-1])
+                y_units = spec_header.split(":")[-1].strip()
             except IndexError:
                 group_name = spec_header if spec_header.strip() else "group"
                 region = spec_header if spec_header.strip() else "region"
@@ -490,7 +466,7 @@ class TextParserColumns(TextParser):
         super().__init__()
         self.n_headerlines = 8
 
-    def _parse_blocks(self):
+    def _parse_blocks(self) -> list[list[str]]:
         """
         Extract spectrum blocks from full data string.
 
@@ -552,9 +528,11 @@ class TextParserColumns(TextParser):
                     }
                 n_components = len(comp_names)
 
-            elif line.startswith(("Area", "Width", "Position", "data")):
+            elif line.startswith(("Area", "Width", "FWHM", "Position", "data")):
                 line_split = line.split("\t")
-                fit_data[line_split[0]] = [_format_value(val) for val in line_split[1:]]
+                fit_data[line_split[0]] = [
+                    _context._format_value(val) for val in line_split[1:]
+                ]
 
             elif "K.E." in line and "Counts" in line:
                 # Parse column headers
@@ -612,10 +590,12 @@ class TextParserColumns(TextParser):
                             break
 
                     if name not in lineshape_in:
-                        data[matching_key]["data"].append(_format_value(value))
+                        data[matching_key]["data"].append(_context._format_value(value))
                         lineshape_in += [name]
                     else:
-                        data[matching_key]["data_cps"].append(_format_value(value))
+                        data[matching_key]["data_cps"].append(
+                            _context._format_value(value)
+                        )
         flattened = {}
         for i, (sup_key, sub_dict) in enumerate(data.items()):
             for sub_key, value in sub_dict.items():
@@ -626,11 +606,17 @@ class TextParserColumns(TextParser):
                         value = np.array(value)
                     flattened[f"{sup_key}/{sub_key}"] = value
 
-            for param in ("Area", "FWHM", "Position", "data"):
+            for param in ("Area", "Width", "FWHM", "Position", "data"):
                 if param in fit_data and i < len(fit_data[param]):
-                    param_value = _format_value(fit_data[param][i])
+                    param_value = fit_data[param][i]
                     if param_value:
-                        flattened[f"{sup_key}/{param.lower()}"] = param_value
+                        param_key, param_value, unit = _context.format(
+                            param, param_value
+                        )
+                        # print(param_key, param_value)
+                        flattened[f"{sup_key}/{param_key}"] = param_value
+                        if unit:
+                            flattened[f"{sup_key}/{param_key}/@units"] = unit
 
         if self.uniform_energy_steps:
             uniform = False

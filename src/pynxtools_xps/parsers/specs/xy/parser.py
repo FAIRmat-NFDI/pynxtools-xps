@@ -26,17 +26,12 @@ import re
 import warnings
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 import numpy as np
 import xarray as xr
 
-from pynxtools_xps.mapping import (
-    _re_map_keys,
-    _re_map_values,
-    _Value,
-    convert_pascal_to_snake,
-)
+from pynxtools_xps.mapping import _convert_bool, _Value, convert_pascal_to_snake
 from pynxtools_xps.numerics import _get_minimal_step, check_uniform_step_width
 from pynxtools_xps.parsers.base import (
     _construct_data_key,
@@ -84,10 +79,10 @@ class SpecsXYMapper(_XPSMapper):
         self.write_channels_to_data = kwargs.pop("write_channels_to_data", False)
         return super().parse_file(file, **kwargs)
 
-    def construct_data(self):
+    def construct_data(self, parsed_data: list[dict[str, Any]]):
         """Map XY format to NXmpes-ready dict."""
         # pylint: disable=duplicate-code
-        for spectrum in spectra:
+        for spectrum in parsed_data:
             self._update_xps_dict_with_spectrum(spectrum)
 
     def _update_xps_dict_with_spectrum(self, spectrum: dict[str, Any]):
@@ -107,16 +102,16 @@ class SpecsXYMapper(_XPSMapper):
 
         for key, value in spectrum.items():
             mpes_key = f"{entry_parent}/{key}"
-            # TODO: convert_units(unit) -> _convert
-            # if "units" in key:
-            #     if isinstance(value, dict):
-            #         value = {k: convert_units(v) for k, v in value.items()}
-            #     else:
-            #         value = convert_units(value)
+            if "units" in key:
+                if isinstance(value, dict):
+                    value = {k: _context.map_unit(v) for k, v in value.items()}
+                else:
+                    value = _context.map_unit(value)
+            else:
+                unit = _context.get_default_unit(key)
+                if unit is not None:
+                    self._data[f"{mpes_key}/@units"] = unit
             self._data[mpes_key] = value
-            units = None  # TODO: convert_units(unit) -> _convert, convert_units(get_units_for_key(key, UNITS))
-            if units is not None:
-                self._data[f"{mpes_key}/@units"] = units
 
         data = spectrum["data"]
 
@@ -207,6 +202,9 @@ class XYProdigyParser(_XPSParser):  # pylint: disable=too-few-public-methods
     Tested with SpecsLab Prodigy v 4.64.1-r88350.
     """
 
+    config_file: ClassVar[str] = "config_specs_xy.json"
+    supported_file_extensions: ClassVar[tuple[str, ...]] = (".xy",)
+
     def __init__(self):
         """
         Construct the parser.
@@ -217,7 +215,7 @@ class XYProdigyParser(_XPSParser):  # pylint: disable=too-few-public-methods
         self.n_headerlines = 14
         self.export_settings = {}
 
-    def parse_file(self, file: str | Path, **kwargs):
+    def _parse(self, file: Path, **kwargs) -> None:
         """
         Parse the .xy file into a list of dictionaries.
 
@@ -255,7 +253,7 @@ class XYProdigyParser(_XPSParser):  # pylint: disable=too-few-public-methods
         # Recursively read XPS data from flat 'lines' list.
         groups = self._handle_groups(data)
 
-        return self._flatten_dict(groups)
+        self._data = self._flatten_dict(groups)
 
     def _read_lines(self, file: str | Path):
         """
@@ -312,10 +310,6 @@ class XYProdigyParser(_XPSParser):  # pylint: disable=too-few-public-methods
             Dictionary of export settings.
 
         """
-        bool_map = {
-            "yes": True,
-            "no": False,
-        }
 
         export_settings = {}
         for line in header:
@@ -323,14 +317,10 @@ class XYProdigyParser(_XPSParser):  # pylint: disable=too-few-public-methods
             if len(line) == 0:
                 pass
             else:
-                setting = line.split(":", 1)[1].strip()
-                setting_bool = bool_map.get(setting, setting)
-                key = convert_pascal_to_snake(line.split(":", 1)[0].strip())
-                export_settings[key] = setting_bool
-
-        # TODO: do we need this?
-        export_settings = _re_map_keys(export_settings, _context)
-        export_settings = _re_map_values(export_settings, _context)
+                key, setting_str = line.split(":", 1)
+                key, setting_str = key.strip(), setting_str.strip()
+                key, setting, _ = _context.format(key, setting_str)
+                export_settings[key] = _convert_bool(setting)
 
         return export_settings
 
@@ -393,9 +383,6 @@ class XYProdigyParser(_XPSParser):  # pylint: disable=too-few-public-methods
         for name_header, group_data in zip(grouped_list[::2], grouped_list[1::2]):
             name = self._strip_param(name_header[0], "Group:")
             group_settings = {"group_name": name}
-            # TODO: do we need this?
-            group_settings = _re_map_keys(group_settings, _context)
-            group_settings = _re_map_values(group_settings, _context)
 
             sections, region_data = _parse_group_header(group_data)
             group: Unknown = self._handle_regions(group_data)
@@ -428,15 +415,12 @@ class XYProdigyParser(_XPSParser):  # pylint: disable=too-few-public-methods
                 continue
 
             raw_value: _Value = rest[0].strip()
+
             key, value, unit = _context.format(key, raw_value)
 
             settings[key] = value
             if unit:
                 settings[f"{key}/@units"] = unit
-
-        # TODO: do we need this at all?
-        settings = _re_map_keys(settings, _context)
-        settings = _re_map_values(settings, _context)
 
         return settings
 
@@ -485,10 +469,6 @@ class XYProdigyParser(_XPSParser):  # pylint: disable=too-few-public-methods
                 if unit:
                     region_settings[f"{key}/@units"] = unit
 
-            # TODO: do we need this?
-            region_settings = _re_map_keys(region_settings, _context)
-            region_settings = _re_map_values(region_settings, _context)
-
             region = self._handle_cycles(region_data)
             region["region_settings"] = region_settings
             regions[name] = region
@@ -532,10 +512,6 @@ class XYProdigyParser(_XPSParser):  # pylint: disable=too-few-public-methods
             name = f"cycle_{i}"
             cycle_settings = {"loop_no": i}
             cycle_data = region_data[line_no_a:line_no_b]
-
-            # TODO: do we need this?
-            cycle_settings = _re_map_keys(cycle_settings, _context)
-            cycle_settings = _re_map_values(cycle_settings, _context)
 
             cycle = self._handle_individual_cycles(cycle_data)
             cycle["cycle_settings"] = cycle_settings
@@ -669,7 +645,7 @@ class XYProdigyParser(_XPSParser):  # pylint: disable=too-few-public-methods
             if bracket_match:
                 unit = bracket_match.group(1).strip()
                 label = re.sub(r"\s*\[[^\]]*\]", "", label)
-                unit = None  # TODO: convert_units(unit) -> _convert
+                unit = _context.map_unit(unit)
 
             # Preserve trailing uppercase letter (e.g., D or L)
             trailing_upper = ""
@@ -706,24 +682,23 @@ class XYProdigyParser(_XPSParser):  # pylint: disable=too-few-public-methods
                 channel = _normalize_ext_channel_label(match.group(1))[0]
 
             if line.startswith(self.prefix) and line.strip(self.prefix).strip():
-                key, value = (
+                key, value_str = (
                     item.strip()
                     for item in line.strip(self.prefix).strip().split(":", 1)
                 )
-                # TODO: use _context
-                key = convert_pascal_to_snake(key)
-                if key == "acquisition_date":
-                    scan_settings[key] = _context.map_value(key, value)
+                key, value, _ = _context.format(key, value_str)
+                if key == "time_stamp":
+                    scan_settings[key] = value
 
                 if key == "column_labels":
                     if in_remote_channel:
-                        column_labels = value.strip().split(" ", 1)
+                        column_labels = str(value).strip().split(" ", 1)
                         column_labels = [
                             label.split("(Remote Out Device)", 1)[0].strip()
                             for label in column_labels
                         ]
                     else:
-                        column_labels = value.strip().split(" ")
+                        column_labels = str(value).strip().split(" ")
                     normalized_labels_and_units = [
                         _normalize_ext_channel_label(label) for label in column_labels
                     ]
@@ -747,10 +722,6 @@ class XYProdigyParser(_XPSParser):  # pylint: disable=too-few-public-methods
 
         if energy_axis and check_uniform_step_width(energy_axis):
             scan_settings["step_size"] = _get_minimal_step(energy_axis)
-        # TODO: do we need this?
-        scan_settings = _re_map_keys(scan_settings, _context)
-        scan_settings = _re_map_values(scan_settings, _context)
-
         scan: OrderedDict[str, dict[str, Any]] = OrderedDict()
         scan["data"] = data_channels
         scan["channel_units"] = channel_units

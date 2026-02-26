@@ -75,15 +75,11 @@ _KEY_MAP: dict[str, str | dict[str, str]] = {
     "Epass": "pass_energy",
     "VoltageRange": "voltage_energy_range",
     # spectrometer settings
-    "Coil Current [mA]": "coil_current [mA]",
-    "Pre Defl Y [nU]": "pre_deflector_y_current [nU]",
-    "Pre Defl X [nU]": "pre_deflector_x_current [nU]",
-    "L1 [nU]": "lens1_voltage [nU]",
-    "L2 [nU]": "lens2_voltage [nU]",
-    "Focus Displacement 1 [nu]": "focus_displacement_current [nU]",
-    "Detector Voltage [V]": "detector_voltage [V]",
-    "Bias Voltage Electrons [V]": "bias_voltage_electrons [V]",
-    "Bias Voltage Ions [V]": "bias_voltage_ions [V]",
+    "pre_defl_x": "pre_defl_x_current",
+    "pre_defl_y": "pre_defl_y_current",
+    "l1": "lens1_voltage",
+    "l2": "lens2_voltage",
+    "focus_displacement_1": "focus_displacement_current",
     # source settings
     "anode": "source_label",
     "uanode": "source_voltage",
@@ -123,7 +119,6 @@ _UNIT_MAP: dict[str, str | None] = {
     "counts/s": "counts_per_second",
     "CPS": "counts_per_second",
     "u": "um",
-    "KV": "kV",
     "seconds": "s",
     "(min)": "min",
     # "Percent": "",  # should be changed back to percent once pint is updated
@@ -131,12 +126,12 @@ _UNIT_MAP: dict[str, str | None] = {
     "eV/atom": "eV",
     "microm": "micrometer",
     "d": "degree",
-    "nU": "",  # workaround for SPECS SLE reader
 }
 
 _DEFAULT_UNITS: dict[str, str] = {
     "work_function": "eV",
     "excitation_energy": "eV",
+    "device_excitation_energy": "eV",
     "iris_diameter": "mm",
     "step_size": "eV",
     "detector_voltage": "V",

@@ -19,59 +19,41 @@
 Metadata mapping for the SPECS XY parser.
 """
 
-from pynxtools_xps.mapping import (
-    _convert_energy_scan_mode,
-    _convert_energy_type,
-    _convert_measurement_method,
-    _MetadataContext,
-    _ValueMap,
-)
+from pynxtools_xps.mapping import _convert_energy_scan_mode, _MetadataContext
 
 _KEY_MAP: dict[str, str] = {
-    "group": "group_id",
-    "analyzer_slit": "entrance_slit",
-    "energy_axis": "x_units",
-    "source": "source_label",
-    "polar_angle": "source_polar_angle",
-    "azimuth_angle": "source_azimuth_angle",
-    "ex_energy": "excitation_energy",
-    # "acquisition_date": "time_stamp",
-    "analyzer": "analyzer_name",
-    "analyzer_lens": "lens_mode",
-    "analyzer_lens_mode": "lens_mode",
-    "curves/scan": "curves_per_scan",
-    "values/curve": "n_values",
-    "bias_voltage": "bias_voltage_electrons",
-    "binding_energy": "start_energy",
-    "eff._workfunction": "work_function",
-    "comment": "comments",
+    # "group": "group_id",
+    # "analyzer_slit": "entrance_slit",
+    # "energy_axis": "x_units",
+    # "source": "source_label",
+    # "polar_angle": "source_polar_angle",
+    # "azimuth_angle": "source_azimuth_angle",
+    # "ex_energy": "excitation_energy",
+    # # "acquisition_date": "time_stamp",
+    # "analyzer": "analyzer_name",
+    # "analyzer_lens": "lens_mode",
+    # "analyzer_lens_mode": "lens_mode",
+    # "curves/scan": "curves_per_scan",
+    # "values/curve": "n_values",
+    # "bias_voltage": "bias_voltage_electrons",
+    # "binding_energy": "start_energy",
+    # "eff._workfunction": "work_function",
+    # "comment": "comments",
 }
 
-_VALUE_MAP: _ValueMap = {
-    "analysis_method": _convert_measurement_method,
-    "scan_mode": _convert_energy_scan_mode,
-    "bias_voltage_electrons": float,
-    "n_values": int,
-    "excitation_energy": float,
-    "kinetic_energy": float,
-    "work_function": float,
-    "dwell_time": float,
-    "detector_voltage": float,
-    "curves_per_scan": int,
-    "pass_energy": float,
-    "spectrum_id": int,
-    "x_units": _convert_energy_type,
+_VALUE_MAP = {
+    "scan_mode/name": _convert_energy_scan_mode,
 }
 
 _UNIT_MAP: dict[str, str | None] = {}
 
 _DEFAULT_UNITS: dict[str, str] = {
-    "work_function": "eV",
-    "excitation_energy": "eV",
-    "pass_energy": "eV",
-    "bias_voltage_electrons": "V",
-    "dwell_time": "s",
-    "step_size": "eV",
+    # "work_function": "eV",
+    # "excitation_energy": "eV",
+    # "pass_energy": "eV",
+    # "bias_voltage_electrons": "V",
+    # "dwell_time": "s",
+    # "step_size": "eV",
 }
 
 _context = _MetadataContext(

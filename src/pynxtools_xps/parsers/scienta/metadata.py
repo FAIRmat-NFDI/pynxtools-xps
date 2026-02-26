@@ -22,6 +22,7 @@ Metadata mapping for the Scienta parser.
 import datetime
 import re
 from functools import partial
+from typing import Any
 
 import numpy as np
 
@@ -39,44 +40,17 @@ from pynxtools_xps.mapping import (
 # TODO: define these!
 _POSSIBLE_DATE_FORMATS: list[str] = []
 
-# TODO: is the dimension handling needed??
-# def _get_key_value_pair(line: str):
-#     """
-#     Split the line at the '=' sign and return a
-#     key-value pair. The values are mapped according
-#     to the desired format.
 
-#     Parameters
-#     ----------
-#     line : str
-#         One line from the input file.
-
-#     Returns
-#     -------
-#     Tuple[str, object]
-#         A tuple containing:
-#         - key : str
-#             Anything before the '=' sign, mapped to the desired
-#             key format.
-#         - value : object
-#             Anything after the '=' sign, mapped to the desired
-#             value format and type.
-
-#     """
-#     try:
-#         key, value_str = line.split("=")
-#         key = convert_pascal_to_snake(key)
-#         key = KEY_MAP.get(key, key)
-#         if "dimension" in key:
-#             key_part = f"dimension_{key.rsplit('_')[-1]}"
-#             key = KEY_MAP.get(key_part, key_part)
-
-#         value = _re_map_single_value(key, value_str, VALUE_MAP)
-
-#     except ValueError:
-#         key, value = "", ""
-
-#     return key, value
+def _get_key_value_unit(line: str) -> tuple[str, Any, str | None]:
+    """
+    Split the line at the '=' sign and return a normalized key-value pair.
+    """
+    try:
+        key_raw, value_str = line.split("=", 1)
+        key, value, unit = _context.format(key_raw.strip(), value_str.strip())
+    except ValueError:
+        key, value, unit = "", "", ""
+    return key, value, unit
 
 
 def _extract_energy_units(energy_units: str) -> str:
@@ -115,7 +89,7 @@ def _construct_date_time(date_string: str, time_string: str) -> str | None:
     """
 
     def _parse_date(date_string: str) -> datetime.datetime:
-        possible_date_formats = ["%Y-%m-%d", "%m/%d/%Y"]
+        possible_date_formats = ["%Y-%m-%d", "%m/%d/%Y", "%m/%d/%y"]
         for date_fmt in possible_date_formats:
             try:
                 return datetime.datetime.strptime(date_string, date_fmt)
@@ -143,6 +117,30 @@ def _construct_date_time(date_string: str, time_string: str) -> str | None:
         raise ValueError(
             "Date and time could not be converted to ISO 8601 format."
         ) from err
+
+
+# TODO: do we need this? If so, can it be more general?
+def _check_valid_value(value: str | int | float | bool | np.ndarray) -> bool:
+    """
+    Check if a value is valid.
+
+    Strings and arrays are considered valid if they are non-empty.
+    Numbers and booleans are always considered valid.
+
+    Args:
+        value (str | int | float | bool | np.ndarray):
+            The value to check. Can be a scalar, string, or NumPy array.
+
+    Returns:
+        bool: True if the value is valid, False otherwise.
+    """
+    if isinstance(value, str | int | float) and value is not None:
+        return True
+    if isinstance(value, bool):
+        return True
+    if isinstance(value, np.ndarray) and value.size != 0:
+        return True
+    return False
 
 
 _KEY_MAP: dict[str, str] = {

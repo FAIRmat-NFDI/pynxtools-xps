@@ -40,7 +40,7 @@ class KratosParser(_XPSParser):
         """
         self.metadata = KratosMetadata()
 
-    def parse_file(self, file: str | Path, **kwargs):
+    def _parse(self, file: Path, **kwargs) -> None:
         # TODO: parse actual data, not just metadata!
         """
         Parse the data file into a list of dictionaries.
@@ -64,8 +64,7 @@ class KratosParser(_XPSParser):
         # TODO: write parser for actual Kratos data file
         # header, data = self._separate_header_and_data()
         # self.parse_header_into_metadata(header)
-
-        return self.data
+        pass
 
     def parse_header_into_metadata(self, header: list[str]):
         """

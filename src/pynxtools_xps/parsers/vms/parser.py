@@ -25,13 +25,16 @@ import datetime
 import warnings
 from itertools import groupby
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 import numpy as np
 import xarray as xr
 
-from pynxtools_xps._utils import _drop_unused_keys, update_dict_without_overwrite
-from pynxtools_xps.mapping import _re_map_values, convert_pascal_to_snake
+from pynxtools_xps.mapping import (
+    _format_dict,
+    convert_pascal_to_snake,
+    update_dict_without_overwrite,
+)
 from pynxtools_xps.numerics import _check_for_allowed_in_list, _get_minimal_step
 from pynxtools_xps.parsers.base import (
     _construct_data_key,
@@ -46,6 +49,12 @@ from pynxtools_xps.parsers.vms.data_model import (
     VamasAdditionalParam,
     VamasBlock,
     VamasHeader,
+)
+from pynxtools_xps.parsers.vms.metadata import (
+    ALLOWED_TECHNIQUES,
+    EXP_MODES,
+    _context,
+    _drop_unused_keys,
 )
 
 
@@ -142,13 +151,13 @@ class VamasMapper(_XPSMapper):
                 entry_parent = "/ENTRY[entry]"
                 key = key.replace("entry/", "", 1)
             mpes_key = f"{entry_parent}/{key}"
-            # TODO: use _context
-            # if "units" in key:
-            #     value = convert_units(value)
+            if "units" in key:
+                value = _context.map_unit(value)
+            else:
+                unit = _context.get_default_unit(key)
+                if unit is not None:
+                    self._data[f"{mpes_key}/@units"] = unit
             self._data[mpes_key] = value
-            # units = convert_units(get_units_for_key(key, UNITS))
-            # if units is not None:
-            #     self._data[f"{mpes_key}/@units"] = units
 
         # Create key for writing to data.
         scan_key = _construct_data_key(spectrum)
@@ -195,6 +204,9 @@ class VamasMapper(_XPSMapper):
 class VamasParser(_XPSParser):
     """A parser for reading vamas files."""
 
+    config_file: ClassVar[str] = "config_vms.json"
+    supported_file_extensions: ClassVar[tuple[str, ...]] = (".vms",)
+
     def __init__(self):
         """Construct the vamas parser.
 
@@ -204,12 +216,13 @@ class VamasParser(_XPSParser):
         vamas attribute keys, which are used, depending on how the
         vamas file is formatted.
         """
+        super().__init__()
         self.lines: list[str] = []
 
         self.header = VamasHeader()
         self.blocks: list[VamasBlock] = []
 
-    def parse_file(self, file: str | Path, **kwargs):
+    def _parse(self, file: Path, **kwargs) -> None:
         """Parse the vamas file into a list of dictionaries.
 
         Parameters
@@ -220,7 +233,7 @@ class VamasParser(_XPSParser):
         self._read_lines(file)
         self._parse_header()
         self._parse_blocks()
-        return self.build_list()
+        self._data = self._build_list()
 
     def _read_lines(self, file: str | Path):
         """Read in vamas text file."""
@@ -257,9 +270,7 @@ class VamasParser(_XPSParser):
         map_attrs = ["num_analysis_positions", "num_x_coords", "num_y_coords"]
 
         for attr in common_attrs:
-            self._setattr_with_datacls_type(
-                self.header, attr, self.lines.pop(0).strip()
-            )
+            setattr(self.header, attr, self.lines.pop(0).strip())
 
         num_comment_lines = int(self.header.num_comment_lines)
         self.header.comment_lines = self._extract_n_lines_to_list(num_comment_lines)
@@ -270,26 +281,18 @@ class VamasParser(_XPSParser):
         self.header.scan_mode = self.lines.pop(0).strip()
 
         if self.header.exp_mode in ["MAP", "MAPDP", "NORM", "SDP"]:
-            self.header.num_spectral_regions = int(self.lines.pop(0).strip())
-        else:
-            delattr(self.header, "num_spectral_regions")
+            setattr(self.header, "num_spectral_regions", self.lines.pop(0).strip())
 
         for attr in map_attrs:
             if self.header.exp_mode in ["MAP", "MAPDP"]:
-                self._setattr_with_datacls_type(
-                    self.header, attr, self.lines.pop(0).strip()
-                )
-            else:
-                delattr(self.header, attr)
+                setattr(self.header, attr, self.lines.pop(0).strip())
 
         self.header.num_exp_var = int(self.lines.pop(0).strip())
 
         for exp_var_no in range(int(self.header.num_exp_var)):
             exp_var = ExpVariable()
             for attr in ["label", "unit"]:
-                self._setattr_with_datacls_type(
-                    exp_var, attr, self.lines.pop(0).strip()
-                )
+                setattr(exp_var, attr, self.lines.pop(0).strip())
                 setattr(
                     self.header, f"exp_var_{exp_var_no}_{attr}", getattr(exp_var, attr)
                 )
@@ -317,11 +320,6 @@ class VamasParser(_XPSParser):
         """Parse all (metadata) of Vamas blocks."""
         for _ in range(int(self.header.num_blocks)):
             self.blocks += [self._parse_one_block()]
-
-    # def _pop() -> Value:
-    # TODO: use this to fill the VamasBlock
-    # print(self.data.pop)
-    #     return self.lines.pop(0).strip()
 
     def _parse_one_block(self):
         """
@@ -353,9 +351,7 @@ class VamasParser(_XPSParser):
 
         for attr in ["x_coord", "y_coord"]:
             if self.header.exp_mode in ["MAP", "MAPDP"]:
-                self._setattr_with_datacls_type(block, attr, self.lines.pop(0).strip())
-            else:
-                delattr(block, attr)
+                setattr(block, attr, self.lines.pop(0).strip())
 
         for _ in range(int(self.header.num_exp_var)):
             block.exp_var_value = self.lines.pop(0).strip()
@@ -380,19 +376,16 @@ class VamasParser(_XPSParser):
                 "SNMS",
                 "SNMS energy spec",
             ]:
-                self._setattr_with_datacls_type(block, attr, self.lines.pop(0).strip())
-            else:
-                delattr(block, attr)
+                setattr(block, attr, self.lines.pop(0).strip())
+
         block.source_energy = float(self.lines.pop(0).strip())
         block.source_power = self.lines.pop(0).strip()
         block.source_beam_width_x = self.lines.pop(0).strip()
-        block.source_beam_width_x = self.lines.pop(0).strip()
+        block.source_beam_width_y = self.lines.pop(0).strip()
 
         for attr in ["field_of_view_x", "field_of_view_y"]:
             if self.header.exp_mode in ["MAP", "MAPDP", "MAPSV", "MAPSVDP", "SEM"]:
-                self._setattr_with_datacls_type(block, attr, self.lines.pop(0).strip())
-            else:
-                delattr(block, attr)
+                setattr(block, attr, self.lines.pop(0).strip())
 
         for attr in [
             "first_linescan_x_start",
@@ -403,9 +396,7 @@ class VamasParser(_XPSParser):
             "last_linescan_y_end",
         ]:
             if self.header.exp_mode in ["MAP", "MAPSVDP", "SEM"]:
-                self._setattr_with_datacls_type(block, attr, self.lines.pop(0).strip())
-            else:
-                delattr(block, attr)
+                setattr(block, attr, self.lines.pop(0).strip())
 
         block.source_polar_angle = float(self.lines.pop(0).strip())
         block.source_azimuth_angle = float(self.lines.pop(0).strip())
@@ -413,9 +404,7 @@ class VamasParser(_XPSParser):
         block.resolution = float(self.lines.pop(0).strip())
 
         if block.technique == "AES diff":
-            self.header.differential_width_aes = float(self.lines.pop(0).strip())
-        else:
-            delattr(block, "differential_width_aes")
+            block.differential_width_aes = float(self.lines.pop(0).strip())
 
         block.magnification = float(self.lines.pop(0).strip())
         block.work_function = float(self.lines.pop(0).strip())
@@ -479,9 +468,7 @@ class VamasParser(_XPSParser):
                 "XPS",
                 "XRF",
             ]:
-                self._setattr_with_datacls_type(block, attr, self.lines.pop(0).strip())
-            else:
-                delattr(block, attr)
+                setattr(block, attr, self.lines.pop(0).strip())
 
         block.sample_normal_polar_angle_of_tilt = float(self.lines.pop(0).strip())
         block.sample_normal_tilt_azimuth_angle = float(self.lines.pop(0).strip())
@@ -491,7 +478,7 @@ class VamasParser(_XPSParser):
         for param_no in range(block.no_additional_params):
             param = VamasAdditionalParam()
             for attr in ["label", "unit", "value"]:
-                self._setattr_with_datacls_type(param, attr, self.lines.pop(0).strip())
+                setattr(param, attr, self.lines.pop(0).strip())
                 setattr(block, f"param_{param_no}_{attr}", getattr(param, attr))
 
         block.future_upgrade_block_entries = self._extract_n_lines_to_list(
@@ -500,12 +487,12 @@ class VamasParser(_XPSParser):
 
         block.num_ord_values = int(self.lines.pop(0).strip())
         if self.header.scan_mode == "IRREGULAR":
-            del self.data[:2]
+            del self.lines[:2]
 
         for var_no in range(block.no_variables):
             var = OrdinateValue()
             for attr in ["min_ord_value", "max_ord_value"]:
-                self._setattr_with_datacls_type(var, attr, self.lines.pop(0).strip())
+                setattr(var, attr, self.lines.pop(0).strip())
                 setattr(block, f"{attr}_{var_no + 1}", getattr(var, attr))
 
         self._add_data_values(block)
@@ -561,7 +548,7 @@ class VamasParser(_XPSParser):
         """Parse data with regularly spaced energy axis."""
         data_dict: dict[str, np.ndarray] = {}
 
-        block_data = np.array(self.data[: block.num_ord_values], dtype=float)
+        block_data = np.array(self.lines[: block.num_ord_values], dtype=float)
 
         energy = block_data[:: block.no_variables + 1]
         if block.abscissa_label == "binding energy":
@@ -632,7 +619,7 @@ class VamasParser(_XPSParser):
 
         return flattened_spectra
 
-    def build_list(self):
+    def _build_list(self):
         """
         Construct a list of dictionaries from the Vamas objects
 
@@ -652,7 +639,7 @@ class VamasParser(_XPSParser):
         }
         del header_dict["comment_lines"]
 
-        header_comments = handle_comments(
+        header_comments: dict[str, Any] = handle_comments(
             self.header.comment_lines, comment_type="header"
         )
 
@@ -677,10 +664,8 @@ class VamasParser(_XPSParser):
 
             settings["n_values"] = int(block.num_ord_values / block.no_variables)
 
-            # Remap to the MPES-preferred keys and values
-            # TODO: this should be either one step or (better) done on a per-setting basis beforehand
-            re_map_keys(settings, _context)
-            _re_map_values(settings, _context)
+            # Remap to the MPES-preferred keys, values, and units
+            settings = _format_dict(settings, _context)
 
             comment_dict = handle_comments(block.comment_lines, comment_type="block")
 
@@ -712,8 +697,7 @@ class VamasParser(_XPSParser):
                 comment_dict.update(flattened_casa_data)
                 del comment_dict["casa"]
 
-            # re_map_keys(comment_dict, KEY_MAP)
-            _re_map_values(comment_dict, VALUE_MAP)
+            _format_dict(comment_dict, _context)
 
             update_dict_without_overwrite(settings, comment_dict)
 

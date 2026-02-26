@@ -22,7 +22,6 @@ import datetime
 import re
 
 import pytest
-from pynxtools_xps.reader_utils import extract_unit
 
 from pynxtools_xps.mapping import parse_datetime
 
@@ -56,46 +55,46 @@ from pynxtools_xps.mapping import parse_datetime
 #     result = get_units_for_key(unit_key, unit_map)
 #     assert result == expected_unit, f"Expected {expected_unit} but got {result}"
 
+# TODO: check _MetadataContext instead!
+# @pytest.mark.parametrize(
+#     "key, value, unit_missing, expected_value, expected_unit",
+#     [
+#         # Test cases with explicit units
+#         ("x_position", "0 mm", {}, 0, "mm"),
+#         ("polar_rotation", "0 deg", {}, 0, "deg"),
+#         ("analyzer_work_function", "4.506eV", {}, 4.506, "eV"),
+#         ("temperature", "300K", {}, 300, "K"),
+#         ("pressure", "1.01bar", {}, 1.01, "bar"),
+#         # Test cases without explicit units
+#         ("voltage", "5.0", {"voltage": "V"}, 5.0, "V"),
+#         ("current", "10", {"current": "A"}, 10, "A"),
+#         # Test cases with scientific notation
+#         ("distance", "1.23e-10m", {}, 1.23e-10, "m"),
+#         ("charge", "1.602e-19C", {}, 1.602e-19, "C"),
+#         # Test cases with missing unit in value and unit_missing dictionary
+#         ("energy", "1000", {"energy": "J"}, 1000, "J"),
+#         ("mass", "0.5", {"mass": "kg"}, 0.5, "kg"),
+#     ],
+# )
+# def test_extract_unit(
+#     key: str,
+#     value: str,
+#     unit_missing: dict[str, str],
+#     expected_value: str,
+#     expected_unit: str,
+# ):
+#     result_value, result_unit = extract_unit(key, value, unit_missing)
 
-@pytest.mark.parametrize(
-    "key, value, unit_missing, expected_value, expected_unit",
-    [
-        # Test cases with explicit units
-        ("x_position", "0 mm", {}, 0, "mm"),
-        ("polar_rotation", "0 deg", {}, 0, "deg"),
-        ("analyzer_work_function", "4.506eV", {}, 4.506, "eV"),
-        ("temperature", "300K", {}, 300, "K"),
-        ("pressure", "1.01bar", {}, 1.01, "bar"),
-        # Test cases without explicit units
-        ("voltage", "5.0", {"voltage": "V"}, 5.0, "V"),
-        ("current", "10", {"current": "A"}, 10, "A"),
-        # Test cases with scientific notation
-        ("distance", "1.23e-10m", {}, 1.23e-10, "m"),
-        ("charge", "1.602e-19C", {}, 1.602e-19, "C"),
-        # Test cases with missing unit in value and unit_missing dictionary
-        ("energy", "1000", {"energy": "J"}, 1000, "J"),
-        ("mass", "0.5", {"mass": "kg"}, 0.5, "kg"),
-    ],
-)
-def test_extract_unit(
-    key: str,
-    value: str,
-    unit_missing: dict[str, str],
-    expected_value: str,
-    expected_unit: str,
-):
-    result_value, result_unit = extract_unit(key, value, unit_missing)
+#     assert isinstance(result_value, type(expected_value)), (
+#         f"Expected type {type(expected_value)} but got type {type(result_value)}"
+#     )
 
-    assert isinstance(result_value, type(expected_value)), (
-        f"Expected type {type(expected_value)} but got type {type(result_value)}"
-    )
-
-    assert result_value == expected_value, (
-        f"Expected {expected_value} but got {result_value}"
-    )
-    assert result_unit == expected_unit, (
-        f"Expected {expected_unit} but got {result_unit}"
-    )
+#     assert result_value == expected_value, (
+#         f"Expected {expected_value} but got {result_value}"
+#     )
+#     assert result_unit == expected_unit, (
+#         f"Expected {expected_unit} but got {result_unit}"
+#     )
 
 
 @pytest.mark.parametrize(

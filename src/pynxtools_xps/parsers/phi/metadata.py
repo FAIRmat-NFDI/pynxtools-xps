@@ -158,7 +158,6 @@ def _parse_datetime(value: str):
 
 
 _KEY_MAP: dict[str, str] = {
-    "file_desc": "file_description",
     "acq_filename": "acquisition_filename",
     "acq_file_date": "acquisition_file_date",
     "institution": "vendor",

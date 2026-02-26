@@ -246,7 +246,7 @@ class SpecsXMLParser(_XPSParser):
 
     def __init__(self) -> None:
         # TODO: self._data is different then elsewhere
-        # self._data: dict = {}
+        self._data: dict = {}  # type: ignore[assignment]
         self.metadata_dict: dict = {}
         self._root_path = "/ENTRY"
         self.tail_part_from_struct = ""

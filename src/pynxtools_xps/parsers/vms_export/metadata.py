@@ -19,26 +19,59 @@
 Metadata mapping for the VAMAS TXT export parser.
 """
 
+from collections import Counter
+
 from pynxtools_xps.mapping import _MetadataContext, _ValueMap
 
+
+def _handle_repetitions(input_list: list[str]) -> list[str]:
+    """
+    Process a list of strings to handle repeated items by appending a suffix
+    to each duplicate item. The suffix is in the format '_n', where 'n' is the
+    occurrence number of that item in the list.
+
+    Parameters:
+    - input_list (List[str]): A list of strings where repeated items are
+      identified and renamed with a suffix.
+
+    Returns:
+    - List[str]: A new list where repeated items are modified by appending
+      a suffix to make them unique.
+    """
+    counts = Counter(input_list)
+    result = []
+    occurrences = {}
+
+    for item in input_list:
+        if counts[item] > 1:
+            # If the item has been seen before, add a suffix
+            if item not in occurrences:
+                occurrences[item] = 0
+            occurrences[item] += 1
+            result.append(f"{item}_{occurrences[item]}")
+        else:
+            result.append(item)
+
+    return result
+
+
 _KEY_MAP: dict[str, str] = {
-    "K.E.": "kinetic_energy",
-    "B.E.": "binding_energy",
-    "Counts": "counts",
-    "CPS": "counts_per_second",
-    "Background": "background_intensity",
-    "Background CPS": "background_intensity_cps",
-    "Envelope": "fit_sum",
-    "Envelope CPS": "fit_sum_cps",
-    "%At Conc": "atomic_concentration",
+    "k.e.": "kinetic_energy",
+    "b.e.": "binding_energy",
+    "cps": "counts_per_second",
+    "background": "background_intensity",
+    "background_cps": "background_intensity_cps",
+    "envelope": "fit_sum",
+    "envelope_cps": "fit_sum_cps",
+    "%at_conc": "atomic_concentration",
+    "fwhm": "width",
+    "area/(rsf*t*mfp)": "area_over_rsf*t*mfp",
 }
 
 _VALUE_MAP: _ValueMap = {}
 _UNIT_MAP: dict[str, str | None] = {}
 
-_DEFAULT_UNITS: dict[str, str] = {
-    "step_size": "eV",
-}
+_DEFAULT_UNITS: dict[str, str] = {"step_size": "eV", "width": "eV", "position": "eV"}
 
 _context = _MetadataContext(
     key_map=_KEY_MAP,

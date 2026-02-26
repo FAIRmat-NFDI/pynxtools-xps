@@ -22,10 +22,10 @@ Classes for reading XPS files from TXT export of CasaXPS.
 import csv
 import re
 from pathlib import Path
+from typing import Any, ClassVar
 
-from pynxtools_xps.mapping import _Value
-from pynxtools_xps.parsers.base import _XPSMapper, _XPSParser
-from pynxtools_xps.parsers.vms_export.metadata import _context
+from pynxtools_xps.parsers.base import _XPSMapper, _XPSMetadataParser
+from pynxtools_xps.parsers.vms_export.metadata import _context, _handle_repetitions
 
 
 class VamasResultMapper(_XPSMapper):
@@ -33,8 +33,6 @@ class VamasResultMapper(_XPSMapper):
     Class for restructuring .csv result files from
     Casa report export (from Vamas) into python dictionary.
     """
-
-    config_file = "config_vms.json"
 
     def __init__(self):
         super().__init__()
@@ -51,21 +49,19 @@ class VamasResultMapper(_XPSMapper):
         """
         return CSVResultParser()
 
-    def construct_data(self, raw_data: list[dict[str, _Value]]):
-        pass
+    def construct_data(self, parsed_data: dict[str, Any]):  # type: ignore[override]
+        # TODO: this should not be needed if there is an ABC _XPSMetadataParser
+        self._data = parsed_data
 
-    def update_main_file_dict(self, main_file_dicts: list[dict[str, _Value]]):
+    def update_main_file_dict(self, main_file_dicts: list[dict[str, Any]]):
         """
         Update the dictionaries returned by the main files with specific keys from self.data.
 
         Args:
-            main_file_dicts (List[list[str, _Value]]): List of dictionaries to update.
+            main_file_dicts (List[list[str, Any]]): List of dictionaries to update.
         """
         pattern = re.compile(r"(component\d+/)name")
-        update_with = {
-            "Area/(RSF*T*MFP)",
-            "atomic_concentration",
-        }
+        update_with = {"area_over_rsf*t*mfp", "atomic_concentration", "goodness_of_fit"}
 
         for existing_dict in main_file_dicts:
             filtered_keys = {
@@ -83,8 +79,10 @@ class VamasResultMapper(_XPSMapper):
                         existing_dict[new_key] = sub_dict[sub_key]
 
 
-class CSVResultParser(_XPSParser):
-    def parse_file(self, file: str | Path, **kwargs):
+class CSVResultParser(_XPSMetadataParser):
+    supported_file_extensions: ClassVar[tuple[str, ...]] = (".csv",)
+
+    def _parse(self, file: Path, **kwargs):
         """
         Parse only the first table from the input file,
 
@@ -94,7 +92,9 @@ class CSVResultParser(_XPSParser):
         Returns:
             dict: Parsed data including the file path, header, and rows.
         """
-        table_data: dict[str, dict[str, _Value]] = {}
+        parsed_data: dict[str, dict[str, Any]] = {}
+        table_data: dict[str, list[Any]] = {}
+        components: list[str] = []
         headers: list[str] = []
         reading_table: bool = False
 
@@ -115,14 +115,26 @@ class CSVResultParser(_XPSParser):
 
                 # Process rows of the table
                 if reading_table:
-                    table_data[row[0]] = {}
+                    components += [row[0]]
                     for header, value in zip(headers, row[1:]):
+                        if header not in table_data:
+                            table_data[header] = []
                         if value:
                             formatted_value = _context._format_value(value)
                             if header == "atomic_concentration" and isinstance(
                                 formatted_value, int | float
                             ):
                                 formatted_value /= 100
-                            table_data[row[0]][header] = formatted_value
+                            table_data[header] += [formatted_value]
 
-        return table_data
+        components = _handle_repetitions(
+            [_context.normalize_key(comp) for comp in components]
+        )
+
+        for i, component in enumerate(components):
+            parsed_data[component] = {}
+            for header, values in table_data.items():
+                parsed_data[component][header] = values[i]
+
+        # TODO: type mismatch
+        self._data = parsed_data  # type: ignore[assignment]

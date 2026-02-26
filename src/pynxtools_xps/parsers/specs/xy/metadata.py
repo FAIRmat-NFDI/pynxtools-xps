@@ -51,12 +51,16 @@ def _parse_datetime(date: str) -> str:
         Datetime in datetime.datetime format.
 
     """
-    # 2025-04-17 13:06:40 UTC
-    if date.find("UTC"):
+    if "UTC" in date:
         date = date[: date.find("UTC")].strip()
         tzinfo = datetime.timezone.utc
     else:
         date = date.strip()
+        # Date already carries its own timezone offset — return directly.
+        try:
+            return datetime.datetime.fromisoformat(date).isoformat()
+        except ValueError:
+            pass
         tzinfo = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo  # type: ignore[assignment]
 
     return parse_datetime(date, _POSSIBLE_DATE_FORMATS, tzinfo)
@@ -65,43 +69,27 @@ def _parse_datetime(date: str) -> str:
 # TODO: is this correct or a wrong copy from the SLE parser
 
 _KEY_MAP: dict[str, str] = {
-    "Group": "group_id",
-    "Scan Mode": "scan_mode",
-    "Analyzer Lens Voltage": "analyzer_lens_voltage",
-    "Calibration File": "calibration_file",
-    "Transmission File": "transmission_file",
-    "Analyzer Slit": "entrance_slit",
-    "Iris Diameter": "iris_diameter",
-    "Energy Axis": "x_units",
-    "Source": "source_label",
-    "Polar Angle": "source_polar_angle",
-    "Azimuth Angle": "source_azimuth_angle",
+    "group": "group_id",
+    "analyzer_slit": "entrance_slit",
+    "energy_axis": "x_units",
+    "source": "source_label",
+    "polar_angle": "source_polar_angle",
+    "azimuth_angle": "source_azimuth_angle",
     "ex_energy": "excitation_energy",
-    "Acquisition Date": "time_stamp",
-    "Analysis Method": "analysis_method",
-    "Analyzer": "analyzer_name",
-    "Analyzer Lens": "lens_mode",
-    "Analyzer Lens Mode": "lens_mode",
-    "Scan Variable": "scan_variable",
-    "Curves/Scan": "curves_per_scan",
-    "Values/Curve": "n_values",
-    "Step Size": "step_size",
-    "Dwell Time": "dwell_time",
-    "Excitation Energy": "excitation_energy",
-    "Kinetic Energy": "kinetic_energy",
-    "Pass Energy": "pass_energy",
-    "Bias Voltage": "bias_voltage_electrons",
-    "Binding Energy": "start_energy",
-    "Detector Voltage": "detector_voltage",
-    "Eff. Workfunction": "work_function",
-    "Normalized By": "normalized_by",
-    "Comment": "comments",
-    "Spectrum ID": "spectrum_id",
-    "Note": "note",
+    "acquisition_date": "time_stamp",
+    "analyzer": "analyzer_name",
+    "analyzer_lens": "lens_mode",
+    "analyzer_lens_mode": "lens_mode",
+    "curves/scan": "curves_per_scan",
+    "values/curve": "n_values",
+    "bias_voltage": "bias_voltage_electrons",
+    "binding_energy": "start_energy",
+    "eff._workfunction": "work_function",
+    "comment": "comments",
 }
 
 _VALUE_MAP: _ValueMap = {
-    "acquisition_date": _parse_datetime,
+    "time_stamp": _parse_datetime,
     "analysis_method": _convert_measurement_method,
     "scan_mode": _convert_energy_scan_mode,
     "bias_voltage_electrons": float,

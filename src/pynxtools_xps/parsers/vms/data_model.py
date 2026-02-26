@@ -41,10 +41,10 @@ class VamasHeader(_XPSDataclass):
     )  # ["Casa Info Follows CasaXPS Version 2.3.22PR1.0\n0"]
     exp_mode: str = "NORM"
     scan_mode: str = "REGULAR"
-    num_spectral_regions: int = 0
-    num_analysis_positions: int = 0
-    num_x_coords: int = 0
-    num_y_coords: int = 0
+    num_spectral_regions: int | None = None
+    num_analysis_positions: int | None = None
+    num_x_coords: int | None = None
+    num_y_coords: int | None = None
     num_exp_var: int = 1
     num_entries_in_inclusion_list: int = 0
     inclusion_list: list = field(default_factory=list)
@@ -72,30 +72,30 @@ class VamasBlock(_XPSDataclass):
     num_comment_lines: int = 0
     comment_lines: list = field(default_factory=list)
     technique: str = ""
-    x_coord: float = 0.0
-    y_coord: float = 0.0
+    x_coord: float | None = None
+    y_coord: float | None = None
     exp_var_value: str = ""
     source_label: str = ""
-    sputter_ion_atomic_number: int = 0
-    sputter_ion_num_atoms: int = 0
-    sputter_ion_charge: int = 1
+    sputter_ion_atomic_number: int | None = None
+    sputter_ion_num_atoms: int | None = None
+    sputter_ion_charge: int | None = None
     source_energy: float = 0.0
     source_power: str = "0"
-    source_beam_width_x: str = "0"
-    source_beam_width_y: str = "0"
+    source_beam_width_x: str | None = None
+    source_beam_width_y: str | None = None
     field_of_view_x: float = 0.0
     field_of_view_y: float = 0.0
-    first_linescan_x_start: float = 0.0
-    first_linescan_y_start: float = 0.0
-    first_linescan_x_end: float = 0.0
-    first_linescan_y_end: float = 0.0
-    last_linescan_x_end: float = 0.0
-    last_linescan_y_end: float = 0.0
+    first_linescan_x_start: float | None = None
+    first_linescan_y_start: float | None = None
+    first_linescan_x_end: float | None = None
+    first_linescan_y_end: float | None = None
+    last_linescan_x_end: float | None = None
+    last_linescan_y_end: float | None = None
     source_polar_angle: float = 0.0
     source_azimuth_angle: float = 180.0
     analyzer_mode: str = ""
     resolution: float = 0.0
-    differential_width_aes: float = 0.0
+    differential_width_aes: float | None = None
     magnification: float = 1.0
     work_function: float = 0.0
     target_bias: float = 0.0
@@ -124,12 +124,12 @@ class VamasBlock(_XPSDataclass):
     no_scans: int = 0
     time_correction: float = 0.0
 
-    sputter_source_energy: float = 0.0
-    sputter_source_beam_current: float = 0.0
-    sputter_source_width_x: float = 0.0
-    sputter_source_width_y: float = 0.0
-    sputter_source_incidence_polar_angle: float = 0.0
-    sputter_source_azimuth_angle: float = 0.0
+    sputter_source_energy: float | None = None
+    sputter_source_beam_current: float | None = None
+    sputter_source_width_x: float | None = None
+    sputter_source_width_y: float | None = None
+    sputter_source_incidence_polar_angle: float | None = None
+    sputter_source_azimuth_angle: float | None = None
 
     # degrees from upward z-direction,
     # defined by the sample stage

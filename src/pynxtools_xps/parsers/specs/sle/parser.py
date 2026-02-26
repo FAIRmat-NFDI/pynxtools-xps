@@ -27,16 +27,15 @@ import sqlite3
 import warnings
 import zlib
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 import numpy as np
 import xarray as xr
 from lxml import etree as ET
-from packaging.version import InvalidVersion, Version
 from scipy.interpolate import interp1d
 
-from pynxtools_xps._utils import update_dict_without_overwrite
 from pynxtools_xps.logging import _logger
+from pynxtools_xps.mapping import _format_dict, update_dict_without_overwrite
 from pynxtools_xps.parsers.base import (
     _construct_data_key,
     _construct_entry_name,
@@ -50,6 +49,11 @@ from pynxtools_xps.parsers.specs.sle.flatten_xml import (
     flatten_schedule,
 )
 from pynxtools_xps.parsers.specs.sle.metadata import _context
+from pynxtools_xps.parsers.versioning import (
+    VersionRange,
+    VersionTuple,
+    normalize_version,
+)
 
 
 def _execute_sql_query_with_cur(cur: sqlite3.Cursor, query: str):
@@ -64,14 +68,12 @@ class SpecsSLEMapper(_XPSMapper):
     specs vendor into python dictionary.
     """
 
-    config_file = "config_specs_sle.json"
+    config_file: ClassVar[str | dict[str, str]] = "config_specs_sle.json"
 
     def __init__(self):
         self.parsers = [
             SLEProdigyParser,
         ]
-
-        self.file: str | Path = ""
         self.multiple_spectra_groups: bool = True
 
         super().__init__()
@@ -97,94 +99,7 @@ class SpecsSLEMapper(_XPSMapper):
             If no parser supports the given version.
 
         """
-
-        def is_in_range(version_tuple, start, end):
-            """
-            Check if a version tuple falls within a specified range.
-
-            Parameters
-            ----------
-            version_tuple : tuple
-                Tuple containing the major and minor version (e.g., (1, 0)).
-            start : tuple
-                Starting version of the range.
-            end : tuple or None
-                Ending version of the range. If None, there is no upper limit.
-
-            Returns
-            -------
-            bool
-                True if the version is within the range, False otherwise.
-            """
-
-            if end is None:
-                return version_tuple >= start
-            return start <= version_tuple <= end
-
-        def is_version_supported(version, supported_version_ranges):
-            """
-            Determine if a version is supported by a parser based on version ranges.
-
-            Parameters
-            ----------
-            version : str
-                Version string to check (e.g., 'v4.75').
-            supported_version_ranges : list of tuple
-                List of version range tuples, where each tuple has a start and optional end.
-
-            Returns
-            -------
-            bool
-                True if the version is supported, False otherwise.
-            """
-            try:
-                parsed_version = Version(version.lstrip("v"))
-            except InvalidVersion:
-                raise ValueError(f"Invalid version: {version}")
-
-            version_tuple = (parsed_version.major, parsed_version.minor)
-
-            for start, end in supported_version_ranges:
-                if is_in_range(version_tuple, start, end):
-                    return True
-            return False
-
-        version = self._get_sle_version()
-
-        supporting_parsers = []
-
-        for parser in self.parsers:
-            if is_version_supported(version, parser.supported_version_ranges):
-                supporting_parsers += [parser]
-
-        if not supporting_parsers:
-            raise KeyError(
-                f"Version {version} of SPECS Prodigy is currently not supported."
-            )
-
-        return supporting_parsers[-1]()  # always use newest parser
-
-    def parse_file(self, file: str | Path, **kwargs: dict[str, Any]) -> dict[str, Any]:
-        """
-        Parse the file using the parser that fits the Prodigy SLE version.
-
-        Returns flat list of dictionaries containing one spectrum each.
-
-        Parameters
-        ----------
-        file : str
-            String name of the file.
-        **kwargs : dict[str, Any]
-            Dict with additional keyword arguments.
-
-        Returns
-        -------
-        dict[str, Any]
-            Dict with parsed data.
-
-        """
-        self.file = file
-        return super().parse_file(file, **kwargs)
+        return self.parsers[-1]()
 
     def construct_data(self, parsed_data: list[dict[str, Any]]):
         """
@@ -307,20 +222,21 @@ class SLEProdigyParser(_XPSParser):
     to be used as template for implementing parsers for different versions.
     """
 
-    supported_version_ranges = [
-        ((1, 0), None),  # Supports v1.* and higher
-        ((2, 0), (2, None)),  # Supports v2.* and higher
-        ((3, 0), (3, None)),  # Supports v3.* and higher
-        ((4, 0), (4, None)),  # Supports 4.1 through 4.100
-    ]
+    config_file: ClassVar[str] = "config_specs_sle.json"
+    supported_file_extensions: ClassVar[tuple[str, ...]] = (".sle",)
+    requires_version: ClassVar[bool] = True
+    supported_versions: ClassVar[tuple[VersionRange, ...]] = (
+        ((1, 1), (4, 0)),  # 1.*, 2.*, 3.*
+        ((4, 1), (4, 101)),  # 4.1 – 4.100
+    )
 
     def __init__(self):
-        self.con: sqlite3.Connection = None
-        self.cur: sqlite3.Cursor = None
+        self.con: sqlite3.Connection
+        self.cur: sqlite3.Cursor
 
-        self.xml_schedule: ET.Element = None
-        self.xml_context: ET.Element = None
-        self.xml_metainfo: ET.Element = None
+        self.xml_schedule: ET.Element
+        self.xml_context: ET.Element
+        self.xml_metainfo: ET.Element
 
         self.remove_align: bool = True
 
@@ -331,7 +247,14 @@ class SLEProdigyParser(_XPSParser):
         }
         self.encoding = np.float32
 
-    def parse_file(self, file: str | Path, **kwargs):
+    def detect_version(self, file: Path) -> VersionTuple | None:
+        self.initiate_file_connection(file)
+        version = self._get_version()
+        version = normalize_version(version)
+
+        return version
+
+    def _parse(self, file: Path, **kwargs) -> None:
         """
         Parse the file's data and metadata into a flat list of dictionaries.
 
@@ -400,8 +323,6 @@ class SLEProdigyParser(_XPSParser):
         # self._remove_snapshot()
         self._reindex_spectra()
         self._reindex_groups()
-
-        return self.data
 
     def initiate_file_connection(self, file: str | Path):
         """Set the SQLlite connection of the file to be opened."""
@@ -967,7 +888,7 @@ class SLEProdigyParser(_XPSParser):
             combined = {
                 k: v
                 for k, v in dict(zip(column_names, results)).items()
-                if k in KEY_MAP
+                if k in _context.key_map
             }
             combined = copy.copy(combined)
             # Default energy type if missing
@@ -975,7 +896,7 @@ class SLEProdigyParser(_XPSParser):
                 combined["EnergyType"] = "Binding"
 
             for key, value in combined.items():
-                spectrum[KEY_MAP[key]] = value
+                spectrum[_context.key_map[key]] = value
 
             if "step_size" not in spectrum or spectrum["step_size"] is None:
                 try:
@@ -1088,7 +1009,7 @@ class SLEProdigyParser(_XPSParser):
         cps = signal_data / dwell_time
         return cps
 
-    def _get_sql_node_id(self, xml_id: int) -> int:
+    def _get_sql_node_id(self, xml_id: int) -> int | None:
         """
         Get the SQL internal ID for the NodeID taken from XML.
 
@@ -1255,7 +1176,7 @@ class SLEProdigyParser(_XPSParser):
                 "Unsupported binary encoding for length ratio: %s", length_ratio
             )
 
-    def _decompress_data(self, binary_data: bytes | bytearray) -> bytes:
+    def _decompress_data(self, binary_data: bytes | bytearray) -> bytes | bytearray:
         """
         Attempts to decompress binary data using zlib. If decompression fails,
         returns the original data.
@@ -1289,8 +1210,7 @@ class SLEProdigyParser(_XPSParser):
         Reformat spectra into the format needed for the Mapper object
         """
         for spec in self._data:
-            re_map_keys(spec, KEY_MAP)
-            re_map_values(spec, VALUE_MAP)
+            _format_dict(spec, _context)
 
             if "data" not in spec:
                 spec["data"] = {}

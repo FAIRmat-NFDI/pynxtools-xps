@@ -42,23 +42,20 @@ from pynxtools_xps.parsers.phi.metadata import _context, _convert_channel_info
 class PHIMapper(_XPSMapper):
     """
     Map PHI format to NXmpes-ready dict.
+
     """
 
-    config_file: ClassVar[str] = "config_phi.json"
-
-    def __init__(self):
-        super().__init__()
-        self.write_channels_to_data = True
+    config_file: ClassVar[str | dict[str, str]] = "config_phi.json"
 
     def _select_parser(self):
         """Select the proper Phi data parser."""
         return PHIParser()
 
-    def construct_data(self, raw_data: list[dict[str, Any]]):
+    def construct_data(self, parsed_data: list[dict[str, Any]]):
         """Map Phi format to NXmpes-ready dict."""
         # pylint: disable=duplicate-code
 
-        for spectrum in raw_data:
+        for spectrum in parsed_data:
             self._update_xps_dict_with_spectrum(spectrum)
 
     def _update_xps_dict_with_spectrum(self, spectrum: dict[str, Any]):
@@ -125,11 +122,15 @@ class PHIParser(_XPSParser):  # pylint: disable=too-few-public-methods
     Tested with Software version SS 3.3.3.2.
     """
 
+    config_file: ClassVar[str] = "config_phi.json"
+    supported_file_extensions: ClassVar[tuple[str, ...]] = (".spe", ".pro")
+
     def __init__(self):
         """
         Construct the parser.
 
         """
+        super().__init__()
         self.metadata = PHIMetadata()
 
         self.binary_header_length = 4
@@ -139,7 +140,7 @@ class PHIParser(_XPSParser):  # pylint: disable=too-few-public-methods
         self.binary_header: np.ndarray = None
         self._data_header: np.ndarray = None
 
-    def parse_file(self, file: str | Path, **kwargs):
+    def _parse(self, file: Path, **kwargs) -> None:
         """
         Parse the .spe, .pro file into a list of dictionaries.
 
@@ -173,8 +174,6 @@ class PHIParser(_XPSParser):  # pylint: disable=too-few-public-methods
         self.parse_data_into_spectra(data)
 
         self.add_metadata_to_each_spectrum()
-
-        return self._data
 
     def _read_lines(self, file: str | Path):
         """
@@ -227,7 +226,7 @@ class PHIParser(_XPSParser):  # pylint: disable=too-few-public-methods
 
         """
 
-        def map_keys(key: str, channel_count: int):
+        def _map_keys(key: str, channel_count: int):
             """Maps key names for better identification of fields."""
             prefix_map = {
                 "neut": ("neut_", "neutral_"),
@@ -268,26 +267,25 @@ class PHIParser(_XPSParser):  # pylint: disable=too-few-public-methods
         for line in header:
             raw_value: str
             try:
-                key, raw_value = line.split(": ")
+                raw_key, raw_value = line.split(": ")
 
             except ValueError:
-                key = line.strip(": ")
+                raw_key = line.strip(": ")
                 raw_value = ""
 
-            # TODO: use full _context
-            key = _context.normalize_key(key)
-            key, channel_count = map_keys(key, channel_count)
+            key = _context.normalize_key(raw_key)
+            key, channel_count = _map_keys(key, channel_count)
 
             if key in datacls_fields:
                 field_type = type(getattr(self.metadata, key))
 
-                # TODO: use _context
-                # if key in KEYS_WITH_UNITS:
-                #     value, unit = self.extract_unit(key, value)
-                #     setattr(self.metadata, f"{key}_units", unit)
+                value, unit = _context.parse_value_and_unit(raw_value)
+                if unit:
+                    setattr(self.metadata, f"{key}_units", _context.map_unit(unit))
 
                 if not key.startswith("channel_"):
-                    value = _context.map_value(key, raw_value)
+                    if key in _context.value_map:
+                        value = _context.map_value(key, value)
 
                 else:
                     value = _convert_channel_info(raw_value)
@@ -552,43 +550,6 @@ class PHIParser(_XPSParser):  # pylint: disable=too-few-public-methods
         else:
             _logger.error("This binary encoding is not supported.")
 
-    # TODO: This should be done through the _context
-    # def extract_unit(self, key: str, value):
-    #     """
-    #     Extract units for the metadata containing unit information.
-
-    #     Example:
-    #         analyzer_work_function: 4.506 eV
-    #         -> analyzer_work_function: 4.506,
-    #            analyzer_work_function_units: eV,
-
-    #     Parameters
-    #     ----------
-    #     key : str
-    #         Key of the associated value.
-    #     value : str
-    #         Combined unit and value information.
-
-    #     Returns
-    #     -------
-    #     value :
-    #         value with units.
-    #     unit : str
-    #         Associated unit.
-
-    #     """
-    #     try:
-    #         value, unit = split_value_and_unit(value)
-    #     except ValueError:
-    #         unit = ""
-
-    #     unit = convert_units(unit)
-
-    #     if key in UNIT_MISSING:
-    #         unit = UNIT_MISSING[key]
-
-    #     return value, unit
-
     def add_metadata_to_each_spectrum(self):
         """
         Add flattened dict with PHIMetadata fields to each spectrum.
@@ -598,7 +559,7 @@ class PHIParser(_XPSParser):  # pylint: disable=too-few-public-methods
 
         for spectrum in self.data:
             spectrum.update(flattened_metadata)
-            spectrum["intensity/@units"] = UNIT_MISSING["intensity"]
+            spectrum["intensity/@units"] = _context.get_default_unit("intensity")
 
     def flatten_metadata(self):
         """
@@ -641,10 +602,11 @@ class PHIParser(_XPSParser):  # pylint: disable=too-few-public-methods
         for key in flattened_dict.copy().keys():
             if "_units" in key:
                 new_key = key.replace("_units", "/@units")
-                flattened_dict[new_key] = flattened_dict.pop(key)
+                unit = flattened_dict.pop(key)
+                flattened_dict[new_key] = _context.map_unit(unit)
 
         for key in flattened_dict.copy().keys():
-            if key in KEYS_WITH_UNITS and f"{key}/@units" not in flattened_dict:
-                flattened_dict[f"{key}/@units"] = UNIT_MISSING[key]
+            if key in _context.default_units and f"{key}/@units" not in flattened_dict:
+                flattened_dict[f"{key}/@units"] = _context.get_default_unit(key)
 
         return flattened_dict

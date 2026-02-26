@@ -47,7 +47,12 @@ from pynxtools_xps.parsers import (
     VamasMapper,
     VamasResultMapper,
 )
-from pynxtools_xps.parsers.base import _XPSMapper
+from pynxtools_xps.parsers.base import (
+    # ParsedSpectrum,
+    _XPSMapper,
+    _XPSMetadataParser,
+    _XPSParser,
+)
 
 _CONVERT_DICT = {
     "unit": "@units",
@@ -105,6 +110,91 @@ def _concatenate_values(value1: Any, value2: Any) -> Any:
     return concatenated
 
 
+# TODO: enable
+# def _assemble_spectra(
+#     spectra: list[ParsedSpectrum],
+#     file_path: str | Path,
+# ) -> dict[str, Any]:
+#     """Build ENTRY-keyed dict + xarray datasets from parsed spectra.
+
+#     This is the single, generic replacement for all per-parser
+#     ``_XPSMapper.construct_data`` / ``_update_xps_dict_with_spectrum``
+#     methods.
+#     """
+#     data_dict: dict[str, Any] = {
+#         "File": file_path,
+#         "file_ext": os.path.splitext(file_path)[1],
+#         "data": {},
+#     }
+
+#     for spectrum in spectra:
+#         spectrum.validate()
+
+#         entry = _construct_entry_name(
+#             [spectrum.group_name, spectrum.spectrum_type]
+#         )
+#         if not entry:
+#             entry = "entry"
+
+#         entry_parent = f"/ENTRY[{entry}]"
+
+#         # Write metadata as ENTRY-prefixed keys
+#         for key, value in spectrum.metadata.items():
+#             if key.startswith("entry/"):
+#                 mpes_key = f"/ENTRY[entry]/{key.replace('entry/', '', 1)}"
+#             else:
+#                 mpes_key = f"{entry_parent}/{key}"
+#             data_dict[mpes_key] = value
+
+#         # Create or reuse xarray Dataset for this entry
+#         if entry not in data_dict["data"]:
+#             data_dict["data"][entry] = xr.Dataset()
+#         ds = data_dict["data"][entry]
+
+#         base_key = _construct_data_key(spectrum)
+
+#         # Write individual scans
+#         for scan in spectrum.scans:
+#             if len(spectrum.scans) > 1:
+#                 s_key = f"{base_key}_scan{scan.scan_id}"
+#             else:
+#                 s_key = base_key
+
+#             ds[s_key] = xr.DataArray(
+#                 data=scan.intensity,
+#                 coords={"energy": spectrum.energy},
+#             )
+
+#             # Channel-resolved data
+#             if scan.channels is not None:
+#                 for i in range(scan.channels.shape[1]):
+#                     ds[f"{s_key}_chan{i}"] = xr.DataArray(
+#                         data=scan.channels[:, i],
+#                         coords={"energy": spectrum.energy},
+#                     )
+
+#             # Raw counts (stored as chan0 when no channel separation)
+#             if scan.raw_counts is not None and scan.channels is None:
+#                 ds[f"{s_key}_chan0"] = xr.DataArray(
+#                     data=scan.raw_counts,
+#                     coords={"energy": spectrum.energy},
+#                 )
+
+#         # Write average across scans (if multiple)
+#         if len(spectrum.scans) > 1:
+#             with warnings.catch_warnings():
+#                 warnings.simplefilter("ignore", category=RuntimeWarning)
+#                 averaged = np.mean(
+#                     [s.intensity for s in spectrum.scans], axis=0
+#                 )
+#             ds[base_key] = xr.DataArray(
+#                 data=averaged,
+#                 coords={"energy": spectrum.energy},
+#             )
+
+#     return data_dict
+
+
 def _check_multiple_extensions(
     file_paths: Iterable[str | Path] | None = None,
 ) -> bool:
@@ -142,6 +232,16 @@ class XPSReader(MultiFormatReader):
     reader_dir: Path = Path(__file__).parent
     config_file: str | Path | None = reader_dir.joinpath("config", "template.json")
 
+    # TODO: implement
+    parsers: list[type[_XPSParser]] = [
+        # KratosParser,
+    ]
+
+    metadata_parsers: list[type[_XPSMetadataParser]] = [
+        # TODO: implement
+        # VamasExportMapper,
+    ]
+
     mappers: list[type[_XPSMapper]] = [
         PHIMapper,
         ScientaMapper,
@@ -169,7 +269,6 @@ class XPSReader(MultiFormatReader):
     ]
 
     supported_metadata_file_extensions: dict[str, str] = {".csv": ".txt"}
-
     supported_vendors: list[str] = ["kratos", "phi", "scienta", "specs", "unknown"]
     vendor_map: dict[str, dict[str, Any]] = {
         ".csv": {"unknown": VamasResultMapper},
@@ -312,6 +411,143 @@ class XPSReader(MultiFormatReader):
         return {}
 
     def handle_data_file(self, file_path: str) -> dict[str, Any]:
+        # # # TODO: this is structurally incorrect, we need this:
+        # # # self.datasets: list[Dataset] = []
+        # # # self.pending_metadata: list[_XPSMetadataParser] = []
+        # # # class Dataset:
+        # # #     def __init__(self, parser: _XPSParser, file: Path):
+        # # #         self.parser = parser
+        # # #         self.file = file
+        # # #         self.data = parser.data
+
+        # # # # Important Final Detail: Metadata should not be applied multiple times to the same dataset.
+        # # # # # If that is a risk, track application:
+        # # # # dataset.applied_metadata: set[type]
+
+        # # # file = Path(file_path)
+
+        # # # primary_matches = [
+        # # #     P for P in self.parsers
+        # # #     if P.is_mainfile(file)
+        # # # ]
+
+        # # # metadata_matches = [
+        # # #     M for M in self.metadata_parsers
+        # # #     if M.is_mainfile(file)
+        # # # ]
+
+        # # # # Handle ambiguity strictly
+        # # # if primary_matches and metadata_matches:
+        # # #     raise ValueError("File matches both primary and metadata parsers.")
+
+        # # # if not primary_matches and not metadata_matches:
+        # # #     raise ValueError("No parser supports this file.")
+
+        # # # if primary_matches:
+        # # #     ParserCls = _select_unique(primary_matches)
+        # # #     parser = ParserCls()
+        # # #     parser.parse_file(file, **self.kwargs)
+
+        # # #     dataset = Dataset(parser, file)
+        # # #     self.datasets.append(dataset)
+
+        # # #     # Try to apply any metadata that arrived earlier
+        # # #     self._try_attach_pending_metadata(dataset)
+
+        # # # if metadata_matches:
+        # # #     MetadataCls = _select_unique(metadata_matches)
+        # # #     metadata = MetadataCls()
+        # # #     metadata.parse_file(file)
+
+        # # #     attached = False
+
+        # # #     for dataset in self.datasets:
+        # # #         if MetadataCls.supports_parser(dataset.parser):
+        # # #             metadata.update_main_file_data(dataset.data)
+        # # #             attached = True
+
+        # # #     if not attached:
+        # # #         # No compatible dataset yet → defer
+        # # #         self.pending_metadata.append(metadata)
+
+        # # # def _try_attach_pending_metadata(self, dataset: Dataset):
+        # # #     still_pending = []
+
+        # # #     for metadata in self.pending_metadata:
+        # # #         if metadata.__class__.supports_parser(dataset.parser):
+        # # #             metadata.update_main_file_data(dataset.data)
+        # # #         else:
+        # # #             still_pending.append(metadata)
+
+        # # #  self.pending_metadata = still_pending
+
+        # def _select_parser(file_path: Path) -> type[_XPSParser]:
+        #     matches = [
+        #         ParserCls
+        #         for ParserCls in self.parsers
+        #         if ParserCls.is_mainfile(file)
+        #     ]
+
+        #     if len(matches) == 0:
+        #         raise ValueError("No parser supports this file.")
+        #     if len(matches) > 1:
+        #         raise ValueError("Ambiguous file format: multiple parsers match.")
+
+        #     parser = matches[0]
+
+        #     return parser
+
+        # def _select_metadata_parsers(
+        #     file: Path,
+        #     parser:_XPSParser,
+        # ) -> list[type[_XPSMetadataParser]]:
+
+        #     fitting_metadata_parsers: list[_XPSMetadataParser] = []
+
+        #     matches = [
+        #         ParserCls
+        #         for ParserCls in self.metadata_parsers
+        #         if ParserCls.is_mainfile(file)
+        #     ]
+
+        #     if not matches:
+        #         return []
+
+        #     for metadata_parser in matches:
+        #         if not metadata_parser.supports_parser(parser):
+        #             _logger.warning(
+        #                 f"Metadata parser {metadata_parser.__name__} does not support the main parser {parser.__class__.__name__}."
+        #             )
+        #             continue
+        #         fitting_metadata_parsers.append(metadata_parser)
+
+        #     return fitting_metadata_parsers
+
+        # file = Path(file_path)
+        # main_file_ext = file.suffix
+        # file_ext = file.suffix
+
+        # parser = _select_parser(file)()
+        # parser.parse_file(file_path, **self.kwargs)
+        # main_file_data = parser.data
+
+        # metadata_parsers = _select_metadata_parsers(file, parser)
+
+        # for m_parser in metadata_parsers:
+        #     m_parser().update_main_file_data(main_file_data)
+
+        # config_file = parser.config_file
+        # if isinstance(config_file, dict):
+        #     config_file = config_file.get(file_ext)
+        # self.set_config_file(
+        #     XPSReader.reader_dir.joinpath("config", config_file),
+        #     replace=False,
+        # )
+
+        # self.parsed_data_dicts += [parser.data]
+
+        # return {}
+
         def _check_for_vendors(file_path: str) -> str:
             """
             Check for the vendor name of the XPS data file.
@@ -360,19 +596,21 @@ class XPSReader(MultiFormatReader):
 
             parser = XPSReader.vendor_map[file_ext][vendor]()
             parser.parse_file(file_path, **self.kwargs)
-            data_dict = parser.data_dict
+
+            # New parser path: returns list[ParsedSpectrum]
+            # spectra = handler.parse_file(file_path, **self.kwargs)
+            # data = _assemble_spectra(spectra, file_path)
+            # self.parsed_data_dicts += [data]
 
             config_file = parser.config_file
-
             if isinstance(config_file, dict):
                 config_file = config_file.get(file_ext)
-
             self.set_config_file(
                 XPSReader.reader_dir.joinpath("config", config_file),
                 replace=False,
             )
 
-            self.parsed_data_dicts += [parser.data_dict]
+            self.parsed_data_dicts += [parser.data]
 
         elif file_ext in XPSReader.supported_metadata_file_extensions:
             vendor = _check_for_vendors(file_path)
@@ -685,6 +923,9 @@ class XPSReader(MultiFormatReader):
         escaped_entry = re.escape(entry)
         xr_data = self.parsed_data["data"].get(entry)
 
+        if xr_data is None:
+            return []
+
         def get_signals(key: str) -> list[str]:
             if key == "scans":
                 data_vars = _get_scan_vars(xr_data.data_vars)
@@ -764,6 +1005,9 @@ class XPSReader(MultiFormatReader):
         entry = self.callbacks.entry_name
         escaped_entry = re.escape(entry)
         xr_data = self.parsed_data["data"].get(entry)
+
+        if xr_data is None:
+            return None
 
         # Average or errors
         if path.startswith(("average", "errors")):

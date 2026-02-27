@@ -56,8 +56,8 @@
     "beam_probe":{
       "distance":"@eln",
       "distance/@units":"@eln",
-      "incident_energy":"@attrs:excitation_energy",
-      "incident_energy/@units":"@attrs:excitation_energy/@units",
+      "incident_energy":"@attrs:device_excitation_energy",
+      "incident_energy/@units":"@attrs:device_excitation_energy/@units",
       "incident_energy_spread":null,
       "incident_energy_spread/@units":null,
       "incident_polarization":null,

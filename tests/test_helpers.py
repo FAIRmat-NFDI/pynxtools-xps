@@ -15,96 +15,54 @@
 # limitations under the License.
 #
 """
-Tests for helper functions
+Parametrized tests for:
+  - parsers/base._XPSDataclass and name-construction helpers
+  - mapping.parse_datetime
 """
 
 import datetime
 import re
+from dataclasses import dataclass
 
 import pytest
 
-from pynxtools_xps.reader_utils import extract_unit
-from pynxtools_xps.value_mappers import get_units_for_key, parse_datetime
+from pynxtools_xps.mapping import convert_pascal_to_snake, parse_datetime
+from pynxtools_xps.parsers.base import (
+    _align_name_part,
+    _construct_data_key,
+    _construct_entry_name,
+    _XPSDataclass,
+)
+
+# ── pascal_to_snake ─────────────────────────────────────────────────────────────
 
 
 @pytest.mark.parametrize(
-    "unit_key, unit_map, expected_unit",
+    "raw, expected",
     [
-        # Test cases with direct keys in the unit_map
-        ("detector/detector_voltage", {"detector/detector_voltage": "V"}, "V"),
-        ("temperature", {"temperature": "K"}, "K"),
-        # Test cases with keys that don't exist in the unit_map
-        ("nonexistent_key", {"some_key": "m"}, None),
-        # Test cases with regex pattern in the key
-        (
-            "detector/[detector_voltage]",
-            {"detector/detector_voltage": "V"},
-            "detector_voltage",
-        ),
-        ("sensor/[sensor_current]", {"sensor/sensor_current": "A"}, "sensor_current"),
-        # Test cases with key that includes a regex but isn't mapped
-        ("not_mapped/[value]", {}, "value"),
-        # Key with multiple slashes
-        ("foo/bar/baz", {"foo/bar/baz": "kg"}, "kg"),
-        # Key with trailing slash
-        ("foo/bar/", {"foo/bar/": "s"}, "s"),
-        # Key with leading slash
-        ("/foo/bar", {"/foo/bar": "A"}, "A"),
+        ("ScanMode", "scan_mode"),
+        ("EnergyType", "energy_type"),
+        ("XPS", "xps"),  # all-uppercase → all-lowercase
+        ("PassEnergy", "pass_energy"),
+        ("already_snake", "already_snake"),
+        ("key[unit]", "key[unit]"),  # bracketed part preserved verbatim
+        ("ABCDef", "abc_def"),  # internal uppercase run split correctly
     ],
 )
-def test_get_units_for_key(unit_key: str, unit_map: dict[str, str], expected_unit: str):
-    result = get_units_for_key(unit_key, unit_map)
-    assert result == expected_unit, f"Expected {expected_unit} but got {result}"
+def test_convert_pascal_to_snake(raw, expected):
+    assert convert_pascal_to_snake(raw) == expected
 
 
-@pytest.mark.parametrize(
-    "key, value, unit_missing, expected_value, expected_unit",
-    [
-        # Test cases with explicit units
-        ("x_position", "0 mm", {}, 0, "mm"),
-        ("polar_rotation", "0 deg", {}, 0, "deg"),
-        ("analyzer_work_function", "4.506eV", {}, 4.506, "eV"),
-        ("temperature", "300K", {}, 300, "K"),
-        ("pressure", "1.01bar", {}, 1.01, "bar"),
-        # Test cases without explicit units
-        ("voltage", "5.0", {"voltage": "V"}, 5.0, "V"),
-        ("current", "10", {"current": "A"}, 10, "A"),
-        # Test cases with scientific notation
-        ("distance", "1.23e-10m", {}, 1.23e-10, "m"),
-        ("charge", "1.602e-19C", {}, 1.602e-19, "C"),
-        # Test cases with missing unit in value and unit_missing dictionary
-        ("energy", "1000", {"energy": "J"}, 1000, "J"),
-        ("mass", "0.5", {"mass": "kg"}, 0.5, "kg"),
-    ],
-)
-def test_extract_unit(
-    key: str,
-    value: str,
-    unit_missing: dict[str, str],
-    expected_value: str,
-    expected_unit: str,
-):
-    result_value, result_unit = extract_unit(key, value, unit_missing)
-
-    assert isinstance(result_value, type(expected_value)), (
-        f"Expected type {type(expected_value)} but got type {type(result_value)}"
-    )
-
-    assert result_value == expected_value, (
-        f"Expected {expected_value} but got {result_value}"
-    )
-    assert result_unit == expected_unit, (
-        f"Expected {expected_unit} but got {result_unit}"
-    )
+# ── Datetime parsing ─────────────────────────────────────────────────────────────
 
 
 @pytest.mark.parametrize(
     "datetime_string, possible_date_formats, tzinfo, expected_iso8601",
     [
-        # Test cases with valid datetime strings and formats
+        # Non-ISO format: tzinfo IS applied via strptime path
         (
-            "2023-10-23 14:30:00",
-            ["%Y-%m-%d %H:%M:%S"],
+            "23/10/2023 14:30:00",
+            ["%d/%m/%Y %H:%M:%S"],
             datetime.timezone.utc,
             "2023-10-23T14:30:00+00:00",
         ),
@@ -120,6 +78,7 @@ def test_extract_unit(
             datetime.timezone.utc,
             "2023-10-23T14:30:00+00:00",
         ),
+        # Already-ISO strings: fromisoformat short-circuits; tzinfo is NOT applied
         (
             "2023-10-23T14:30:00Z",
             ["%Y-%m-%dT%H:%M:%SZ"],
@@ -132,14 +91,14 @@ def test_extract_unit(
             datetime.timezone(datetime.timedelta(hours=2)),
             "2023-10-23T14:30:00+02:00",
         ),
-        # Test cases with timezone information
+        # Non-ISO format with non-UTC timezone offset
         (
-            "2023-10-23 14:30:00",
-            ["%Y-%m-%d %H:%M:%S"],
+            "23.10.2023 14:30:00",
+            ["%d.%m.%Y %H:%M:%S"],
             datetime.timezone(datetime.timedelta(hours=1)),
             "2023-10-23T14:30:00+01:00",
         ),
-        # Test case with missing timezone should still return UTC
+        # ISO-parseable string with tzinfo=None → no offset in result
         (
             "2023-10-23 14:30:00",
             ["%Y-%m-%d %H:%M:%S"],
@@ -158,7 +117,6 @@ def test_parse_datetime(
 @pytest.mark.parametrize(
     "datetime_string, possible_date_formats",
     [
-        # Test cases that should raise ValueError
         ("invalid date string", ["%Y-%m-%d %H:%M:%S"]),
         ("2023-10-23 invalid", ["%Y-%m-%d %H:%M:%S"]),
         ("23-10-2023", ["%Y-%m-%d %H:%M:%S"]),
@@ -171,3 +129,98 @@ def test_parse_datetime_invalid(datetime_string, possible_date_formats):
     )
     with pytest.raises(ValueError, match=re.escape(expected_error)):
         parse_datetime(datetime_string, possible_date_formats)
+
+
+# ── base name-construction helpers ────────────────────────────────────────────
+
+
+@pytest.mark.parametrize(
+    "name_part, expected",
+    [
+        ("C 1s", "C_1s"),
+        ("Fe-2p", "Fe_2p"),
+        ("Au/Ag", "Au_Ag"),
+        ("a.b", "a_b"),
+        ("a:b", "a_b"),
+        ("a+b", "a_b"),
+        ("a=b", "ab"),
+        ("clean", "clean"),
+    ],
+)
+def test_align_name_part(name_part, expected):
+    assert _align_name_part(name_part) == expected
+
+
+@pytest.mark.parametrize(
+    "parts, expected",
+    [
+        (["C 1s"], "C_1s"),
+        (["C 1s", "scan1"], "C_1s__scan1"),
+        (["", "C 1s"], "C_1s"),  # empty parts are filtered out
+        ([], ""),
+    ],
+)
+def test_construct_entry_name(parts, expected):
+    assert _construct_entry_name(parts) == expected
+
+
+@pytest.mark.parametrize(
+    "spectrum, expected",
+    [
+        ({"loop_no": 0, "scan_no": 3}, "cycle0_scan3"),
+        ({"loop_no": None, "scan_no": None}, "cycle0_scan0"),
+        ({"loop_no": 2, "scan_no": None}, "cycle2_scan0"),
+        ({"loop_no": 1, "scan_no": 0}, "cycle1_scan0"),
+    ],
+)
+def test_construct_data_key(spectrum, expected):
+    assert _construct_data_key(spectrum) == expected
+
+
+# ── _XPSDataclass ─────────────────────────────────────────────────────────────
+
+
+@dataclass
+class _SampleDC(_XPSDataclass):
+    """Minimal concrete dataclass for testing _XPSDataclass type enforcement."""
+
+    x: int
+    y: float | None
+    name: str
+    tags: list[str]
+
+
+@pytest.mark.parametrize(
+    "x, y, name, tags",
+    [
+        (1, None, "a", []),
+        (2, 3.14, "b", ["t1"]),
+        (3, None, "c", ["x", "y"]),
+        (0, 0.0, "", []),
+    ],
+)
+def test_xps_dataclass_valid(x, y, name, tags):
+    dc = _SampleDC(x=x, y=y, name=name, tags=tags)
+    assert dc.x == x
+    assert dc.y == y
+    assert dc.name == name
+    assert dc.tags == tags
+
+
+def test_xps_dataclass_coercion():
+    """A coercible string value is converted to the annotated type."""
+    dc = _SampleDC(x="2", y=None, name="a", tags=[])
+    assert dc.x == 2
+    assert isinstance(dc.x, int)
+
+
+@pytest.mark.parametrize(
+    "x, y, name, tags",
+    [
+        ("abc", None, "a", []),  # "abc" cannot be coerced to int
+        (1, "not_a_float", "a", []),  # "not_a_float" cannot be coerced to float|None
+    ],
+)
+def test_xps_dataclass_invalid(x, y, name, tags):
+    with pytest.raises(TypeError):
+        _SampleDC(x=x, y=y, name=name, tags=tags)

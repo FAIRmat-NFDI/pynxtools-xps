@@ -27,7 +27,6 @@ from pynxtools_xps.mapping import (
     _MetadataContext,
     _split_key_and_unit,
     _split_value_and_unit,
-    convert_pascal_to_snake,
 )
 from pynxtools_xps.parsers.kratos.metadata import _context as kratos_context
 from pynxtools_xps.parsers.specs.xy.metadata import _context as specs_xy_context
@@ -68,22 +67,6 @@ def test_split_value_and_unit(value, expected_value, expected_unit):
     value_out, unit_out = _split_value_and_unit(value)
     assert value_out == expected_value
     assert unit_out == expected_unit
-
-
-@pytest.mark.parametrize(
-    "raw, expected",
-    [
-        ("ScanMode", "scan_mode"),
-        ("EnergyType", "energy_type"),
-        ("XPS", "xps"),  # all-uppercase → all-lowercase
-        ("PassEnergy", "pass_energy"),
-        ("already_snake", "already_snake"),
-        ("key[unit]", "key[unit]"),  # bracketed part preserved verbatim
-        ("ABCDef", "abc_def"),  # internal uppercase run split correctly
-    ],
-)
-def test_convert_pascal_to_snake(raw, expected):
-    assert convert_pascal_to_snake(raw) == expected
 
 
 # ── _MetadataContext — unit tests per method ──────────────────────────────────

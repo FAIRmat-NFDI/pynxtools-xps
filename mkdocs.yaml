@@ -10,15 +10,15 @@ nav:
   - Tutorials:
     - tutorial/installation.md
     - tutorial/standalone.md
-    - tutorial/nexusio.md
-    - tutorial/nomad.md
+    - tutorial/nomad_usage.md
     - tutorial/contributing.md
   - How-To Guides:
-    - how-tos/build_a_reader.md
+    - how-tos/build_a_parser.md
   - Explanation:
-    - explanation/implementation.md
+    - explanation/motivation.md
     - explanation/appdefs.md
-    - explanation/contextualization.md
+    - explanation/parser_architecture.md    
+    - explanation/coordinate_system.md
     - explanation/data_processing.md
     - explanation/nomad_integration.md
   - Reference:
@@ -26,9 +26,12 @@ nav:
     - reference/scienta.md
     - reference/phi.md
     - reference/vms.md
+    - reference/kratos.md
 
 plugins:
   - search
+  - macros:
+      module_name: src/pynxtools_xps/mkdocs
 
 theme:
   name: material
@@ -51,6 +54,9 @@ theme:
 
 markdown_extensions:
   - attr_list
+  - pymdownx.tasklist:
+      custom_checkbox: true  
+  - def_list
   - md_in_html
   - admonition
   - pymdownx.details
@@ -71,7 +77,7 @@ markdown_extensions:
       custom_fences:
         - name: mermaid
           class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
+          format: !!python/name:pymdownx.superfences.fence_div_format
 
 extra:
   generator: false

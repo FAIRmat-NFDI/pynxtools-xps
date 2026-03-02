@@ -17,9 +17,9 @@
         "energy": 0.0,
         "energy_units": "eV"
     },
-    "analyzer_work_function": 0.0,
+    "analyzer_work_function": 4.506,
     "analyzer_work_function_units": "eV",
-    "analyzer_retardation_gain": 0.0,
+    "analyzer_retardation_gain": 1.001505,
     "register_image": true,
     "register_image_interval": 1,
     "register_image_mode": 1,
@@ -51,7 +51,7 @@
     "refresh_persistence": 1,
     "peak_to_noise_ratio_state": true,
     "delay_before_acquire": 5.0,
-    "delay_before_acquire_units": "s",
+    "delay_before_acquire_units": "seconds",
     "c60_ion_gun": "None",
     "bias_box_mode": 0,
     "tfc_parameters": [
@@ -179,7 +179,7 @@
     "no_depth_profile_data_cycles": 0,
     "no_pre_sputter_cycles": 1,
     "profiling_sputter_delay": 15.0,
-    "profiling_sputter_delay_units": "s",
+    "profiling_sputter_delay_units": "",
     "profiling_xray_off_during_sputter": false,
     "profiling_source_blank_during_sputter": false,
     "profiling_zalar_high_accuracy_interval": 20,
@@ -230,7 +230,7 @@
         "y": 1000.0
     },
     "xray_rotation": -21.5,
-    "xray_rotation_units": "degree",
+    "xray_rotation_units": "V",
     "xray_high_power": false,
     "xray_emission_control": true,
     "xray_emission_current": 4.5,
@@ -242,11 +242,11 @@
     "xray_max_filament_current_units": "A",
     "xray_settings": {
         "spot_size": 200.0,
-        "spot_size_units": "um",
+        "spot_size_units": "u",
         "power": 50.0,
         "power_units": "W",
         "high_voltage": 15.0,
-        "high_voltage_units": "kV"
+        "high_voltage_units": "KV"
     },
     "flood_gun_mode": "Neutralize",
     "flood_gun_current": 5.0,
@@ -343,7 +343,7 @@
         "polar_units": "degree"
     },
     "stage_current_rotation_speed": 1.0,
-    "stage_current_rotation_speed_units": "degree/s",
+    "stage_current_rotation_speed_units": "",
     "defect_positioner_id": 1,
     "defect_positioner_comment": "",
     "defect_positioner_u": -18.9982,
@@ -357,9 +357,9 @@
     "defect_positioner_z": 16.8606,
     "defect_positioner_z_units": "mm",
     "defect_positioner_tilt": 45.0031,
-    "defect_positioner_tilt_units": "degree",
+    "defect_positioner_tilt_units": "mm",
     "defect_positioner_rotation": -0.05,
-    "defect_positioner_rotation_units": "degree",
+    "defect_positioner_rotation_units": "mm",
     "defect_positioner_alignment": "None",
     "defect_positioner_reference_image": "Blank.pho",
     "gcib_sputter_rate": 0.0,

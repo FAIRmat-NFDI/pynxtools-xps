@@ -19,6 +19,17 @@
 MKdocs macros for the documentation
 """
 
+import importlib
+
+
+def _format_version_range(lower, upper) -> str:
+    """Format a half-open version interval as a human-readable string."""
+    lower_str = ".".join(str(x) for x in lower)
+    if upper is None:
+        return f">= {lower_str}"
+    upper_str = ".".join(str(x) for x in upper)
+    return f"{lower_str} – {upper_str} (exclusive)"
+
 
 def define_env(env):
     """
@@ -32,3 +43,88 @@ def define_env(env):
 
     # add to the dictionary of variables available to markdown pages:
     env.variables["version"] = "2023.10"  # Figure out from setuptools-scm eventually
+
+    @env.macro
+    def supported_formats_table() -> str:
+        """
+        Generate a Markdown list of all supported XPS file formats, grouped by vendor.
+
+        Reads ``XPSReader.vendor_map`` and groups extensions by vendor,
+        linking each item to the corresponding reference page.
+
+        Example usage in a doc page::
+
+            {{ supported_formats_table() }}
+        """
+        _VENDOR_META: dict[str, tuple[str, str]] = {
+            "scienta": ("Scienta Omicron", "reference/scienta.md"),
+            "specs": ("SPECS", "reference/specs.md"),
+            "phi": ("PHI Electronics", "reference/phi.md"),
+            "unknown": ("VAMAS (ISO 14976)", "reference/vms.md"),
+        }
+        # Vendor display order
+        _VENDOR_ORDER = ["scienta", "specs", "phi", "unknown"]
+
+        try:
+            from pynxtools_xps.reader import XPSReader  # noqa: PLC0415
+        except ImportError as exc:
+            return f"*Could not load `XPSReader`: {exc}*"
+
+        vendor_map: dict = XPSReader.vendor_map
+        # Build vendor → sorted list of extensions
+        vendor_extensions: dict[str, list[str]] = {}
+        for ext, vendors in vendor_map.items():
+            for vendor in vendors:
+                if vendor not in _VENDOR_META:
+                    continue
+                vendor_extensions.setdefault(vendor, []).append(ext)
+
+        rows = []
+        for vendor in _VENDOR_ORDER:
+            if vendor not in vendor_extensions:
+                continue
+            label, page = _VENDOR_META[vendor]
+            exts = ", ".join(f"`{e}`" for e in sorted(vendor_extensions[vendor]))
+            rows.append(f"- [{label}]({page}) — {exts}")
+
+        return "\n".join(rows)
+
+    @env.macro
+    def parser_version_table(module_path: str, class_name: str) -> str:
+        """
+        Generate a Markdown table of supported version ranges for a parser class.
+
+        Parameters
+        ----------
+        module_path:
+            Dotted module path relative to pynxtools_xps.parsers,
+            e.g. "specs.sle.parser".
+        class_name:
+            Name of the parser class, e.g. "SpecsSLEParser".
+
+        Example usage in a doc page::
+
+            {{ parser_version_table("specs.sle.parser", "SpecsSLEParser") }}
+        """
+        try:
+            mod = importlib.import_module(f"pynxtools_xps.parsers.{module_path}")
+            cls = getattr(mod, class_name)
+        except (ImportError, AttributeError) as exc:
+            return f"*Could not load `{class_name}` from `{module_path}`: {exc}*"
+
+        ranges = getattr(cls, "supported_versions", ())
+        requires = getattr(cls, "requires_version", False)
+
+        if not ranges and not requires:
+            return "All file versions are accepted."
+
+        if not ranges and requires:
+            return (
+                "This parser requires explicit version information in the file header, "
+                "but no specific version range is declared."
+            )
+
+        rows = "\n".join(
+            f"| {_format_version_range(lower, upper)} |" for lower, upper in ranges
+        )
+        return f"| Supported versions |\n| ------------------ |\n{rows}"

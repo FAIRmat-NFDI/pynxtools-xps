@@ -1,5 +1,6 @@
 # Custom Dictionary Words
 ACQUSITION
+ARPES
 ARXPS
 AXISNAME
 Analysed
@@ -26,8 +27,10 @@ FWHM
 Florian
 Forschungsgemeinschaft
 Gießen
+HAXPES
 HHTP
 Hetaba
+IUPAC
 Justus
 Kratos
 Kumar
@@ -44,10 +47,12 @@ Monochromator
 Mozumder
 NAPXPS
 NFDI
+NIAC
 Nefedov
 Nefedovs
 Nønne
 PBTTT
+PEEM
 Phoibos
 Pielsticker
 Prisle
@@ -70,6 +75,7 @@ Universität
 VAMAS
 Vamas
 Vikas
+Voigt
 Walid
 Workfunction
 Zenodo
@@ -77,8 +83,10 @@ aligment
 analyser
 arange
 argwhere
+arithmatex
 binarywave
 bnote
+browsable
 bunit
 calib
 caplog
@@ -105,6 +113,7 @@ headerlines
 iemission
 ifilament
 interp
+ipynb
 kratos
 linalg
 linescan
@@ -114,6 +123,7 @@ lmfit
 lukaspie
 mainfile
 maxit
+mbar
 metainfo
 microm
 monochromatized
@@ -126,6 +136,8 @@ nxdls
 nxfit
 orcid
 panode
+panosc
+parseable
 pnts
 presputter
 prmt
@@ -135,6 +147,8 @@ scienta
 smoothings
 snakecase
 stigmator
+subclassing
+subpackages
 trapz
 uanode
 ufilament
@@ -148,3 +162,4 @@ xaxis
 yaxes
 zalar
 zenodo
+Šunjić

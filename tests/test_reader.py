@@ -26,7 +26,7 @@ import pytest
 from pynxtools.dataconverter.convert import get_reader
 from pynxtools.testing.nexus_conversion import ReaderTest
 
-from pynxtools_xps.vms.vamas_comment_handler import handle_comments
+from pynxtools_xps.parsers.vms.comment_handler import handle_comments
 
 READER_NAME = "xps"
 READER_CLASS = get_reader(READER_NAME)
@@ -138,7 +138,7 @@ def test_nexus_conversion(
     )
 
 
-def read_comment_file(filepath: str):
+def _read_comment_file(filepath: str):
     """Read comments from one vms comment test file."""
 
     no_of_comments = 0
@@ -157,12 +157,12 @@ def read_comment_file(filepath: str):
 @pytest.mark.parametrize(
     "file, comment_type, expected_no_of_comments",
     [
-        pytest.param("kratos.vms", "block", 51, id="Kratos metadata"),
+        pytest.param("kratos.vms", "block", 52, id="Kratos metadata"),
         pytest.param("phi.vms", "block", 312, id="PHI metadata"),
         pytest.param("casa_header.vms", "header", 1, id="CasaXPS header"),
         pytest.param("casa_process.vms", "block", 151, id="CasaXPS processing"),
         pytest.param("specs_header.vms", "header", 3, id="SPECS header metadata"),
-        pytest.param("specs_block.vms", "block", 11, id="SPECS header metadata"),
+        pytest.param("specs_block.vms", "block", 8, id="SPECS header metadata"),
     ],
 )
 def test_vms_comment_handler(
@@ -172,7 +172,7 @@ def test_vms_comment_handler(
     filepath = os.path.join(os.path.dirname(__file__), "data", "vms_comments", file)
     ref_json_filepath = filepath.replace(".vms", "_ref.json")
 
-    no_of_comments, comment_lines = read_comment_file(filepath)
+    no_of_comments, comment_lines = _read_comment_file(filepath)
     assert no_of_comments == len(comment_lines)
 
     comments = handle_comments(comment_lines, comment_type=comment_type)

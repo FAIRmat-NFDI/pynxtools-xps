@@ -1,35 +1,49 @@
 # VAMAS ISO standard (VMS)
 
-The reader supports VAMAS (.vms, .npl) files, the ISO standard data transfer format ([ISO 14976](https://www.iso.org/standard/24269.html)) for X-ray photoelectron spectroscopy. The data can be stored both in REGULAR (i.e, with an equally spaced energy axis) as well as IRREGULAR mode. The reader also allows for .npl files which are structured in the same way as .vms files.
+The reader supports VAMAS (`.vms`, `.npl`) files, the ISO standard data transfer format
+([ISO 14976](https://www.iso.org/standard/24269.html)) for surface chemical analysis.
+Data can be stored in both REGULAR (equally spaced energy axis) and IRREGULAR mode.
+`.npl` files are structurally identical to `.vms` files and are handled by the same parser.
 
-Note that most vendors and analysis software tend to write metadata from their instruments into the comment lines of the VAMAS format. Currently, the VAMAS reader supports parsing of metadata from VAMAS format for the following vendors and software solutions:
+The parser is in
+[`src/pynxtools_xps/parsers/vms/`](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/src/pynxtools_xps/parsers/vms).
 
-- [Kratos Analytical Ltd](https://www.kratos.com/)
-- [Specs GmbH](https://www.specs-group.com/specs/)
-- [Phi Electronics](https://www.phi.com/): same metadata as in the PHI reader
-- [CasaXPS](http://www.casaxps.com/): calibrations and peak fitting
+## Supported versions
 
-The reader for the VAMAS format can be found [here](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/src/pynxtools_xps/vms).
+The VAMAS standard does not carry explicit version information. All conforming VAMAS
+files are accepted. The format is defined by
+[ISO 14976](https://www.iso.org/standard/24269.html).
+
+## Vendor metadata in comment blocks
+
+Most XPS instruments and analysis tools write vendor-specific metadata into the VAMAS
+comment lines. The reader parses this additional metadata automatically for the following
+sources:
+
+- [Kratos Analytical](https://www.kratos.com/) — see the [Kratos reference page](kratos.md)
+- [SPECS GmbH](https://www.specs-group.com/specs/)
+- [PHI Electronics](https://www.phi.com/) — same metadata fields as the [PHI reader](phi.md)
+- [CasaXPS](http://www.casaxps.com/) — calibrations and peak fitting results
 
 ## Standard .vms data
 
-Example data is available [here](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/vms). The data was measured with and exported from [SpecsLabProdigy](https://www.specs-group.com/nc/specs/products/detail/prodigy/).
+Example data is available in the
+[`examples/vms/` directory](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/vms).
+The data was measured with and exported from
+[SpecsLabProdigy](https://www.specs-group.com/nc/specs/products/detail/prodigy/).
 
 ### REGULAR file format
 
-<!-- How is this data structured -->
-
-The example conversion for the REGULAR VAMAS file can be run with the following command:
+In the ISO format, there are two types of scan modes: regular and irregular. In regular mode,
+the energy axis is uniformly spaced. The axis itself is not saved, but only its start (“abscissa start”) and step energy (“abscissa increment”). The “abscissa label" determines whether the scan is in binding or kinetic energy.
 
 ```console
-user@box:~$ dataconverter regular.vms eln_data_vms.yaml --reader xps --nxdl NXxps --output regular.vms.nxs 
+user@box:~$ dataconverter regular.vms eln_data_vms.yaml --reader xps --nxdl NXxps --output regular.vms.nxs
 ```
 
 ### IRREGULAR file format
 
-<!-- How is this data structured -->
-
-The example conversion for the IRREGULAR VAMAS file can be run with the following command:
+In irregular mode, the energy axis is stored explicitly as a list of energy values. These values are not required to be uniformly spaced and may vary arbitrarily.
 
 ```console
 user@box:~$ dataconverter irregular.vms eln_data_vms.yaml --reader xps --nxdl NXxps --output irregular.vms.nxs
@@ -37,32 +51,36 @@ user@box:~$ dataconverter irregular.vms eln_data_vms.yaml --reader xps --nxdl NX
 
 ## Data analysis and peak fitting
 
-```pynxtools-xps``` also supports extracting data and the description of the data analysis (i.e., peak fitting)
-by the [CasaXPS data analysis software](http://www.casaxps.com/). Three files are needed for the example conversion:
+`pynxtools-xps` can also extract CasaXPS peak fitting data alongside the raw spectra.
+Three files are required:
 
-1) The VAMAS (.vms) file containing the original (meta)data and the definition of the peak fitting in the VAMAS
-comments
-2) The lineshapes of the measurement data as well as the peak fitting, exported from CasaXPS as a TXT file.
-3) The analysis results (incl. the atomic concentrations), exported from CasaXPS as a CSV file.
+1. The VAMAS `.vms` file containing the original data and the peak fitting definition in
+   the VAMAS comments.
+2. The lineshapes exported from CasaXPS as a TXT file.
+3. The analysis results (including atomic concentrations) exported from CasaXPS as a CSV file.
 
-Example data is available [here](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/vms/vms_analysis).
-
-The example conversion for the .txt export file can be run with the following command:
+Example data is available in the
+[`examples/vms/data_analysis/` directory](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/vms/data_analysis).
 
 ```console
-user@box:~$ dataconverter FeO* eln.yaml --reader $READER --nxdl $NXDL --output vms_analysis_ref.nxs
+user@box:~$ dataconverter FeO* eln.yaml --reader xps --nxdl NXxps --output vms_analysis_ref.nxs
 ```
 
-You can learn much more about how to prepare the data in CasaXPS for NeXus conversion [here](../explanation/data_processing.md).
+For details on how to prepare CasaXPS data for NeXus conversion, see
+[Explanation > Data processing with CasaXPS](../explanation/data_processing.md).
 
-## Standalone export from CasaXPS
+## Standalone CasaXPS export
 
-```pynxtools-xps``` also supports data exported from CasaXPS as TXT file by itself.
+`pynxtools-xps` also supports data exported directly from CasaXPS as a TXT file,
+without the original VAMAS file.
 
-Example data is available [here](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/vms/txt_export).
-
-The example conversion for the .txt export file can be run with the following command:
+Example data is available in the
+[`examples/vms/txt_export/` directory](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/vms/txt_export).
 
 ```console
 user@box:~$ dataconverter vms_txt_export.txt eln_data_vms_txt_export.yaml --reader xps --nxdl NXxps --output vms_txt_export.nxs
 ```
+
+## Further reading
+
+- [Explanation > Parser architecture](../explanation/parser_architecture.md)

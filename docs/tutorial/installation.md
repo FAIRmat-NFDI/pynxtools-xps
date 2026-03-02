@@ -72,6 +72,24 @@ You can also install the latest _development_ version with
 
 To use `pynxtools-xps` with NOMAD, simply install it in the same environment as the `nomad-lab` package. NOMAD will recognize `pynxtools-xps` as a plugin automatically. In addition, NOMAD will install a schema for NeXus application definitions.
 
+You can also install `nomad-lab` together with `pynxtools-xps`:
+
+=== "uv"
+
+    ```bash
+    uv pip install pynxtools-xps[nomad]
+    ```
+
+=== "pip"
+
+    ```bash
+    pip install pynxtools-xps[nomad]
+    ```
+
+The `[nomad]` extra pulls in `nomad-lab` as a dependency. Alternatively, install both
+packages independently — NOMAD discovers plugins automatically via Python entry points,
+so no additional configuration is needed.
+
 ## Start using `pynxtools-xps`
 
 That's it! You can now use `pynxtools-xps`!

@@ -1,28 +1,44 @@
-# Data from Phi VersaProbe 4 instruments
+# Data from PHI instruments
 
-The reader supports [Phi MultiPak](https://www.phi.com/surface-analysis-equipment/genesis.html#software:multi-pak-data-reduction-software/) .spe (single spectra) and .pro (sputter profile / external parameter scan / ....) files, which is the proprietary format of PHI Electronics used for their VersaProbe 4 instruments. The Phi MultiPak software version that was used to measure this data is SS 3.3.3.2.1. 
+The reader supports `.spe` (single spectra) and `.pro` (sputter profile / external
+parameter scan) files from [PHI Electronics](https://www.phi.com/) VersaProbe 4
+instruments, written by [PHI MultiPak](https://www.phi.com/surface-analysis-equipment/genesis.html#software:multi-pak-data-reduction-software/)
+software.
 
-<!-- How is this data structured -->
+The parser is in
+[`src/pynxtools_xps/parsers/phi/`](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/src/pynxtools_xps/parsers/phi).
 
-The reader for the Phi data can be found [here](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/src/pynxtools_xps/phi).
+## Supported versions
 
-## .spe data (single spectrum):
+| Format | Extension | Software | Supported versions |
+| ------ | --------- | -------- | ------------------ |
+| PHI MultiPak single spectrum | `.spe` | PHI MultiPak | any (SS 3.3.3.2.1 tested) |
+| PHI MultiPak profile | `.pro` | PHI MultiPak | any (SS 3.3.3.2.1 tested) |
 
-Example data for this file format is available [here](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/phi).
+## .spe data (single spectrum)
 
-The example conversion can be run with the following command:
-```console_
+Example data is available in the
+[`examples/phi/` directory](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/phi).
+
+```console
 user@box:~$ dataconverter SnO2_10nm.spe eln_data_phi.yaml --reader xps --nxdl NXxps --output SnO2_10nm.spe.nxs
 ```
 
-### .pro data (profiling):
-Example data for this file format is available [here](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/phi).
+## .pro data (profiling)
 
-The example conversion can be run with the following command:
+Example data is available in the
+[`examples/phi/` directory](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/phi).
 
-```console_
+```console
 user@box:~$ dataconverter SnO2_10nm_1.pro eln_data_phi.yaml --reader xps --nxdl NXxps --output SnO2_10nm_1.pro.nxs
 ```
 
-## Acknowledgments
-We thank Sebastian Benz and Dr. Joachim Sann from [Justus-Liebig-Universität Gießen](https://www.uni-giessen.de/de) for providing these example data sets.
+## Acknowledgements
+
+We thank Sebastian Benz and Dr. Joachim Sann from
+[Justus-Liebig-Universität Gießen](https://www.uni-giessen.de/de)
+for providing these example data sets.
+
+## Further reading
+
+- [Explanation > Parser architecture](../explanation/parser_architecture.md)

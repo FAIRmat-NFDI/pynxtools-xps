@@ -1,0 +1,1579 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="The documentation for the pynxtools-xps plugin.
+">
+      
+      
+        <meta name="author" content="The NOMAD authors">
+      
+      
+      
+        <link rel="prev" href="installation.html">
+      
+      
+        <link rel="next" href="nomad_usage.html">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
+    
+    
+      
+        <title>Standalone data conversion - Documentation for pynxtools-xps</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Titillium Web";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="#2A4CDF" data-md-color-accent="#008A67">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#standalone-data-conversion" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="header.title">
+    <a href="../index.html" title="Documentation for pynxtools-xps" class="md-header__button md-logo" aria-label="Documentation for pynxtools-xps" data-md-component="logo">
+      
+  <img src="../assets/nomad-plugin-logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Documentation for pynxtools-xps
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Standalone data conversion
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/FAIRmat-NFDI/pynxtools-xps" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="Documentation for pynxtools-xps" class="md-nav__button md-logo" aria-label="Documentation for pynxtools-xps" data-md-component="logo">
+      
+  <img src="../assets/nomad-plugin-logo.png" alt="logo">
+
+    </a>
+    Documentation for pynxtools-xps
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/FAIRmat-NFDI/pynxtools-xps" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="installation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standalone data conversion
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="standalone.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standalone data conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#who-is-this-tutorial-for" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Who is this tutorial for?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-should-you-know-before-this-tutorial" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What should you know before this tutorial?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-will-know-at-the-end-of-this-tutorial" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you will know at the end of this tutorial?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Steps
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Steps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-understand-the-three-inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Understand the three inputs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-get-an-eln-template-for-your-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Get an ELN template for your format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-run-the-conversion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Run the conversion
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Run the conversion">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vamas-vms-npl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VAMAS (.vms, .npl)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specs-sle-sle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SPECS SLE (.sle)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specs-xml-xml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SPECS XML (.xml)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specs-xy-xy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SPECS XY (.xy)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scienta-txt-and-ibw-txt-ibw" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scienta TXT and IBW (.txt, .ibw)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phi-spe-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PHI (.spe, .pro)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-inspect-the-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Inspect the output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#further-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Further reading
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="nomad_usage.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage in NOMAD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="contributing.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-To Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How-To Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-tos/build_a_parser.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Build a parser
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Explanation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Explanation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explanation/motivation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Motivation and software design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explanation/appdefs.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NXmpes and NXxps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explanation/parser_architecture.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parser architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explanation/coordinate_system.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The XPS coordinate system
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explanation/data_processing.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data processing with CasaXPS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explanation/nomad_integration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NOMAD integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/specs.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data from SPECS instruments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/scienta.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data from Scienta Omicron instruments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/phi.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data from PHI instruments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/vms.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VAMAS ISO standard (VMS)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/kratos.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data from Kratos instruments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#who-is-this-tutorial-for" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Who is this tutorial for?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-should-you-know-before-this-tutorial" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What should you know before this tutorial?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-will-know-at-the-end-of-this-tutorial" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you will know at the end of this tutorial?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Steps
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Steps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-understand-the-three-inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Understand the three inputs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-get-an-eln-template-for-your-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Get an ELN template for your format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-run-the-conversion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Run the conversion
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Run the conversion">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vamas-vms-npl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VAMAS (.vms, .npl)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specs-sle-sle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SPECS SLE (.sle)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specs-xml-xml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SPECS XML (.xml)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specs-xy-xy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SPECS XY (.xy)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scienta-txt-and-ibw-txt-ibw" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scienta TXT and IBW (.txt, .ibw)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phi-spe-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PHI (.spe, .pro)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-inspect-the-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Inspect the output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#further-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Further reading
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="standalone-data-conversion">Standalone data conversion<a class="headerlink" href="#standalone-data-conversion" title="Permanent link">&para;</a></h1>
+<h2 id="who-is-this-tutorial-for">Who is this tutorial for?<a class="headerlink" href="#who-is-this-tutorial-for" title="Permanent link">&para;</a></h2>
+<p>This tutorial is for researchers who have a raw XPS measurement file and want to
+produce a standardized NeXus output without using NOMAD.</p>
+<h2 id="what-should-you-know-before-this-tutorial">What should you know before this tutorial?<a class="headerlink" href="#what-should-you-know-before-this-tutorial" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>pynxtools-xps</code> must be installed — see <a href="installation.html">Tutorial &gt; Installation guide</a>.</li>
+<li>Basic command-line familiarity is sufficient. No Python coding is required.</li>
+</ul>
+<h2 id="what-you-will-know-at-the-end-of-this-tutorial">What you will know at the end of this tutorial?<a class="headerlink" href="#what-you-will-know-at-the-end-of-this-tutorial" title="Permanent link">&para;</a></h2>
+<p>You will understand:</p>
+<ul>
+<li>What inputs the dataconverter needs and why</li>
+<li>How to run the conversion for each supported file format</li>
+<li>How to inspect the resulting NeXus file</li>
+</ul>
+<h2 id="steps">Steps<a class="headerlink" href="#steps" title="Permanent link">&para;</a></h2>
+<h3 id="1-understand-the-three-inputs">1. Understand the three inputs<a class="headerlink" href="#1-understand-the-three-inputs" title="Permanent link">&para;</a></h3>
+<p>Every conversion takes three inputs and produces one output:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Raw measurement file  ─┐
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>ELN yaml              ─┼─►  dataconverter (reader: xps, nxdl: NXxps)  ─►  output.nxs
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>Optional params/config ─┘
+</code></pre></div>
+<p><strong>Raw measurement file</strong> — the vendor file from your instrument (<code>.sle</code>, <code>.vms</code>, <code>.xml</code>, …).</p>
+<p><strong>ELN yaml</strong> — a YAML file you fill in with instrument, sample, and user metadata that
+the raw file does not contain. <code>NXxps</code> requires fields such as the analyzer work function,
+X-ray source details, and sample description; vendor files rarely provide all of them.
+You do not need to write this file from scratch — ready-to-use templates are in the
+<a href="https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/" rel="noopener" target="_blank"><code>examples/</code></a>
+directory of the repository, one per format.</p>
+<p><strong>Optional params file or config JSON</strong> — some formats accept additional conversion
+options (e.g., filtering alignment spectra in SLE files). These are passed with
+<code>--params-file</code> or <code>-c</code>.</p>
+<h3 id="2-get-an-eln-template-for-your-format">2. Get an ELN template for your format<a class="headerlink" href="#2-get-an-eln-template-for-your-format" title="Permanent link">&para;</a></h3>
+<p>Copy the ELN template closest to your format from the table below:</p>
+<table>
+<thead>
+<tr>
+<th>Format</th>
+<th>ELN template</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VAMAS <code>.vms</code> / <code>.npl</code></td>
+<td><a href="https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/examples/vms/eln_data_vms.yaml" rel="noopener" target="_blank"><code>examples/vms/eln_data_vms.yaml</code></a></td>
+</tr>
+<tr>
+<td>SPECS SLE <code>.sle</code></td>
+<td><a href="https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/examples/specs/sle/eln_data_sle.yaml" rel="noopener" target="_blank"><code>examples/specs/sle/eln_data_sle.yaml</code></a></td>
+</tr>
+<tr>
+<td>SPECS XML <code>.xml</code></td>
+<td><a href="https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/examples/specs/xml/eln_data_xml.yaml" rel="noopener" target="_blank"><code>examples/specs/xml/eln_data_xml.yaml</code></a></td>
+</tr>
+<tr>
+<td>SPECS XY <code>.xy</code></td>
+<td><a href="https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/examples/specs/xy/eln_data_xy.yaml" rel="noopener" target="_blank"><code>examples/specs/xy/eln_data_xy.yaml</code></a></td>
+</tr>
+<tr>
+<td>Scienta TXT <code>.txt</code></td>
+<td><a href="https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/examples/scienta/txt/eln_data_scienta_txt.yaml" rel="noopener" target="_blank"><code>examples/scienta/txt/eln_data_scienta_txt.yaml</code></a></td>
+</tr>
+<tr>
+<td>Scienta IBW <code>.ibw</code></td>
+<td><a href="https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/examples/scienta/ibw/eln_data_scienta_ibw.yaml" rel="noopener" target="_blank"><code>examples/scienta/ibw/eln_data_scienta_ibw.yaml</code></a></td>
+</tr>
+<tr>
+<td>PHI <code>.spe</code> / <code>.pro</code></td>
+<td><a href="https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/examples/phi/eln_data_phi.yaml" rel="noopener" target="_blank"><code>examples/phi/eln_data_phi.yaml</code></a></td>
+</tr>
+</tbody>
+</table>
+<p>Fill in the relevant fields (instrument details, sample description, user information) before running the conversion.</p>
+<h3 id="3-run-the-conversion">3. Run the conversion<a class="headerlink" href="#3-run-the-conversion" title="Permanent link">&para;</a></h3>
+<p>The general command is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="gp">user@box:~$ </span>dataconverter<span class="w"> </span>&lt;measurement-file&gt;<span class="w"> </span>&lt;eln_data.yaml&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span>--reader<span class="w"> </span>xps<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span>--nxdl<span class="w"> </span>NXxps<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span>--output<span class="w"> </span>output.nxs
+</code></pre></div>
+<p>Replace <code>&lt;measurement-file&gt;</code> and <code>&lt;eln_data.yaml&gt;</code> with your actual file paths.
+Use <code>--nxdl NXmpes</code> instead of <code>NXxps</code> if you need the general photoemission schema
+(see <a href="../explanation/appdefs.html">Explanation &gt; NXmpes and NXxps</a>).</p>
+<p>The format-specific examples below use the files from the <code>examples/</code> directory.</p>
+<h4 id="vamas-vms-npl">VAMAS (<code>.vms</code>, <code>.npl</code>)<a class="headerlink" href="#vamas-vms-npl" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="gp">user@box:~$ </span>dataconverter<span class="w"> </span>regular.vms<span class="w"> </span>eln_data_vms.yaml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span>--reader<span class="w"> </span>xps<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span>--nxdl<span class="w"> </span>NXxps<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span>--output<span class="w"> </span>regular.nxs
+</code></pre></div>
+<p>Both regular (equally spaced energy axis) and irregular VAMAS files are supported.</p>
+<h4 id="specs-sle-sle">SPECS SLE (<code>.sle</code>)<a class="headerlink" href="#specs-sle-sle" title="Permanent link">&para;</a></h4>
+<p>The SLE example uses a <code>params.yaml</code> file that bundles all arguments:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="gp">user@box:~$ </span>dataconverter<span class="w"> </span>--params-file<span class="w"> </span>params.yaml
+</code></pre></div>
+<p>The <code>params.yaml</code> in <a href="https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/specs/sle" rel="noopener" target="_blank"><code>examples/specs/sle/</code></a>
+supports a <code>remove_align</code> keyword. Setting it to <code>true</code> removes alignment spectra from the
+output, which can significantly speed up conversion for large files:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># params.yaml excerpt</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nt">remove_align</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<h4 id="specs-xml-xml">SPECS XML (<code>.xml</code>)<a class="headerlink" href="#specs-xml-xml" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="gp">user@box:~$ </span>dataconverter<span class="w"> </span>In-situ_PBTTT_XPS_SPECS.xml<span class="w"> </span>eln_data_xml.yaml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span>--reader<span class="w"> </span>xps<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span>--nxdl<span class="w"> </span>NXxps<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span>--output<span class="w"> </span>output.nxs
+</code></pre></div>
+<h4 id="specs-xy-xy">SPECS XY (<code>.xy</code>)<a class="headerlink" href="#specs-xy-xy" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="gp">user@box:~$ </span>dataconverter<span class="w"> </span>MgFe2O4.xy<span class="w"> </span>eln_data_xy.yaml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">    </span>--reader<span class="w"> </span>xps<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span>--nxdl<span class="w"> </span>NXxps<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">    </span>--output<span class="w"> </span>MgFe2O4.nxs
+</code></pre></div>
+<h4 id="scienta-txt-and-ibw-txt-ibw">Scienta TXT and IBW (<code>.txt</code>, <code>.ibw</code>)<a class="headerlink" href="#scienta-txt-and-ibw-txt-ibw" title="Permanent link">&para;</a></h4>
+<p>Scienta instruments export one file per scan region. Pass all scan files as positional
+arguments before the ELN yaml:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="gp">user@box:~$ </span>dataconverter<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span>Cu-HHTP_0001.txt<span class="w"> </span>Cu-HHTP_0002.txt<span class="w"> </span>Cu-HHTP_0003.txt<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span>eln_data_scienta_txt.yaml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">    </span>--reader<span class="w"> </span>xps<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span>--nxdl<span class="w"> </span>NXxps<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span>--output<span class="w"> </span>Cu-HHTP.nxs
+</code></pre></div>
+<p>The same multi-file pattern applies to IBW files:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="gp">user@box:~$ </span>dataconverter<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">    </span>Cu-HHTP_0001Cu-HHTP__001.ibw<span class="w"> </span>Cu-HHTP_0002Cu-HHTP__002.ibw<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span>eln_data_scienta_ibw.yaml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span>--reader<span class="w"> </span>xps<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">    </span>--nxdl<span class="w"> </span>NXxps<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span>--output<span class="w"> </span>Cu-HHTP.nxs
+</code></pre></div>
+<h4 id="phi-spe-pro">PHI (<code>.spe</code>, <code>.pro</code>)<a class="headerlink" href="#phi-spe-pro" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="gp">user@box:~$ </span>dataconverter<span class="w"> </span>SnO2_10nm.spe<span class="w"> </span>eln_data_phi.yaml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">    </span>--reader<span class="w"> </span>xps<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">    </span>--nxdl<span class="w"> </span>NXxps<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span>--output<span class="w"> </span>SnO2_10nm.nxs
+</code></pre></div>
+<h3 id="4-inspect-the-output">4. Inspect the output<a class="headerlink" href="#4-inspect-the-output" title="Permanent link">&para;</a></h3>
+<p>The output is a standard HDF5 file with the <code>.nxs</code> extension. You can inspect it in several ways:</p>
+<p><strong>Python (<code>h5py</code>):</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s2">&quot;output.nxs&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>    <span class="n">f</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="nb">print</span><span class="p">)</span>  <span class="c1"># print the full group/dataset tree</span>
+</code></pre></div>
+<p><strong>Browser (H5Web):</strong></p>
+<p>Open <a href="https://h5web.panosc.eu/" rel="noopener" target="_blank">h5web.panosc.eu</a> and
+upload your <code>.nxs</code> file for interactive exploration of datasets, attributes, and groups.</p>
+<p><strong>NOMAD:</strong></p>
+<p>Upload the <code>.nxs</code> file to a NOMAD instance to get full parsing into NOMAD Metainfo,
+Elasticsearch indexing, and the H5Web viewer embedded in the FILES tab.
+See <a href="nomad_usage.html">Tutorial &gt; Usage in NOMAD</a> for instructions.</p>
+<h2 id="further-reading">Further reading<a class="headerlink" href="#further-reading" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="installation.html">Tutorial &gt; Installation guide</a> — setting up <code>pynxtools-xps</code></li>
+<li><a href="nomad_usage.html">Tutorial &gt; Usage in NOMAD</a> — using the converter inside NOMAD</li>
+<li><a href="../explanation/parser_architecture.html">Explanation &gt; Parser architecture</a> — how raw files are mapped to NeXus</li>
+<li><a href="../explanation/appdefs.html">Explanation &gt; NXmpes and NXxps</a> — the output schemas</li>
+<li><a href="../reference/specs.html">Reference &gt; SPECS formats</a> — SLE, XML, XY format details</li>
+<li><a href="../reference/scienta.html">Reference &gt; Scienta Omicron formats</a> — TXT, IBW, HDF5 format details</li>
+<li><a href="../reference/phi.html">Reference &gt; PHI formats</a> — SPE, PRO format details</li>
+<li><a href="../reference/vms.html">Reference &gt; VAMAS format</a> — VMS, NPL format details</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="installation.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Installation guide">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Installation guide
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="nomad_usage.html" class="md-footer__link md-footer__link--next" aria-label="Next: Usage in NOMAD">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Usage in NOMAD
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.footer", "content.code.copy", "content.code.annotate", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../javascript.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

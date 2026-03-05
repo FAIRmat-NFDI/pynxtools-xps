@@ -256,7 +256,7 @@ def test_kratos_context_format(key, value, exp_key, exp_val, exp_unit):
             "technique",
             "XPS",
             "analysis_method",
-            ("XPS", "X-ray photoelectron spectroscopy"),
+            "XPS",
             None,
         ),
         ("source_energy", "1486.6", "excitation_energy", 1486.6, "eV"),

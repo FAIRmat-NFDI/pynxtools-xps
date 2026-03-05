@@ -14,9 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# pylint: disable=too-many-lines,too-few-public-methods
 """
-Classes for reading XPS files from TXT export of CasaXPS.
+Parser for reading XPS data from TXT export of CasaXPS.
 """
 
 import itertools

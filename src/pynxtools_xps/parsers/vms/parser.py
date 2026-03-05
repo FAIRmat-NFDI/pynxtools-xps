@@ -14,11 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# pylint: disable=too-many-lines
 """
-Parser for reading XPS (X-ray Photoelectron Spectroscopy) metadata from
-VAMAS standard, to be passed to MPES nxdl (NeXus Definition Language)
-template.
+Parser for reading XPS data from the VAMAS standard.
 """
 
 import datetime

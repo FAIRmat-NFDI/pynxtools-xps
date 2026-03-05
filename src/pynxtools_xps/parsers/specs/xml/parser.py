@@ -15,9 +15,7 @@
 # limitations under the License.
 #
 """
-Parser for reading XPS (X-ray Photoelectron Spectroscopy) data from
-Specs Lab Prodigy XML export, to be passed to mpes nxdl
-(NeXus Definition Language) template.
+Parser for reading XPS data from Specs Lab Prodigy XML export.
 """
 
 import copy

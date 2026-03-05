@@ -16,7 +16,7 @@
 #
 # pylint: disable=too-many-instance-attributes
 """
-Data model for Vamas ISO standard.
+Data model for the Vamas ISO standard.
 """
 
 from dataclasses import dataclass, field

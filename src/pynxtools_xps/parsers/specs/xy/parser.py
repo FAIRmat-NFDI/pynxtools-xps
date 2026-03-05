@@ -14,11 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# pylint: disable=too-many-lines,too-many-instance-attributes
 """
-Parser for reading XPS (X-ray Photoelectron Spectroscopy) data from
-Specs Lab Prodigy XY exports, to be passed to mpes nxdl
-(NeXus Definition Language) template.
+Parser for reading XPS data from Specs Lab Prodigy XY exports.
 """
 
 import itertools

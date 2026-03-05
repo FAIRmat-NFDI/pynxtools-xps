@@ -14,9 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# pylint: disable=too-many-lines,too-few-public-methods
 """
-Classes for reading XPS result files from CasaXPS CSV export (from Vamas).
+Metadata parser for reading result files from CasaXPS CSV export (from Vamas).
 """
 
 import csv

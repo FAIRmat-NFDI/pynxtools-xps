@@ -16,9 +16,8 @@
 #
 # pylint: disable=too-many-lines,too-many-instance-attributes
 """
-Parser for reading XPS (X-ray Photoelectron Spectroscopy) data from native
-Specs Lab Prodigy SLE format, to be passed to MPES NXDL
-(NeXus Definition Language) template.
+Parser for reading XPS data from SPECS instruments in the
+proprietary SPECS Lab Prodigy SLE format.
 """
 
 import copy
@@ -106,7 +105,7 @@ class SpecsSLEParser(_XPSParser):
         self.encoding = np.float32
 
     def detect_version(self, file: Path) -> VersionTuple | None:
-        self.initiate_file_connection(file)
+        self._initiate_file_connection(file)
         version = self._get_version()
         version = normalize_version(version)
 
@@ -137,7 +136,7 @@ class SpecsSLEParser(_XPSParser):
         self.sum_channels = kwargs.get("sum_channels", False)
 
         # initiate connection to sql file
-        self.initiate_file_connection(file)
+        self._initiate_file_connection(file)
 
         query = "SELECT COUNT(*) FROM RawData"
         try:
@@ -246,7 +245,7 @@ class SpecsSLEParser(_XPSParser):
                 metadata=metadata,
             )
 
-    def initiate_file_connection(self, file: str | Path):
+    def _initiate_file_connection(self, file: str | Path):
         """Set the SQLlite connection of the file to be opened."""
         sql_connection = file
         self.con = sqlite3.connect(sql_connection)

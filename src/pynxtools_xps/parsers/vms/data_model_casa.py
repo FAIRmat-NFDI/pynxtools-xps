@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 """
-Data model for CasaXPS.
+Data model for the CasaXPS software.
 """
 
 import re

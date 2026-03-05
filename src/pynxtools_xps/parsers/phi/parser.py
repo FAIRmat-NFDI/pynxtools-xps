@@ -15,9 +15,7 @@
 # limitations under the License.
 #
 """
-Parser for reading XPS (X-ray Photoelectron Spectroscopy) data from
-Phi PHI VersaProbe 4 instruments (.spe or .pro format) and mapping
-to the NXmpes/NXxps template.
+Parser for reading XPS data from PHI VersaProbe 4 instruments.
 """
 
 import struct

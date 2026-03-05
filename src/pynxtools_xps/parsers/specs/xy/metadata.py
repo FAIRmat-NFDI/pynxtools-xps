@@ -16,7 +16,7 @@
 #
 
 """
-Metadata mapping for the SPECS XML parser.
+Metadata mapping for the SPECS XY parser.
 """
 
 import datetime

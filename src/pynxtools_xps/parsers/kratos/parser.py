@@ -15,9 +15,9 @@
 # limitations under the License.
 #
 """
-Parser for reading XPS (X-ray Photoelectron Spectroscopy) metadata from
-Kratos instruments (currently only after exporting to .vms format), to be
-passed to MPES nxdl (NeXus Definition Language) template.
+Parser for reading XPS data from Kratos instruments.
+Currently, only metadata stored in comments after exporting
+to Vamas format) can be parsed.
 """
 
 from pathlib import Path

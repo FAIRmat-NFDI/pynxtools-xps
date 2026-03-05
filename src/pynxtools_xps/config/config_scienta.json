@@ -221,13 +221,6 @@
       "current/@units":"@eln"
     }
   },
-  "/ENTRY/energy_axis_calibration":{
-    "physical_quantity":"energy",
-    "calibrated_axis":"@data:energy",
-    "calibrated_axis/@units":"eV"
-  },
-  "/ENTRY/energy_referencing":null,
-  "/ENTRY/transmission_correction":null,
   "/ENTRY/SAMPLE[sample]":{
     "name":"@attrs:sample_name",
     "identifierNAME[identifier]":"@eln",
@@ -262,28 +255,6 @@
     "flood_gun_current_env":{
       "flood_gun":"@link:/entry/instrument/flood_gun"
     }
-  },
-  "/ENTRY/DATA[data]":{
-    "@axes":"@attrs:axis_labels",
-    "@signal":"data",
-    "data":"@data:average",
-    "FIELDNAME_errors[data_errors]":"@data:errors",
-    "data/@units":"@attrs:intensity/@units",
-    "@energy_indices":0,
-    "AXISNAME[*]":"@data:*.axes",
-    "AXISNAME[*]/@units":"@data:*.unit",
-    "AXISNAME[energy]/@type":"@attrs:energy_scale"
-  },
-  "/ENTRY/DATA[data_reduced]":{
-    "@axes":["energy"],
-    "@signal":"data",
-    "data":"!@data:average_reduced",
-    "FIELDNAME_errors[data_errors]":"@data:errors_reduced",
-    "data/@units":"@attrs:intensity/@units",
-    "@energy_indices":0,
-    "energy":"@link:/entry/data/energy",
-    "energy/@units":"eV",
-    "energy/@type":"@attrs:energy_scale"
   },
   "/ENTRY/PROCESS[channels_averaging]":{
     "sequence_index":"!@attrs:sequence_index",
@@ -323,5 +294,34 @@
       "@axes":["energy"],
       "@energy_indices":0
     }
+  },
+  "/ENTRY/energy_axis_calibration":{
+    "physical_quantity":"energy",
+    "calibrated_axis":"@data:energy",
+    "calibrated_axis/@units":"eV"
+  },
+  "/ENTRY/energy_referencing":null,
+  "/ENTRY/transmission_correction":null,
+  "/ENTRY/DATA[data]":{
+    "@axes":"@attrs:axis_labels",
+    "@signal":"data",
+    "data":"@data:average",
+    "FIELDNAME_errors[data_errors]":"@data:errors",
+    "data/@units":"@attrs:intensity/@units",
+    "@energy_indices":0,
+    "AXISNAME[*]":"@data:*.axes",
+    "AXISNAME[*]/@units":"@data:*.unit",
+    "AXISNAME[energy]/@type":"@attrs:energy_scale"
+  },
+  "/ENTRY/DATA[data_reduced]":{
+    "@axes":["energy"],
+    "@signal":"data",
+    "data":"!@data:average_reduced",
+    "FIELDNAME_errors[data_errors]":"@data:errors_reduced",
+    "data/@units":"@attrs:intensity/@units",
+    "@energy_indices":0,
+    "energy":"@link:/entry/data/energy",
+    "energy/@units":"eV",
+    "energy/@type":"@attrs:energy_scale"
   }
 }

@@ -193,6 +193,12 @@ class _XPSDataclass:
         return self.__dict__.copy()
 
 
+def _indent(text: str, n: int) -> str:
+    """Prepend *n* spaces to every line of *text*."""
+    prefix = " " * n
+    return "\n".join(prefix + line for line in text.splitlines())
+
+
 @dataclass
 class ParsedSpectrum:
     """Typed intermediate representation for one XPS spectrum.
@@ -230,6 +236,38 @@ class ParsedSpectrum:
     data: xr.DataArray | None = None
     raw: xr.DataArray | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
+
+    def __repr__(self) -> str:
+        _BOOKKEEPING_DIMS = frozenset({"cycle", "scan", "channel"})
+
+        def _da_summary(da: xr.DataArray | None, label: str) -> str:
+            if da is None:
+                return f"  {label:<6} None"
+            dims_str = "(" + ", ".join(f"{d}={da.sizes[d]}" for d in da.dims) + ")"
+            coord_parts = []
+            for coord in da.coords:
+                if coord in _BOOKKEEPING_DIMS:
+                    continue
+                vals = da.coords[coord].values
+                unit = self.metadata.get(f"{coord}/@units", "")
+                unit_str = f" {unit}" if unit else ""
+                coord_parts.append(
+                    f"{coord}=[{vals.min():.4g} \u2026 {vals.max():.4g}]{unit_str}"
+                )
+            coord_str = ("  " + "  ".join(coord_parts)) if coord_parts else ""
+            return f"  {label:<6} {dims_str}{coord_str}"
+
+        lines = ["ParsedSpectrum"]
+        lines.append(_da_summary(self.data, "data:"))
+        lines.append(_da_summary(self.raw, "raw:"))
+        n = len(self.metadata)
+        lines.append(f"  metadata ({n} keys):")
+        for k, v in self.metadata.items():
+            v_str = str(v)
+            if len(v_str) > 60:
+                v_str = v_str[:57] + "..."
+            lines.append(f"    {k:<32}  {v_str}")
+        return "\n".join(lines)
 
     # ------------------------------------------------------------------
     # Computed aggregations (used by the reader's get_data)
@@ -410,6 +448,22 @@ class _Parser(ABC):
     def __init__(self) -> None:
         self.file: Path
         self._data: dict[str, ParsedSpectrum] = {}
+
+    def __repr__(self) -> str:
+        try:
+            file_str = f"{self.file.name}"
+        except AttributeError:
+            file_str = ""
+        n = len(self._data)
+        lines = [f"{self.__class__.__name__}"]
+        lines.append(f"File name: {file_str}")
+        lines.append(f"Number of parsed entries: {n}")
+        lines.append(f"Entries:")
+
+        for entry_name, spectrum in self._data.items():
+            lines.append(f"    '{entry_name}':")
+            lines.append(_indent(repr(spectrum), 8))
+        return "\n".join(lines)
 
     @property
     def data(self) -> dict[str, ParsedSpectrum]:

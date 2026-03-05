@@ -40,11 +40,8 @@ from pynxtools_xps.numerics import _get_minimal_step, check_uniform_step_width
 from pynxtools_xps.parsers.base import ParsedSpectrum, _construct_entry_name, _XPSParser
 from pynxtools_xps.parsers.specs.xy.metadata import _context
 
-# Data-array keys that are the primary x/y axes.
-_PRIMARY_AXES = frozenset({"energy", "intensity"})
 
-
-class SpecsXYParser(_XPSParser):  # pylint: disable=too-few-public-methods
+class SpecsXYParser(_XPSParser):
     """
     A parser for reading in ASCII-encoded .xy data from Specs Prodigy.
 

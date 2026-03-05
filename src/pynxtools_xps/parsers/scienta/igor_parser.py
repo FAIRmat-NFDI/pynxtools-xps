@@ -103,6 +103,7 @@ class _IgorWaveParser(_XPSParser):
     def __init__(self):
         super().__init__()
         self.lines: list[str] = []
+        self._spectrum: dict[str, Any] = {}
 
     def _parse(self, file: Path, **kwargs) -> None:
         """
@@ -187,6 +188,11 @@ class _IgorWaveParser(_XPSParser):
         if intensity_arr is None:
             intensity_arr = np.array([])
 
+        # Extract unit and add to metadata
+        metadata = self._filter_metadata(spectrum)
+        for axis, unit in spectrum["units"].items():
+            metadata[f"{axis}/@units"] = unit
+
         # Shape: (cycle=1, scan=1, n_energy)
         data_arr = xr.DataArray(
             data=intensity_arr[np.newaxis, np.newaxis, :],
@@ -197,7 +203,7 @@ class _IgorWaveParser(_XPSParser):
         self._data[entry_name] = ParsedSpectrum(
             data=data_arr,
             raw=None,
-            metadata=self._filter_metadata(spectrum),
+            metadata=metadata,
         )
 
     @abstractmethod
@@ -323,6 +329,8 @@ class ScientaIgorParserOld(_IgorWaveParser):
             key, value, unit = _get_key_value_unit(line)
             if key:
                 notes[key] = value
+            if unit:
+                notes[f"{key}/@units"] = unit
 
         return notes
 
@@ -438,7 +446,7 @@ class ScientaIgorParser(_XPSParser):
             sub_parser = sub_parser_cls()
             if sub_parser.matches_file(file):
                 sub_parser._parse(file, **kwargs)
-                self._data.update(sub_parser._data)
+                self._data.update(sub_parser.data)
                 return
         raise ValueError(
             f"{self.__class__.__name__}: no sub parser matched file '{file}'"

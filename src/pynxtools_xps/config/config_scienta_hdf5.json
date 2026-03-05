@@ -222,13 +222,6 @@
       "current/@units":"@eln"
     }
   },
-  "/ENTRY/energy_axis_calibration":{
-    "physical_quantity":"energy",
-    "calibrated_axis":"@data:energy",
-    "calibrated_axis/@units":"eV"
-  },
-  "/ENTRY/energy_referencing":null,
-  "/ENTRY/transmission_correction":null,
   "/ENTRY/SAMPLE[sample]":{
     "name":"@attrs:sample/name",
     "description":"@attrs:sample/description",
@@ -264,33 +257,13 @@
       "flood_gun":"@link:/entry/instrument/flood_gun"
     }
   },
-  "/ENTRY/DATA[data]":{
-    "@axes":"@attrs:data_axes",
-    "@signal":"data",
-    "data":"@data:average",
-    "FIELDNAME_errors[data_errors]":"@data:errors",
-    "data/@units":"counts_per_second",
-    "energy":"@data:energy",
-    "energy/@type":"@attrs:acquisition/spectrum_definition/energy_mode",
-    "energy/@units":"eV",
-    "AXISNAME[y_axis]":"@attrs:data/y_axis",
-    "AXISNAME[y_axis]/@units":"@attrs:y_axis/@units",
-    "AXISNAME[z_axis]":"@attrs:data/z_axis",
-    "AXISNAME[z_axis]/@units":"@attrs:z_axis/@units",
-    "@y_axis_indices": 0,
-    "@energy_indices": 1
+   "/ENTRY/energy_axis_calibration":{
+    "physical_quantity":"energy",
+    "calibrated_axis":"@data:energy",
+    "calibrated_axis/@units":"eV"
   },
-  "/ENTRY/DATA[data_reduced]":{
-    "@axes":["energy"],
-    "@signal":"data",
-    "data":"!@data:average_reduced",
-    "FIELDNAME_errors[data_errors]":"@data:errors_reduced",
-    "data/@units":"counts_per_second",
-    "energy":"@link:/entry/data/energy",
-    "energy/@type":"@attrs:acquisition/spectrum_definition/energy_mode",
-    "energy/@units":"eV",
-    "@energy_indices":0
-  },
+  "/ENTRY/energy_referencing":null,
+  "/ENTRY/transmission_correction":null,
   "/ENTRY/PROCESS[channels_averaging]":{
     "sequence_index":"!@attrs:sequence_index",
     "DATA[data]":{
@@ -329,5 +302,23 @@
       "@axes":["energy"],
       "@energy_indices":0
     }
+  },
+  "/ENTRY/DATA[data]":{
+    "@axes":"@attrs:data_axes",
+    "@signal":"data",
+    "data":"@data:average",
+    "FIELDNAME_errors[data_errors]":"@data:errors",
+    "data/@units":"counts_per_second",
+    "AXISNAME[*]":"@data:*.axes",
+    "AXISNAME[*]/@units":"@data:*.unit",
+    "AXISNAME[energy]/@type":"@attrs:energy_scale"
+  },
+  "/ENTRY/DATA[data_reduced]":{
+    "@axes":["energy"],
+    "@signal":"data",
+    "data":"!@data:average_reduced",
+    "FIELDNAME_errors[data_errors]":"@data:errors_reduced",
+    "data/@units":"counts_per_second",
+    "energy":"@link:/entry/data/energy"
   }
 }

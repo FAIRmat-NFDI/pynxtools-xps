@@ -76,7 +76,7 @@ def _get_dict_keys(header_lines: list[str]) -> list[str]:
     return [_context.normalize_key(header) for header in header_lines if header]
 
 
-class _TextParser(_XPSParser):  # pylint: disable=too-few-public-methods
+class _TextParser(_XPSParser):
     """
     Internal parser for ASCII files exported from CasaXPS.
 

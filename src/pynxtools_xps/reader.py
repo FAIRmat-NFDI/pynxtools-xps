@@ -105,7 +105,11 @@ def _concatenate_values(value1: Any, value2: Any) -> Any:
 
 def _raw_or_data_array(spectrum: "ParsedSpectrum") -> xr.DataArray:
     """Return raw DataArray, falling back to processed data."""
-    return spectrum.raw if spectrum.raw is not None else spectrum.data
+    data_array = spectrum.raw if spectrum.raw is not None else spectrum.data
+    if data_array is not None:
+        return data_array
+    else:
+        raise ValueError(f"Could not retrieve raw or data array for {spectrum}.")
 
 
 def _raw_active_dims(spectrum: "ParsedSpectrum") -> list[str]:
@@ -131,6 +135,8 @@ def _get_raw(spectrum: "ParsedSpectrum") -> np.ndarray:
 
 def _cycle_averaging(spectrum: "ParsedSpectrum") -> np.ndarray | None:
     """Average over all scan and cycle dims; None if only one cycle present."""
+    if spectrum.data is None:
+        return None
     if "cycle" not in spectrum.data.dims or spectrum.data.sizes["cycle"] <= 1:
         return None
     dims = [d for d in ["scan", "cycle"] if d in spectrum.data.dims]
@@ -178,6 +184,8 @@ def _check_multiple_extensions(
     Raises:
         TypeError: If `file_paths` is not a tuple of strings or `Path` objects.
     """
+    if file_paths is None:
+        return False
     extensions = {str(path).split(".")[-1] for path in file_paths if "." in str(path)}
 
     return len(extensions) > 1
@@ -206,7 +214,6 @@ def _collect_supported_extensions(
     return extensions
 
 
-# pylint: disable=too-few-public-methods
 class XPSReader(MultiFormatReader):
     """Reader for XPS."""
 
@@ -516,7 +523,7 @@ class XPSReader(MultiFormatReader):
         detectors: list[str] = []
 
         try:
-            for _entry, spectrum in self.parsed_data.items():
+            for spectrum in self.parsed_data.values():
                 if isinstance(spectrum, ParsedSpectrum) and spectrum.raw is not None:
                     n_channels = spectrum.raw.sizes.get("channel", 0)
                     for i in range(n_channels):
@@ -813,7 +820,7 @@ class XPSReader(MultiFormatReader):
         self,
         template: dict = None,
         file_paths: tuple[str] = None,
-        objects: tuple[Any] = None,
+        objects: tuple[Any] | None = None,
         **kwargs,
     ) -> dict:
         self.overwrite_keys = _check_multiple_extensions(file_paths)

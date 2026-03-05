@@ -39,7 +39,7 @@ from pynxtools_xps.parsers.phi.data_model import (
 from pynxtools_xps.parsers.phi.metadata import _context, _convert_channel_info
 
 
-class PHIParser(_XPSParser):  # pylint: disable=too-few-public-methods
+class PHIParser(_XPSParser):
     """
     A parser for reading in PHI VersaProbe 4 data in the .spe or
     .pro format.

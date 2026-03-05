@@ -42,8 +42,6 @@ class ScientaTXTParser(_XPSParser):
         {"data", "axis_labels", "data_labels", "units"}
     )
 
-    # pylint: disable=too-few-public-methods
-
     def matches_file(self, file: Path) -> bool:
         """Return True for Scienta TXT files ([Info] INI format with SES metadata)."""
         try:
@@ -105,7 +103,7 @@ class ScientaTXTParser(_XPSParser):
         self.lines = self.lines[n_headerlines:]
 
         for line in headerlines:
-            key, value, _ = _get_key_value_unit(line)
+            key, value, unit = _get_key_value_unit(line)
             if key:
                 setattr(self.header, key, value)
         self.header.validate_types()
@@ -121,6 +119,8 @@ class ScientaTXTParser(_XPSParser):
             Number of the region in the file.
         """
         region = ScientaRegion(region_id=region_id)
+        # Workaround as units are not defined in the ScientaRegion
+        units: dict[str, str] = {}
 
         bool_variables = {
             "in_region": False,
@@ -157,15 +157,19 @@ class ScientaTXTParser(_XPSParser):
                     bool_variables["in_run_mode_info"],
                 ]
             ):
-                key, value, _ = _get_key_value_unit(line)
+                key, value, unit = _get_key_value_unit(line)
                 setattr(region, key, value)
+                if unit:
+                    units[f"{key}/@units"] = unit
 
             if bool_variables["in_ui_info"]:
-                key, value, _ = _get_key_value_unit(line)
+                key, value, unit = _get_key_value_unit(line)
                 if _check_valid_value(value):
                     if bool_variables["in_manipulator"]:
                         key = f"manipulator_{key}"
                     setattr(region, key, value)
+                    if unit:
+                        units[f"{key}/@units"] = unit
 
             if bool_variables["in_data"]:
                 try:
@@ -178,10 +182,10 @@ class ScientaTXTParser(_XPSParser):
         region.time_stamp = _construct_date_time(region.start_date, region.time)
         region.validate_types()
 
-        region_dict = {**self.header.dict(), **region.dict()}
+        metadata = {**self.header.dict(), **region.dict(), **units}
 
         entry_name = _construct_entry_name(
-            [region_dict.get("region_name", ""), region_dict.get("spectrum_type", "")]
+            [metadata.get("region_name", ""), metadata.get("spectrum_type", "")]
         )
         if not entry_name:
             entry_name = f"region_{region_id}"
@@ -196,7 +200,7 @@ class ScientaTXTParser(_XPSParser):
             dims=("cycle", "scan", "energy"),
         )
 
-        metadata = self._filter_metadata(region_dict)
+        metadata = self._filter_metadata(metadata)
         metadata["energy/@units"] = "eV"
         metadata["intensity/@units"] = "counts_per_second"
 

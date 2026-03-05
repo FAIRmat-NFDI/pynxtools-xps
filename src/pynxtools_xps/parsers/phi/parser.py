@@ -239,16 +239,13 @@ class PHIParser(_XPSParser):  # pylint: disable=too-few-public-methods
             if key in datacls_fields:
                 field_type = type(getattr(self.metadata, key))
 
-                value, unit = _context.parse_value_and_unit(raw_value)
-                if unit:
-                    setattr(self.metadata, f"{key}_units", _context.map_unit(unit))
+                key, value, unit = _context.format(key, raw_value)
 
-                if not key.startswith("channel_"):
-                    if key in _context.value_map:
-                        value = _context.map_value(key, value)
-
-                else:
+                if key.startswith("channel_"):
                     value = _convert_channel_info(raw_value)
+
+                if unit:
+                    setattr(self.metadata, f"{key}_units", unit)
 
                 setattr(self.metadata, key, value)
 

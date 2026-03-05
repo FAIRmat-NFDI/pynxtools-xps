@@ -18,15 +18,15 @@
 Metadata mapping for the PHI parser.
 """
 
-import datetime
 import re
-from zoneinfo import ZoneInfo
+from functools import partial
 
 from pynxtools_xps.mapping import (
     _convert_bool,
     _convert_energy_scan_mode,
     _MetadataContext,
     _ValueMap,
+    parse_datetime,
 )
 
 
@@ -128,33 +128,10 @@ def _convert_stage_positions(value: str):
     }
 
 
-# ToDO: this should be replaced by generic parser from mappers
-def _parse_datetime(value: str):
-    """
-    Parse datetime into a datetime.datetime object.
-
-    Parameters
-    ----------
-    value : str
-        String representation of the date in the format
-        "%m/%d/%y.
-
-    Returns
-    -------
-    date_object : str
-        Datetime in ISO8601 format.
-
-    """
-    year, month, day = value.strip().split(" ")
-    date_object = datetime.datetime(
-        year=int(year),
-        month=int(month),
-        day=int(day),
-        tzinfo=ZoneInfo("UTC"),
-    )
-
-    return date_object.isoformat()
-
+_POSSIBLE_DATE_FORMATS: list[str] = [
+    "%Y %m %d",  # 2024 1 22
+    "%Y-%m-%dT%H:%M:%S%z",  # 2024-01-22T00:00:00+00:00
+]
 
 _KEY_MAP: dict[str, str] = {
     "acq_filename": "acquisition_filename",
@@ -227,8 +204,14 @@ _KEY_MAP: dict[str, str] = {
 
 _VALUE_MAP: _ValueMap = {
     "file_type": _map_file_type,
-    "file_date": _parse_datetime,
-    "acquisition_file_date": _parse_datetime,
+    "file_date": partial(
+        parse_datetime,
+        possible_date_formats=_POSSIBLE_DATE_FORMATS,
+    ),
+    "acquisition_file_date": partial(
+        parse_datetime,
+        possible_date_formats=_POSSIBLE_DATE_FORMATS,
+    ),
     "energy_reference": _convert_energy_referencing,
     "intensity_calibration_coefficients": _map_to_list,
     "energy_recalibration": _convert_bool,
@@ -304,104 +287,6 @@ _DEFAULT_UNITS: dict[str, str] = {
     "xray_stigmator_y": "mm",
 }
 
-# TODO: this should be automatic?!
-# _KEYS_WITH_UNITS: list[str] = [
-#     "analyzer_work_function",
-#     "source_analyzer_angle",
-#     "analyzer_solid_angle",
-#     "scan_deflection_span_x",
-#     "scan_deflection_span_y",
-#     "scan_deflection_offset_x",
-#     "scan_deflection_offset_y",
-#     "sca_multiplier_voltage",
-#     "delay_before_acquire",
-#     "sputter_current",
-#     "sputter_rate",
-#     "sputter_energy",
-#     "float_voltage",
-#     "target_sputter_time",
-#     "sputter_emission",
-#     "grid_voltage",
-#     "condenser_lens_voltage",
-#     "objective_lens_voltage",
-#     "bend_voltage",
-#     "deflection_bias",
-#     "ion_gun_gas_pressure",
-#     "sputter_emission",
-#     "deflection_bias",
-#     "neutral_current",
-#     "neutral_rate",
-#     "neutral_energy",
-#     "neutral_float_voltage",
-#     "neutral_grid_voltage",
-#     "neutral_condenser_lens_voltage",
-#     "neutral_objective_lens_voltage",
-#     "neutral_bend_voltage",
-#     "neutral_target_timed_on_time",
-#     "neutral_emission",
-#     "neutral_deflection_bias",
-#     "neutral_ion_gun_gas_pressure",
-#     "profiling_sputter_delay",
-#     "survey_dwell_time",
-#     "xray_anode_power",
-#     "xray_power",
-#     "xray_beam_voltage",
-#     "xray_beam_diameter",
-#     "xray_condenser_lens_voltage",
-#     "xray_objective_coil_current",
-#     "xray_blanking_voltage",
-#     "xray_filament_current",
-#     "xray_rotation",
-#     "xray_emission_current",
-#     "xray_max_filament_current",
-#     "xray_stigmator_x",
-#     "xray_stigmator_y",
-#     "xray_offset_x",
-#     "xray_offset_y",
-#     "flood_gun_current",
-#     "flood_gun_energy",
-#     "flood_gun_extractor_voltage",
-#     "flood_gun_filament_current",
-#     "flood_gun_pulse_length",
-#     "flood_gun_pulse_frequency",
-#     "flood_gun_time_per_step",
-#     "flood_gun_ramp_rate",
-#     "flood_gun_x_steering",
-#     "flood_gun_y_steering",
-#     "sxi_binding_energy",
-#     "sxi_pass_energy",
-#     "sxi_lens2_voltage",
-#     "sxi_lens3_voltage",
-#     "sxi_lens4_voltage",
-#     "sxi_lens5_voltage",
-#     "sxi_rotator",
-#     "sxi_lens_bias_voltage",
-#     "sxi_shutter_bias_voltage",
-#     "detector_acquisition_time",
-#     "stage_current_rotation_speed",
-#     "defect_positioner_u",
-#     "defect_positioner_v",
-#     "defect_positioner_x",
-#     "defect_positioner_y",
-#     "defect_positioner_z",
-#     "defect_positioner_tilt",
-#     "defect_positioner_rotation",
-#     "gcib_sputter_rate",
-#     "gcib_high_voltage",
-#     "gcib_ionization",
-#     "gcib_extractor",
-#     "gcib_wien_filter_voltage",
-#     "gcib_bend_voltage",
-#     "gcib_emission",
-#     "gcib_magnet_current",
-#     "gcib_focus",
-#     "gcib_objective",
-#     "gcib_focus",
-#     "gcib_gas_pressure",
-#     "gcib_cluster_size",
-#     "gcib_energy_per_atom",
-#     "deconvolution_pass_energy",
-# ]
 
 _context = _MetadataContext(
     key_map=_KEY_MAP,

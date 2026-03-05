@@ -203,7 +203,7 @@
       "ELECTROMAGNETIC_LENS[objective_lens]":{
         "name":"objective lens",
         "voltage":"@attrs:gcib_objective",
-        "voltage/@units":"['@attrs:gcib_objective/@units', 'V']"
+        "voltage/@units":"V"
       }
     },
     "source_TYPE[source_neutral_ion_gun]":{

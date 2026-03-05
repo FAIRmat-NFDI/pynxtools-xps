@@ -390,9 +390,12 @@ class _MetadataContext:
             return float(value) if "." in value or "e" in value.lower() else int(value)
         return value
 
-    def get_default_unit(self, key: str) -> str | None:
-        """Get default units for a given key"""
-        return self.default_units.get(key)
+    def get_default_unit(self, key: str, unit: str | None = None) -> str | None:
+        """
+        Get default units for a given key.
+        Overwrites unit if it is in the default units.
+        """
+        return self.default_units.get(key, unit)
 
     def map_unit(self, unit: str | None) -> str | None:
         """Map a unit given the unit_map"""
@@ -434,10 +437,7 @@ class _MetadataContext:
         value, unit = self.parse_value_and_unit(value)
 
         key, unit = self.resolve_unit_from_key(key, unit)
-
-        if unit is None:
-            unit = self.get_default_unit(key)
-
+        unit = self.get_default_unit(key, unit)
         unit = self.map_unit(unit)
 
         value = self.map_value(key, value)

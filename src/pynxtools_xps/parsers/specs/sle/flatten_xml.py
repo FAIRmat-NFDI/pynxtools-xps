@@ -25,7 +25,7 @@ from typing import Any
 
 from lxml import etree as ET
 
-from pynxtools_xps.mapping import MEASUREMENT_METHOD_MAP
+from pynxtools_xps.mapping import MEASUREMENT_METHOD_MAP, _get_measurement_method_long
 
 # TODO: this gets another set of maps from _KEY_MAP, should be done in one go!
 from pynxtools_xps.parsers.specs.sle.metadata import _KEY_MAP, _context
@@ -325,18 +325,10 @@ def flatten_schedule(xml: ET.Element) -> list[dict[str, Any]]:
         for group in xml.iter(measurement_type):
             data: dict[str, Any] = {}
 
-            try:
-                analysis_method, analysis_method_long = _context.map_value(  # type: ignore[misc]
-                    "measurement_type", measurement_type
-                )
-            except ValueError:
-                analysis_method = _context.map_value(
-                    "measurement_type", measurement_type
-                )
-                analysis_method_long = "X-ray photoelectron spectroscopy"
-
-            data["analysis_method"] = analysis_method
-            data["analysis_method_long_name"] = analysis_method_long
+            data["analysis_method"] = measurement_type
+            data["analysis_method_long_name"] = _get_measurement_method_long(
+                measurement_type
+            )
 
             data["device_group_id"] = group.attrib["ID"]
 

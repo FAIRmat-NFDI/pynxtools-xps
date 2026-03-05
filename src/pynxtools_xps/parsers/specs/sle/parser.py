@@ -24,7 +24,6 @@ Specs Lab Prodigy SLE format, to be passed to MPES NXDL
 import copy
 import re
 import sqlite3
-import warnings
 import zlib
 from pathlib import Path
 from typing import Any, ClassVar
@@ -36,12 +35,7 @@ from scipy.interpolate import interp1d
 
 from pynxtools_xps.logging import _logger
 from pynxtools_xps.mapping import _format_dict, update_dict_without_overwrite
-from pynxtools_xps.parsers.base import (
-    _construct_data_key,
-    _construct_entry_name,
-    _XPSMapper,
-    _XPSParser,
-)
+from pynxtools_xps.parsers.base import ParsedSpectrum, _construct_entry_name, _XPSParser
 from pynxtools_xps.parsers.specs.sle.flatten_xml import (
     _iterate_xml_at_tag,
     flatten_context,
@@ -62,161 +56,7 @@ def _execute_sql_query_with_cur(cur: sqlite3.Cursor, query: str):
     return cur.fetchall()
 
 
-class SpecsSLEMapper(_XPSMapper):
-    """
-    Class for restructuring .sle data file from
-    specs vendor into python dictionary.
-    """
-
-    config_file: ClassVar[str | dict[str, str]] = "config_specs_sle.json"
-
-    def __init__(self):
-        self.parsers = [
-            SLEProdigyParser,
-        ]
-        self.multiple_spectra_groups: bool = True
-
-        super().__init__()
-
-    def _get_sle_version(self):
-        con = sqlite3.connect(self.file)
-        query = 'SELECT Value FROM Configuration WHERE Key="Version"'
-        return _execute_sql_query_with_cur(con.cursor(), query)[0][0]
-
-    def _select_parser(self):
-        """
-        Select the correct parser for the SLE file version. If multiple parsers
-        support the version, the most recent parser is returned.
-
-        Returns
-        -------
-        Parser
-            Specs SLE Parser.
-
-        Raises
-        ------
-        KeyError
-            If no parser supports the given version.
-
-        """
-        return self.parsers[-1]()
-
-    def construct_data(self, parsed_data: list[dict[str, Any]]):
-        """
-        Map SLE format to NXmpes-ready dict.
-
-        Returns
-        -------
-        None.
-
-        """
-        if len({spectrum.get("group_name") for spectrum in parsed_data}) == 1:
-            self.multiple_spectra_groups = False
-
-        for spectrum in parsed_data:
-            self._update_xps_dict_with_spectrum(spectrum)
-
-    def _update_xps_dict_with_spectrum(self, spectrum: dict[str, Any]):
-        """
-        Map one spectrum from raw data to NXmpes-ready dict.
-
-        Parameters
-        ----------
-        spectrum : dict[str, Any]
-            Dictionary with data and metadata for one spectrum.
-
-        Returns
-        -------
-        None.
-
-        """
-        # pylint: disable=too-many-locals,duplicate-code
-        entry_parts = []
-
-        parts_to_use = ["group_name"] * bool(self.multiple_spectra_groups) + [
-            "spectrum_type"
-        ]
-        for part in parts_to_use:
-            val = spectrum.get(part, None)
-            if val:
-                entry_parts += [val]
-
-        entry = _construct_entry_name(entry_parts)
-        entry_parent = f"/ENTRY[{entry}]"
-
-        for key, value in spectrum.items():
-            key, value, units = _context.format(key, value)
-            mpes_key = f"{entry_parent}/{key}"
-
-            self._data[mpes_key] = value
-            if units is not None:
-                self._data[f"{mpes_key}/@units"] = units
-
-        # Create keys for writing to data
-        scan_key = _construct_data_key(spectrum)
-
-        energy = np.array(spectrum["data"]["x"])
-
-        # If multiple spectra exist to entry, only create a new
-        # xr.Dataset if the entry occurs for the first time.
-        if entry not in self._data["data"]:
-            self._data["data"][entry] = xr.Dataset()
-
-        # Write averaged cycle data to 'data'.
-        all_scan_data = [
-            value
-            for key, value in self._data["data"][entry].items()
-            if scan_key.split("_")[0] in key
-        ]
-
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=RuntimeWarning)
-            averaged_scans = np.mean(all_scan_data, axis=0)
-
-        scans = spectrum["data"].get("scans", [])
-        if scans:
-            # Use shortcut x or first scan axis
-            energy = np.array(spectrum["data"].get("x", scans[0]["x"]))
-
-            # Write each scan individually
-            for scan in scans:
-                s_key = f"{scan_key}_scan{scan['scan_id']}"
-                self._data["data"][entry][s_key] = xr.DataArray(
-                    data=scan["merged"],
-                    coords={"energy": scan["x"]},
-                    attrs={
-                        k: v
-                        for k, v in scan.items()
-                        if k not in ["x", "raw", "channels", "merged"]
-                    },
-                )
-                self._data[f"{entry}/{s_key}/@units"] = "counts_per_second"
-
-                # Also write channel-resolved data
-                for i in range(scan["channels"].shape[1]):
-                    ch_key = f"{s_key}_chan{i}"
-                    self._data["data"][entry][ch_key] = xr.DataArray(
-                        data=scan["channels"][:, i], coords={"energy": scan["x"]}
-                    )
-                    self._data[f"{entry}/{ch_key}/@units"] = "counts_per_second"
-
-            # Average scan
-            merged_arrays = [scan["merged"] for scan in scans]
-            averaged = np.mean(merged_arrays, axis=0)
-            self._data["data"][entry][scan_key] = xr.DataArray(
-                data=averaged, coords={"energy": energy}
-            )
-            self._data[f"{entry}/{scan_key}/@units"] = "counts_per_second"
-
-            # Add unit for detector data
-            # TODO: replace this by _context
-            # detector_data_units: str = get_units_for_key("detector/raw_data/raw", UNITS)
-            # self._data[f"{entry_parent}/detector/raw_data/raw/@units"] = (
-            #     detector_data_units if detector_data_units is not None else "counts"
-            # )
-
-
-class SLEProdigyParser(_XPSParser):
+class SpecsSLEParser(_XPSParser):
     """
     Generic parser without reading capabilities,
     to be used as template for implementing parsers for different versions.
@@ -224,13 +64,31 @@ class SLEProdigyParser(_XPSParser):
 
     config_file: ClassVar[str] = "config_specs_sle.json"
     supported_file_extensions: ClassVar[tuple[str, ...]] = (".sle",)
+    _metadata_exclude_keys: ClassVar[frozenset[str]] = frozenset({"data"})
     requires_version: ClassVar[bool] = True
     supported_versions: ClassVar[tuple[VersionRange, ...]] = (
         ((1, 1), (4, 0)),  # 1.*, 2.*, 3.*
         ((4, 1), (4, 101)),  # 4.1 – 4.100
     )
+    _SQLITE_MAGIC: ClassVar[bytes] = b"SQLite format 3\x00"
+
+    def matches_file(self, file: Path) -> bool:
+        """Return True for SPECS SLE files (SQLite 3 with SpecsLabSchedule schema)."""
+        try:
+            with open(file, "rb") as f:
+                if f.read(16) != self._SQLITE_MAGIC:
+                    return False
+            conn = sqlite3.connect(str(file))
+            cur = conn.cursor()
+            cur.execute("SELECT Value FROM Configuration WHERE Key='Schedule' LIMIT 1")
+            row = cur.fetchone()
+            conn.close()
+            return bool(row and row[0] and "SpecsLabSchedule" in row[0])
+        except Exception:
+            return False
 
     def __init__(self):
+        super().__init__()
         self.con: sqlite3.Connection
         self.cur: sqlite3.Cursor
 
@@ -296,9 +154,9 @@ class SLEProdigyParser(_XPSParser):
         self._get_xml_context()
         self._get_xml_metainfo()
 
-        self._data = flatten_schedule(self.xml_schedule)
+        self._flat_spectra = flatten_schedule(self.xml_schedule)
 
-        for spectrum in self._data:
+        for spectrum in self._flat_spectra:
             update_dict_without_overwrite(spectrum, flatten_context(self.xml_context))
             update_dict_without_overwrite(spectrum, flatten_metainfo(self.xml_metainfo))
 
@@ -323,6 +181,70 @@ class SLEProdigyParser(_XPSParser):
         # self._remove_snapshot()
         self._reindex_spectra()
         self._reindex_groups()
+
+        self._build_parsed_spectra()
+
+    def _build_parsed_spectra(self) -> None:
+        """Convert ``self._flat_spectra`` into ``self._data``.
+
+        Each spectrum dict in ``self._flat_spectra`` becomes one ``ParsedSpectrum`` in ``self._data``
+        entry.  Scans are stacked along the ``"scan"`` axis; a single
+        synthetic ``"cycle"`` dimension is prepended so that the output
+        conforms to the ``(cycle, scan, *axes)`` contract.
+
+        Channel data (``scan["channels"]``, shape ``(n_energy, n_channels)``)
+        is transposed to ``(n_channels, n_energy)`` and stored in
+        ``ParsedSpectrum.raw``.
+        """
+        for spectrum in self._flat_spectra:
+            entry_name = (
+                _construct_entry_name(
+                    [spectrum.get("group_name", ""), spectrum.get("spectrum_type", "")]
+                )
+                or "entry"
+            )
+
+            scans = spectrum.get("data", {}).get("scans", [])
+            if not scans:
+                continue
+
+            energy = np.array(spectrum["data"].get("x", scans[0]["x"]))
+
+            # Channel-averaged signal: (n_scans, n_energy) → (1, n_scans, n_energy)
+            merged_stack = np.stack(
+                [np.array(scan["merged"]) for scan in scans], axis=0
+            )
+            data_da = xr.DataArray(
+                data=merged_stack[np.newaxis, ...],
+                dims=("cycle", "scan", "energy"),
+                coords={"energy": energy},
+            )
+
+            # Raw per-channel data: (n_scans, n_energy, n_channels) →
+            #   (1, n_scans, n_channels, n_energy)
+            raw_da: xr.DataArray | None = None
+            if all(
+                scan.get("channels") is not None
+                and np.array(scan["channels"]).ndim == 2
+                for scan in scans
+            ):
+                channels_stack = np.stack(
+                    [np.array(scan["channels"]) for scan in scans], axis=0
+                )  # (n_scans, n_energy, n_channels)
+                channels_arr = channels_stack.transpose(0, 2, 1)
+                raw_da = xr.DataArray(
+                    data=channels_arr[np.newaxis, ...],
+                    dims=("cycle", "scan", "channel", "energy"),
+                    coords={"energy": energy},
+                )
+
+            metadata = self._filter_metadata(spectrum)
+
+            self._data[entry_name] = ParsedSpectrum(
+                data=data_da,
+                raw=raw_da,
+                metadata=metadata,
+            )
 
     def initiate_file_connection(self, file: str | Path):
         """Set the SQLlite connection of the file to be opened."""
@@ -373,8 +295,8 @@ class SLEProdigyParser(_XPSParser):
         """
         # pylint: disable=too-many-locals
 
-        total = len(self._data)
-        for idx, spectrum in enumerate(self._data, start=1):
+        total = len(self._flat_spectra)
+        for idx, spectrum in enumerate(self._flat_spectra, start=1):
             spectrum["data"]: dict[str, Any] = {}
 
             # copy node to new instance
@@ -642,7 +564,7 @@ class SLEProdigyParser(_XPSParser):
 
     # def _add_extension_data(self):
     #     for channel in spectrum.channels.values()[1:]:
-    #         # TODO: this is a temporary fix, could add __iter__ to DataSet
+    #         # TODO: this is a temporary fix, could add __iter__ to spectrum
     #         channel.signal = []
     #         for raw_id in spectrum.scans.raw_ids:
     #             channel.signal.append(np.frombuffer(self._getExtensionData(
@@ -754,7 +676,7 @@ class SLEProdigyParser(_XPSParser):
         detector_data : list[NDArray[np.float_]]
             List of numpy arrays with measured data.
         """
-        for spectrum in self._data:
+        for spectrum in self._flat_spectra:
             node_id = spectrum.get("node_id")
             query = f'SELECT RawID FROM RawData WHERE Node="{node_id}"'
             raw_ids = [i[0] for i in self._execute_sql_query(query)]
@@ -778,7 +700,7 @@ class SLEProdigyParser(_XPSParser):
 
         """
         # iterate through each spectrum
-        for spectrum in self._data:
+        for spectrum in self._flat_spectra:
             # convert the xml xps id to the node ID and get the device protocol
             protocol_node_id = self._get_sql_node_id(spectrum["device_group_id"])
             query = (
@@ -876,7 +798,7 @@ class SLEProdigyParser(_XPSParser):
         -------
         None.
         """
-        for spectrum in self._data:
+        for spectrum in self._flat_spectra:
             node_id = self._get_sql_node_id(spectrum["spectrum_id"])
             query = f'SELECT * FROM Spectrum WHERE Node="{node_id}"'
             results = self._execute_sql_query(query)
@@ -1042,7 +964,7 @@ class SLEProdigyParser(_XPSParser):
         None.
 
         """
-        for spectrum in self._data:
+        for spectrum in self._flat_spectra:
             xml_id = spectrum["spectrum_id"]
             node_id = self._get_sql_node_id(xml_id)
             spectrum["node_id"] = node_id
@@ -1055,7 +977,7 @@ class SLEProdigyParser(_XPSParser):
         -------
         None.
         """
-        for j in reversed(list(enumerate(self._data))):
+        for j in reversed(list(enumerate(self._flat_spectra))):
             idx = j[0]
             spectrum = j[1]
             node_id = spectrum["node_id"]
@@ -1063,7 +985,7 @@ class SLEProdigyParser(_XPSParser):
             result = self._execute_sql_query(query)
 
             if len(result) == 0:
-                del self._data[idx]
+                del self._flat_spectra[idx]
 
     def _get_energy_data(self, spectrum: dict[str, Any]) -> np.ndarray:
         """
@@ -1194,14 +1116,14 @@ class SLEProdigyParser(_XPSParser):
 
     def _reindex_spectra(self):
         """Re-number the spectrum_id."""
-        for idx, spectrum in enumerate(self._data):
+        for idx, spectrum in enumerate(self._flat_spectra):
             spectrum["spectrum_id"] = idx
 
     def _reindex_groups(self):
         """Re-number the group_id."""
-        group_ids = list({spec["group_id"] for spec in self._data})
+        group_ids = list({spec["group_id"] for spec in self._flat_spectra})
         for idx, group_id in enumerate(group_ids):
-            for spec in self._data:
+            for spec in self._flat_spectra:
                 if int(spec["group_id"]) == int(group_id):
                     spec["group_id"] = copy.copy(idx)
 
@@ -1209,7 +1131,7 @@ class SLEProdigyParser(_XPSParser):
         """
         Reformat spectra into the format needed for the Mapper object
         """
-        for spec in self._data:
+        for spec in self._flat_spectra:
             _format_dict(spec, _context)
 
             if "data" not in spec:
@@ -1269,15 +1191,17 @@ class SLEProdigyParser(_XPSParser):
         """
         Remove spectra measured with the scan mode FixedEnergies.
         """
-        self._data = [
-            spec for spec in self._data if spec["energy_scan_mode"] != "fixed_energy"
+        self._flat_spectra = [
+            spec
+            for spec in self._flat_spectra
+            if spec["energy_scan_mode"] != "fixed_energy"
         ]
 
     def _remove_syntax(self):
         """
         Remove the extra syntax in the group name.
         """
-        for spectrum in self._data:
+        for spectrum in self._flat_spectra:
             new_name = spectrum["group_name"].split("#", 1)[0]
             new_name = new_name.rstrip(", ")
             spectrum["group_name"] = new_name
@@ -1286,6 +1210,8 @@ class SLEProdigyParser(_XPSParser):
         """
         Remove spectra required in Snapshot mode.
         """
-        self._data = [
-            spec for spec in self._data if "snapshot" not in spec["energy_scan_mode"]
+        self._flat_spectra = [
+            spec
+            for spec in self._flat_spectra
+            if "snapshot" not in spec["energy_scan_mode"]
         ]

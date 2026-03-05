@@ -16,7 +16,7 @@
 #
 # pylint: disable=too-many-lines,too-few-public-methods
 """
-Classes for reading XPS files from TXT export of CasaXPS.
+Classes for reading XPS result files from CasaXPS CSV export (from Vamas).
 """
 
 import csv
@@ -24,117 +24,254 @@ import re
 from pathlib import Path
 from typing import Any, ClassVar
 
-from pynxtools_xps.parsers.base import _XPSMapper, _XPSMetadataParser
+from pynxtools_xps.parsers.base import (
+    ParsedSpectrum,
+    _construct_entry_name,
+    _XPSMetadataParser,
+)
 from pynxtools_xps.parsers.vms_export.metadata import _context, _handle_repetitions
+from pynxtools_xps.parsers.vms_export.parser_export import VamasExportParser
 
 
-class VamasResultMapper(_XPSMapper):
+class VamasResultParser(_XPSMetadataParser):
     """
-    Class for restructuring .csv result files from
-    Casa report export (from Vamas) into python dictionary.
+    Metadata-only parser for CasaXPS quantification CSV exports.
+
+    Parses a ``.csv`` result file produced by CasaXPS and injects
+    fitting/quantification results into the ``metadata`` of matching
+    ``ParsedSpectrum`` objects produced by ``VamasExportParser``.
+
+    ``_parse()`` reads Table 1 (component quantities) and the first compact
+    table (Sample Identifier per component), groups components by
+    ``(sample_id, peak_name)``, and stores one metadata-only
+    ``ParsedSpectrum`` per group in ``self._data``.
+
+    Entry keys are built with :func:`_construct_entry_name` and therefore
+    match the keys produced by ``VamasExportParser``.  If the CSV lacks a
+    Sample Identifier, the base-class suffix matching in
+    ``_matches_entry`` still aligns the entries correctly.
+
+    Compatible primary parser: ``VamasExportParser``.
     """
 
-    def __init__(self):
-        super().__init__()
-
-    def _select_parser(self):
-        """
-        Select parser based on the structure of the text file
-
-        Returns
-        -------
-        TextParser
-            TextParser for CasaXPS export from Vamas files.
-
-        """
-        return CSVResultParser()
-
-    def construct_data(self, parsed_data: dict[str, Any]):  # type: ignore[override]
-        # TODO: this should not be needed if there is an ABC _XPSMetadataParser
-        self._data = parsed_data
-
-    def update_main_file_dict(self, main_file_dicts: list[dict[str, Any]]):
-        """
-        Update the dictionaries returned by the main files with specific keys from self.data.
-
-        Args:
-            main_file_dicts (List[list[str, Any]]): List of dictionaries to update.
-        """
-        pattern = re.compile(r"(component\d+/)name")
-        update_with = {"area_over_rsf*t*mfp", "atomic_concentration", "goodness_of_fit"}
-
-        for existing_dict in main_file_dicts:
-            filtered_keys = {
-                key: match.group(1)
-                for key in existing_dict
-                if (match := pattern.search(key))
-            }
-
-            for key in filtered_keys:
-                value = existing_dict[key]
-                if value in self.data:
-                    sub_dict = self.data[value]
-                    for sub_key in update_with & sub_dict.keys():
-                        new_key = f"{key.rsplit('name', 1)[0]}{sub_key}"
-                        existing_dict[new_key] = sub_dict[sub_key]
-
-
-class CSVResultParser(_XPSMetadataParser):
+    compatible_primary_parser: ClassVar[type[VamasExportParser]] = VamasExportParser
     supported_file_extensions: ClassVar[tuple[str, ...]] = (".csv",)
 
-    def _parse(self, file: Path, **kwargs):
+    def matches_file(self, file: Path) -> bool:
+        """Return True for CasaXPS quantification CSV exports."""
+        try:
+            with open(file, encoding="utf-8", errors="ignore") as f:
+                head = f.read(2048)
+            return "Goodness of Fit" in head
+        except Exception:
+            return False
+
+    def _parse(self, file: Path, **kwargs) -> None:
+        """Parse quantification CSV and populate ``self._data``."""
+        with open(file) as f:
+            all_rows = list(csv.reader(f, delimiter="\t"))
+
+        table1_rows = self._parse_table1(all_rows)
+        compact_rows = self._parse_compact_table(all_rows, n_expected=len(table1_rows))
+        self._build_entries(table1_rows, compact_rows)
+
+        for spec in self.data.values():
+            print(spec.metadata)
+
+    def _parse_table1(self, all_rows: list[list[str]]) -> list[dict[str, Any]]:
+        """Extract ordered component data from Table 1.
+
+        Table 1 is the first ``Name``-headed block in the CSV.  It contains
+        per-component quantities: ``position``, ``fwhm``, ``raw_area``,
+        ``area_over_rsf_t_mfp``, ``atomic_concentration``, and
+        ``goodness_of_fit``.
+
+        Returns a list of dicts (one per component row), each with a
+        ``"_peak_name"`` key holding the raw peak name from column 0.
         """
-        Parse only the first table from the input file,
+        result: list[dict[str, Any]] = []
+        headers: list[str] = []
+        reading = False
+
+        for row in all_rows:
+            is_blank = not row or not any(c.strip() for c in row)
+
+            if is_blank:
+                if reading:
+                    break
+                continue
+
+            if row[0].strip() == "Name" and not reading:
+                headers = [_context.normalize_key(h) for h in row[1:] if h]
+                reading = True
+                continue
+
+            if reading:
+                row_data: dict[str, Any] = {"_peak_name": row[0].strip()}
+                for header, value in zip(headers, row[1:]):
+                    if value.strip():
+                        formatted = _context._format_value(value)
+                        if header == "atomic_concentration" and isinstance(
+                            formatted, int | float
+                        ):
+                            formatted /= 100
+                        row_data[header] = formatted
+                result.append(row_data)
+
+        return result
+
+    def _parse_compact_table(
+        self,
+        all_rows: list[list[str]],
+        n_expected: int,
+    ) -> list[tuple[str, str]]:
+        """Extract ``(peak_name, sample_id)`` pairs from the compact table.
+
+        The compact table follows Table 1 and has a header containing
+        ``"Sample Identifier"``.  Data rows alternate with St.Dev. rows
+        (where ``row[0]`` is empty); only data rows are collected.
+
+        The Sample Identifier propagates forward: once set for a row, it
+        remains in effect until a new non-empty identifier appears.
+
+        Collection stops after *n_expected* data rows are gathered, which
+        prevents running into the second compact table.
+        """
+        result: list[tuple[str, str]] = []
+        reading = False
+        sample_id = ""
+
+        for row in all_rows:
+            if not row or not any(c.strip() for c in row):
+                continue  # skip fully blank lines
+
+            if row[0].strip() == "Name" and any("Sample Identifier" in c for c in row):
+                reading = True
+                continue
+
+            if not reading:
+                continue
+
+            # Skip sub-header row (e.g. "\tSt.Dev.") and St.Dev. data rows
+            if not row[0].strip():
+                continue
+
+            peak_name = row[0].strip()
+            new_id = row[2].strip() if len(row) > 2 else ""
+            if new_id:
+                sample_id = new_id
+
+            result.append((peak_name, sample_id))
+
+            if len(result) == n_expected:
+                break
+
+        return result
+
+    def _build_entries(
+        self,
+        table1_rows: list[dict[str, Any]],
+        compact_rows: list[tuple[str, str]],
+    ) -> None:
+        """Group aligned rows into ``self._data``.
+
+        Rows are grouped by ``(sample_id, peak_name)``; a new group starts
+        whenever either value changes.  Within each group,
+        :func:`_handle_repetitions` disambiguates repeated peak names
+        (e.g. four ``"Fe 2p"`` peaks become ``Fe_2p_1`` … ``Fe_2p_4``).
+
+        Each group becomes one ``ParsedSpectrum(data=None)`` entry in
+        ``self._data``, keyed by
+        ``_construct_entry_name([sample_id, peak_name])`` or
+        ``_construct_entry_name([peak_name])`` when no sample identifier
+        is present.  Component field values are stored under
+        ``{comp_label}/{field}`` keys in ``metadata``.
+        """
+        # Align table1 and compact by index; fall back to raw peak name if shorter
+        aligned: list[tuple[str, str, dict[str, Any]]] = []
+        for i, row_data in enumerate(table1_rows):
+            if i < len(compact_rows):
+                peak_name, s_id = compact_rows[i]
+            else:
+                peak_name = row_data["_peak_name"]
+                s_id = ""
+            aligned.append((peak_name, s_id, row_data))
+
+        # Group by (sample_id, peak_name) — new group on any change
+        groups: dict[str, list[dict[str, Any]]] = {}
+        group_order: list[str] = []
+
+        for peak_name, s_id, row_data in aligned:
+            parts = [s_id, peak_name] if s_id else [peak_name]
+            entry_name = _construct_entry_name(parts)
+            if entry_name not in groups:
+                groups[entry_name] = []
+                group_order.append(entry_name)
+            groups[entry_name].append(row_data)
+
+        # Build ParsedSpectrum per group
+        for entry_name in group_order:
+            group_rows = groups[entry_name]
+            raw_labels = [r["_peak_name"] for r in group_rows]
+            comp_labels = _handle_repetitions(
+                [_construct_entry_name([lbl]) for lbl in raw_labels]
+            )
+
+            metadata: dict[str, Any] = {}
+            for comp_label, row_data in zip(comp_labels, group_rows):
+                for field, value in row_data.items():
+                    if field == "_peak_name":
+                        continue
+                    print(comp_label, field, value)
+                    metadata[f"{comp_label}/{field}"] = value
+
+            self._data[entry_name] = ParsedSpectrum(
+                data=None, raw=None, metadata=metadata
+            )
+
+    def update_main_file_data(self, main_file_data: dict[str, ParsedSpectrum]) -> None:
+        """
+        Merge ``self._data`` metadata into matching entries of *main_file_data*.
+
+        For each spectrum, the method searches its ``metadata`` for keys that
+        match the pattern ``component{N}/name``.  When a component name matches
+        an entry in the CSV data, the quantification fields
+        ``area_over_rsf*t*mfp``, ``atomic_concentration``, and
+        ``goodness_of_fit`` are injected into the spectrum's metadata under
+        the path ``component{N}/{field}``.
 
         Args:
-            file_path (str): Path to the .vms file.
-
-        Returns:
-            dict: Parsed data including the file path, header, and rows.
+            main_file_data: Mapping from NeXus entry name to ``ParsedSpectrum``,
+                as produced by the compatible primary parser.
         """
-        parsed_data: dict[str, dict[str, Any]] = {}
-        table_data: dict[str, list[Any]] = {}
-        components: list[str] = []
-        headers: list[str] = []
-        reading_table: bool = False
+        if not self._data:
+            return
 
-        with open(file) as f:
-            reader = csv.reader(f, delimiter="\t")
+        pattern = re.compile(r"(component\d+/)name")
+        inject_fields = {
+            "area_over_rsf*t*mfp",
+            "atomic_concentration",
+            "goodness_of_fit",
+        }
 
-            for row in reader:
-                if not row:
-                    if reading_table:
-                        break
-                    continue
+        for entry, meta_spectrum in self._data.items():
+            meta = meta_spectrum.metadata
+            print(meta)
+            filtered_keys = {
+                key: match.group(1) for key in meta if (match := pattern.search(key))
+            }
 
-                # Detect header row
-                if row[0].startswith("Name") and not reading_table:
-                    headers = [_context.normalize_key(h) for h in row[1:] if h]
-                    reading_table = True
-                    continue
+            for key, comp_prefix in filtered_keys.items():
+                component_name = meta[key]
 
-                # Process rows of the table
-                if reading_table:
-                    components += [row[0]]
-                    for header, value in zip(headers, row[1:]):
-                        if header not in table_data:
-                            table_data[header] = []
-                        if value:
-                            formatted_value = _context._format_value(value)
-                            if header == "atomic_concentration" and isinstance(
-                                formatted_value, int | float
-                            ):
-                                formatted_value /= 100
-                            table_data[header] += [formatted_value]
+                print(key)
+                # if component_name in self._data:
+                #     csv_sub = self._data[component_name]
+                #     for field in inject_fields & csv_sub.keys():
+                #         meta[f"{comp_prefix}{field}"] = csv_sub[field]
 
-        components = _handle_repetitions(
-            [_context.normalize_key(comp) for comp in components]
-        )
-
-        for i, component in enumerate(components):
-            parsed_data[component] = {}
-            for header, values in table_data.items():
-                parsed_data[component][header] = values[i]
-
-        # TODO: type mismatch
-        self._data = parsed_data  # type: ignore[assignment]
+        # TODO: this is all broken
+        for meta_entry, meta_spectrum in self._data.items():
+            for main_entry, main_spectrum in main_file_data.items():
+                if self._matches_entry(meta_entry, main_entry):
+                    main_spectrum.metadata.update(meta_spectrum.metadata)

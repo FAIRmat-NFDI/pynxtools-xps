@@ -30,7 +30,7 @@ import numpy as np
 import xarray as xr
 
 from pynxtools_xps.mapping import Any, _convert_energy_scan_mode
-from pynxtools_xps.parsers.base import _align_name_part, _XPSMapper, _XPSParser
+from pynxtools_xps.parsers.base import ParsedSpectrum, _align_name_part, _XPSParser
 from pynxtools_xps.parsers.specs.xml.metadata import _context
 
 _KEY_PARTS = ["RegionGroup_", "RegionData_"]
@@ -50,203 +50,24 @@ def _construct_entry_name(key: str) -> str:
     return "__".join(name_parts)
 
 
-class SpecsXMLMapper(_XPSMapper):
-    """
-    Class for restructuring xml data file from
-    specs vendor into python dictionary.
-    """
-
-    config_file = "config_specs_xml.json"
-
-    def _select_parser(self):
-        """
-        Select Specs XML parser.
-        Currently, there is only one parser.
-        Returns
-        -------
-        XmlParserSpecs
-            Parser for reading .xml file exported by SpecsLab2.
-
-        """
-        return SpecsXMLParser()
-
-    def parse_file(self, file: str | Path, **kwargs):
-        """
-        Parse the file using the parser that fits the Prodigy SLE version.
-        Returns flat list of dictionaries containing one spectrum each.
-
-        """
-        self.parser = self._select_parser()
-        self.parser.parse_file(file, **kwargs)
-
-        self.construct_data(self.parser.data)
-
-        self._data = {**self._data, **self.parser.metadata_dict}
-
-    # pylint: disable=too-many-locals,too-many-statements, too-many-branches
-    # TODO: Fix the typing issues
-    def construct_data(self, parsed_data: dict[str, Any]):  # type: ignore[override]
-        """
-        Construct the Binding Energy and separate the counts for
-        different detectors and finally sum up all the counts for
-        to find total electron counts.
-        """
-        for entry, spectrum in parsed_data.items():
-            raw_data = spectrum["raw_data"]
-            mcd_num = int(raw_data["mcd_num"])
-
-            curves_per_scan = raw_data["curves_per_scan"]
-            values_per_curve = raw_data["values_per_curve"]
-            values_per_scan = int(curves_per_scan * values_per_curve)
-            mcd_head = int(raw_data["mcd_head"])
-            mcd_tail = int(raw_data["mcd_tail"])
-            excitation_energy = raw_data["excitation_energy"]
-            scan_mode = raw_data["scan_mode"]
-            kinetic_energy = raw_data["kinetic_energy"]
-            scan_delta = raw_data["scan_delta"]
-            pass_energy = raw_data["pass_energy"]
-            kinetic_energy_base = raw_data["kinetic_energy_base"]
-            # Adding one unit to the binding_energy_upper is added as
-            # electron comes out if energy is one unit higher
-            binding_energy_upper = (
-                excitation_energy - kinetic_energy + kinetic_energy_base + 1
-            )
-
-            mcd_energy_shifts = raw_data["mcd_shifts"]
-            mcd_energy_offsets: list[Any] = []
-            offset_ids = []
-
-            # consider offset values for detector with respect to
-            # position at +16 which is usually large and positive value
-            for mcd_shift in mcd_energy_shifts:
-                mcd_energy_offset = (mcd_energy_shifts[-1] - mcd_shift) * pass_energy
-                mcd_energy_offsets.append(mcd_energy_offset)
-                offset_id = round(mcd_energy_offset / scan_delta)
-                offset_ids.append(int(offset_id - 1 if offset_id > 0 else offset_id))
-
-            # Skipping entry without count data
-            if not mcd_energy_offsets:
-                continue
-            # TODO: Fix the typing issues
-            mcd_energy_offsets = np.array(mcd_energy_offsets)  # type: ignore
-            # Putting energy of the last detector as a highest energy
-            starting_eng_pnts = binding_energy_upper - mcd_energy_offsets
-            ending_eng_pnts = starting_eng_pnts - values_per_scan * scan_delta
-
-            channeltron_eng_axes = np.zeros((mcd_num, values_per_scan))
-            for ind in np.arange(len(channeltron_eng_axes)):
-                channeltron_eng_axes[ind, :] = np.linspace(
-                    starting_eng_pnts[ind], ending_eng_pnts[ind], values_per_scan
-                )
-
-            channeltron_eng_axes = np.round(channeltron_eng_axes, decimals=8)
-            # construct ultimate or incorporated energy axis from
-            # lower to higher energy
-            scans = list(raw_data["scans"].keys())
-
-            # Check whether array is empty or not
-            if not scans:
-                continue
-            if not raw_data["scans"][scans[0]].any():
-                continue
-            # Sorting in descending order
-            binding_energy = channeltron_eng_axes[-1, :]
-
-            self._data["data"][entry] = xr.Dataset()
-
-            for scan_nm in scans:
-                channel_counts = np.zeros((mcd_num + 1, values_per_scan))
-                # values for scan_nm corresponds to the data for each
-                # "scan" in individual CountsSeq
-                scan_counts = raw_data["scans"][scan_nm]
-
-                if scan_mode == "fixed_analyzer_transmission":
-                    for row in np.arange(mcd_num):
-                        count_on_row = scan_counts[row::mcd_num]
-                        # Reverse counts from lower to higher
-                        # BE as in BE_eng_axis
-                        count_on_row = count_on_row[mcd_head:-mcd_tail]
-
-                        channel_counts[row + 1, :] = count_on_row
-                        channel_counts[0, :] += count_on_row
-
-                        # Storing detector's raw counts
-                        self._data["data"][entry][f"{scan_nm}_chan{row}"] = (
-                            xr.DataArray(
-                                data=channel_counts[row + 1, :],
-                                coords={"energy": binding_energy},
-                            )
-                        )
-
-                        # Storing calibrated and after accumulated each scan counts
-                        if row == mcd_num - 1:
-                            self._data["data"][entry][scan_nm] = xr.DataArray(
-                                data=channel_counts[0, :],
-                                coords={"energy": binding_energy},
-                            )
-                else:
-                    for row in np.arange(mcd_num):
-                        start_id = offset_ids[row]
-                        count_on_row = scan_counts[start_id::mcd_num]
-                        count_on_row = count_on_row[0:values_per_scan]
-                        channel_counts[row + 1, :] = count_on_row
-
-                        # shifting and adding all the curves.
-                        channel_counts[0, :] += count_on_row
-
-                        # Storing detector's raw counts
-                        self._data["data"][entry][f"{scan_nm}_chan{row}"] = (
-                            xr.DataArray(
-                                data=channel_counts[row + 1, :],
-                                coords={"energy": binding_energy},
-                            )
-                        )
-
-                        # Storing calibrated and after accumulated each scan counts
-                        if row == mcd_num - 1:
-                            self._data["data"][entry][scan_nm] = xr.DataArray(
-                                data=channel_counts[0, :],
-                                coords={"energy": binding_energy},
-                            )
-
-            # Write averaged cycle data to 'data'.
-            averaged_scans = {
-                key: value
-                for key, value in self._data["data"][entry].items()
-                if "_chan" not in key
-            }
-
-            average_cycles = {}
-
-            for key, value in averaged_scans.items():
-                cycle_number = re.findall(r"cycle(\d+)_", key)[0]
-                cycle_key = f"cycle{cycle_number}"
-                if cycle_number not in average_cycles:
-                    average_cycles[cycle_key] = value
-                else:
-                    average_cycles[cycle_key] += value
-
-            for cycle, value in average_cycles.items():
-                average_cycles[cycle] = value / len(
-                    [k for k in averaged_scans.keys() if cycle in k]
-                )
-
-            for cycle, value in average_cycles.items():
-                self._data["data"][entry][cycle] = xr.DataArray(
-                    data=value,
-                    coords={"energy": binding_energy},
-                )
-
-
 class SpecsXMLParser(_XPSParser):
     """Parser for SpecsLab2 XML data"""
 
-    config_file: ClassVar[str] = "config_specs_sle.json"
+    config_file: ClassVar[str] = "config_specs_xml.json"
     supported_file_extensions: ClassVar[tuple[str, ...]] = (".xml",)
 
+    def matches_file(self, file: Path) -> bool:
+        """Return True for SpecsLab2 XML files (XMLSerializer2 / CORBA / specs.de)."""
+        try:
+            with open(file, encoding="utf-8", errors="ignore") as f:
+                head = f.read(5120)
+            return "<?xml" in head and "XMLSerializer2" in head and "specs.de" in head
+        except Exception:
+            return False
+
     def __init__(self) -> None:
-        # TODO: self._data is different then elsewhere
-        self._data: dict = {}  # type: ignore[assignment]
+        super().__init__()
+        self._flat_spectra: dict = {}
         self.metadata_dict: dict = {}
         self._root_path = "/ENTRY"
         self.tail_part_from_struct = ""
@@ -302,6 +123,7 @@ class SpecsXMLParser(_XPSParser):
         self.metadata_dict = metadata_dict
 
         self.collect_raw_data_to_construct_data()
+        self._build_parsed_spectra()
 
     def pass_child_through_parsers(
         self,
@@ -747,68 +569,195 @@ class SpecsXMLParser(_XPSParser):
                     entry = ""
 
             if entry and (entry not in entry_list):
-                self._data[entry] = {"raw_data": copy.deepcopy(raw_dict)}
+                self._flat_spectra[entry] = {"raw_data": copy.deepcopy(raw_dict)}
                 entry_list.append(entry)
 
             if not entry:
                 continue
 
             if "region/curves_per_scan" in key:
-                self._data[entry]["raw_data"]["curves_per_scan"] = val
+                self._flat_spectra[entry]["raw_data"]["curves_per_scan"] = val
             elif "region/values_per_curve" in key:
-                self._data[entry]["raw_data"]["values_per_curve"] = val
+                self._flat_spectra[entry]["raw_data"]["values_per_curve"] = val
 
             elif "region/excitation_energy" in key:
-                self._data[entry]["raw_data"]["excitation_energy"] = val
+                self._flat_spectra[entry]["raw_data"]["excitation_energy"] = val
 
             elif "region/scan_mode/name" in key:
                 val = _convert_energy_scan_mode(val)
-                self._data[entry]["raw_data"]["scan_mode"] = val
+                self._flat_spectra[entry]["raw_data"]["scan_mode"] = val
 
             elif "region/kinetic_energy" in key:
                 if "region/kinetic_energy_base" not in key:
-                    self._data[entry]["raw_data"]["kinetic_energy"] = val
+                    self._flat_spectra[entry]["raw_data"]["kinetic_energy"] = val
                     continue
                 if "region/kinetic_energy_base" in key:
-                    self._data[entry]["raw_data"]["kinetic_energy_base"] = val
+                    self._flat_spectra[entry]["raw_data"]["kinetic_energy_base"] = val
                     continue
 
             elif "region/effective_workfunction" in key:
-                self._data[entry]["raw_data"]["effective_workfunction"] = val
+                self._flat_spectra[entry]["raw_data"]["effective_workfunction"] = val
 
             elif "region/scan_delta" in key:
-                self._data[entry]["raw_data"]["scan_delta"] = val
+                self._flat_spectra[entry]["raw_data"]["scan_delta"] = val
 
             elif "region/pass_energy" in key:
-                self._data[entry]["raw_data"]["pass_energy"] = val
+                self._flat_spectra[entry]["raw_data"]["pass_energy"] = val
 
             elif "mcd_head" in key:
-                self._data[entry]["raw_data"]["mcd_head"] = val
+                self._flat_spectra[entry]["raw_data"]["mcd_head"] = val
 
             elif "mcd_tail" in key:
-                self._data[entry]["raw_data"]["mcd_tail"] = val
+                self._flat_spectra[entry]["raw_data"]["mcd_tail"] = val
 
             elif "shift" in key:
-                self._data[entry]["raw_data"]["mcd_shifts"].append(val)
-                self._data[entry]["raw_data"]["mcd_num"] += 1
+                self._flat_spectra[entry]["raw_data"]["mcd_shifts"].append(val)
+                self._flat_spectra[entry]["raw_data"]["mcd_num"] += 1
 
             elif "gain" in key:
-                self._data[entry]["raw_data"]["mcd_gains"].append(val)
+                self._flat_spectra[entry]["raw_data"]["mcd_gains"].append(val)
 
             elif "position" in key:
-                self._data[entry]["raw_data"]["mcd_poss"].append(val)
+                self._flat_spectra[entry]["raw_data"]["mcd_poss"].append(val)
 
             # construct scan names e.g cycles2_scan0
             if "cycles/Cycle_" in key:
                 _, last_part = key.split("cycles/Cycle_")
                 if "/time" in last_part:
-                    self._data[entry]["raw_data"]["time"] = val
+                    self._flat_spectra[entry]["raw_data"]["time"] = val
                     continue
                 if "/parameters/Loop" in last_part:
-                    self._data[entry]["raw_data"]["loop_no"] = val
+                    self._flat_spectra[entry]["raw_data"]["loop_no"] = val
                     continue
                 parts = last_part.split("/")
                 cycle_num, scan_num = parts[0], parts[-2].split("_")[1]
                 scan_name = f"cycle{cycle_num}_scan{scan_num}"
 
-                self._data[entry]["raw_data"]["scans"][scan_name] = val
+                self._flat_spectra[entry]["raw_data"]["scans"][scan_name] = val
+
+    # pylint: disable=too-many-locals,too-many-branches
+    def _build_parsed_spectra(self) -> None:
+        """Apply MCD channel physics and build ParsedSpectrum objects.
+
+        Reads the raw_data dicts populated by ``collect_raw_data_to_construct_data``,
+        computes the binding-energy axis and channel-deinterleaved counts, and
+        stores the result in ``self._data``.
+        """
+        for entry, spectrum in self._flat_spectra.items():
+            raw_data = spectrum["raw_data"]
+            mcd_num = int(raw_data["mcd_num"])
+
+            if mcd_num == 0:
+                continue
+
+            curves_per_scan = raw_data["curves_per_scan"]
+            values_per_curve = raw_data["values_per_curve"]
+            values_per_scan = int(curves_per_scan * values_per_curve)
+            mcd_head = int(raw_data["mcd_head"])
+            mcd_tail = int(raw_data["mcd_tail"])
+            excitation_energy = raw_data["excitation_energy"]
+            scan_mode = raw_data.get("scan_mode", "fixed_analyzer_transmission")
+            kinetic_energy = raw_data["kinetic_energy"]
+            scan_delta = raw_data["scan_delta"]
+            pass_energy = raw_data["pass_energy"]
+            kinetic_energy_base = raw_data["kinetic_energy_base"]
+            binding_energy_upper = (
+                excitation_energy - kinetic_energy + kinetic_energy_base + 1
+            )
+
+            mcd_energy_shifts = raw_data["mcd_shifts"]
+            mcd_energy_offsets: list[Any] = []
+            offset_ids = []
+
+            for mcd_shift in mcd_energy_shifts:
+                mcd_energy_offset = (mcd_energy_shifts[-1] - mcd_shift) * pass_energy
+                mcd_energy_offsets.append(mcd_energy_offset)
+                offset_id = round(mcd_energy_offset / scan_delta)
+                offset_ids.append(int(offset_id - 1 if offset_id > 0 else offset_id))
+
+            if not mcd_energy_offsets:
+                continue
+
+            mcd_energy_offsets_arr = np.array(mcd_energy_offsets)
+            starting_eng_pnts = binding_energy_upper - mcd_energy_offsets_arr
+            ending_eng_pnts = starting_eng_pnts - values_per_scan * scan_delta
+
+            channeltron_eng_axes = np.zeros((mcd_num, values_per_scan))
+            for ind in np.arange(len(channeltron_eng_axes)):
+                channeltron_eng_axes[ind, :] = np.linspace(
+                    starting_eng_pnts[ind], ending_eng_pnts[ind], values_per_scan
+                )
+            channeltron_eng_axes = np.round(channeltron_eng_axes, decimals=8)
+            binding_energy = channeltron_eng_axes[-1, :]
+
+            scan_names = list(raw_data["scans"].keys())
+            if not scan_names:
+                continue
+            if not raw_data["scans"][scan_names[0]].any():
+                continue
+
+            # Determine cycle/scan structure from scan name patterns
+            scan_indices: list[tuple[int, int, str]] = []
+            for scan_nm in scan_names:
+                m = re.match(r"cycle(\d+)_scan(\d+)", scan_nm)
+                if m:
+                    scan_indices.append((int(m.group(1)), int(m.group(2)), scan_nm))
+
+            if not scan_indices:
+                continue
+
+            n_cycles = max(c for c, s, _ in scan_indices) + 1
+            n_scans = max(s for c, s, _ in scan_indices) + 1
+
+            data_arr = np.zeros((n_cycles, n_scans, values_per_scan))
+            raw_arr = np.zeros((n_cycles, n_scans, mcd_num, values_per_scan))
+
+            for c_idx, s_idx, scan_nm in scan_indices:
+                scan_counts = raw_data["scans"][scan_nm]
+                channel_counts = np.zeros((mcd_num + 1, values_per_scan))
+
+                if scan_mode == "fixed_analyzer_transmission":
+                    for row in np.arange(mcd_num):
+                        count_on_row = scan_counts[row::mcd_num]
+                        if mcd_tail > 0:
+                            count_on_row = count_on_row[mcd_head:-mcd_tail]
+                        else:
+                            count_on_row = count_on_row[mcd_head:]
+                        channel_counts[row + 1, :] = count_on_row
+                        channel_counts[0, :] += count_on_row
+                else:
+                    for row in np.arange(mcd_num):
+                        start_id = offset_ids[row]
+                        count_on_row = scan_counts[start_id::mcd_num]
+                        count_on_row = count_on_row[0:values_per_scan]
+                        channel_counts[row + 1, :] = count_on_row
+                        channel_counts[0, :] += count_on_row
+
+                data_arr[c_idx, s_idx, :] = channel_counts[0, :]
+                # raw_arr: (n_cycles, n_scans, n_channels, n_energy)
+                raw_arr[c_idx, s_idx, :, :] = channel_counts[1:, :]
+
+            data_da = xr.DataArray(
+                data_arr,
+                dims=("cycle", "scan", "energy"),
+                coords={"energy": binding_energy},
+            )
+            raw_da = xr.DataArray(
+                raw_arr,
+                dims=("cycle", "scan", "channel", "energy"),
+                coords={"energy": binding_energy},
+            )
+
+            # Extract per-entry metadata from self.metadata_dict
+            entry_prefix = f"/ENTRY[{entry}]/"
+            metadata = {
+                key[len(entry_prefix) :]: value
+                for key, value in self.metadata_dict.items()
+                if key.startswith(entry_prefix)
+            }
+
+            self._data[entry] = ParsedSpectrum(
+                data=data_da,
+                raw=raw_da,
+                metadata=metadata,
+            )

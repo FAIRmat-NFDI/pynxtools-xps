@@ -18,12 +18,11 @@
 Base classes and typed intermediate representations for XPS parsers.
 """
 
-import os
 import types
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, ClassVar, Union, cast, get_args, get_origin
+from typing import Any, ClassVar, Union, get_args, get_origin
 
 import xarray as xr
 
@@ -194,48 +193,102 @@ class _XPSDataclass:
         return self.__dict__.copy()
 
 
-# TODO: fill this with life
-# @dataclass
-# class ScanData(_XPSDataclass):
-#     """One scan's measured data."""
+@dataclass
+class ParsedSpectrum:
+    """Typed intermediate representation for one XPS spectrum.
 
-#     scan_id: int
-#     data: xr.Dataset
-#     channel_data: xr.Dataset | None = None
-#     raw_data: xr.Dataset | None = None
-#     attrs: dict[str, Any] = field(default_factory=dict)
+    Parsers return ``dict[str, ParsedSpectrum]`` where keys are NeXus entry
+    names (e.g. ``"SampleName__Survey"``). The ``XPSReader`` accesses spectra
+    directly through ``get_attr`` and ``get_data`` callbacks.
 
-#     def validate(self) -> None:
-#         """Check internal consistency of lengths."""
-#         if len(self.intensity) != n:
-#             raise ValueError(
-#                 f"Scan {self.scan_id}: intensity length "
-#                 f"{len(self.intensity)} != energy length {n}"
-#             )
-#         if scan.channels is not None and self.channels.shape[0] != n:
-#             raise ValueError(
-#                 f"Scan {self.scan_id}: channels shape "
-#                 f"{self.channels.shape} incompatible with energy length {n}"
-#             )
+    Physical hierarchy::
 
+        DETECTOR/raw_data              (cycle, scan, channel, *axes)
+        PROCESS[channels_averaging]    (cycle, scan, *axes)   ← data field
+        PROCESS[scan_averaging]        (cycle, *axes)          ← computed
+        PROCESS[cycle_averaging]       (*axes,)                ← computed
+        DATA[data]                     (*axes,) + errors       ← computed
 
-# @dataclass
-# class ParsedSpectrum(_XPSDataclass):
-#     """Typed intermediate representation produced by every XPS parser.
+    Channel averaging is parser-specific (detector geometry, MCD calibration)
+    and must be performed by the parser before constructing this object.
+    The remaining averaging steps are computed generically by the assembly layer.
 
-#     All parsers return ``list[ParsedSpectrum]``.  The reader assembles
-#     these into the ENTRY-keyed dict + xarray datasets consumed by the
-#     config-based template mapping.
-#     """
+    Attributes:
+        data: Channel-averaged scan data, or ``None`` for metadata-only entries
+            produced by ``_XPSMetadataParser`` subclasses.
+            When not ``None``, required dims are ``("cycle", "scan")`` followed
+            by one or more physical axes (typically ``"energy"``).
+            Use ``n_cycles=1`` for formats without an explicit loop structure.
+        raw:  Optional raw per-channel data.
+            Required dims: ``("cycle", "scan", "channel")``, followed by the
+            same physical axes as ``data``.
+        metadata: Flat key-value metadata for ``@attrs:`` lookups in config
+            files.  Keys should follow the same snake_case convention as the
+            rest of the parser output.
+    """
 
-#     group_name: str
-#     spectrum_type: str
-#     scans: list[ScanData]
-#     metadata: dict[str, Any] = field(default_factory=dict)
-#     scan_no: int | None = None
-#     loop_no: int | None = None
-#     energy_units: str = "eV"
-#     intensity_units: str = "counts_per_second"
+    data: xr.DataArray | None = None
+    raw: xr.DataArray | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    # ------------------------------------------------------------------
+    # Computed aggregations (used by the reader's get_data)
+    # ------------------------------------------------------------------
+
+    def _require_data(self) -> xr.DataArray:
+        """Return ``self.data``, raising if this is a metadata-only entry."""
+        if self.data is None:
+            raise ValueError(
+                "This ParsedSpectrum is metadata-only (data=None). "
+                "Aggregation methods are not available."
+            )
+        return self.data
+
+    def average(self) -> xr.DataArray:
+        """Mean across all cycles and scans. Shape: (*axes,)."""
+        return self._require_data().mean(dim=["cycle", "scan"])
+
+    def errors(self) -> xr.DataArray:
+        """Std across all cycles and scans. Shape: (*axes,)."""
+        return self._require_data().std(dim=["cycle", "scan"])
+
+    def scan_average(self) -> xr.DataArray:
+        """Mean across scans within each cycle. Shape: (cycle, *axes)."""
+        return self._require_data().mean(dim="scan")
+
+    def cycle_average(self) -> xr.DataArray:
+        """Mean across cycles after scan averaging. Shape: (*axes,)."""
+        return self.scan_average().mean(dim="cycle")
+
+    def validate(self) -> None:
+        """Check that required dimensions are present and shapes are consistent."""
+        data = self._require_data()
+        required = ("cycle", "scan")
+        for dim in required:
+            if dim not in data.dims:
+                raise ValueError(
+                    f"ParsedSpectrum.data must have a '{dim}' dimension; "
+                    f"got dims: {tuple(data.dims)}"
+                )
+
+        if self.raw is not None:
+            required_raw = ("cycle", "scan", "channel")
+            for dim in required_raw:
+                if dim not in self.raw.dims:
+                    raise ValueError(
+                        f"ParsedSpectrum.raw must have a '{dim}' dimension; "
+                        f"got dims: {tuple(self.raw.dims)}"
+                    )
+            # Physical axes must match
+            data_axes = [d for d in data.dims if d not in ("cycle", "scan")]
+            raw_axes = [
+                d for d in self.raw.dims if d not in ("cycle", "scan", "channel")
+            ]
+            if data_axes != raw_axes:
+                raise ValueError(
+                    f"ParsedSpectrum.data and .raw must share the same physical "
+                    f"axes; data has {data_axes}, raw has {raw_axes}"
+                )
 
 
 class _Parser(ABC):
@@ -356,10 +409,11 @@ class _Parser(ABC):
 
     def __init__(self) -> None:
         self.file: Path
-        self._data: list[dict[str, Any]] = []
+        self._data: dict[str, ParsedSpectrum] = {}
 
     @property
-    def data(self) -> list[dict[str, Any]]:
+    def data(self) -> dict[str, ParsedSpectrum]:
+        """Parsed spectra (or metadata-only entries) keyed by NeXus entry name."""
         return self._data
 
     def _is_mainfile(self, file: Path) -> None:
@@ -402,15 +456,15 @@ class _Parser(ABC):
         """
         return None
 
-    # TODO: this should be an abstract method
-    # @abstractmethod
+    @abstractmethod
     def matches_file(self, file: Path) -> bool:
         """
-        Determine whether the file structurally matches this parser.
+        Return True if *file* structurally matches this parser's format.
 
-        This method must perform strict structural validation beyond
-        extension and version checks. It should return True only if the
-        file unambiguously conforms to the expected format.
+        Implementations must perform positive identification — not just
+        extension checks or negative exclusions. The check should be fast
+        (read at most a few KB), and always catch all exceptions and return
+        False rather than propagating them.
 
         Args:
             file: Path to the candidate file.
@@ -418,13 +472,12 @@ class _Parser(ABC):
         Returns:
             True if the file matches this parser's format, otherwise False.
         """
-        ...
-        # TODO: this should be an abstract method
-        return True
 
     def parse_file(self, file: str | Path, **kwargs):
         """
         Parse the given file and populate the parser's data attribute.
+
+        After parsing, stamp file provenance into every spectrum's metadata.
 
         Args:
             file: Path to the file to parse.
@@ -437,6 +490,9 @@ class _Parser(ABC):
         self.file = file
         self._is_mainfile(file)
         self._parse(file, **kwargs)
+        for spectrum in self._data.values():
+            spectrum.metadata["File"] = str(self.file)
+            spectrum.metadata["file_ext"] = self.file.suffix
 
     @abstractmethod
     def _parse(self, file: Path, **kwargs) -> None:
@@ -444,7 +500,7 @@ class _Parser(ABC):
         Perform the actual parsing implementation.
 
         Subclasses must implement this method to extract structured
-        data from the validated file and populate `self._data`.
+        data from the validated file and populate ``self._data``.
 
         Args:
             file: Path to the validated file.
@@ -454,19 +510,29 @@ class _Parser(ABC):
 
 
 class _XPSParser(_Parser):
-    """
-    Abstract base class for all XPS file parsers.
+    """Abstract base class for all XPS file parsers.
 
-    Subclasses define the structural and semantic rules required to
-    identify and parse a specific XPS file format variant.
+    Subclasses define the structural and semantic rules required to identify
+    and parse a specific XPS file format variant.
 
-    Additional class attributes:
-        config_file: Path or mapping used to configure the parser.
+    Subclasses must set ``config_file`` and implement ``_parse()``, which
+    should populate ``self._data`` — a ``dict[str, ParsedSpectrum]``
+    mapping NeXus entry names to typed spectral data.
 
-    ``config_file`` must be set by subclasses.
+    The ``data`` property exposes this mapping to ``XPSReader.parsed_data_dicts``.
+    File provenance (``File``, ``file_ext``) is stamped into every spectrum's
+    metadata by ``parse_file()`` immediately after parsing completes.
     """
 
     config_file: ClassVar[str] = ""
+    _metadata_exclude_keys: ClassVar[frozenset[str]] = frozenset()
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    def _filter_metadata(self, raw: dict[str, Any]) -> dict[str, Any]:
+        """Return *raw* with all ``_metadata_exclude_keys`` removed."""
+        return {k: v for k, v in raw.items() if k not in self._metadata_exclude_keys}
 
 
 class _XPSMetadataParser(_Parser):
@@ -474,17 +540,19 @@ class _XPSMetadataParser(_Parser):
     Abstract base class for supplementary parsers that enrich
     existing spectral datasets.
 
-    Metadata parsers do not generate spectra. Instead, they parse
-    auxiliary files (e.g., quantification exports) and inject
-    additional information into data dictionaries produced by
-    a primary `_XPSParser`.
+    Metadata parsers parse auxiliary files (e.g., quantification exports)
+    and inject additional information into spectra produced by a primary
+    ``_XPSParser``.  Like ``_XPSParser``, ``_parse()`` populates
+    ``self._data``, but with **metadata-only** entries:
+    ``ParsedSpectrum(data=None, raw=None, metadata={...})``.
 
-    Additional class attributes:
-        compatible_primary_parser: Tuple of compatible _XPSParser
-            objects or mapping used to configure the parser.
+    ``update_main_file_data`` merges ``self._data`` into a caller-supplied
+    ``dict[str, ParsedSpectrum]`` by matching entry names.  The default
+    implementation handles the common case where the metadata parser's
+    entry names are either identical to — or a suffix of — the primary
+    parser's entry names (see ``_matches_entry``).
 
     ``compatible_primary_parser`` must be set by subclasses.
-
     """
 
     compatible_primary_parser: ClassVar[type[_XPSParser]]
@@ -510,91 +578,37 @@ class _XPSMetadataParser(_Parser):
                 f"{parser.__class__.__name__}."
             )
 
-    # TODO: this shall be an abstract method
-    # @abstractmethod
-    def update_main_file_data(
-        self,
-        main_file_data: list[dict[str, Any]],
-    ) -> None:
+    def update_main_file_data(self, main_file_data: dict[str, ParsedSpectrum]) -> None:
         """
-        Inject parsed metadata into already-parsed spectral data.
+        Merge ``self._data`` metadata into matching entries of *main_file_data*.
 
-        Implementations must validate compatibility with the provided
-        data before modifying it.
+        For each entry in ``self._data``, finds the first key in
+        *main_file_data* that satisfies ``_matches_entry`` and updates its
+        ``metadata`` dict in-place.
 
         Args:
-            main_file_dicts: List of dictionaries produced by a primary
-                `_XPSParser`.
-
-        Raises:
-            ValueError: If the metadata cannot be aligned with the
-                provided spectral data.
+            main_file_data: Mapping from NeXus entry name to ``ParsedSpectrum``,
+                as produced by the compatible primary parser.
         """
-        ...
+        for meta_entry, meta_spectrum in self._data.items():
+            for main_entry, main_spectrum in main_file_data.items():
+                if self._matches_entry(meta_entry, main_entry):
+                    main_spectrum.metadata.update(meta_spectrum.metadata)
+                    break
 
+    @staticmethod
+    def _matches_entry(meta_key: str, main_key: str) -> bool:
+        """Return True if *meta_key* aligns with *main_key*.
 
-class _XPSMapper(ABC):
-    """
-    Deprecated: retained only for backward compatibility during migration.
-    """
+        Handles two cases:
 
-    def __init__(self):
-        self.file: Path = ""
-        self._data: dict[str, Any] = {}
-        self._data["data"] = cast(dict[str, xr.Dataset], {})
-        self.parser = None
-
-    @property
-    def data(self) -> dict:
-        """Getter property."""
-        return self._data
-
-    @abstractmethod
-    def _select_parser(self):
-        """Select the correct parser for the file extension and format."""
-
-    def parse_file(self, file: str | Path, **kwargs):
-        file = Path(file)
-        self.file = file
-        self.parser = self._select_parser()
-
-        self._data["File"] = file
-        self._data["file_ext"] = os.path.splitext(file)[1]
-        self.parser.parse_file(file, **kwargs)
-        self.construct_data(self.parser.data)
-
-    @abstractmethod
-    def construct_data(self, parsed_data: list[dict[str, Any]]):
-        """Map from individual parser format to NXmpes-ready dict."""
-
-
-# TODO: this should be implemented when deprecating mappers
-def _construct_data_key(spectrum: dict[str, Any]) -> str:
-    """
-    Construct a key for the 'data' field of the xps_dict.
-
-    For ParsedSpectrum: returns ``cycle0`` when scan_no is None,
-    or ``cycle0_scan3`` when scan_no is set.  This lets parsers with
-    all scans inside one ParsedSpectrum (PHI, SLE) use just the cycle
-    key, while parsers that emit one ParsedSpectrum per scan (VAMAS)
-    include the scan index.
-
-    For legacy dicts: always returns ``cycle{N}_scan{M}`` (backward
-    compatible with old mapper code).
-    """
-    # if isinstance(spectrum, ParsedSpectrum):
-    #     loop_no = spectrum.loop_no
-    #     scan_no = spectrum.scan_no
-    #     cycle_key = f"cycle{loop_no}" if loop_no is not None else "cycle0"
-    #     if scan_no is not None:
-    #         return f"{cycle_key}_scan{scan_no}"
-    #     return cycle_key
-    # else:
-    loop_no = spectrum.get("loop_no")
-    scan_no = spectrum.get("scan_no")
-    cycle_key = f"cycle{loop_no}" if loop_no is not None else "cycle0"
-    scan_key = f"scan{scan_no}" if scan_no is not None else "scan0"
-    return f"{cycle_key}_{scan_key}"
+        - **Exact match**: ``meta_key == main_key``
+          (e.g. both are ``"FeO__Fe_2p"``).
+        - **Suffix match**: ``main_key`` ends with ``"__" + meta_key``
+          (e.g. ``meta_key="Fe_2p"``, ``main_key="FeO__Fe_2p"``), used when
+          the metadata file has no sample identifier.
+        """
+        return main_key == meta_key or main_key.endswith("__" + meta_key)
 
 
 def _align_name_part(name_part: str):
@@ -613,6 +627,19 @@ def _align_name_part(name_part: str):
     )
 
     return name_part.translate(translation_table)
+
+
+def _construct_data_key(spectrum: dict[str, Any]) -> str:
+    """Construct a key for the ``data`` field of the xps_dict.
+
+    Returns ``"cycle{N}_scan{M}"`` from ``loop_no`` and ``scan_no``
+    fields in *spectrum*, defaulting to ``"cycle0_scan0"`` when absent.
+    """
+    loop_no = spectrum.get("loop_no")
+    scan_no = spectrum.get("scan_no")
+    cycle_key = f"cycle{loop_no}" if loop_no is not None else "cycle0"
+    scan_key = f"scan{scan_no}" if scan_no is not None else "scan0"
+    return f"{cycle_key}_{scan_key}"
 
 
 def _construct_entry_name(parts: list[str]) -> str:

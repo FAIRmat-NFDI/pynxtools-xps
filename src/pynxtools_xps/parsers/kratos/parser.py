@@ -40,6 +40,12 @@ class KratosParser(_XPSParser):
         """
         self.metadata = KratosMetadata()
 
+    def matches_file(self, file: Path) -> bool:
+        """Return True for Kratos main measurement files."""
+        # TODO: write parser for actual Kratos data file
+        # TODO: implement matches_file accordingly
+        return True
+
     def _parse(self, file: Path, **kwargs) -> None:
         # TODO: parse actual data, not just metadata!
         """

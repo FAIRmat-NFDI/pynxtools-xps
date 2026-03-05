@@ -36,12 +36,12 @@ BOOL_MAP: dict[str, bool] = {
     "Off": False,
 }
 
-MEASUREMENT_METHOD_MAP: dict[str, tuple[str, str]] = {
-    "XPS": ("XPS", "X-ray photoelectron spectroscopy"),
-    "UPS": ("UPS", "ultraviolet photoelectron spectroscopy"),
-    "ESCA": ("XPS", "electron spectroscopy for chemical analysis"),
-    "NAPXPS": ("NAPXPS", "near ambient pressure X-ray photoelectron spectroscopy"),
-    "ARXPS": ("ARXPS", "angle-resolved X-ray photoelectron spectroscopy"),
+MEASUREMENT_METHOD_MAP: dict[str, str] = {
+    "XPS": "X-ray photoelectron spectroscopy",
+    "UPS": "ultraviolet photoelectron spectroscopy",
+    "ESCA": "electron spectroscopy for chemical analysis",
+    "NAPXPS": "near ambient pressure X-ray photoelectron spectroscopy",
+    "ARXPS": "angle-resolved X-ray photoelectron spectroscopy",
 }
 
 ENERGY_TYPE_MAP: dict[str, str] = {
@@ -98,8 +98,14 @@ _convert_bool = _make_converter(BOOL_MAP)
 _convert_detector_acquisition_mode = _make_converter(ACQUSITION_MODE_MAP)
 _convert_energy_scan_mode = _make_converter(ENERGY_SCAN_MODE_MAP)
 _convert_energy_type = _make_converter(ENERGY_TYPE_MAP)
-_convert_measurement_method = _make_converter(MEASUREMENT_METHOD_MAP)
 _convert_slit_type = _make_converter(SLIT_TYPE_MAP)
+
+
+def _get_measurement_method_long(measurement_method: str) -> str:
+    """Extract the long measurement name for a measurement method string."""
+    return MEASUREMENT_METHOD_MAP.get(
+        measurement_method, "X-ray photoelectron spectroscopy"
+    )
 
 
 def parse_datetime(
@@ -409,9 +415,8 @@ class _MetadataContext:
             "energy_scan_mode": self.__convert_energy_scan_mode,
         }
         """
-        # TODO: what is this needed, was in reader_utils._re_map_single_value
-        # if isinstance(value, str) and value is not None:
-        #     value = value.rstrip("\n")
+        if isinstance(value, str) and value is not None:
+            value = value.rstrip("\n")
 
         map_fn: Callable[[_Value], _Value] | None = self.value_map.get(key)
         if map_fn is None:

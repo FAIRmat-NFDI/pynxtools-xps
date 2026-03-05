@@ -21,7 +21,6 @@ to the NXmpes/NXxps template.
 """
 
 import struct
-import warnings
 from pathlib import Path
 from typing import Any, ClassVar
 
@@ -29,90 +28,15 @@ import numpy as np
 import xarray as xr
 
 from pynxtools_xps.logging import _logger
+from pynxtools_xps.mapping import _get_measurement_method_long
 from pynxtools_xps.numerics import safe_arange_with_edges
-from pynxtools_xps.parsers.base import _construct_entry_name, _XPSMapper, _XPSParser
+from pynxtools_xps.parsers.base import ParsedSpectrum, _construct_entry_name, _XPSParser
 from pynxtools_xps.parsers.phi.data_model import (
     PHIMetadata,
     PHISpatialArea,
     PHISpectralRegion,
 )
 from pynxtools_xps.parsers.phi.metadata import _context, _convert_channel_info
-
-
-class PHIMapper(_XPSMapper):
-    """
-    Map PHI format to NXmpes-ready dict.
-
-    """
-
-    config_file: ClassVar[str | dict[str, str]] = "config_phi.json"
-
-    def _select_parser(self):
-        """Select the proper Phi data parser."""
-        return PHIParser()
-
-    def construct_data(self, parsed_data: list[dict[str, Any]]):
-        """Map Phi format to NXmpes-ready dict."""
-        # pylint: disable=duplicate-code
-
-        for spectrum in parsed_data:
-            self._update_xps_dict_with_spectrum(spectrum)
-
-    def _update_xps_dict_with_spectrum(self, spectrum: dict[str, Any]):
-        """
-        Map one spectrum from raw data to NXmpes-ready dict.
-
-        """
-        # pylint: disable=too-many-locals,duplicate-code
-        entry_parts = []
-
-        for part in ["group_name", "spectrum_type"]:
-            val = spectrum.get(part, None)
-            if val:
-                entry_parts += [val]
-
-        entry = _construct_entry_name(entry_parts)
-        entry_parent = f"/ENTRY[{entry}]"
-
-        for key, value in spectrum.items():
-            if key.startswith("entry"):
-                entry_parent = "/ENTRY[entry]"
-                key = key.replace("entry/", "", 1)
-            mpes_key = f"{entry_parent}/{key}"
-            self._data[mpes_key] = value
-
-            # units = get_units_for_key(key, UNITS)
-            # if units is not None:
-            #     self._data[f"{mpes_key}/@units"] = units
-
-        # Create key for writing to data
-        cycle_key = "cycle0"
-
-        energy = np.array(spectrum["energy"])
-
-        if entry not in self._data["data"]:
-            self._data["data"][entry] = xr.Dataset()
-
-        # Write averaged data to 'data'.
-        all_scan_data = np.array(
-            [np.array(value) for key, value in spectrum["data"].items()]
-        )
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=RuntimeWarning)
-            averaged_scans = np.mean(all_scan_data, axis=0)
-
-        self._data["data"][entry][cycle_key] = xr.DataArray(
-            data=averaged_scans,
-            coords={"energy": energy},
-        )
-
-        # Write scan data to 'data'.
-        for scan_no, intensity in spectrum["data"].items():
-            xarr_key = f"{cycle_key}_{scan_no}"
-            self._data["data"][entry][xarr_key] = xr.DataArray(
-                data=intensity,
-                coords={"energy": energy},
-            )
 
 
 class PHIParser(_XPSParser):  # pylint: disable=too-few-public-methods
@@ -124,6 +48,7 @@ class PHIParser(_XPSParser):  # pylint: disable=too-few-public-methods
 
     config_file: ClassVar[str] = "config_phi.json"
     supported_file_extensions: ClassVar[tuple[str, ...]] = (".spe", ".pro")
+    _metadata_exclude_keys: ClassVar[frozenset[str]] = frozenset({"energy", "data"})
 
     def __init__(self):
         """
@@ -132,32 +57,35 @@ class PHIParser(_XPSParser):  # pylint: disable=too-few-public-methods
         """
         super().__init__()
         self.metadata = PHIMetadata()
+        self._flat_spectra: list[dict[str, Any]] = []
 
         self.binary_header_length = 4
         self._data_header_length = 24
         self.encoding: tuple[str, int] = ("<f", 4)
 
-        self.binary_header: np.ndarray = None
-        self._data_header: np.ndarray = None
+        self.binary_header: np.ndarray
+        self._data_header: np.ndarray
+
+    def matches_file(self, file: Path) -> bool:
+        """Return True for PHI files: SOFH start marker and EOFH boundary present."""
+        try:
+            with open(file, "rb") as f:
+                head = f.read(16384)  # 16 KB covers all known header sizes
+            return head[:4] == b"SOFH" and b"EOFH" in head
+        except Exception:
+            return False
 
     def _parse(self, file: Path, **kwargs) -> None:
         """
-        Parse the .spe, .pro file into a list of dictionaries.
+        Parse the .spe, .pro file and populate ``self._data``.
 
-        Parsed data is stored in the attribute 'self.data'.
-        Each dictionary in the data list is a grouping of related
-        attributes. The dictionaries are later re-structured into a
-        nested dictionary that more closely resembles the domain logic.
+        Each spectrum region is parsed from the binary file, enriched with
+        metadata, and stored as a ``ParsedSpectrum`` keyed by its entry name.
 
         Parameters
         ----------
         file : str
             XPS data filepath.
-
-        Returns
-        -------
-        list
-            Flat list of dictionaries containing one spectrum each.
 
         """
         self.raw_data = self._read_lines(file)
@@ -174,6 +102,38 @@ class PHIParser(_XPSParser):  # pylint: disable=too-few-public-methods
         self.parse_data_into_spectra(data)
 
         self.add_metadata_to_each_spectrum()
+        self._build_parsed_spectra()
+
+    def _build_parsed_spectra(self) -> None:
+        """Build ``self._data`` from ``self._flat_spectra``."""
+        for spectrum_dict in self._flat_spectra:
+            entry_name = (
+                _construct_entry_name(
+                    [
+                        spectrum_dict.get("group_name", ""),
+                        spectrum_dict.get("spectrum_type", ""),
+                    ]
+                )
+                or "entry"
+            )
+            self._data[entry_name] = self._assemble_entry(entry_name, spectrum_dict)
+
+    def _assemble_entry(
+        self, entry_name: str, spectrum_dict: dict[str, Any]
+    ) -> ParsedSpectrum:
+        """Build one ``ParsedSpectrum`` from a single spectrum dict."""
+        energy_array = np.array(spectrum_dict["energy"])
+
+        scan_arrays = np.array([np.array(v) for v in spectrum_dict["data"].values()])
+        # shape: (1, n_scans, n_energy)  — single cycle
+        da = xr.DataArray(
+            data=scan_arrays[np.newaxis, ...],
+            dims=("cycle", "scan", "energy"),
+            coords={"energy": energy_array},
+        )
+
+        metadata = self._filter_metadata(spectrum_dict)
+        return ParsedSpectrum(data=da, raw=None, metadata=metadata)
 
     def _read_lines(self, file: str | Path):
         """
@@ -433,7 +393,7 @@ class PHIParser(_XPSParser):  # pylint: disable=too-few-public-methods
 
                     region_and_areas[new_key] = value
 
-                self._data += [region_and_areas]
+                self._flat_spectra += [region_and_areas]
 
     def parse_binary_header(self, binary_data):
         """
@@ -449,7 +409,7 @@ class PHIParser(_XPSParser):  # pylint: disable=too-few-public-methods
         """
         binary_header = struct.unpack("I", binary_data[: self.binary_header_length])[0]
 
-        for i, spectrum in enumerate(self._data):
+        for i, spectrum in enumerate(self._flat_spectra):
             start = (
                 self.binary_header_length * self._data_header_length * i
                 + self.binary_header_length
@@ -482,7 +442,7 @@ class PHIParser(_XPSParser):  # pylint: disable=too-few-public-methods
             Binary XPS data, format is 64 bit float.
 
         """
-        for i, spectrum in enumerate(self._data):
+        for i, spectrum in enumerate(self._flat_spectra):
             float_buffer = self.encoding[1]
 
             # spectrum["n_scans"] = 2
@@ -535,9 +495,10 @@ class PHIParser(_XPSParser):  # pylint: disable=too-few-public-methods
     def _check_encoding(self):
         """Check if the binary data is single or double encoded."""
         datasize = sum(
-            s["spectrum_header"][8] * s["spectrum_header"][9] for s in self._data
+            s["spectrum_header"][8] * s["spectrum_header"][9]
+            for s in self._flat_spectra
         )
-        binary_size = sum(s["spectrum_header"][-2] for s in self._data)
+        binary_size = sum(s["spectrum_header"][-2] for s in self._flat_spectra)
 
         encodings_map: dict[str, tuple[str, int]] = {
             "double": ("<d", 8),
@@ -557,7 +518,7 @@ class PHIParser(_XPSParser):  # pylint: disable=too-few-public-methods
         """
         flattened_metadata = self.flatten_metadata()
 
-        for spectrum in self.data:
+        for spectrum in self._flat_spectra:
             spectrum.update(flattened_metadata)
             spectrum["intensity/@units"] = _context.get_default_unit("intensity")
 
@@ -598,6 +559,9 @@ class PHIParser(_XPSParser):  # pylint: disable=too-few-public-methods
                     flattened_dict[f"{sup_key}_{sub_key}"] = sub_value
             else:
                 flattened_dict[key] = value
+
+            if "technique" in key:
+                flattened_dict[f"{key}_long_name"] = _get_measurement_method_long(value)
 
         for key in flattened_dict.copy().keys():
             if "_units" in key:

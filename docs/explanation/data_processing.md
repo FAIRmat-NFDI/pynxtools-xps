@@ -33,7 +33,9 @@ Three files are needed for the example conversion:
 comments
 1. The lineshapes of the measurement data as well as the peak fitting, exported from CasaXPS as a TXT file.
 This file can be obtained by using the `Save Tab ASCII` to TXT button in CasaXPS and choosing "Rows of Tables" as the export option.
-1. The analysis results (incl. the atomic concentrations), exported from CasaXPS as a CSV file. This file can be obtained from the `Quantify` window in CasaXPS and exporting the "Comps" report from the "Report" tab. Learn more about [XPS quantification in CasaXPS](http://www.casaxps.com/casaxps-training/quantification/quant.htm).
+1. The analysis results (incl. the atomic concentrations), exported from CasaXPS as a CSV file. This file can be obtained from the `Quantify` window in CasaXPS, by exporting the "Comps" report from the "Report" tab as a CSV file. Note that for this to work, you need to change to "Edit Mode" in CasaXPS, so that the entry names are correctly stored in that file.
+
+Learn more about XPS quantification in CasaXPS in the [CasaXPS documentation](http://www.casaxps.com/casaxps-training/quantification/quant.htm).
 
 ## Example conversion
 

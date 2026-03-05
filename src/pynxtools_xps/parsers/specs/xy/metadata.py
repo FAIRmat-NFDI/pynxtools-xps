@@ -24,7 +24,6 @@ import datetime
 from pynxtools_xps.mapping import (
     _convert_energy_scan_mode,
     _convert_energy_type,
-    _convert_measurement_method,
     _MetadataContext,
     _ValueMap,
     parse_datetime,
@@ -66,8 +65,6 @@ def _parse_datetime(date: str) -> str:
     return parse_datetime(date, _POSSIBLE_DATE_FORMATS, tzinfo)
 
 
-# TODO: is this correct or a wrong copy from the SLE parser
-
 _KEY_MAP: dict[str, str] = {
     "group": "group_id",
     "analyzer_slit": "entrance_slit",
@@ -90,7 +87,6 @@ _KEY_MAP: dict[str, str] = {
 
 _VALUE_MAP: _ValueMap = {
     "time_stamp": _parse_datetime,
-    "analysis_method": _convert_measurement_method,
     "scan_mode": _convert_energy_scan_mode,
     "bias_voltage_electrons": float,
     "n_values": int,

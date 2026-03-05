@@ -24,7 +24,6 @@ from typing import Any
 from pynxtools_xps.mapping import (
     _convert_energy_scan_mode,
     _convert_energy_type,
-    _convert_measurement_method,
     _MetadataContext,
     _ValueMap,
 )
@@ -105,7 +104,6 @@ def _convert_vamas_unit(unit: str) -> str | None:
 
 
 _VALUE_MAP: _ValueMap = {
-    "analysis_method": _convert_measurement_method,
     "energy_label": _convert_energy_type,
     "energy_scan_mode": _convert_energy_scan_mode,
     "y_units_1": _convert_vamas_unit,

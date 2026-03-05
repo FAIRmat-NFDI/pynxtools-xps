@@ -7,6 +7,7 @@ Analysed
 Analyser
 Brockhauser
 COLLECTIONCOLUMN
+CORBA
 Calib
 Chns
 DEPTHPRO
@@ -101,6 +102,7 @@ dataconverter
 datasize
 deconvolution
 defintions
+deinterleaved
 egun
 electronanalyzer
 elments
@@ -131,6 +133,7 @@ monochromator
 mpes
 ndarray
 neutraliser
+newaxis
 nxdata
 nxdls
 nxfit

@@ -25,7 +25,6 @@ from zoneinfo import ZoneInfo
 from pynxtools_xps.mapping import (
     _convert_bool,
     _convert_energy_scan_mode,
-    _convert_measurement_method,
     _MetadataContext,
     _ValueMap,
 )
@@ -227,8 +226,6 @@ _KEY_MAP: dict[str, str] = {
 }
 
 _VALUE_MAP: _ValueMap = {
-    "technique": _convert_measurement_method,
-    "technique_ex": _convert_measurement_method,
     "file_type": _map_file_type,
     "file_date": _parse_datetime,
     "acquisition_file_date": _parse_datetime,
@@ -268,7 +265,7 @@ _VALUE_MAP: _ValueMap = {
 
 _UNIT_MAP: dict[str, str | None] = {
     "KV": "kV",
-    "Percent": "",  # TODO: should be changed back to percent once pint is updated
+    "Percent": "%",
     "atom": "dimensionless",
     "eV/atom": "eV",
 }

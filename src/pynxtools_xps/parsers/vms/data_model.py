@@ -143,10 +143,10 @@ class VamasBlock(_XPSDataclass):
     future_upgrade_block_entries: list = field(default_factory=list)
 
     def convert_to_binding_energy_scale(self):
+        # TODO: check that components are also converted.
         """
         Convert from kinetic to binding energy.
 
-        ToDo: check that components are also converted.
         """
         self.abscissa_label = "binding energy"
 

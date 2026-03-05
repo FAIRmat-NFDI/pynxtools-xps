@@ -40,6 +40,8 @@ from pynxtools_xps.parsers import (
     ScientaHDF5Parser,
     ScientaIgorParser,
     ScientaTXTParser,
+    SPECSMetadataCSVParser,
+    SPECSMetadataSLHParser,
     SpecsSLEParser,
     SpecsXMLParser,
     SpecsXYParser,
@@ -237,6 +239,8 @@ class XPSReader(MultiFormatReader):
     ]
 
     metadata_parsers: list[type[_XPSMetadataParser]] = [
+        SPECSMetadataCSVParser,
+        SPECSMetadataSLHParser,
         VamasResultParser,
     ]
 

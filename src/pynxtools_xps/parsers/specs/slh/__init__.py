@@ -15,5 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# TODO: implement logic for reading SLH metadata
-# from pynxtools_xps.logging import _logger
+from .parser import SPECSMetadataCSVParser, SPECSMetadataSLHParser
+
+__all__ = ["SPECSMetadataCSVParser", "SPECSMetadataSLHParser"]

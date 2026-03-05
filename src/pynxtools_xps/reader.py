@@ -40,6 +40,8 @@ from pynxtools_xps.parsers import (
     ScientaHDF5Parser,
     ScientaIgorParser,
     ScientaTXTParser,
+    SPECSMetadataCSVParser,
+    SPECSMetadataSLHParser,
     SPECSSLEParser,
     SPECSXMLParser,
     SPECSXYParser,
@@ -47,6 +49,7 @@ from pynxtools_xps.parsers import (
     VamasParser,
     VamasResultParser,
 )
+
 from pynxtools_xps.parsers.base import ParsedSpectrum, _XPSMetadataParser, _XPSParser
 
 _PROCESS_ORDER: list[tuple[str, Any]] = [
@@ -286,6 +289,8 @@ class XPSReader(MultiFormatReader):
 
     metadata_parsers: list[type[_XPSMetadataParser]] = [
         VamasResultParser,
+        SPECSMetadataCSVParser,
+        SPECSMetadataSLHParser,
     ]
 
     supported_file_extensions: list[str] = _collect_supported_extensions(parsers)

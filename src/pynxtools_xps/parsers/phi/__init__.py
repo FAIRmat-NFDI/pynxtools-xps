@@ -15,12 +15,11 @@
 # limitations under the License.
 #
 from .data_model import PHIMetadata, PHISpatialArea, PHISpectralRegion
-from .parser import PHIMapper, PHIParser
+from .parser import PHIParser
 
 __all__ = [
     "PHIMetadata",
     "PHISpatialArea",
     "PHISpectralRegion",
     "PHIParser",
-    "PHIMapper",
 ]

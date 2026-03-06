@@ -177,10 +177,16 @@
         },
         "raw_data":{
           "@signal":"raw",
-          "raw":"@data:raw_data",
-          "raw/@units":"@attrs:raw_data/raw/@units",
-          "DATA[*]":"@data:*.channels",
-          "DATA[*]/@units":"@attrs:raw_data/raw/@units"
+          "raw":"@data:raw",
+          "raw/@units":"@data:raw_units",
+          "AXISNAME[cycle]":"@data:raw_cycle",
+          "AXISNAME[scan]":"@data:raw_scan",
+          "AXISNAME[channel]":"@data:raw_channel",
+          "energy":"@link:/entry/data/energy",
+          "energy/@units":"@attrs:energy/@units",
+          "energy/@type":"@attrs:energy/@type",
+          "@axes":"@data:raw_axes",
+          "@energy_indices":"@data:raw_energy_index"
         }
       }
     },
@@ -246,29 +252,6 @@
       "current/@units":"@eln"
     }
   },
-  "/ENTRY/energy_axis_calibration":{
-    "calibrated_axis":"@data:energy",
-    "calibrated_axis/@units":"@attrs:energy/@units",
-    "physical_quantity":"energy",
-    "calibration_object":{
-      "type":"file",
-      "file_name":"@attrs:calibration_file/path"
-    }
-  },
-  "/ENTRY/energy_referencing":null,
-  "/ENTRY/transmission_correction":{
-    "transmission_function":{
-      "@signal":"relative_intensity",
-      "@axes":["kinetic_energy"],
-      "kinetic_energy":"@attrs:transmission_function/kinetic_energy",
-      "kinetic_energy/@units":"@attrs:transmission_function/kinetic_energy/@units",
-      "relative_intensity":"@attrs:transmission_function/relative_intensity"
-    },
-    "calibration_object":{
-      "type":"file",
-      "file_name":"@attrs:transmission_function/file"
-    }
-  },
   "/ENTRY/SAMPLE[sample]":{
     "name":"@eln",
     "identifierNAME[identifier]":"@eln",
@@ -309,17 +292,81 @@
       "flood_gun":"@link:/entry/instrument/flood_gun"
     }
   },
+   "/ENTRY/energy_axis_calibration":{
+    "calibrated_axis":"@data:energy",
+    "calibrated_axis/@units":"@attrs:energy/@units",
+    "physical_quantity":"energy",
+    "calibration_object":{
+      "type":"file",
+      "file_name":"@attrs:calibration_file/path"
+    }
+  },
+  "/ENTRY/energy_referencing":null,
+  "/ENTRY/transmission_correction":{
+    "transmission_function":{
+      "@signal":"relative_intensity",
+      "@axes":["kinetic_energy"],
+      "kinetic_energy":"@attrs:transmission_function/kinetic_energy",
+      "kinetic_energy/@units":"@attrs:transmission_function/kinetic_energy/@units",
+      "relative_intensity":"@attrs:transmission_function/relative_intensity"
+    },
+    "calibration_object":{
+      "type":"file",
+      "file_name":"@attrs:transmission_function/file"
+    }
+  },
+  "/ENTRY/PROCESS[channels_averaging]":{
+    "sequence_index":"!@attrs:sequence_index",
+    "DATA[data]":{
+      "@signal":"data",
+      "DATA[data]":"@data:channels_averaging",
+      "DATA[data]/@units":"@attrs:intensity/@units",
+      "AXISNAME[cycle]":"@data:cycle",
+      "AXISNAME[scan]":"@data:scan",
+      "AXISNAME[energy]":"@link:/entry/data/energy",
+      "AXISNAME[energy]/@units":"@attrs:energy/@units",
+      "@axes":["cycle","scan","energy"]
+    }
+  },
+  "/ENTRY/PROCESS[scan_averaging]":{
+    "sequence_index":"!@attrs:sequence_index",
+    "DATA[data]":{
+      "@signal":"data",
+      "DATA[data]":"@data:scan_averaging",
+      "DATA[data]/@units":"@attrs:intensity/@units",
+      "AXISNAME[cycle]":"@data:cycle",
+      "AXISNAME[energy]":"@link:/entry/data/energy",
+      "AXISNAME[energy]/@units":"@attrs:energy/@units",
+      "@axes":["cycle","energy"]
+    }
+  },
+  "/ENTRY/PROCESS[cycle_averaging]":{
+    "sequence_index":"!@attrs:sequence_index",
+    "DATA[data]":{
+      "@signal":"data",
+      "DATA[data]":"@data:cycle_averaging",
+      "DATA[data]/@units":"@attrs:intensity/@units",
+      "AXISNAME[energy]":"@link:/entry/data/energy",
+      "AXISNAME[energy]/@units":"@attrs:energy/@units",
+      "@axes":["energy"]
+    }
+  },
   "/ENTRY/DATA[data]":{
     "@axes":["energy"],
     "@signal":"data",
     "data":"@data:average",
     "FIELDNAME_errors[data_errors]":"@data:errors",
     "data/@units":"@attrs:intensity/@units",
-    "DATA[*]":"@data:*.scans",
-    "DATA[*]/@units":"@attrs:intensity/@units",
-    "energy":"@data:energy",
-    "energy/@type":"@attrs:energy/@type",
-    "energy/@units":"@attrs:energy/@units",
+    "energy":"@link:/entry/energy_axis_calibration/calibrated_axis",
+    "energy/@type":"@attrs:energy/@type"
+  },
+  "/ENTRY/DATA[data_reduced]":{
+    "@signal":"data",
+    "@axes":["energy"],
+    "data":"!@data:average_reduced",
+    "FIELDNAME_errors[data_errors]":"@data:errors_reduced",
+    "data/@units":"@attrs:intensity/@units",
+    "energy":"@link:/entry/data/energy",
     "@energy_indices":0
   }
 }

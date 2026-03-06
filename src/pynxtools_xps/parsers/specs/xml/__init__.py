@@ -14,6 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from .parser import SpecsXMLMapper, SpecsXMLParser
+from .parser import SpecsXMLParser
 
-__all__ = ["SpecsXMLMapper", "SpecsXMLParser"]
+__all__ = ["SpecsXMLParser"]

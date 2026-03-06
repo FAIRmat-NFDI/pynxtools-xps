@@ -24,7 +24,6 @@ from functools import partial
 from pynxtools_xps.mapping import (
     _convert_energy_scan_mode,
     _convert_energy_type,
-    _convert_measurement_method,
     _MetadataContext,
     _ValueMap,
     parse_datetime,
@@ -110,7 +109,6 @@ _VALUE_MAP: _ValueMap = {
         possible_date_formats=_POSSIBLE_DATE_FORMATS,
     ),
     "energy_scan_mode": _convert_energy_scan_mode,
-    "measurement_type": _convert_measurement_method,
 }
 
 _UNIT_MAP: dict[str, str | None] = {

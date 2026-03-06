@@ -14,15 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# pylint: disable=too-many-lines,too-few-public-methods
 """
-Classes for reading XPS files from TXT export of CasaXPS.
+Parser for reading XPS data from TXT export of CasaXPS.
 """
 
 import itertools
 import operator
 import re
-import warnings
 from abc import abstractmethod
 from pathlib import Path
 from typing import Any, ClassVar
@@ -31,18 +29,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
 
-from pynxtools_xps.mapping import _Value, convert_pascal_to_snake
+from pynxtools_xps.mapping import convert_pascal_to_snake
 from pynxtools_xps.numerics import (
     _get_minimal_step,
     check_uniform_step_width,
     interpolate_arrays,
 )
-from pynxtools_xps.parsers.base import (
-    _construct_data_key,
-    _construct_entry_name,
-    _XPSMapper,
-    _XPSParser,
-)
+from pynxtools_xps.parsers.base import ParsedSpectrum, _construct_entry_name, _XPSParser
 from pynxtools_xps.parsers.vms_export.metadata import _context, _handle_repetitions
 
 
@@ -82,134 +75,19 @@ def _get_dict_keys(header_lines: list[str]) -> list[str]:
     return [_context.normalize_key(header) for header in header_lines if header]
 
 
-class VamasExportMapper(_XPSMapper):
+class _TextParser(_XPSParser):
     """
-    Class for restructuring .txt data file from
-    Casa TXT export (from Vamas) into python dictionary.
-    """
+    Internal parser for ASCII files exported from CasaXPS.
 
-    config_file = "config_vms.json"
-
-    def __init__(self):
-        self.parser_map = {
-            "rows_of_tables": TextParserRows,
-            "columns_of_tables": TextParserColumns,
-        }
-        super().__init__()
-
-    def _get_file_type(self, file: Path):
-        """
-        Check which export option was used in CasaXPS.
-
-        Parameters
-        ----------
-        file : str
-            XPS data filepath.
-
-        Returns
-        -------
-        str
-            Either columns_of_tables or rows_of_tables.
-
-        """
-        with open(file, encoding="utf-8") as txt_file:
-            first_line = txt_file.readline()
-            if first_line.startswith("Cycle"):
-                return "columns_of_tables"
-            return "rows_of_tables"
-
-    def _select_parser(self):
-        """
-        Select parser based on the structure of the text file
-
-        Returns
-        -------
-        TextParser
-            TextParser for CasaXPS export from Vamas files.
-
-        """
-        return self.parser_map[self._get_file_type(self.file)]()
-
-    def construct_data(self, parsed_data: list[dict[str, Any]]):
-        """Map TXT format to NXmpes-ready dict."""
-
-        for spectrum in parsed_data:
-            self._update_xps_dict_with_spectrum(spectrum)
-
-    def _update_xps_dict_with_spectrum(self, spectrum: dict[str, _Value]):
-        """
-        Map one spectrum from raw data to NXmpes-ready dict.
-
-        """
-        # pylint: disable=too-many-locals,duplicate-code
-        entry_parts: list[str] = []
-        for part in ["group_name", "spectrum_type"]:
-            val = spectrum.get(part)
-            if isinstance(val, str):
-                entry_parts.append(val)
-
-        entry = _construct_entry_name(entry_parts)
-        entry_parent = f"/ENTRY[{entry}]"
-
-        entry_parent = f"/ENTRY[{entry}]"
-
-        for key, value in spectrum.items():
-            key, value, unit = _context.format(key, value)
-            if key.startswith("entry"):
-                entry_parent = "/ENTRY[entry]"
-                key = key.replace("entry/", "", 1)
-            mpes_key = f"{entry_parent}/{key}"
-            self._data[mpes_key] = value
-
-            if unit is not None:
-                self._data[f"{mpes_key}/@units"] = unit
-
-        # Create key for writing to data.
-        scan_key = _construct_data_key(spectrum)
-
-        energy = np.array(spectrum["kinetic_energy/data"])
-        # energy = np.array(spectrum["binding_energy/data"])
-        intensity = np.array(spectrum["counts_per_second/data"])
-        # intensity = np.array(spectrum["counts/data"])
-
-        # If multiple spectra exist to entry, only create a new
-        # xr.Dataset if the entry occurs for the first time.
-        if entry not in self._data["data"]:
-            self._data["data"][entry] = xr.Dataset()
-
-        # Write averaged cycle data to 'data'.
-        all_scan_data = [
-            value
-            for key, value in self._data["data"][entry].items()
-            if scan_key.split("_")[0] in key
-        ]
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=RuntimeWarning)
-            averaged_scans = np.mean(all_scan_data, axis=0)
-
-        if averaged_scans.size == 1:
-            # on first scan in cycle
-            averaged_scans = intensity
-
-        self._data["data"][entry][scan_key.split("_")[0]] = xr.DataArray(
-            data=averaged_scans,
-            coords={"energy": energy},
-        )
-
-        self._data["data"][entry][scan_key] = xr.DataArray(
-            data=intensity, coords={"energy": energy}
-        )
-
-
-class TextParser(_XPSParser):  # pylint: disable=too-few-public-methods
-    """
-    Parser for ASCI files exported from CasaXPS.
+    Not intended for direct use outside this module.  Use
+    ``VamasExportParser`` as the public entry point.
     """
 
     config_file: ClassVar[str] = "config_vms.json"
     supported_file_extensions: ClassVar[tuple[str, ...]] = (".txt",)
 
     def __init__(self):
+        super().__init__()
         self.lines: list[str] = []
         self.n_headerlines: int = 7
         self.uniform_energy_steps: bool = True
@@ -218,22 +96,17 @@ class TextParser(_XPSParser):  # pylint: disable=too-few-public-methods
         """
         Parse the file into a list of dictionaries.
 
-        Parsed data stored in the attribute 'self.data'.
+        Parsed data stored in the attribute 'self._data'.
 
         Parameters
         ----------
-        file : str
+        file : Path
             XPS data filepath.
         uniform_energy_steps : bool, optional
-            If true, the spectra are interpolate to have uniform
+            If true, the spectra are interpolated to have uniform
             energy steps. The default is True.
-        **kwargs : dict
-            n_headerlines: number of header_lines in each data block.
-
-        Returns
-        -------
-        dict
-            DESCRIPTION.
+        n_headerlines : int, optional
+            Number of header lines in each data block.
 
         """
         self.n_headerlines = kwargs.pop("n_headerlines", self.n_headerlines)
@@ -245,7 +118,7 @@ class TextParser(_XPSParser):  # pylint: disable=too-few-public-methods
         self._read_lines(file)
         blocks = self._parse_blocks()
 
-        self._data = self._build_list_of_dicts(blocks)
+        self._flat_spectra = self._build_list_of_dicts(blocks)
 
     def _read_lines(self, file):
         """
@@ -256,10 +129,6 @@ class TextParser(_XPSParser):  # pylint: disable=too-few-public-methods
         file : str
             XPS data filepath.
 
-        Returns
-        -------
-        None.
-
         """
         with open(file, encoding="utf-8") as txt_file:
             for line in txt_file:
@@ -269,8 +138,6 @@ class TextParser(_XPSParser):  # pylint: disable=too-few-public-methods
     def _parse_blocks(self) -> list[list[str]]:
         """
         Extract spectrum blocks from full data string.
-
-        This method has to be implemented in the inherited parsers.
 
         Returns
         -------
@@ -286,8 +153,6 @@ class TextParser(_XPSParser):  # pylint: disable=too-few-public-methods
         """
         Build list of dictionaries, with each dict containing data
         and metadata of one spectrum (block).
-
-        This method has to be implemented in the inherited parsers.
 
         Parameters
         ----------
@@ -305,11 +170,7 @@ class TextParser(_XPSParser):  # pylint: disable=too-few-public-methods
     def _separate_header_and_data(self, block):
         """
         Separate header (with metadata) from data for one measurement
-        block
-
-        Returns
-        -------
-        None.
+        block.
 
         """
         header = block[: self.n_headerlines]
@@ -318,15 +179,25 @@ class TextParser(_XPSParser):  # pylint: disable=too-few-public-methods
         return header, data
 
 
-class TextParserRows(TextParser):
+class _TextParserRows(_TextParser):
     """
-    Parser for ASCI files exported from CasaXPS using the
+    Internal parser for ASCII files exported from CasaXPS using the
     'Rows of Tables' option.
     """
 
     def __init__(self):
         super().__init__()
         self.n_headerlines: int = 7
+
+    def matches_file(self, file: Path) -> bool:
+        """Return True for CasaXPS VAMAS text exports in rows layout)."""
+        try:
+            with open(file, encoding="utf-8", errors="ignore") as f:
+                first = f.readline()
+            # Rows format: "Characteristic Energy eV\t<float>\tAcquisition Time s\t..."
+            return "Characteristic Energy eV" in first and "Acquisition Time s" in first
+        except Exception:
+            return False
 
     def _parse_blocks(self) -> list[list[str]]:
         """
@@ -353,7 +224,7 @@ class TextParserRows(TextParser):
 
         """
         lines = blocks[0]
-        header, data_lines = self._separate_header_and_data(blocks)
+        header, data_lines = self._separate_header_and_data(lines)
         settings = self._parse_header(header)
         data = self._parse_data(data_lines)
 
@@ -438,10 +309,8 @@ class TextParserRows(TextParser):
                 x_bin, intensity = interpolate_arrays(x_bin, intensity)
 
             spectrum = {
-                "data": {
-                    "binding_energy": np.array(x_bin),
-                    "intensity": np.array(intensity).squeeze(),
-                },
+                "binding_energy/data": np.array(x_bin),
+                "counts_per_second/data": np.array(intensity).squeeze(),
                 "start_energy": x_bin[0],
                 "stop_energy": x_bin[-1],
                 "energy_type": "binding",
@@ -456,15 +325,28 @@ class TextParserRows(TextParser):
         return data
 
 
-class TextParserColumns(TextParser):
+class _TextParserColumns(_TextParser):
     """
-    Parser for ASCI files exported from CasaXPS using the
+    Internal parser for ASCII files exported from CasaXPS using the
     'Columns of Tables' option.
     """
 
     def __init__(self):
         super().__init__()
         self.n_headerlines = 8
+
+    def matches_file(self, file: Path) -> bool:
+        """Return True for CasaXPS VAMAS text exports in columns layout)."""
+        try:
+            with open(file, encoding="utf-8", errors="ignore") as f:
+                first = f.readline()
+            # Columns format: "Cycle N:GroupName:SpectrumType\t..."
+            if first.startswith("Cycle ") and ":" in first:
+                return True
+        except Exception:
+            return False
+
+        return False
 
     def _parse_blocks(self) -> list[list[str]]:
         """
@@ -613,7 +495,6 @@ class TextParserColumns(TextParser):
                         param_key, param_value, unit = _context.format(
                             param, param_value
                         )
-                        # print(param_key, param_value)
                         flattened[f"{sup_key}/{param_key}"] = param_value
                         if unit:
                             flattened[f"{sup_key}/{param_key}/@units"] = unit
@@ -656,7 +537,6 @@ class TextParserColumns(TextParser):
         Build list of dictionaries, with each dict containing data
         and metadata of one spectrum (block).
 
-
         Parameters
         ----------
         blocks : list
@@ -695,3 +575,129 @@ class TextParserColumns(TextParser):
             plt.show()
 
         return spectra
+
+
+class VamasExportParser(_XPSParser):
+    """
+    Parser for ASCII files exported from CasaXPS (from Vamas).
+
+    Supports both 'Rows of Tables' and 'Columns of Tables' export formats.
+    Populates ``self._data`` with one ``ParsedSpectrum`` per
+    (group_name, spectrum_type) pair.
+    """
+
+    config_file: ClassVar[str] = "config_vms.json"
+    supported_file_extensions: ClassVar[tuple[str, ...]] = (".txt",)
+
+    _SUB_PARSERS: ClassVar[tuple[type[_TextParser], ...]] = (
+        _TextParserRows,
+        _TextParserColumns,
+    )
+
+    _metadata_exclude_keys: ClassVar[frozenset[str]] = frozenset(
+        {
+            "binding_energy/data",
+            "kinetic_energy/data",
+            "counts_per_second/data",
+            "counts/data",
+            "counts/data_cps",
+        }
+    )
+
+    def matches_file(self, file: Path) -> bool:
+        """Return True if any txt export variant recognizes the file."""
+        return any(cls().matches_file(file) for cls in self._SUB_PARSERS)
+
+    def _parse(self, file: Path, **kwargs) -> None:
+        """
+        Parse the CasaXPS text export and populate ``self._data``.
+
+        One ``ParsedSpectrum`` is built per (group_name, spectrum_type) pair.
+        The intensity DataArray has dims ``("cycle", "scan", "energy")``.
+        Fitting data (component*/data, background*/data, fit_sum/data) is
+        stored in ``metadata`` as-is.
+
+        Dispatch to the first matching strategy and merge its data
+
+        Parameters
+        ----------
+        file : Path
+            XPS data filepath.
+        n_headerlines : int, optional
+            Number of header lines per data block.
+        uniform_energy_steps : bool, optional
+            If True, spectra are interpolated to have uniform energy steps.
+
+        """
+        for sub_parser_cls in self._SUB_PARSERS:
+            sub_parser = sub_parser_cls()
+            if sub_parser.matches_file(file):
+                sub_parser._parse(file, **kwargs)
+                self._flat_spectra = sub_parser._flat_spectra
+                self._build_parsed_spectra()
+                return
+        raise ValueError(
+            f"{self.__class__.__name__}: no sub parser matched file '{file}'"
+        )
+
+    def _build_parsed_spectra(self) -> None:
+        """Group flat spectra by entry name and build ``self._data``."""
+        entries: dict[str, list[dict[str, Any]]] = {}
+        for spectrum in self._flat_spectra:
+            entry_parts = [
+                str(spectrum.get(part, ""))
+                for part in ("group_name", "spectrum_type")
+                if spectrum.get(part)
+            ]
+            entry_name = _construct_entry_name(entry_parts)
+            entries.setdefault(entry_name, []).append(spectrum)
+
+        for entry_name, spectra in entries.items():
+            self._data[entry_name] = self._assemble_entry(spectra)
+
+    def _assemble_entry(self, spectra: list[dict[str, Any]]) -> ParsedSpectrum:
+        """
+        Build a ``ParsedSpectrum`` from all scan dicts for one entry.
+
+        Parameters
+        ----------
+        spectra : list[dict]
+            All spectrum dicts from the flat parser output that share the
+            same entry name.
+
+        Returns
+        -------
+        ParsedSpectrum
+
+        """
+        # Resolve energy axis from the first spectrum.
+        first = spectra[0]
+        if "binding_energy/data" in first:
+            energy_key = "binding_energy/data"
+        else:
+            energy_key = "kinetic_energy/data"
+
+        # Resolve intensity axis.
+        if "counts_per_second/data" in first:
+            intensity_key = "counts_per_second/data"
+        else:
+            intensity_key = "counts/data"
+
+        energy_axis = np.array(first[energy_key])
+
+        # Stack intensities: shape (1, n_scans, n_energy).
+        intensities = np.stack([np.array(s[intensity_key]) for s in spectra], axis=0)
+        intensities = intensities[np.newaxis, ...]  # (1, n_scans, n_energy)
+
+        data_array = xr.DataArray(
+            data=intensities,
+            dims=("cycle", "scan", "energy"),
+            coords={"energy": energy_axis},
+        )
+
+        # Metadata: all keys except the primary energy/intensity data arrays.
+        # Fitting data (component*/data, background*/data, fit_sum/data) is
+        # kept as-is in metadata.
+        metadata = self._filter_metadata(first)
+
+        return ParsedSpectrum(data=data_array, raw=None, metadata=metadata)

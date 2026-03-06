@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 """
-Data model for Kratos spectrometers for export to CasaXPS.
+Data model for Kratos instruments for export to Vamas.
 """
 
 from dataclasses import dataclass, field

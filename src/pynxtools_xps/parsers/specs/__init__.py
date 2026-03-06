@@ -14,15 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from .sle import SLEProdigyParser, SpecsSLEMapper
-from .xml import SpecsXMLMapper, SpecsXMLParser
-from .xy import SpecsXYMapper, XYProdigyParser
+from .sle import SpecsSLEParser
+from .slh import SPECSMetadataCSVParser, SPECSMetadataSLHParser
+from .xml import SpecsXMLParser
+from .xy import SpecsXYParser
 
 __all__ = [
-    "SpecsSLEMapper",
-    "SpecsXMLMapper",
-    "SpecsXYMapper",
-    "SLEProdigyParser",
+    "SpecsSLEParser",
     "SpecsXMLParser",
-    "XYProdigyParser",
+    "SpecsXYParser",
+    "SPECSMetadataCSVParser",
+    "SPECSMetadataSLHParser",
 ]

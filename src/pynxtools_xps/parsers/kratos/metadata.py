@@ -97,22 +97,6 @@ _VALUE_MAP: _ValueMap = {
     "deflection": _convert_xray_deflection,
 }
 
-# TODO: what to do with these, should be handled by generic format_key_value_and_unit
-# KEYS_WITH_UNITS: list[str] = [
-#     "filament_current",
-#     "filament_bias",
-#     "charge_balance",
-#     "emission_current",
-#     "energy_start",
-#     "energy_end",
-#     "energy_centre",
-#     "energy_width",
-#     "step_size",
-#     "dwell_time",
-#     "sweep_time",
-#     "x_ray_power",
-# ]
-
 _UNIT_MAP: dict[str, str | None] = {}
 
 _DEFAULT_UNITS: dict[str, str] = {

@@ -114,3 +114,26 @@ def is_version_supported(
             return True
 
     return False
+
+
+def _version_ranges_overlap(
+    primary_parser_versions: Iterable[VersionRange],
+    required_parser_versions: Iterable[VersionRange],
+) -> bool:
+    """Return True if any range in *primary_parser_versions* overlaps with any
+    range in *required_parser_versions*.
+
+    Ranges are half-open intervals ``[lower, upper)`` with ``upper=None`` meaning
+    unbounded. Two intervals ``[p_lo, p_hi)`` and ``[r_lo, r_hi)`` overlap iff
+    ``p_lo < r_hi AND r_lo < p_hi`` (treating ``None`` as +∞).
+
+    Used to check whether a metadata parser's ``supported_primary_parser_versions``
+    is compatible with a primary parser's ``supported_versions``.
+    """
+    for p_lo, p_hi in primary_parser_versions:
+        for r_lo, r_hi in required_parser_versions:
+            p_lo_lt_r_hi = r_hi is None or p_lo < r_hi
+            r_lo_lt_p_hi = p_hi is None or r_lo < p_hi
+            if p_lo_lt_r_hi and r_lo_lt_p_hi:
+                return True
+    return False

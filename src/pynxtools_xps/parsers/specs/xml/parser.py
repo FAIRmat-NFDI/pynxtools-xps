@@ -531,8 +531,6 @@ class SpecsXMLParser(_XPSParser):
 
         return (name, cumulative_counts)
 
-    # pylint: disable=too-many-branches
-    # pylint: disable=too-many-statements
     def collect_raw_data_to_construct_data(self):
         """Collect the raw data about detectors so that the binding energy and
         and counts for the corresponding nominal.
@@ -633,7 +631,6 @@ class SpecsXMLParser(_XPSParser):
 
                 self._flat_spectra[entry]["raw_data"]["scans"][scan_name] = val
 
-    # pylint: disable=too-many-locals,too-many-branches
     def _build_parsed_spectra(self) -> None:
         """Apply MCD channel physics and build ParsedSpectrum objects.
 

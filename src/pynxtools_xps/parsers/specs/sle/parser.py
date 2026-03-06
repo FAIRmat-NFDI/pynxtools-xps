@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# pylint: disable=too-many-lines,too-many-instance-attributes
 """
 Parser for reading XPS data from SPECS instruments in the
 proprietary SPECS Lab Prodigy SLE format.
@@ -292,7 +291,6 @@ class SpecsSLEParser(_XPSParser):
         -------
         None.
         """
-        # pylint: disable=too-many-locals
 
         total = len(self._flat_spectra)
         for idx, spectrum in enumerate(self._flat_spectra, start=1):

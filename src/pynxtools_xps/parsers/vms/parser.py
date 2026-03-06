@@ -248,7 +248,6 @@ class VamasParser(_XPSParser):
             A block represents one spectrum with its metadata.
 
         """
-        # pylint: disable=too-many-statements
         block = VamasBlock()
         block.block_id = self.lines.pop(0).strip()
         block.sample_id = self.lines.pop(0).strip()

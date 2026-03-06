@@ -8,7 +8,7 @@ The implementation is organized in three explicit layers, each with a clearly bo
 
 1. **Parsing** — vendor-specific
    [`_XPSParser`](https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/src/pynxtools_xps/parsers/base.py)
-   subclasses extract spectra from raw files into flat dictionaries.
+   subclasses extract spectra from raw files into typed `ParsedSpectrum` objects.
 2. **Normalization** — per-vendor
    [`_MetadataContext`](https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/src/pynxtools_xps/mapping.py)
    instances canonicalize key names, values, and units through a deterministic pipeline.
@@ -20,7 +20,7 @@ This separation keeps all vendor-specific knowledge confined to
 ```mermaid
 flowchart LR
     A[Vendor file\n.sle / .vms / .xy / …] --> B[Parser\n_XPSParser]
-    B --> C[Flat spectrum dicts\nlist of dicts]
+    B --> C[ParsedSpectrum objects\ndict keyed by entry name]
     C --> D[_MetadataContext\nnormalize key / value / unit]
     D --> E[Canonical key-value pairs]
     E --> F[JSON config\nNeXus paths]
@@ -39,20 +39,42 @@ Each supported format has a dedicated parser in
 All parsers inherit from
 [`_Parser`](https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/src/pynxtools_xps/parsers/base.py),
 the abstract base class that defines the extension, version, and structure validation contract.
+It declares two `@abstractmethod` hooks that every subclass must implement:
+`matches_file()` (positive format identification) and `_parse()` (data extraction).
 Two concrete base classes specialize it:
 
 - [`_XPSParser`](https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/src/pynxtools_xps/parsers/base.py)
-  — primary data parsers. Subclasses implement `matches_file()` (structural validation)
-  and `_parse()` (data extraction).
+  — primary data parsers.
 - [`_XPSMetadataParser`](https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/src/pynxtools_xps/parsers/base.py)
   — supplementary parsers for auxiliary files (for example, CasaXPS quantification exports).
   They inject additional metadata into already-parsed data via `update_main_file_data()`.
 
 ### Output format
 
-Every `_XPSParser` populates `self._data`, a `list[dict[str, Any]]`. Each dictionary
-represents one XPS spectrum and contains all raw key-value pairs extracted from the file.
-Key names and value formats are vendor-specific at this stage.
+Every `_XPSParser` populates `self._data`, a `dict[str, ParsedSpectrum]`. Keys are NeXus
+entry names (e.g. `"SampleName__Survey"`). Each
+[`ParsedSpectrum`](https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/src/pynxtools_xps/parsers/base.py)
+holds three fields:
+
+- `data` — channel-averaged scan data as an `xr.DataArray` with required dimensions
+  `("cycle", "scan")` followed by one or more physical axes (typically `"energy"`).
+  Use `n_cycles=1` for formats without an explicit loop structure.
+- `raw` — optional per-channel data with required dimensions `("cycle", "scan", "channel")`
+  plus the same physical axes as `data`.
+- `metadata` — flat `dict[str, Any]` of canonical key-value pairs for `@attrs:` lookups
+  in config files.
+
+`ParsedSpectrum` exposes pre-built aggregations:
+
+| Method | Returns |
+| ------ | ------- |
+| `average()` | Mean across all cycles and scans — shape `(*axes,)` |
+| `errors()` | Standard deviation across all cycles and scans — shape `(*axes,)` |
+| `scan_average()` | Mean across scans within each cycle — shape `(cycle, *axes)` |
+| `cycle_average()` | Scan average then mean across cycles — shape `(*axes,)` |
+
+These are consumed by `XPSReader` to fill the NXprocess groups defined in the config
+(`PROCESS[scan_averaging]`, `PROCESS[cycle_averaging]`, etc.).
 
 ### Version awareness
 
@@ -147,8 +169,17 @@ The supported application definitions are:
 
 ## Typed intermediate representation
 
-Intermediate data objects used during parsing inherit from
+Two typed structures enforce correctness during and after parsing:
+
+**`_XPSDataclass`** — vendor-internal data models.
+Dataclasses for each logical record in a format (header, spectrum region, …) inherit from
 [`_XPSDataclass`](https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/src/pynxtools_xps/parsers/base.py),
-a base class that enforces type annotations at assignment time.
+which enforces type annotations at assignment time.
 It coerces compatible values (for example, `str` → `int`) and raises `TypeError` for
 values that cannot be converted, keeping parsing logic free of ad-hoc type guards.
+These models are internal to each vendor subpackage (in `data_model.py`).
+
+**`ParsedSpectrum`** — the public output of every `_XPSParser`.
+After a parser's `_parse()` runs, results are exposed as `dict[str, ParsedSpectrum]`
+accessible via the `data` property.  See [Layer 1 — Output format](#output-format) above
+for the full field specification.

@@ -6,8 +6,14 @@ plain text (`.txt`),
 [Igor Binary Wave Format](https://www.wavemetrics.com/) (`.ibw`), and
 HDF5 (`.h5` / `.hdf5`).
 
-The parser is in
-[`src/pynxtools_xps/parsers/scienta/`](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/src/pynxtools_xps/parsers/scienta).
+Three dedicated parsers live in
+[`src/pynxtools_xps/parsers/scienta/`](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/src/pynxtools_xps/parsers/scienta):
+
+| Parser class | Source file | Format |
+| ------------ | ----------- | ------ |
+| `ScientaTXTParser` | `txt_parser.py` | Plain-text SES export |
+| `ScientaIgorParser` | `igor_parser.py` | Igor Binary Wave (IBW) |
+| `ScientaHDF5Parser` | `hdf5_parser.py` | HDF5 written by Scienta/PEAK |
 
 ## Supported versions
 

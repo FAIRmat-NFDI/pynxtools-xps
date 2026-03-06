@@ -16,7 +16,7 @@
 #
 
 """
-Metadata mapping for the SPECS XY parser.
+Metadata mapping for the SPECS XML parser.
 """
 
 from pynxtools_xps.mapping import _convert_energy_scan_mode, _MetadataContext

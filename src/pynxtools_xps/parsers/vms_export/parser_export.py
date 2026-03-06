@@ -14,202 +14,97 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# pylint: disable=too-many-lines,too-few-public-methods
 """
-Classes for reading XPS files from TXT export of CasaXPS.
+Parser for reading XPS data from TXT export of CasaXPS.
 """
 
 import itertools
 import operator
 import re
-import warnings
 from abc import abstractmethod
 from pathlib import Path
 from typing import Any, ClassVar
 
-import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
 
-from pynxtools_xps.mapping import _Value, convert_pascal_to_snake
+from pynxtools_xps.mapping import convert_pascal_to_snake
 from pynxtools_xps.numerics import (
     _get_minimal_step,
     check_uniform_step_width,
     interpolate_arrays,
 )
-from pynxtools_xps.parsers.base import (
-    _construct_data_key,
-    _construct_entry_name,
-    _XPSMapper,
-    _XPSParser,
-)
-from pynxtools_xps.parsers.vms_export.metadata import _context, _handle_repetitions
+from pynxtools_xps.parsers.base import ParsedSpectrum, _construct_entry_name, _XPSParser
+from pynxtools_xps.parsers.vms_export.metadata import _context
+
+# Column-header → flat-dict key mappings for the two halves of the data section.
+# The KE-side columns produce ``{key}/data`` arrays; the BE-side produce
+# ``{key}/data_cps`` arrays.  Component-name columns are handled separately
+# by :func:`_map_data_headers`.
+_KE_SIDE_HEADERS: dict[str, str] = {
+    "K.E.": "kinetic_energy/data",
+    "Counts": "counts/data",
+    "Background": "background/data",
+    "Envelope": "envelope/data",
+}
+
+_BE_SIDE_HEADERS: dict[str, str] = {
+    "B.E.": "binding_energy/data",
+    "CPS": "counts_per_second/data",
+    "Background CPS": "background/data_cps",
+    "Envelope CPS": "envelope/data_cps",
+}
 
 
-def _select_from_list(input_list: list[str], skip: int, keep_middle: int) -> list[str]:
-    """
-    Select items from a list according to the specified pattern:
-    - Extract the first (2 + count + keep_middle) items,
-    - Skip the next 'count' number of items,
-    - Extract everything after the skipped items.
+def _map_data_headers(
+    headers: list[str],
+    comp_names: list[str],
+    special_map: dict[str, str],
+    comp_suffix: str,
+) -> list[str]:
+    """Map raw column headers from the data section to flat-dict keys.
 
-    Parameters:
-    - input_list (List[str]): The list of strings to process.
-    - skip (int): The number of items to skip after the initial selection.
-    - keep_middle (int): The number of items to keep in the middle.
-
-    Returns:
-    - List[str]: The processed list after extracting and skipping items.
-    """
-    first_part = input_list[: (2 + skip + keep_middle)]
-    skip_part = input_list[(2 + skip + keep_middle) : (2 + skip + keep_middle + skip)]
-    remaining_part = input_list[(2 + skip + keep_middle + skip) :]
-
-    return first_part + remaining_part
-
-
-def _get_dict_keys(header_lines: list[str]) -> list[str]:
-    """
-    Maps a list of header strings to their corresponding keys based on a predefined mapping.
+    Special headers are resolved via *special_map*.  Headers that match a
+    component name are assigned ``component{i}{comp_suffix}`` in order of
+    first appearance.  All other headers are normalized with
+    ``_context.normalize_key`` and *comp_suffix* appended.
 
     Args:
-        header_lines (List[str]): A list of header strings to be mapped.
+        headers:      Ordered raw column header strings (whitespace stripped).
+        comp_names:   Ordered component names from the ``Name`` row.
+        special_map:  Explicit header → final key mapping.
+        comp_suffix:  Appended to component keys (``"/data"`` for the KE
+                      side, ``"/data_cps"`` for the BE side).
 
     Returns:
-        List[str]: A list of keys, where each header is replaced by its mapped value
-                   or left unchanged if no mapping is found.
+        Flat-dict keys in the same order as *headers*.
     """
-    return [_context.normalize_key(header) for header in header_lines if header]
+    comp_idx = 0
+    keys: list[str] = []
+    for h in headers:
+        if h in special_map:
+            keys.append(special_map[h])
+        elif h in comp_names:
+            keys.append(f"component{comp_idx}{comp_suffix}")
+            comp_idx += 1
+        else:
+            keys.append(_context.normalize_key(h) + comp_suffix)
+    return keys
 
 
-class VamasExportMapper(_XPSMapper):
+class _TextParser(_XPSParser):
     """
-    Class for restructuring .txt data file from
-    Casa TXT export (from Vamas) into python dictionary.
-    """
+    Internal parser for ASCII files exported from CasaXPS.
 
-    config_file = "config_vms.json"
-
-    def __init__(self):
-        self.parser_map = {
-            "rows_of_tables": TextParserRows,
-            "columns_of_tables": TextParserColumns,
-        }
-        super().__init__()
-
-    def _get_file_type(self, file: Path):
-        """
-        Check which export option was used in CasaXPS.
-
-        Parameters
-        ----------
-        file : str
-            XPS data filepath.
-
-        Returns
-        -------
-        str
-            Either columns_of_tables or rows_of_tables.
-
-        """
-        with open(file, encoding="utf-8") as txt_file:
-            first_line = txt_file.readline()
-            if first_line.startswith("Cycle"):
-                return "columns_of_tables"
-            return "rows_of_tables"
-
-    def _select_parser(self):
-        """
-        Select parser based on the structure of the text file
-
-        Returns
-        -------
-        TextParser
-            TextParser for CasaXPS export from Vamas files.
-
-        """
-        return self.parser_map[self._get_file_type(self.file)]()
-
-    def construct_data(self, parsed_data: list[dict[str, Any]]):
-        """Map TXT format to NXmpes-ready dict."""
-
-        for spectrum in parsed_data:
-            self._update_xps_dict_with_spectrum(spectrum)
-
-    def _update_xps_dict_with_spectrum(self, spectrum: dict[str, _Value]):
-        """
-        Map one spectrum from raw data to NXmpes-ready dict.
-
-        """
-        # pylint: disable=too-many-locals,duplicate-code
-        entry_parts: list[str] = []
-        for part in ["group_name", "spectrum_type"]:
-            val = spectrum.get(part)
-            if isinstance(val, str):
-                entry_parts.append(val)
-
-        entry = _construct_entry_name(entry_parts)
-        entry_parent = f"/ENTRY[{entry}]"
-
-        entry_parent = f"/ENTRY[{entry}]"
-
-        for key, value in spectrum.items():
-            key, value, unit = _context.format(key, value)
-            if key.startswith("entry"):
-                entry_parent = "/ENTRY[entry]"
-                key = key.replace("entry/", "", 1)
-            mpes_key = f"{entry_parent}/{key}"
-            self._data[mpes_key] = value
-
-            if unit is not None:
-                self._data[f"{mpes_key}/@units"] = unit
-
-        # Create key for writing to data.
-        scan_key = _construct_data_key(spectrum)
-
-        energy = np.array(spectrum["kinetic_energy/data"])
-        # energy = np.array(spectrum["binding_energy/data"])
-        intensity = np.array(spectrum["counts_per_second/data"])
-        # intensity = np.array(spectrum["counts/data"])
-
-        # If multiple spectra exist to entry, only create a new
-        # xr.Dataset if the entry occurs for the first time.
-        if entry not in self._data["data"]:
-            self._data["data"][entry] = xr.Dataset()
-
-        # Write averaged cycle data to 'data'.
-        all_scan_data = [
-            value
-            for key, value in self._data["data"][entry].items()
-            if scan_key.split("_")[0] in key
-        ]
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=RuntimeWarning)
-            averaged_scans = np.mean(all_scan_data, axis=0)
-
-        if averaged_scans.size == 1:
-            # on first scan in cycle
-            averaged_scans = intensity
-
-        self._data["data"][entry][scan_key.split("_")[0]] = xr.DataArray(
-            data=averaged_scans,
-            coords={"energy": energy},
-        )
-
-        self._data["data"][entry][scan_key] = xr.DataArray(
-            data=intensity, coords={"energy": energy}
-        )
-
-
-class TextParser(_XPSParser):  # pylint: disable=too-few-public-methods
-    """
-    Parser for ASCI files exported from CasaXPS.
+    Not intended for direct use outside this module.  Use
+    ``VamasExportParser`` as the public entry point.
     """
 
     config_file: ClassVar[str] = "config_vms.json"
     supported_file_extensions: ClassVar[tuple[str, ...]] = (".txt",)
 
     def __init__(self):
+        super().__init__()
         self.lines: list[str] = []
         self.n_headerlines: int = 7
         self.uniform_energy_steps: bool = True
@@ -218,22 +113,17 @@ class TextParser(_XPSParser):  # pylint: disable=too-few-public-methods
         """
         Parse the file into a list of dictionaries.
 
-        Parsed data stored in the attribute 'self.data'.
+        Parsed data stored in the attribute 'self._data'.
 
         Parameters
         ----------
-        file : str
+        file : Path
             XPS data filepath.
         uniform_energy_steps : bool, optional
-            If true, the spectra are interpolate to have uniform
+            If true, the spectra are interpolated to have uniform
             energy steps. The default is True.
-        **kwargs : dict
-            n_headerlines: number of header_lines in each data block.
-
-        Returns
-        -------
-        dict
-            DESCRIPTION.
+        n_headerlines : int, optional
+            Number of header lines in each data block.
 
         """
         self.n_headerlines = kwargs.pop("n_headerlines", self.n_headerlines)
@@ -245,7 +135,7 @@ class TextParser(_XPSParser):  # pylint: disable=too-few-public-methods
         self._read_lines(file)
         blocks = self._parse_blocks()
 
-        self._data = self._build_list_of_dicts(blocks)
+        self._flat_spectra = self._build_list_of_dicts(blocks)
 
     def _read_lines(self, file):
         """
@@ -256,10 +146,6 @@ class TextParser(_XPSParser):  # pylint: disable=too-few-public-methods
         file : str
             XPS data filepath.
 
-        Returns
-        -------
-        None.
-
         """
         with open(file, encoding="utf-8") as txt_file:
             for line in txt_file:
@@ -269,8 +155,6 @@ class TextParser(_XPSParser):  # pylint: disable=too-few-public-methods
     def _parse_blocks(self) -> list[list[str]]:
         """
         Extract spectrum blocks from full data string.
-
-        This method has to be implemented in the inherited parsers.
 
         Returns
         -------
@@ -286,8 +170,6 @@ class TextParser(_XPSParser):  # pylint: disable=too-few-public-methods
         """
         Build list of dictionaries, with each dict containing data
         and metadata of one spectrum (block).
-
-        This method has to be implemented in the inherited parsers.
 
         Parameters
         ----------
@@ -305,11 +187,7 @@ class TextParser(_XPSParser):  # pylint: disable=too-few-public-methods
     def _separate_header_and_data(self, block):
         """
         Separate header (with metadata) from data for one measurement
-        block
-
-        Returns
-        -------
-        None.
+        block.
 
         """
         header = block[: self.n_headerlines]
@@ -318,15 +196,25 @@ class TextParser(_XPSParser):  # pylint: disable=too-few-public-methods
         return header, data
 
 
-class TextParserRows(TextParser):
+class _TextParserRows(_TextParser):
     """
-    Parser for ASCI files exported from CasaXPS using the
+    Internal parser for ASCII files exported from CasaXPS using the
     'Rows of Tables' option.
     """
 
     def __init__(self):
         super().__init__()
         self.n_headerlines: int = 7
+
+    def matches_file(self, file: Path) -> bool:
+        """Return True for CasaXPS VAMAS text exports in rows layout)."""
+        try:
+            with open(file, encoding="utf-8", errors="ignore") as f:
+                first = f.readline()
+            # Rows format: "Characteristic Energy eV\t<float>\tAcquisition Time s\t..."
+            return "Characteristic Energy eV" in first and "Acquisition Time s" in first
+        except Exception:
+            return False
 
     def _parse_blocks(self) -> list[list[str]]:
         """
@@ -353,7 +241,7 @@ class TextParserRows(TextParser):
 
         """
         lines = blocks[0]
-        header, data_lines = self._separate_header_and_data(blocks)
+        header, data_lines = self._separate_header_and_data(lines)
         settings = self._parse_header(header)
         data = self._parse_data(data_lines)
 
@@ -438,10 +326,8 @@ class TextParserRows(TextParser):
                 x_bin, intensity = interpolate_arrays(x_bin, intensity)
 
             spectrum = {
-                "data": {
-                    "binding_energy": np.array(x_bin),
-                    "intensity": np.array(intensity).squeeze(),
-                },
+                "binding_energy/data": np.array(x_bin),
+                "counts_per_second/data": np.array(intensity).squeeze(),
                 "start_energy": x_bin[0],
                 "stop_energy": x_bin[-1],
                 "energy_type": "binding",
@@ -456,15 +342,28 @@ class TextParserRows(TextParser):
         return data
 
 
-class TextParserColumns(TextParser):
+class _TextParserColumns(_TextParser):
     """
-    Parser for ASCI files exported from CasaXPS using the
+    Internal parser for ASCII files exported from CasaXPS using the
     'Columns of Tables' option.
     """
 
     def __init__(self):
         super().__init__()
         self.n_headerlines = 8
+
+    def matches_file(self, file: Path) -> bool:
+        """Return True for CasaXPS VAMAS text exports in columns layout)."""
+        try:
+            with open(file, encoding="utf-8", errors="ignore") as f:
+                first = f.readline()
+            # Columns format: "Cycle N:GroupName:SpectrumType\t..."
+            if first.startswith("Cycle ") and ":" in first:
+                return True
+        except Exception:
+            return False
+
+        return False
 
     def _parse_blocks(self) -> list[list[str]]:
         """
@@ -484,178 +383,125 @@ class TextParserColumns(TextParser):
 
         return blocks
 
-    def _parse_block_data(self, block_lines):
-        """
-        Parses a block of spectral data into metadata and a DataFrame of measurements.
+    def _parse_block_data(self, block_lines: list[str]) -> dict[str, Any]:
+        """Parse one ``Cycle``-headed block into a flat metadata + data dict.
+
+        The data section header contains both ``K.E.`` and ``B.E.``, separated
+        by an empty tab cell (``\\t\\t``).  The left half (KE side) produces
+        ``{key}/data`` arrays; the right half (BE side) produces
+        ``{key}/data_cps`` arrays.  Component columns are assigned
+        ``component{N}/data`` and ``component{N}/data_cps`` keys in order.
+
+        Header rows (``Name``, ``Position``, ``FWHM``, ``Area``, ``Width``,
+        ``Lineshape``) produce scalar ``component{N}/{field}`` metadata keys.
 
         Args:
-            block (list of str): The raw lines of the spectral data block.
+            block_lines: Raw text lines for one spectral block.
 
         Returns:
-            dict: A dictionary with metadata and a DataFrame of measurements.
+            Flat dict with scalar metadata and 1-D ``np.ndarray`` values.
         """
+        _fit_rows: frozenset[str] = frozenset(
+            {"Position", "FWHM", "Area", "Width", "Lineshape"}
+        )
 
-        metadata = {}
-        data = {}
-        fit_data = {}
+        metadata: dict[str, Any] = {}
+        comp_names: list[str] = []
+        comp_fit: dict[int, dict[str, Any]] = {}
+        ke_keys: list[str] = []
+        be_keys: list[str] = []
+        ke_rows: list[list[float]] = []
+        be_rows: list[list[float]] = []
+        in_data = False
 
-        in_data_section = False
+        for raw_line in block_lines:
+            line = raw_line.rstrip("\n")
+            stripped = line.strip()
+            if not stripped:
+                continue
 
-        for line in block_lines:
-            line = line.strip()
-            if line.startswith("Cycle"):
-                # Extract cycle and scan type
-                metadata["cycle"], metadata["source"], metadata["spectrum_type"] = map(
-                    str.strip, line.split(":")
+            if stripped.startswith("Cycle"):
+                parts = stripped.split(":")
+                metadata["cycle"] = parts[0].strip()
+                if len(parts) > 1:
+                    metadata["group_name"] = parts[1].strip()
+                if len(parts) > 2:
+                    metadata["spectrum_type"] = parts[2].strip()
+
+            elif stripped.startswith("Characteristic Energy"):
+                for key_raw, val_str in re.findall(r"([\w\s]+)\t([\deE+\-.]+)", line):
+                    key_raw = key_raw.strip()
+                    key, _, unit = key_raw.rpartition(" ")
+                    key = convert_pascal_to_snake(key.strip())
+                    metadata[key] = float(val_str)
+                    metadata[f"{key}/@units"] = unit
+
+            elif stripped.startswith("Name"):
+                comp_names = [c for c in line.split("\t")[1:] if c.strip()]
+
+            elif any(stripped.startswith(fr) for fr in _fit_rows):
+                cols = line.split("\t")
+                field = _context.normalize_key(cols[0].strip())
+                values = [v for v in cols[1:] if v.strip()]
+                for i, val_str in enumerate(values):
+                    comp_fit.setdefault(i, {})[field] = _context._format_value(val_str)
+
+            elif "K.E." in stripped and "B.E." in stripped:
+                # Data header — two halves separated by an empty tab cell.
+                halves = line.split("\t\t", 1)
+                left_headers = [h.strip() for h in halves[0].split("\t") if h.strip()]
+                right_headers = (
+                    [h.strip() for h in halves[1].split("\t") if h.strip()]
+                    if len(halves) > 1
+                    else []
                 )
-
-            elif line.startswith("Characteristic Energy"):
-                # Parse characteristic energy and acquisition time
-                metadata_match = re.findall(r"([\w\s]+)\t([\deE\+\-.]+)", line)
-                matches = {key.strip(): float(value) for key, value in metadata_match}
-                for key, value in matches.items():
-                    key, unit = key.rsplit(" ", 1)
-                    key = convert_pascal_to_snake(key)
-                    metadata.update({key: value, f"{key}/@units": unit})
-
-            elif line.startswith("Name"):
-                comp_names = _handle_repetitions(_get_dict_keys(line.split("\t")[1:]))
-                for comp_index, comp_name in enumerate(comp_names):
-                    data[f"component{comp_index}"] = {
-                        "name": comp_name,
-                        "data": [],
-                        "data_cps": [],
-                    }
-                n_components = len(comp_names)
-
-            elif line.startswith(("Area", "Width", "FWHM", "Position", "data")):
-                line_split = line.split("\t")
-                fit_data[line_split[0]] = [
-                    _context._format_value(val) for val in line_split[1:]
-                ]
-
-            elif "K.E." in line and "Counts" in line:
-                # Parse column headers
-                all_names = _get_dict_keys(line.split("\t"))
-
-                keep_middle = 2
-
-                for name in ["background_intensity", "fit_sum"]:
-                    if name in all_names:
-                        keep_middle += 1
-
-                names = _select_from_list(
-                    all_names, skip=n_components, keep_middle=keep_middle
+                ke_keys = _map_data_headers(
+                    left_headers, comp_names, _KE_SIDE_HEADERS, "/data"
                 )
-
-                names = _handle_repetitions(names)
-
-                non_comp_names = []
-
-                for name in names:
-                    if (
-                        not any(
-                            sub_dict.get("name") == name for sub_dict in data.values()
-                        )
-                        and "CPS" not in name
-                    ):
-                        data[name] = {"name": name, "data": [], "data_cps": []}
-
-                        non_comp_names += [name]
-
-                # Circumvents the problem that there are two columns for
-                # each component, but two components can also have the
-                # same name.
-                new_names = (
-                    non_comp_names[:2]
-                    + comp_names
-                    + non_comp_names[2 : 2 + keep_middle]
-                    + comp_names
-                    + non_comp_names[2 + keep_middle :]
+                be_keys = _map_data_headers(
+                    right_headers, comp_names, _BE_SIDE_HEADERS, "/data_cps"
                 )
+                in_data = True
 
-                in_data_section = True
-
-            elif in_data_section:
-                values = [val for val in line.split("\t") if val]
-
-                assert len(values) == len(new_names), f"{new_names}"
-
-                lineshape_in = []
-                for name, value in zip(new_names, values):
-                    matching_key = name
-                    for key, sub_dict in data.items():
-                        if sub_dict.get("name") == name:
-                            matching_key = key
-                            break
-
-                    if name not in lineshape_in:
-                        data[matching_key]["data"].append(_context._format_value(value))
-                        lineshape_in += [name]
-                    else:
-                        data[matching_key]["data_cps"].append(
-                            _context._format_value(value)
-                        )
-        flattened = {}
-        for i, (sup_key, sub_dict) in enumerate(data.items()):
-            for sub_key, value in sub_dict.items():
-                if sup_key == value:
-                    continue
-                if value and any(str(val).strip() for val in value):
-                    if "data" in sub_key:
-                        value = np.array(value)
-                    flattened[f"{sup_key}/{sub_key}"] = value
-
-            for param in ("Area", "Width", "FWHM", "Position", "data"):
-                if param in fit_data and i < len(fit_data[param]):
-                    param_value = fit_data[param][i]
-                    if param_value:
-                        param_key, param_value, unit = _context.format(
-                            param, param_value
-                        )
-                        # print(param_key, param_value)
-                        flattened[f"{sup_key}/{param_key}"] = param_value
-                        if unit:
-                            flattened[f"{sup_key}/{param_key}/@units"] = unit
-
-        if self.uniform_energy_steps:
-            uniform = False
-
-            try:
-                x_arr = flattened["kinetic_energy/data"]
-                uniform = check_uniform_step_width(x_arr)
-            except KeyError:
-                x_arr = flattened["binding_energy/data"]
-                uniform = check_uniform_step_width(x_arr)
-
-            if not uniform:
-                return {**metadata, **flattened}
-            else:
-                uniform_dict = {}
-                all_arrays = {}
-
-                for key, value in flattened.copy().items():
-                    if isinstance(value, np.ndarray):
-                        all_arrays[key] = value
-                    else:
-                        uniform_dict[key] = value
-
-                x_arr, resampled_arrays = interpolate_arrays(
-                    x_arr, list(all_arrays.values())
+            elif in_data:
+                halves = line.split("\t\t", 1)
+                left_vals = [v.strip() for v in halves[0].split("\t") if v.strip()]
+                right_vals = (
+                    [v.strip() for v in halves[1].split("\t") if v.strip()]
+                    if len(halves) > 1
+                    else []
                 )
+                if left_vals:
+                    ke_rows.append([float(v) for v in left_vals[: len(ke_keys)]])
+                if right_vals:
+                    be_rows.append([float(v) for v in right_vals[: len(be_keys)]])
 
-                for i, key in enumerate(all_arrays):
-                    uniform_dict[key] = resampled_arrays[i]
+        flat: dict[str, Any] = {**metadata}
 
-                return {**metadata, **uniform_dict}
+        # Component fit metadata
+        for i, name in enumerate(comp_names):
+            flat[f"component{i}/name"] = name
+            for field, val in comp_fit.get(i, {}).items():
+                flat[f"component{i}/{field}"] = val
 
-        return {**metadata, **flattened}
+        # KE-side data arrays
+        if ke_rows:
+            ke_arr = np.array(ke_rows)
+            for j, key in enumerate(ke_keys):
+                flat[key] = ke_arr[:, j]
 
-    def _build_list_of_dicts(self, blocks):
+        # BE-side data arrays
+        if be_rows:
+            be_arr = np.array(be_rows)
+            for j, key in enumerate(be_keys):
+                flat[key] = be_arr[:, j]
+
+        return flat
+
+    def _build_list_of_dicts(self, blocks: list[list[str]]) -> list[dict[str, Any]]:
         """
         Build list of dictionaries, with each dict containing data
         and metadata of one spectrum (block).
-
 
         Parameters
         ----------
@@ -670,28 +516,172 @@ class TextParserColumns(TextParser):
         """
         spectra = []
         for block in blocks:
-            parsed_data = self._parse_block_data(block)
+            parsed = self._parse_block_data(block)
 
-            if "binding_energy/data" not in parsed_data:
-                parsed_data["binding_energy/data"] = (
-                    parsed_data["characteristic_energy"]
-                    - parsed_data["kinetic_energy/data"]
+            # Fallback: derive binding energy axis if the BE column was absent.
+            if "binding_energy/data" not in parsed and "kinetic_energy/data" in parsed:
+                parsed["binding_energy/data"] = (
+                    parsed["characteristic_energy"] - parsed["kinetic_energy/data"]
                 )
 
-            if "counts_per_second/data" not in parsed_data:
-                parsed_data["counts_per_second/data"] = (
-                    parsed_data["counts"] / parsed_data["acquisition_time"]
+            # Fallback: derive CPS if the CPS column was absent.
+            if "counts_per_second/data" not in parsed and "counts/data" in parsed:
+                parsed["counts_per_second/data"] = (
+                    parsed["counts/data"] / parsed["acquisition_time"]
                 )
 
-            if check_uniform_step_width(parsed_data["kinetic_energy/data"]):
-                parsed_data["step_size"] = _get_minimal_step(
-                    parsed_data["kinetic_energy/data"]
+            # Resample all arrays to a uniform energy grid when requested.
+            if self.uniform_energy_steps:
+                x_key = (
+                    "kinetic_energy/data"
+                    if "kinetic_energy/data" in parsed
+                    else "binding_energy/data"
                 )
+                x_arr = parsed.get(x_key)
+                if x_arr is not None and not check_uniform_step_width(x_arr):
+                    y_keys = [
+                        k
+                        for k, v in parsed.items()
+                        if isinstance(v, np.ndarray) and k != x_key
+                    ]
+                    x_uniform, resampled = interpolate_arrays(
+                        x_arr, [parsed[k] for k in y_keys]
+                    )
+                    parsed[x_key] = x_uniform
+                    for k, v in zip(y_keys, resampled):
+                        parsed[k] = v
 
-            parsed_data["energy_label"] = "binding"
+            ke_data = parsed.get("kinetic_energy/data")
+            if ke_data is not None and check_uniform_step_width(ke_data):
+                parsed["step_size"] = _get_minimal_step(ke_data)
 
-            spectra += [parsed_data]
-
-            plt.show()
+            parsed["energy_label"] = "binding"
+            spectra.append(parsed)
 
         return spectra
+
+
+class VamasExportParser(_XPSParser):
+    """
+    Parser for ASCII files exported from CasaXPS (from Vamas).
+
+    Supports both 'Rows of Tables' and 'Columns of Tables' export formats.
+    Populates ``self._data`` with one ``ParsedSpectrum`` per
+    (group_name, spectrum_type) pair.
+    """
+
+    config_file: ClassVar[str] = "config_vms.json"
+    supported_file_extensions: ClassVar[tuple[str, ...]] = (".txt",)
+
+    _SUB_PARSERS: ClassVar[tuple[type[_TextParser], ...]] = (
+        _TextParserRows,
+        _TextParserColumns,
+    )
+
+    _metadata_exclude_keys: ClassVar[frozenset[str]] = frozenset(
+        {
+            "binding_energy/data",
+            "kinetic_energy/data",
+            "counts_per_second/data",
+            "counts/data",
+            "counts/data_cps",
+        }
+    )
+
+    def matches_file(self, file: Path) -> bool:
+        """Return True if any txt export variant recognizes the file."""
+        return any(cls().matches_file(file) for cls in self._SUB_PARSERS)
+
+    def _parse(self, file: Path, **kwargs) -> None:
+        """
+        Parse the CasaXPS text export and populate ``self._data``.
+
+        One ``ParsedSpectrum`` is built per (group_name, spectrum_type) pair.
+        The intensity DataArray has dims ``("cycle", "scan", "energy")``.
+        Fitting data (component*/data, background*/data, fit_sum/data) is
+        stored in ``metadata`` as-is.
+
+        Dispatch to the first matching strategy and merge its data
+
+        Parameters
+        ----------
+        file : Path
+            XPS data filepath.
+        n_headerlines : int, optional
+            Number of header lines per data block.
+        uniform_energy_steps : bool, optional
+            If True, spectra are interpolated to have uniform energy steps.
+
+        """
+        for sub_parser_cls in self._SUB_PARSERS:
+            sub_parser = sub_parser_cls()
+            if sub_parser.matches_file(file):
+                sub_parser._parse(file, **kwargs)
+                self._flat_spectra = sub_parser._flat_spectra
+                self._build_parsed_spectra()
+                return
+        raise ValueError(
+            f"{self.__class__.__name__}: no sub parser matched file '{file}'"
+        )
+
+    def _build_parsed_spectra(self) -> None:
+        """Group flat spectra by entry name and build ``self._data``."""
+        entries: dict[str, list[dict[str, Any]]] = {}
+        for spectrum in self._flat_spectra:
+            entry_parts = [
+                str(spectrum.get(part, ""))
+                for part in ("group_name", "spectrum_type")
+                if spectrum.get(part)
+            ]
+            entry_name = _construct_entry_name(entry_parts)
+            entries.setdefault(entry_name, []).append(spectrum)
+
+        for entry_name, spectra in entries.items():
+            self._data[entry_name] = self._assemble_entry(spectra)
+
+    def _assemble_entry(self, spectra: list[dict[str, Any]]) -> ParsedSpectrum:
+        """
+        Build a ``ParsedSpectrum`` from all scan dicts for one entry.
+
+        Parameters
+        ----------
+        spectra : list[dict]
+            All spectrum dicts from the flat parser output that share the
+            same entry name.
+
+        Returns
+        -------
+        ParsedSpectrum
+
+        """
+        # Resolve energy axis from the first spectrum.
+        first = spectra[0]
+        if "binding_energy/data" in first:
+            energy_key = "binding_energy/data"
+        else:
+            energy_key = "kinetic_energy/data"
+
+        # Resolve intensity axis.
+        if "counts_per_second/data" in first:
+            intensity_key = "counts_per_second/data"
+        else:
+            intensity_key = "counts/data"
+
+        energy_axis = np.array(first[energy_key])
+
+        # Stack intensities: shape (1, n_scans, n_energy).
+        intensities = np.stack([np.array(s[intensity_key]) for s in spectra], axis=0)
+        intensities = intensities[np.newaxis, ...]  # (1, n_scans, n_energy)
+
+        data_array = xr.DataArray(
+            data=intensities,
+            dims=("cycle", "scan", "energy"),
+            coords={"energy": energy_axis},
+        )
+
+        # Metadata: all keys except the primary energy/intensity data arrays.
+        # Fitting data (component*/data, background*/data, fit_sum/data) is
+        # kept as-is in metadata.
+        metadata = self._filter_metadata(first)
+
+        return ParsedSpectrum(data=data_array, raw=None, metadata=metadata)

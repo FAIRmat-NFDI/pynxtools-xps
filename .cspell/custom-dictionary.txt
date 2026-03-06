@@ -7,6 +7,7 @@ Analysed
 Analyser
 Brockhauser
 COLLECTIONCOLUMN
+CORBA
 Calib
 Chns
 DEPTHPRO
@@ -62,6 +63,9 @@ SDPSC
 SDPSV
 SNMS
 SOFH
+SPECSSLE
+SPECSXML
+SPECSXY
 Sandor
 Sann
 Scienta
@@ -101,6 +105,7 @@ dataconverter
 datasize
 deconvolution
 defintions
+deinterleaved
 egun
 electronanalyzer
 elments
@@ -131,6 +136,7 @@ monochromator
 mpes
 ndarray
 neutraliser
+newaxis
 nxdata
 nxdls
 nxfit

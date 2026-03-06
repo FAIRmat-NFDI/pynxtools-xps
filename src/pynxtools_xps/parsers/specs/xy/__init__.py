@@ -14,6 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from .parser import SpecsXYMapper, XYProdigyParser
+from .parser import SPECSXYParser
 
-__all__ = ["SpecsXYMapper", "XYProdigyParser"]
+__all__ = ["SPECSXYParser"]

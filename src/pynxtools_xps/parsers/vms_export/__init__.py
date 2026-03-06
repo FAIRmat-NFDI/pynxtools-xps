@@ -14,10 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from .parser_export import VamasExportMapper
-from .parser_results import VamasResultMapper
+from .parser_export import VamasExportParser
+from .parser_results import VamasResultParser
 
 __all__ = [
-    "VamasExportMapper",
-    "VamasResultMapper",
+    "VamasExportParser",
+    "VamasResultParser",
 ]

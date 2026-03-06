@@ -284,7 +284,6 @@ class XPSRegion:
         fig.show()
 
 
-# pylint: disable=invalid-name
 def shirley_baseline(
     x: np.ndarray, y: np.ndarray, tol: float = 1e-5, maxit: int = 10
 ) -> np.ndarray:

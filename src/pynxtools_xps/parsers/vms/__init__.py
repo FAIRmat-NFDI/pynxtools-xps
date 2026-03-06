@@ -15,6 +15,6 @@
 # limitations under the License.
 #
 from .data_model import VamasBlock, VamasHeader
-from .parser import VamasMapper, VamasParser
+from .parser import VamasParser
 
-__all__ = ["VamasBlock", "VamasHeader", "VamasMapper", "VamasParser"]
+__all__ = ["VamasBlock", "VamasHeader", "VamasParser"]

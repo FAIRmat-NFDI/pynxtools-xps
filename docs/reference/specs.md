@@ -13,9 +13,9 @@ The parsers are in
 | SpecsLabProdigy XY export | `.xy` | SpecsLabProdigy | any |
 
 Supported `.sle` version ranges (derived from
-[`SpecsSLEParser.supported_versions`](https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/src/pynxtools_xps/parsers/specs/sle/parser.py)):
+[`SPECSSLEParser.supported_versions`](https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/src/pynxtools_xps/parsers/specs/sle/parser.py)):
 
-{{ parser_version_table("specs.sle.parser", "SpecsSLEParser") }}
+{{ parser_version_table("specs.sle.parser", "SPECSSLEParser") }}
 
 If your file is rejected with a version error, check the SpecsLabProdigy version listed
 in your SLE file against the ranges above.

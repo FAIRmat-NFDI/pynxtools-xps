@@ -14,9 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from .parser import SLEProdigyParser, SpecsSLEMapper
+from .parser import SPECSSLEParser
 
 __all__ = [
-    "SpecsSLEMapper",
-    "SLEProdigyParser",
+    "SPECSSLEParser",
 ]

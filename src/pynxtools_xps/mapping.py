@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# pylint: disable=too-many-lines,too-few-public-methods
 """
 Utility function for mapping keys and values in the pynxtools template.
 """
@@ -36,12 +35,12 @@ BOOL_MAP: dict[str, bool] = {
     "Off": False,
 }
 
-MEASUREMENT_METHOD_MAP: dict[str, tuple[str, str]] = {
-    "XPS": ("XPS", "X-ray photoelectron spectroscopy"),
-    "UPS": ("UPS", "ultraviolet photoelectron spectroscopy"),
-    "ESCA": ("XPS", "electron spectroscopy for chemical analysis"),
-    "NAPXPS": ("NAPXPS", "near ambient pressure X-ray photoelectron spectroscopy"),
-    "ARXPS": ("ARXPS", "angle-resolved X-ray photoelectron spectroscopy"),
+MEASUREMENT_METHOD_MAP: dict[str, str] = {
+    "XPS": "X-ray photoelectron spectroscopy",
+    "UPS": "ultraviolet photoelectron spectroscopy",
+    "ESCA": "electron spectroscopy for chemical analysis",
+    "NAPXPS": "near ambient pressure X-ray photoelectron spectroscopy",
+    "ARXPS": "angle-resolved X-ray photoelectron spectroscopy",
 }
 
 ENERGY_TYPE_MAP: dict[str, str] = {
@@ -98,8 +97,14 @@ _convert_bool = _make_converter(BOOL_MAP)
 _convert_detector_acquisition_mode = _make_converter(ACQUSITION_MODE_MAP)
 _convert_energy_scan_mode = _make_converter(ENERGY_SCAN_MODE_MAP)
 _convert_energy_type = _make_converter(ENERGY_TYPE_MAP)
-_convert_measurement_method = _make_converter(MEASUREMENT_METHOD_MAP)
 _convert_slit_type = _make_converter(SLIT_TYPE_MAP)
+
+
+def _get_measurement_method_long(measurement_method: str) -> str:
+    """Extract the long measurement name for a measurement method string."""
+    return MEASUREMENT_METHOD_MAP.get(
+        measurement_method, "X-ray photoelectron spectroscopy"
+    )
 
 
 def parse_datetime(
@@ -384,9 +389,12 @@ class _MetadataContext:
             return float(value) if "." in value or "e" in value.lower() else int(value)
         return value
 
-    def get_default_unit(self, key: str) -> str | None:
-        """Get default units for a given key"""
-        return self.default_units.get(key)
+    def get_default_unit(self, key: str, unit: str | None = None) -> str | None:
+        """
+        Get default units for a given key.
+        Overwrites unit if it is in the default units.
+        """
+        return self.default_units.get(key, unit)
 
     def map_unit(self, unit: str | None) -> str | None:
         """Map a unit given the unit_map"""
@@ -409,9 +417,8 @@ class _MetadataContext:
             "energy_scan_mode": self.__convert_energy_scan_mode,
         }
         """
-        # TODO: what is this needed, was in reader_utils._re_map_single_value
-        # if isinstance(value, str) and value is not None:
-        #     value = value.rstrip("\n")
+        if isinstance(value, str) and value is not None:
+            value = value.rstrip("\n")
 
         map_fn: Callable[[_Value], _Value] | None = self.value_map.get(key)
         if map_fn is None:
@@ -429,10 +436,7 @@ class _MetadataContext:
         value, unit = self.parse_value_and_unit(value)
 
         key, unit = self.resolve_unit_from_key(key, unit)
-
-        if unit is None:
-            unit = self.get_default_unit(key)
-
+        unit = self.get_default_unit(key, unit)
         unit = self.map_unit(unit)
 
         value = self.map_value(key, value)
@@ -441,12 +445,10 @@ class _MetadataContext:
         return key, value, unit
 
 
-def _format_dict(
-    dictionary: dict[str, Any], context: _MetadataContext
-) -> dict[str, Any]:
+def _format_dict(dictionary: dict[str, Any], context: _MetadataContext) -> None:
     """
     Map the keys in a dictionary such that they are replaced by the values
-    in key_map and return the dictionary with replaced keys.
+    in key_map and modify the dictionary with replaced keys in place.
 
     This is often used to map some metadata keys in a vendor file format
     to the common metadata names. used in NXmpes/NXxps.
@@ -464,16 +466,14 @@ def _format_dict(
                "source_energy": "excitation_energy",
             }
 
-    Returns:
-        dictionary (dict[str, Any]): Dictionary with changed keys.
-
     """
-    mapped: dict[str, Any] = {}
+    for key, value in list(dictionary.items()):
+        new_key, new_value, unit = context.format(key, value)
 
-    for key, value in dictionary.items():
-        key, value, unit = context.format(key, value)
-        mapped[key] = value
+        if new_key != key:
+            del dictionary[key]
+
+        dictionary[new_key] = new_value
+
         if unit:
-            mapped[f"{key}/@units"] = unit
-
-    return mapped
+            dictionary[f"{new_key}/@units"] = unit

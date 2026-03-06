@@ -149,7 +149,6 @@ def interpolate_arrays(x: list[float], array_list: list[np.ndarray]):
     stop = x[-1]
     step = _get_minimal_step(x)
     if start > stop:
-        # pylint: disable=arguments-out-of-order
         new_x = np.flip(safe_arange_with_edges(stop, start, step))
     else:
         new_x = safe_arange_with_edges(start, stop, step)

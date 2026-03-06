@@ -94,21 +94,33 @@ Start by subclassing
 - `supported_file_extensions` — a tuple of file extensions that your parser supports
 - `matches_file(file_path)` — return `True` only if the file unambiguously conforms to
   your format (check headers, magic bytes, or required keywords).
-- `_parse(file_path)` — extract all spectra and populate `self._data` as a list of dictionaries, where each dict holds the raw key-value pairs for one spectrum.
+  The implementation must be fast (read at most a few KB) and must never propagate
+  exceptions — catch all errors and return `False`.
+- `_parse(file_path)` — extract all spectra and populate `self._data` as a
+  `dict[str, ParsedSpectrum]`, where keys are NeXus entry names (e.g. `"Au4f__Survey"`)
+  and each value is a
+  [`ParsedSpectrum`](https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/src/pynxtools_xps/parsers/base.py)
+  holding:
+  - `data` — channel-averaged scan data as `xr.DataArray` with dims `(cycle, scan, energy)`
+  - `raw` — optional per-channel data with dims `(cycle, scan, channel, energy)`
+  - `metadata` — flat `dict[str, Any]` of canonical key-value pairs
 
 If your format embeds a version string, override `detect_version(file_path)` to return
 a `VersionTuple` (produced by
 [`normalize_version`](https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/src/pynxtools_xps/parsers/versioning.py))
-and declare `supported_versions` and `requires_version` as class variables.
+and declare `supported_versions` as a class variable (non-empty ranges also implicitly
+require the file to carry a version).
 
 Set `config_file` to the name of the JSON config you will create in step 7.
 
 ### 6. Register the parser
 
-- Import and re-export the new mapper class from
+- Import and re-export the new parser class from
   [`parsers/__init__.py`](https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/src/pynxtools_xps/parsers/__init__.py).
-- Add the parser and mapper to the lists in
-  [`reader.py`](https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/src/pynxtools_xps/reader.py).
+- Import the parser in
+  [`reader.py`](https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/src/pynxtools_xps/reader.py)
+  and add it to the `parsers` list inside `XPSReader`. There is no separate mapper layer —
+  parsers are registered directly.
 
 ### 7. Add a config file
 
@@ -139,10 +151,10 @@ It can be called within your reference markdown file like this:
 {{ parser_version_table("path.to.your.parser", "YourParser") }}
 ```
 
-For example, for the `SpecsSLEParser` located in  [`src/pynxtools_xps/parsers/specs/sle/parser.py`](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/src/pynxtools_xps/parsers), the call is:
+For example, for the `SPECSSLEParser` located in  [`src/pynxtools_xps/parsers/specs/sle/parser.py`](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/src/pynxtools_xps/parsers), the call is:
 
 ```md
-{{ parser_version_table("specs.sle.parser", "SpecsSLEParser") }}
+{{ parser_version_table("specs.sle.parser", "SPECSSLEParser") }}
 ```
 
 ---

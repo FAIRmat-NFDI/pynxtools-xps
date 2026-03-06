@@ -15,9 +15,9 @@
 # limitations under the License.
 #
 """
-Parser for reading XPS (X-ray Photoelectron Spectroscopy) metadata from
-Kratos instruments (currently only after exporting to .vms format), to be
-passed to MPES nxdl (NeXus Definition Language) template.
+Parser for reading XPS data from Kratos instruments.
+Currently, only metadata stored in comments after exporting
+to Vamas format) can be parsed.
 """
 
 from pathlib import Path
@@ -39,6 +39,12 @@ class KratosParser(_XPSParser):
 
         """
         self.metadata = KratosMetadata()
+
+    def matches_file(self, file: Path) -> bool:
+        """Return True for Kratos main measurement files."""
+        # TODO: write parser for actual Kratos data file
+        # TODO: implement matches_file accordingly
+        return True
 
     def _parse(self, file: Path, **kwargs) -> None:
         # TODO: parse actual data, not just metadata!

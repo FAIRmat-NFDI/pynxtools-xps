@@ -15,19 +15,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from .phi import PHIMapper
-from .scienta import ScientaMapper
-from .specs import SpecsSLEMapper, SpecsXMLMapper, SpecsXYMapper
-from .vms import VamasMapper
-from .vms_export import VamasExportMapper, VamasResultMapper
+from .phi import PHIParser
+from .scienta import ScientaHDF5Parser, ScientaIgorParser, ScientaTXTParser
+from .specs import SPECSSLEParser, SPECSXMLParser, SPECSXYParser
+from .vms import VamasParser
+from .vms_export import VamasExportParser, VamasResultParser
 
 __all__ = [
-    "PHIMapper",
-    "ScientaMapper",
-    "SpecsSLEMapper",
-    "SpecsXMLMapper",
-    "SpecsXYMapper",
-    "VamasMapper",
-    "VamasExportMapper",
-    "VamasResultMapper",
+    "PHIParser",
+    "ScientaHDF5Parser",
+    "ScientaIgorParser",
+    "ScientaTXTParser",
+    "SPECSSLEParser",
+    "SPECSXMLParser",
+    "SPECSXYParser",
+    "VamasParser",
+    "VamasExportParser",
+    "VamasResultParser",
 ]

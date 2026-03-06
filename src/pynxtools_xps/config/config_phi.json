@@ -5,7 +5,7 @@
     "start_time":"@attrs:acquisition_file_date",
     "end_time":"@eln",
     "method":"@attrs:technique",
-    "method/@long_name":"@attrs:/technique_long_name",
+    "method/@long_name":"@attrs:technique_long_name",
     "transitions":"@attrs:transitions",
     "identifierNAME[identifier_experiment]":"@attrs:experiment_id",
     "experiment_institution":"@eln",
@@ -104,7 +104,7 @@
         "offset_y/@units":"@attrs:xray_stigmator_y/@units"
       },
       "depends_on":"/entry/instrument/source_probe/transformations/source_analyzer_angle",
-      "TRANSFORMATIONS[transformations]":{
+      "transformations":{
         "AXISNAME[source_analyzer_angle]/@depends_on":".",
         "AXISNAME[source_analyzer_angle]":"@attrs:source_analyzer_angle",
         "AXISNAME[source_analyzer_angle]/@transformation_type":"rotation",
@@ -131,6 +131,7 @@
     },
     "source_TYPE[source_flood_gun]":{
       "type":"Monochromatized electron source",
+      "type/@custom":true,
       "current":"@attrs:flood_gun_current",
       "current/@units":"@attrs:flood_gun_current/@units",
       "voltage":"@attrs:flood_gun_energy",
@@ -159,8 +160,8 @@
       "associated_beam":"none"
     },
     "source_TYPE[source_gas_cluster_ion_beam]":{
-      "type":"other",
-      "type_other":"@eln",
+      "type":"Gas cluster ion beam source",
+      "type/@custom":true,
       "description":"@eln",
       "cluster_size":"@attrs:gcib_cluster_size",
       "cluster_size/@units":"@attrs:gcib_cluster_size/@units",
@@ -202,12 +203,12 @@
       "ELECTROMAGNETIC_LENS[objective_lens]":{
         "name":"objective lens",
         "voltage":"@attrs:gcib_objective",
-        "voltage/@units":"['@attrs:gcib_objective/@units', 'V']"
+        "voltage/@units":"V"
       }
     },
     "source_TYPE[source_neutral_ion_gun]":{
-      "type":"other",
-      "type_other":"@eln",
+      "type":"Neutral ion beam source",
+      "type/@custom":true,
       "description":"@eln",
       "current":"@attrs:neutral_current",
       "current/@units":"@attrs:neutral_current/@units",
@@ -254,8 +255,8 @@
       }
     },
     "source_TYPE[source_sputter_gun]":{
-      "type":"other",
-      "type_other":"@eln",
+      "type":"Ion sputter gun",
+      "type/@custom":true,
       "description":"@eln",
       "current":"@attrs:sputter_current",
       "current/@units":"@attrs:sputter_current/@units",
@@ -402,10 +403,16 @@
         "number_of_channels":"@attrs:number_of_channels",
         "raw_data":{
           "@signal":"raw",
-          "raw":"@data:raw_data",
-          "raw/@units":"counts",
-          "DATA[*]":"@data:*.channels",
-          "DATA[*]/@units":"counts"
+          "raw":"@data:raw",
+          "raw/@units":"@data:raw_units",
+          "AXISNAME[cycle]":"@data:raw_cycle",
+          "AXISNAME[scan]":"@data:raw_scan",
+          "AXISNAME[channel]":"@data:raw_channel",
+          "energy":"@link:/entry/data/energy",
+          "energy/@units":"@attrs:energy/@units",
+          "energy/@type":"@attrs:energy/@type",
+          "@axes":"@data:raw_axes",
+          "@energy_indices":"@data:raw_energy_index"
         }
       }
     },
@@ -530,20 +537,6 @@
       "value":"@link:/entry/instrument/source_flood_gun/current"   
     }
   },
-  "/ENTRY/energy_axis_calibration":null,
-  "/ENTRY/energy_referencing":{
-    "level":null,
-    "physical_quantity":"energy",
-    "reference_peak":"@attrs:energy_reference_peak",
-    "binding_energy":"@attrs:energy_reference_energy",
-    "binding_energy/@units":"@attrs:energy_reference_energy/@units",
-    "offset":null,
-    "calibrated_axis":"@data:energy",
-    "calibrated_axis/@units":"@attrs:energy/@units"
-  },
-  "/ENTRY/transmission_correction":{
-      "intensity_calibration_coefficients":"@attrs:intensity_calibration_coefficients"
-  },
   "/ENTRY/SAMPLE[sample]":{
     "name":"@eln",
     "identifierNAME[identifier]":"@eln",
@@ -579,15 +572,77 @@
       "flood_gun":"@link:/entry/instrument/flood_gun"
     }
   },
+  "/ENTRY/energy_axis_calibration":null,
+  "/ENTRY/energy_referencing":{
+    "level":null,
+    "physical_quantity":"energy",
+    "reference_peak":"@attrs:energy_reference_peak",
+    "binding_energy":"@attrs:energy_reference_energy",
+    "binding_energy/@units":"@attrs:energy_reference_energy/@units",
+    "offset":null,
+    "calibrated_axis":"@data:energy",
+    "calibrated_axis/@units":"@attrs:energy/@units"
+  },
+  "/ENTRY/transmission_correction":{
+    "intensity_calibration_coefficients":"@attrs:intensity_calibration_coefficients"
+  },
+  "/ENTRY/PROCESS[channels_averaging]":{
+    "sequence_index":"!@attrs:sequence_index",
+    "DATA[data]":{
+      "@signal":"data",
+      "DATA[data]":"@data:channels_averaging",
+      "DATA[data]/@units":"@attrs:intensity/@units",
+      "AXISNAME[cycle]":"@data:cycle",
+      "AXISNAME[scan]":"@data:scan",
+      "AXISNAME[energy]":"@link:/entry/data/energy",
+      "AXISNAME[energy]/@units":"@attrs:energy/@units",
+      "@axes":["cycle","scan","energy"],
+      "@energy_indices":2
+    }
+  },
+  "/ENTRY/PROCESS[scan_averaging]":{
+    "sequence_index":"!@attrs:sequence_index",
+    "DATA[data]":{
+      "@signal":"data",
+      "DATA[data]":"@data:scan_averaging",
+      "DATA[data]/@units":"@attrs:intensity/@units",
+      "AXISNAME[cycle]":"@data:cycle",
+      "AXISNAME[energy]":"@link:/entry/data/energy",
+      "AXISNAME[energy]/@units":"@attrs:energy/@units",
+      "@axes":["cycle","energy"],
+      "@energy_indices":1
+    }
+  },
+  "/ENTRY/PROCESS[cycle_averaging]":{
+    "sequence_index":"!@attrs:sequence_index",
+    "DATA[data]":{
+      "@signal":"data",
+      "DATA[data]":"@data:cycle_averaging",
+      "DATA[data]/@units":"@attrs:intensity/@units",
+      "AXISNAME[energy]":"@link:/entry/data/energy",
+      "AXISNAME[energy]/@units":"@attrs:energy/@units",
+      "@axes":["energy"],
+      "@energy_indices":0
+    }
+  },
   "/ENTRY/DATA[data]":{
     "@axes":["energy"],
     "@signal":"data",
     "data":"@data:average",
     "FIELDNAME_errors[data_errors]":"@data:errors",
     "data/@units":"@attrs:intensity/@units",
-    "DATA[*]":"@data:*.scans",
-    "DATA[*]/@units":"@attrs:intensity/@units",
     "energy":"@data:energy",
+    "energy/@type":"@attrs:energy/@type",
+    "energy/@units":"@attrs:energy/@units",
+    "@energy_indices":0
+  },
+  "/ENTRY/DATA[data_reduced]":{
+    "@signal":"data",
+    "@axes":["energy"],
+    "data":"!@data:average_reduced",
+    "FIELDNAME_errors[data_errors]":"@data:errors_reduced",
+    "data/@units":"@attrs:intensity/@units",
+    "energy":"@link:/entry/data/energy",
     "energy/@type":"@attrs:energy/@type",
     "energy/@units":"@attrs:energy/@units",
     "@energy_indices":0

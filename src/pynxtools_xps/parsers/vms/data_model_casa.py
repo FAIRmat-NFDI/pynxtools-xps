@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 """
-Data model for CasaXPS.
+Data model for the CasaXPS software.
 """
 
 import re
@@ -504,7 +504,7 @@ class CasaEnergyCalibration(_XPSDataclass):
                 return x + self.energy_offset
 
         if self.range_calibration:
-            pass  # ToDo: apply range calibration
+            pass  # TODO: apply range calibration
 
 
 @dataclass

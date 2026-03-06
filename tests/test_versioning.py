@@ -72,28 +72,27 @@ def test_format_version(version, expected):
 
 
 @pytest.mark.parametrize(
-    "version, supported, requires, expected",
+    "version, supported, expected",
     [
         # No version present
-        (None, [], False, True),  # no constraints + no required version → True
-        (None, [], True, False),  # requires_version=True but no version → False
+        (None, [], True),  # no constraints → files without version files accepted
+        # ranges declared → files without version rejected
+        (None, [((4, 0), (5, 0))], False),
         # No declared ranges → all versions pass
-        ((4, 1), [], False, True),
+        ((4, 1), [], True),
         # Half-open range: [lower, upper)
-        ((4, 1), [((4, 0), (5, 0))], False, True),  # inside range
-        ((4, 0), [((4, 0), (5, 0))], False, True),  # on lower bound (inclusive)
-        ((5, 0), [((4, 0), (5, 0))], False, False),  # on upper bound (exclusive)
-        ((3, 9), [((4, 0), (5, 0))], False, False),  # below range
+        ((4, 1), [((4, 0), (5, 0))], True),  # inside range
+        ((4, 0), [((4, 0), (5, 0))], True),  # on lower bound (inclusive)
+        ((5, 0), [((4, 0), (5, 0))], False),  # on upper bound (exclusive)
+        ((3, 9), [((4, 0), (5, 0))], False),  # below range
         # Unbounded upper: [lower, ∞)
-        ((6, 0), [((4, 0), None)], False, True),
-        ((3, 0), [((4, 0), None)], False, False),
+        ((6, 0), [((4, 0), None)], True),
+        ((3, 0), [((4, 0), None)], False),
         # Multiple ranges — first match wins
-        ((4, 0), [((4, 0), (5, 0)), ((6, 0), None)], False, True),
+        ((4, 0), [((4, 0), (5, 0)), ((6, 0), None)], True),
         # Gap between ranges — falls through both
-        ((5, 5), [((4, 0), (5, 0)), ((6, 0), None)], False, False),
+        ((5, 5), [((4, 0), (5, 0)), ((6, 0), None)], False),
     ],
 )
-def test_is_version_supported(version, supported, requires, expected):
-    assert (
-        is_version_supported(version, supported, requires_version=requires) == expected
-    )
+def test_is_version_supported(version, supported, expected):
+    assert is_version_supported(version, supported) == expected

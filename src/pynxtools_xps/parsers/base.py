@@ -339,15 +339,15 @@ class _Parser(ABC):
     Class Attributes:
         supported_file_extensions: Tuple of supported file extensions
             (e.g., (".sle", ".txt")).
-        supported_vendors; Tuple of supported instrument vendors.
-        requires_version: If True, the file must explicitly provide
-            version information.
-        supported_versions: Tuple of supported version ranges. If empty,
-            all versions are accepted unless `requires_version` is True.
+        supported_vendors: Tuple of supported instrument vendors.
+        supported_versions: Tuple of supported version ranges (half-open
+            intervals). If empty, all files are accepted regardless of
+            whether they carry a version. If non-empty, only files whose
+            detected version falls within one of the declared ranges are
+            accepted; files without a version are implicitly rejected.
 
-    ``supported_file_extensions`` and ``supported_vendors`` must be
-    set by subclasses, ``requires_version`` and ``supported_versions`` can
-    be optionally set for version-aware parsers.
+    ``supported_file_extensions`` must be set by subclasses.
+    ``supported_versions`` can be optionally set for version-aware parsers.
 
     Subclasses must implement:
         - matches_file()
@@ -359,7 +359,6 @@ class _Parser(ABC):
     supported_vendors: ClassVar[tuple[str, ...]] = ()
     # TODO: implement in subclasses
     # "kratos", "phi", "scienta", "specs", "unknown"]
-    requires_version: ClassVar[bool] = False
     supported_versions: ClassVar[tuple[VersionRange, ...]] = ()
 
     @classmethod
@@ -383,15 +382,6 @@ class _Parser(ABC):
         file_name = path.name
         version_str = _format_version(version) if version is not None else "<unknown>"
 
-        if version is None and cls.requires_version:
-            return (
-                f"File '{file_name}' does not specify a version, "
-                f"but {cls.__name__} requires explicit version information."
-            )
-
-        if not cls.supported_versions:
-            return f"Unsupported file version '{version_str}' for file '{file_name}'."
-
         ranges: list[str] = []
         for lower, upper in cls.supported_versions:
             lower_str = _format_version(lower)
@@ -401,7 +391,14 @@ class _Parser(ABC):
                 upper_str = _format_version(upper)
                 ranges.append(f"{lower_str} – {upper_str}")
 
-        supported_str = ", ".join(ranges)
+        supported_str = ", ".join(ranges) if ranges else "<none>"
+
+        if version is None:
+            return (
+                f"File '{file_name}' does not specify a version, "
+                f"but {cls.__name__} requires one. "
+                f"Supported versions: {supported_str}."
+            )
 
         return (
             f"Unsupported file version '{version_str}' for file '{file_name}'. "
@@ -418,11 +415,7 @@ class _Parser(ABC):
         cls,
         version: VersionTuple | None,
     ) -> bool:
-        return is_version_supported(
-            version,
-            cls.supported_versions,
-            requires_version=cls.requires_version,
-        )
+        return is_version_supported(version, cls.supported_versions)
 
     @classmethod
     def is_mainfile(cls, file: str | Path) -> bool:

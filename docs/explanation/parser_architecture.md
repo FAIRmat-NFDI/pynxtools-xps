@@ -15,8 +15,7 @@ The implementation is organized in three explicit layers, each with a clearly bo
 3. **Templating** — JSON config files map canonical keys to NeXus paths in `NXxps` or `NXmpes`, which `XPSReader` uses to write the HDF5 output.
 
 This separation keeps all vendor-specific knowledge confined to
-[`parsers/<vendor>/`](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/src/pynxtools_xps/parsers) subpackages and makes the normalization logic independently testable. 
-
+[`parsers/<vendor>/`](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/src/pynxtools_xps/parsers) subpackages and makes the normalization logic independently testable.
 
 ```mermaid
 flowchart LR
@@ -57,21 +56,26 @@ Key names and value formats are vendor-specific at this stage.
 
 ### Version awareness
 
-Parsers can declare which file versions they support via two class variables:
+Parsers that need to constrain which file versions they accept declare `supported_versions`:
 
 ```python
-requires_version = True # reject files that carry no version string
 supported_versions = (
     ((1, 1), (4, 0)),   # [1.1, 4.0)
     ((4, 1), (4, 101)), # [4.1, 4.101)
 )
 ```
 
+Intervals are half-open: the lower bound is inclusive, the upper bound exclusive.
+A `None` upper bound means unbounded (`>= lower`).
+
+When `supported_versions` is empty (the default), all files are accepted regardless
+of whether they carry a version string. When non-empty, files without a version are
+implicitly rejected — a declared range implies a version is required.
+
 Version strings extracted from file headers are tokenized into comparable `VersionTuple`
 objects by
 [`normalize_version`](https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/src/pynxtools_xps/parsers/versioning.py)
 before the range check.
-Intervals are half-open: the lower bound is inclusive, the upper bound exclusive.
 
 ---
 

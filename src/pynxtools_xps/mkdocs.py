@@ -113,16 +113,9 @@ def define_env(env):
             return f"*Could not load `{class_name}` from `{module_path}`: {exc}*"
 
         ranges = getattr(cls, "supported_versions", ())
-        requires = getattr(cls, "requires_version", False)
 
-        if not ranges and not requires:
-            return "All file versions are accepted."
-
-        if not ranges and requires:
-            return (
-                "This parser requires explicit version information in the file header, "
-                "but no specific version range is declared."
-            )
+        if not ranges:
+            return "All file versions are accepted, including files without a version."
 
         rows = "\n".join(
             f"| {_format_version_range(lower, upper)} |" for lower, upper in ranges

@@ -77,8 +77,6 @@ def normalize_version(raw: str) -> VersionTuple:
 def is_version_supported(
     version: VersionTuple | None,
     supported_versions: Iterable[VersionRange],
-    *,
-    requires_version: bool = False,
 ) -> bool:
     """
     Determine whether a normalized version tuple is supported.
@@ -86,25 +84,27 @@ def is_version_supported(
     Parameters
     ----------
     version
-        Normalized version tuple or None.
+        Normalized version tuple, or ``None`` if the file carries no version.
     supported_versions
         Iterable of half-open version intervals:
-            (lower_inclusive, upper_exclusive_or_None)
-    requires_version
-        Whether a version must be present.
+        ``(lower_inclusive, upper_exclusive_or_None)``.
+        An empty iterable means no version constraint: all files are accepted,
+        including those without a version.
+        A non-empty iterable implicitly requires a version — ``None`` is
+        rejected because it cannot fall within any declared range.
 
     Returns
     -------
     bool
     """
-    # Version missing
-    if version is None:
-        return not requires_version
-
-    # No constraints declared
+    # No constraints declared → accept everything, including files without version
     ranges = tuple(supported_versions)
     if not ranges:
         return True
+
+    # Ranges declared but file carries no version → reject
+    if version is None:
+        return False
 
     for lower, upper in ranges:
         if upper is None:

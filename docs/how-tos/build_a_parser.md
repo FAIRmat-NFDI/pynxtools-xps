@@ -99,7 +99,8 @@ Start by subclassing
 If your format embeds a version string, override `detect_version(file_path)` to return
 a `VersionTuple` (produced by
 [`normalize_version`](https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/src/pynxtools_xps/parsers/versioning.py))
-and declare `supported_versions` and `requires_version` as class variables.
+and declare `supported_versions` as a class variable (non-empty ranges also implicitly
+require the file to carry a version).
 
 Set `config_file` to the name of the JSON config you will create in step 7.
 

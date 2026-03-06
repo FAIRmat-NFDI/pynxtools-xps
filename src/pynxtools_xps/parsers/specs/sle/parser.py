@@ -63,7 +63,6 @@ class SpecsSLEParser(_XPSParser):
     config_file: ClassVar[str] = "config_specs_sle.json"
     supported_file_extensions: ClassVar[tuple[str, ...]] = (".sle",)
     _metadata_exclude_keys: ClassVar[frozenset[str]] = frozenset({"data"})
-    requires_version: ClassVar[bool] = True
     supported_versions: ClassVar[tuple[VersionRange, ...]] = (
         ((1, 1), (4, 0)),  # 1.*, 2.*, 3.*
         ((4, 1), (4, 101)),  # 4.1 – 4.100

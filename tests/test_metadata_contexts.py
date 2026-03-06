@@ -110,9 +110,9 @@ def test_metadata_context_normalize_key(simple_context, key, expected):
 def test_metadata_context_parse_value_and_unit(
     simple_context, value, expected_val, expected_unit
 ):
-    v, u = simple_context.parse_value_and_unit(value)
-    assert v == expected_val
-    assert u == expected_unit
+    value, unit = simple_context.parse_value_and_unit(value)
+    assert value == expected_val
+    assert unit == expected_unit
 
 
 @pytest.mark.parametrize(
@@ -132,9 +132,9 @@ def test_metadata_context_parse_value_and_unit(
 def test_metadata_context_resolve_unit_from_key(
     simple_context, key, unit, expected_key, expected_unit
 ):
-    k, u = simple_context.resolve_unit_from_key(key, unit)
-    assert k == expected_key
-    assert u == expected_unit
+    key, unit = simple_context.resolve_unit_from_key(key, unit)
+    assert key == expected_key
+    assert unit == expected_unit
 
 
 @pytest.mark.parametrize(
@@ -191,7 +191,7 @@ def test_metadata_context_format_value(simple_context, value, expected):
 
 
 @pytest.mark.parametrize(
-    "key, value, exp_key, exp_val, exp_unit",
+    "key, value, exp_key, exp_value, exp_unit",
     [
         # key_map + value unit
         ("old_key", "5.0 eV", "new_key", 5.0, "eV"),
@@ -208,30 +208,31 @@ def test_metadata_context_format_value(simple_context, value, expected):
     ],
 )
 def test_metadata_context_format(
-    simple_context, key, value, exp_key, exp_val, exp_unit
+    simple_context, key, value, exp_key, exp_value, exp_unit
 ):
-    k, v, u = simple_context.format(key, value)
-    assert k == exp_key
-    assert v == exp_val
-    assert u == exp_unit
+    key, value, unit = simple_context.format(key, value)
+    assert key == exp_key
+    assert value == exp_value
+    assert unit == exp_unit
 
 
 def test_format_dict(simple_context):
     """`_format_dict` applies context.format to every key/value pair."""
-    raw = {"tilt": "30", "old_key": "5.0 eV"}
-    result = _format_dict(raw, simple_context)
+    metadata: dict[str, str] = {"tilt": "30", "old_key": "5.0 eV"}
 
-    assert result["sample_tilt"] == 30
-    assert result["sample_tilt/@units"] == "degree"
-    assert result["new_key"] == 5.0
-    assert result["new_key/@units"] == "eV"
+    _format_dict(metadata, simple_context)
+
+    assert metadata["sample_tilt"] == 30
+    assert metadata["sample_tilt/@units"] == "degree"
+    assert metadata["new_key"] == 5.0
+    assert metadata["new_key/@units"] == "eV"
 
 
 # ── vendor _context integration tests ─────────────────────────────────────────
 
 
 @pytest.mark.parametrize(
-    "key, value, exp_key, exp_val, exp_unit",
+    "key, value, exp_key, exp_value, exp_unit",
     [
         ("tilt", "5", "sample_tilt", 5, "degree"),
         ("lens", "Wide", "lens_mode", "Wide", None),
@@ -241,15 +242,15 @@ def test_format_dict(simple_context):
         ("anode_library", "Al", "anode_material", "Al", None),
     ],
 )
-def test_kratos_context_format(key, value, exp_key, exp_val, exp_unit):
-    k, v, u = kratos_context.format(key, value)
-    assert k == exp_key
-    assert v == exp_val
-    assert u == exp_unit
+def test_kratos_context_format(key, value, exp_key, exp_value, exp_unit):
+    key, value, unit = kratos_context.format(key, value)
+    assert key == exp_key
+    assert value == exp_value
+    assert unit == exp_unit
 
 
 @pytest.mark.parametrize(
-    "key, value, exp_key, exp_val, exp_unit",
+    "key, value, exp_key, exp_value, exp_unit",
     [
         ("block_id", "C 1s", "region", "C 1s", None),
         (
@@ -270,15 +271,15 @@ def test_kratos_context_format(key, value, exp_key, exp_val, exp_unit):
         ("abscissa_label", "KE", "energy_label", "kinetic", None),
     ],
 )
-def test_vms_context_format(key, value, exp_key, exp_val, exp_unit):
-    k, v, u = vms_context.format(key, value)
-    assert k == exp_key
-    assert v == exp_val
-    assert u == exp_unit
+def test_vms_context_format(key, value, exp_key, exp_value, exp_unit):
+    key, value, unit = vms_context.format(key, value)
+    assert key == exp_key
+    assert value == exp_value
+    assert unit == exp_unit
 
 
 @pytest.mark.parametrize(
-    "key, value, exp_key, exp_val, exp_unit",
+    "key, value, exp_key, exp_value, exp_unit",
     [
         # key_map: "analyzer_slit" → "entrance_slit"; no value_map entry
         ("analyzer_slit", "0.3 mm", "entrance_slit", 0.3, "mm"),
@@ -294,8 +295,8 @@ def test_vms_context_format(key, value, exp_key, exp_val, exp_unit):
         ("pass_energy", "50", "pass_energy", 50.0, "eV"),
     ],
 )
-def test_specs_xy_context_format(key, value, exp_key, exp_val, exp_unit):
-    k, v, u = specs_xy_context.format(key, value)
-    assert k == exp_key
-    assert v == exp_val
-    assert u == exp_unit
+def test_specs_xy_context_format(key, value, exp_key, exp_value, exp_unit):
+    key, value, unit = specs_xy_context.format(key, value)
+    assert key == exp_key
+    assert value == exp_value
+    assert unit == exp_unit

@@ -25,7 +25,7 @@ from typing import ClassVar
 
 import pandas as pd
 
-from pynxtools_xps.parsers.base import ParsedSpectrum, _XPSMetadataParser, _XPSParser
+from pynxtools_xps.parsers.base import ParsedSpectrum, _XPSMetadataParser
 from pynxtools_xps.parsers.specs.sle.parser import SpecsSLEParser
 from pynxtools_xps.parsers.versioning import VersionRange
 
@@ -49,11 +49,10 @@ class SPECSMetadataCSVParser(_XPSMetadataParser):
         # TODO: are these valid
         ((0, 6), (0, 7)),  # 0.6, not 0.7
     )
-    supported_parser_versions: ClassVar[tuple[VersionRange, ...]] = (
+    supported_primary_parser_versions: ClassVar[tuple[VersionRange, ...]] = (
         # TODO: are these valid??
-        # TODO: generalize this
         ((1, 2), (1, 3)),  # 1.2, not 1.3
-        ((1, 8), (1, 14)),  # 4.1 – 4.100
+        ((1, 8), (1, 14)),
     )
 
     def __init__(self):
@@ -63,12 +62,6 @@ class SPECSMetadataCSVParser(_XPSMetadataParser):
     def matches_file(self, file: Path) -> bool:
         """Return True for SpecsLab Prodigy metadata CSV exports."""
         return False
-
-    def _supports_parser(cls, parser: _XPSParser) -> bool:
-        if not super()._supports_parser(parser):
-            return False
-        # TODO: check that the supported prodigy versions match
-        return True
 
     def _read_csv(self):
         pass
@@ -118,9 +111,8 @@ class SPECSMetadataSLHParser(_XPSMetadataParser):
     )
     supported_primary_parser_versions: ClassVar[tuple[VersionRange, ...]] = (
         # TODO: are these valid??
-        # TODO: generalize this
         ((1, 2), (1, 3)),  # 1.2, not 1.3
-        ((1, 8), (1, 14)),  # 4.1 – 4.100
+        ((1, 8), (1, 14)),
     )
 
     def __init__(self):
@@ -132,15 +124,9 @@ class SPECSMetadataSLHParser(_XPSMetadataParser):
         self.encoding = ["f", 4]
 
     def matches_file(self, file: Path) -> bool:
-        """Return True for SpecsLab Prodigy metadata CSV exports."""
+        """Return True for SpecsLab Prodigy history (.slh) files."""
         # TODO: missing implementation
         return False
-
-    def _supports_parser(cls, parser: _XPSParser) -> bool:
-        if not super()._supports_parser(parser):
-            return False
-        # TODO: check that the supported prodigy versions match
-        return True
 
     def _initiate_file_connection(self, file: str | Path):
         """Set the SQLlite connection of the file to be opened."""

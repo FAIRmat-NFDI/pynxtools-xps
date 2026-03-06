@@ -31,6 +31,7 @@ from pynxtools_xps.parsers.versioning import (
     VersionRange,
     VersionTuple,
     _format_version,
+    _version_ranges_overlap,
     is_version_supported,
 )
 
@@ -603,6 +604,7 @@ class _XPSMetadataParser(_Parser):
     """
 
     compatible_primary_parser: ClassVar[type[_XPSParser]]
+    supported_primary_parser_versions: ClassVar[tuple[VersionRange, ...]] = ()
 
     @classmethod
     def file_ext_err_msg(cls, file: Path) -> str:
@@ -615,15 +617,48 @@ class _XPSMetadataParser(_Parser):
         )
 
     @classmethod
-    def supports_parser(cls, parser: _XPSParser) -> bool:
-        return isinstance(parser, cls.compatible_primary_parser)
+    def supports_parser(cls, parser: type[_XPSParser] | _XPSParser) -> bool:
+        """Return True if *parser* (class or instance) is compatible with this
+        metadata parser."""
+        try:
+            cls._supports_parser(parser)
+            return True
+        except ValueError:
+            return False
 
-    def _supports_parser(self, parser: _XPSParser):
-        if not self.supports_parser(parser):
+    @classmethod
+    def _supports_parser(cls, parser: type[_XPSParser] | _XPSParser) -> None:
+        """Raise ValueError if *parser* is not compatible with this metadata parser.
+
+        Checks:
+
+        1. *parser* is a subclass/instance of ``compatible_primary_parser``.
+        2. If ``supported_primary_parser_versions`` is non-empty: the parser's
+           ``supported_versions`` must overlap with it.
+
+        Subclasses may override this classmethod to add further checks, calling
+        ``super()._supports_parser(parser)`` first to retain the base checks.
+        Failing further checks should also raise an ValueError.
+        """
+        parser_cls = parser if isinstance(parser, type) else type(parser)
+
+        if not issubclass(parser_cls, cls.compatible_primary_parser):
             raise ValueError(
-                f"{self.__class__.__name__} is not compatible with "
-                f"{parser.__class__.__name__}."
+                f"{cls.__name__} is not compatible with {parser_cls.__name__}: "
+                f"expected a subclass of {cls.compatible_primary_parser.__name__}."
             )
+
+        if cls.supported_primary_parser_versions and parser_cls.supported_versions:
+            if not _version_ranges_overlap(
+                parser_cls.supported_versions,
+                cls.supported_primary_parser_versions,
+            ):
+                raise ValueError(
+                    f"{cls.__name__} does not support any version handled by "
+                    f"{parser_cls.__name__}: no overlap between "
+                    f"{parser_cls.supported_versions!r} and "
+                    f"{cls.supported_primary_parser_versions!r}."
+                )
 
     def update_main_file_data(self, main_file_data: dict[str, ParsedSpectrum]) -> None:
         """

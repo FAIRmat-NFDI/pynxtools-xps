@@ -48,13 +48,19 @@ test_cases: list[tuple[str, list[Any], dict[Any, Any], str]] = [
     (
         "scienta_ibw",
         [],
-        {"FIELD (//Ag__002__VB/start_time)": ["DEBUG - value:"]},
+        {
+            "FIELD (//Ag__002__VB/start_time)": ["DEBUG - value:"],
+            "FIELD (//Ag3d__Ag__001/start_time)": ["DEBUG - value:"],
+        },
         "scienta-ibw-reader",
     ),
     (
         "scienta_txt",
         [],
-        {"FIELD (//Ag__002__VB/start_time)": ["DEBUG - value:"]},
+        {
+            "FIELD (//Ag__002__VB/start_time)": ["DEBUG - value:"],
+            "FIELD (//Ag3d__Ag__001/start_time)": ["DEBUG - value:"],
+        },
         "scienta-txt-reader",
     ),
     ("vms_analysis", [], {}, "vms-reader-with-data-analysis"),

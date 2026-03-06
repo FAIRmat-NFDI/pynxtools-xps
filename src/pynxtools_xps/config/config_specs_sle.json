@@ -182,7 +182,7 @@
           "AXISNAME[cycle]":"@data:raw_cycle",
           "AXISNAME[scan]":"@data:raw_scan",
           "AXISNAME[channel]":"@data:raw_channel",
-          "energy":"@link:/entry/data/energy",
+          "energy":"@link:/entry/energy_axis_calibration/calibrated_axis",
           "energy/@units":"@attrs:energy/@units",
           "energy/@type":"@attrs:energy/@type",
           "@axes":"@data:raw_axes",
@@ -323,7 +323,7 @@
       "DATA[data]/@units":"@attrs:intensity/@units",
       "AXISNAME[cycle]":"@data:cycle",
       "AXISNAME[scan]":"@data:scan",
-      "AXISNAME[energy]":"@link:/entry/data/energy",
+      "AXISNAME[energy]":"@link:/entry/energy_axis_calibration/calibrated_axis",
       "AXISNAME[energy]/@units":"@attrs:energy/@units",
       "@axes":["cycle","scan","energy"]
     }
@@ -335,7 +335,7 @@
       "DATA[data]":"@data:scan_averaging",
       "DATA[data]/@units":"@attrs:intensity/@units",
       "AXISNAME[cycle]":"@data:cycle",
-      "AXISNAME[energy]":"@link:/entry/data/energy",
+      "AXISNAME[energy]":"@link:/entry/energy_axis_calibration/calibrated_axis",
       "AXISNAME[energy]/@units":"@attrs:energy/@units",
       "@axes":["cycle","energy"]
     }
@@ -346,7 +346,7 @@
       "@signal":"data",
       "DATA[data]":"@data:cycle_averaging",
       "DATA[data]/@units":"@attrs:intensity/@units",
-      "AXISNAME[energy]":"@link:/entry/data/energy",
+      "AXISNAME[energy]":"@link:/entry/energy_axis_calibration/calibrated_axis",
       "AXISNAME[energy]/@units":"@attrs:energy/@units",
       "@axes":["energy"]
     }
@@ -358,7 +358,9 @@
     "FIELDNAME_errors[data_errors]":"@data:errors",
     "data/@units":"@attrs:intensity/@units",
     "energy":"@link:/entry/energy_axis_calibration/calibrated_axis",
-    "energy/@type":"@attrs:energy/@type"
+    "energy/@type":"@attrs:energy/@type",
+    "energy/@units":"@attrs:energy/@units",
+    "@energy_indices":0
   },
   "/ENTRY/DATA[data_reduced]":{
     "@signal":"data",
@@ -366,7 +368,7 @@
     "data":"!@data:average_reduced",
     "FIELDNAME_errors[data_errors]":"@data:errors_reduced",
     "data/@units":"@attrs:intensity/@units",
-    "energy":"@link:/entry/data/energy",
+    "energy":"@link:/entry/energy_axis_calibration/calibrated_axis",
     "@energy_indices":0
   }
 }

@@ -573,7 +573,7 @@ class VamasParser(_XPSParser):
             settings["n_values"] = int(block.num_ord_values / block.no_variables)
 
             # Remap to the MPES-preferred keys, values, and units
-            settings = _format_dict(settings, _context)
+            _format_dict(settings, _context)
             analysis_method = settings.get("analysis_method")
             if analysis_method:
                 settings["analysis_method_long_name"] = _get_measurement_method_long(

@@ -445,12 +445,10 @@ class _MetadataContext:
         return key, value, unit
 
 
-def _format_dict(
-    dictionary: dict[str, Any], context: _MetadataContext
-) -> dict[str, Any]:
+def _format_dict(dictionary: dict[str, Any], context: _MetadataContext) -> None:
     """
     Map the keys in a dictionary such that they are replaced by the values
-    in key_map and return the dictionary with replaced keys.
+    in key_map and modify the dictionary with replaced keys in place.
 
     This is often used to map some metadata keys in a vendor file format
     to the common metadata names. used in NXmpes/NXxps.
@@ -468,16 +466,14 @@ def _format_dict(
                "source_energy": "excitation_energy",
             }
 
-    Returns:
-        dictionary (dict[str, Any]): Dictionary with changed keys.
-
     """
-    mapped: dict[str, Any] = {}
+    for key, value in list(dictionary.items()):
+        new_key, new_value, unit = context.format(key, value)
 
-    for key, value in dictionary.items():
-        key, value, unit = context.format(key, value)
-        mapped[key] = value
+        if new_key != key:
+            del dictionary[key]
+
+        dictionary[new_key] = new_value
+
         if unit:
-            mapped[f"{key}/@units"] = unit
-
-    return mapped
+            dictionary[f"{new_key}/@units"] = unit

@@ -297,7 +297,7 @@ class XPSReader(MultiFormatReader):
         super().__init__(config_file, *args, **kwargs)
 
         self._parsed_datasets: list[dict[str, ParsedSpectrum]] = []
-        self.parsed_spectra: dict[str, ParsedSpectrum] = {}
+        self.parsed_data: dict[str, ParsedSpectrum] = {}
         self._active_parsers: list[_XPSParser] = []
         self._pending_metadata: list[_XPSMetadataParser] = []
         self.eln_data: dict[str, Any] = {}
@@ -480,7 +480,7 @@ class XPSReader(MultiFormatReader):
         Returns a list of entry names which should be constructed from the data.
         Defaults to creating a single entry named "entry".
         """
-        entries = list(getattr(self, "parsed_spectra", {}).keys())
+        entries = list(getattr(self, "parsed_data", {}).keys())
         return entries or ["entry"]
 
     def setup_template(self) -> dict[str, Any]:
@@ -532,14 +532,14 @@ class XPSReader(MultiFormatReader):
                     self._parsed_datasets[i][entry] for i in entry_to_indices[entry]
                 ]
                 if self.overwrite_keys:
-                    self.parsed_spectra[entry] = _merge_spectra(spectra)
+                    self.parsed_data[entry] = _merge_spectra(spectra)
                 else:
-                    self.parsed_spectra[entry] = _concatenate_spectra(spectra)
+                    self.parsed_data[entry] = _concatenate_spectra(spectra)
 
         for d in self._parsed_datasets:
             for entry, spectrum in d.items():
                 if entry not in common_entries:
-                    self.parsed_spectra[entry] = spectrum
+                    self.parsed_data[entry] = spectrum
 
     def _get_analyzer_names(self) -> list[str]:
         """
@@ -566,7 +566,7 @@ class XPSReader(MultiFormatReader):
         detectors: list[str] = []
 
         try:
-            for spectrum in self.parsed_spectra.values():
+            for spectrum in self.parsed_data.values():
                 if isinstance(spectrum, ParsedSpectrum) and spectrum.raw is not None:
                     n_channels = spectrum.raw.sizes.get("channel", 0)
                     for i in range(n_channels):
@@ -666,7 +666,7 @@ class XPSReader(MultiFormatReader):
 
     def get_attr(self, key: str, path: str) -> Any:
         """Return metadata stored in the parsed spectrum for the current entry."""
-        spectrum: ParsedSpectrum | None = self.parsed_spectra.get(
+        spectrum: ParsedSpectrum | None = self.parsed_data.get(
             self.callbacks.entry_name
         )
         if spectrum is None:
@@ -698,7 +698,7 @@ class XPSReader(MultiFormatReader):
         Returns the dimensions of the data from the given path.
         """
         entry = self.callbacks.entry_name
-        spectrum: ParsedSpectrum | None = self.parsed_spectra.get(entry)
+        spectrum: ParsedSpectrum | None = self.parsed_data.get(entry)
 
         if spectrum is None:
             return []
@@ -784,7 +784,7 @@ class XPSReader(MultiFormatReader):
         }
 
         entry = self.callbacks.entry_name
-        spectrum: ParsedSpectrum | None = self.parsed_spectra.get(entry)
+        spectrum: ParsedSpectrum | None = self.parsed_data.get(entry)
         if spectrum is None:
             return None
 

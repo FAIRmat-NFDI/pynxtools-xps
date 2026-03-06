@@ -42,12 +42,7 @@ from pynxtools_xps.parsers.vms.data_model import (
     VamasBlock,
     VamasHeader,
 )
-from pynxtools_xps.parsers.vms.metadata import (
-    ALLOWED_TECHNIQUES,
-    EXP_MODES,
-    _context,
-    _drop_unused_keys,
-)
+from pynxtools_xps.parsers.vms.metadata import ALLOWED_TECHNIQUES, EXP_MODES, _context
 
 
 class VamasParser(_XPSParser):
@@ -102,9 +97,6 @@ class VamasParser(_XPSParser):
 
         self._flat_spectra: list[dict[str, Any]] = self._build_list()
         self._build_parsed_spectra()
-
-        for spec in self.data.values():
-            print(spec.metadata)
 
     def _build_parsed_spectra(self) -> None:
         """Group flat spectra by entry name and build ``self._data``."""
@@ -651,6 +643,7 @@ class VamasParser(_XPSParser):
                 ],
                 dtype=float,
             )
+            settings["extent/@units"] = settings["source_beam_width_x/@units"]
             settings["spatial_acceptance"] = np.array(
                 [
                     settings["analysis_width_x"],
@@ -658,6 +651,7 @@ class VamasParser(_XPSParser):
                 ],
                 dtype=float,
             )
+            settings["spatial_acceptance/@units"] = settings["analysis_width_x/@units"]
 
             data = {"x": block.x}
 
@@ -688,7 +682,7 @@ class VamasParser(_XPSParser):
                 "data": data,
             }
 
-            remove_keys = [
+            keys_to_drop = [
                 "comment_lines",
                 "year",
                 "month",
@@ -702,7 +696,8 @@ class VamasParser(_XPSParser):
                 "x",
             ]
 
-            _drop_unused_keys(settings, remove_keys)
+            for key in keys_to_drop:
+                settings.pop(key, None)
 
             spec_dict.update(settings)
             spectra += [spec_dict]

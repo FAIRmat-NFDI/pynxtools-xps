@@ -262,11 +262,11 @@ class ParsedSpectrum:
         lines.append(_da_summary(self.raw, "raw:"))
         n = len(self.metadata)
         lines.append(f"  metadata ({n} keys):")
-        for k, v in self.metadata.items():
+        for k, v in sorted(self.metadata.items()):
             v_str = str(v)
             if len(v_str) > 60:
                 v_str = v_str[:57] + "..."
-            lines.append(f"    {k:<32}  {v_str}")
+            lines.append(f"    {k:<50}  {v_str}")
         return "\n".join(lines)
 
     # ------------------------------------------------------------------

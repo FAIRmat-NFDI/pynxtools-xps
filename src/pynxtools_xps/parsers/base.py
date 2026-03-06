@@ -521,7 +521,7 @@ class _Parser(ABC):
             True if the file matches this parser's format, otherwise False.
         """
 
-    def parse_file(self, file: str | Path, **kwargs):
+    def parse(self, file: str | Path, **kwargs):
         """
         Parse the given file and populate the parser's data attribute.
 
@@ -569,7 +569,7 @@ class _XPSParser(_Parser):
 
     The ``data`` property exposes this mapping to ``XPSReader.parsed_data_dicts``.
     File provenance (``File``, ``file_ext``) is stamped into every spectrum's
-    metadata by ``parse_file()`` immediately after parsing completes.
+    metadata by ``parse()`` immediately after parsing completes.
     """
 
     config_file: ClassVar[str] = ""

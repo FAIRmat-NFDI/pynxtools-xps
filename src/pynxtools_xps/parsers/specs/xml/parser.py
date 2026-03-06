@@ -48,7 +48,7 @@ def _construct_entry_name(key: str) -> str:
     return "__".join(name_parts)
 
 
-class SpecsXMLParser(_XPSParser):
+class SPECSXMLParser(_XPSParser):
     """Parser for SpecsLab2 XML data"""
 
     config_file: ClassVar[str] = "config_specs_xml.json"

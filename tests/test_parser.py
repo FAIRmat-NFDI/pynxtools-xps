@@ -27,9 +27,9 @@ from pynxtools_xps.parsers.scienta.igor_parser import (
     ScientaIgorParserPEAK,
 )
 from pynxtools_xps.parsers.scienta.txt_parser import ScientaTXTParser
-from pynxtools_xps.parsers.specs.sle.parser import SpecsSLEParser
-from pynxtools_xps.parsers.specs.xml.parser import SpecsXMLParser
-from pynxtools_xps.parsers.specs.xy.parser import SpecsXYParser
+from pynxtools_xps.parsers.specs.sle.parser import SPECSSLEParser
+from pynxtools_xps.parsers.specs.xml.parser import SPECSXMLParser
+from pynxtools_xps.parsers.specs.xy.parser import SPECSXYParser
 from pynxtools_xps.parsers.vms.parser import VamasParser
 from pynxtools_xps.parsers.vms_export.parser_export import VamasExportParser
 from pynxtools_xps.parsers.vms_export.parser_results import VamasResultParser
@@ -48,10 +48,10 @@ _POSITIVE_CASES = [
         id="vamas-result-csv",
     ),
     pytest.param(
-        SpecsXMLParser, "specs_xml/In-situ_PBTTT_XPS_SPECS.xml", id="specs-xml"
+        SPECSXMLParser, "specs_xml/In-situ_PBTTT_XPS_SPECS.xml", id="specs-xml"
     ),
-    pytest.param(SpecsXYParser, "specs_xy/MgFe2O4_small.xy", id="specs-xy"),
-    pytest.param(SpecsSLEParser, "specs_sle/EX439_S718_Au.sle", id="specs-sle"),
+    pytest.param(SPECSXYParser, "specs_xy/MgFe2O4_small.xy", id="specs-xy"),
+    pytest.param(SPECSSLEParser, "specs_sle/EX439_S718_Au.sle", id="specs-sle"),
     pytest.param(PHIParser, "phi_spe/SnO2_10nm.spe", id="phi-spe"),
     pytest.param(PHIParser, "phi_pro/SnO2_10nm_1.pro", id="phi-pro"),
     pytest.param(ScientaTXTParser, "scienta_txt/Ag_0001.txt", id="scienta-txt"),
@@ -72,9 +72,9 @@ _NEGATIVE_CASES = [
         "vms_txt_export/vms_txt_export.txt",
         id="vamas-rejects-casa-xps-export",
     ),
-    pytest.param(SpecsXMLParser, "vms_regular/regular.vms", id="specs-xml-rejects-vms"),
+    pytest.param(SPECSXMLParser, "vms_regular/regular.vms", id="specs-xml-rejects-vms"),
     pytest.param(
-        SpecsXMLParser, "specs_xy/MgFe2O4_small.xy", id="specs-xml-rejects-xy"
+        SPECSXMLParser, "specs_xy/MgFe2O4_small.xy", id="specs-xml-rejects-xy"
     ),
     pytest.param(PHIParser, "vms_regular/regular.vms", id="phi-rejects-vms"),
     pytest.param(
@@ -90,7 +90,7 @@ _NEGATIVE_CASES = [
         "vms_txt_export/vms_txt_export.txt",
         id="scienta-txt-rejects-casa-xps-export",
     ),
-    pytest.param(SpecsXYParser, "vms_regular/regular.vms", id="specs-xy-rejects-vms"),
+    pytest.param(SPECSXYParser, "vms_regular/regular.vms", id="specs-xy-rejects-vms"),
     pytest.param(
         ScientaIgorParserOld,
         "vms_regular/regular.vms",

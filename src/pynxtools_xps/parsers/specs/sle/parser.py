@@ -54,7 +54,7 @@ def _execute_sql_query_with_cur(cur: sqlite3.Cursor, query: str):
     return cur.fetchall()
 
 
-class SpecsSLEParser(_XPSParser):
+class SPECSSLEParser(_XPSParser):
     """
     Generic parser without reading capabilities,
     to be used as template for implementing parsers for different versions.

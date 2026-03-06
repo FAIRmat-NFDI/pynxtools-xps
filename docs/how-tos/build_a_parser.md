@@ -140,10 +140,10 @@ It can be called within your reference markdown file like this:
 {{ parser_version_table("path.to.your.parser", "YourParser") }}
 ```
 
-For example, for the `SpecsSLEParser` located in  [`src/pynxtools_xps/parsers/specs/sle/parser.py`](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/src/pynxtools_xps/parsers), the call is:
+For example, for the `SPECSSLEParser` located in  [`src/pynxtools_xps/parsers/specs/sle/parser.py`](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/src/pynxtools_xps/parsers), the call is:
 
 ```md
-{{ parser_version_table("specs.sle.parser", "SpecsSLEParser") }}
+{{ parser_version_table("specs.sle.parser", "SPECSSLEParser") }}
 ```
 
 ---

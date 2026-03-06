@@ -17,7 +17,7 @@
 #
 from .phi import PHIParser
 from .scienta import ScientaHDF5Parser, ScientaIgorParser, ScientaTXTParser
-from .specs import SpecsSLEParser, SpecsXMLParser, SpecsXYParser
+from .specs import SPECSSLEParser, SPECSXMLParser, SPECSXYParser
 from .vms import VamasParser
 from .vms_export import VamasExportParser, VamasResultParser
 
@@ -26,9 +26,9 @@ __all__ = [
     "ScientaHDF5Parser",
     "ScientaIgorParser",
     "ScientaTXTParser",
-    "SpecsSLEParser",
-    "SpecsXMLParser",
-    "SpecsXYParser",
+    "SPECSSLEParser",
+    "SPECSXMLParser",
+    "SPECSXYParser",
     "VamasParser",
     "VamasExportParser",
     "VamasResultParser",

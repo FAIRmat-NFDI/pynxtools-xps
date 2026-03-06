@@ -40,9 +40,9 @@ from pynxtools_xps.parsers import (
     ScientaHDF5Parser,
     ScientaIgorParser,
     ScientaTXTParser,
-    SpecsSLEParser,
-    SpecsXMLParser,
-    SpecsXYParser,
+    SPECSSLEParser,
+    SPECSXMLParser,
+    SPECSXYParser,
     VamasExportParser,
     VamasParser,
     VamasResultParser,
@@ -229,9 +229,9 @@ class XPSReader(MultiFormatReader):
         ScientaHDF5Parser,
         ScientaIgorParser,
         ScientaTXTParser,
-        SpecsSLEParser,
-        SpecsXMLParser,
-        SpecsXYParser,
+        SPECSSLEParser,
+        SPECSXMLParser,
+        SPECSXYParser,
         VamasExportParser,
         VamasParser,
     ]
@@ -385,7 +385,7 @@ class XPSReader(MultiFormatReader):
                     f"'{file.name}'."
                 )
             parser = primary_matches[0]()
-            parser.parse_file(file_path, **(self.kwargs or {}))
+            parser.parse(file_path, **(self.kwargs or {}))
 
             config_file = parser.config_file
             if isinstance(config_file, dict):
@@ -414,7 +414,7 @@ class XPSReader(MultiFormatReader):
                     f"Ambiguous metadata format: multiple parsers match '{file.name}'."
                 )
             m_parser = metadata_matches[0]()
-            m_parser.parse_file(file_path, **(self.kwargs or {}))
+            m_parser.parse(file_path, **(self.kwargs or {}))
 
             attached = False
             for parser in self._active_parsers:

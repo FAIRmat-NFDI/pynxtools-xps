@@ -38,7 +38,7 @@ from pynxtools_xps.parsers.base import ParsedSpectrum, _construct_entry_name, _X
 from pynxtools_xps.parsers.specs.xy.metadata import _context
 
 
-class SpecsXYParser(_XPSParser):
+class SPECSXYParser(_XPSParser):
     """
     A parser for reading in ASCII-encoded .xy data from Specs Prodigy.
 

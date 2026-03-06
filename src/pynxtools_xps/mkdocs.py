@@ -100,11 +100,11 @@ def define_env(env):
             Dotted module path relative to pynxtools_xps.parsers,
             e.g. "specs.sle.parser".
         class_name:
-            Name of the parser class, e.g. "SpecsSLEParser".
+            Name of the parser class, e.g. "SPECSSLEParser".
 
         Example usage in a doc page::
 
-            {{ parser_version_table("specs.sle.parser", "SpecsSLEParser") }}
+            {{ parser_version_table("specs.sle.parser", "SPECSSLEParser") }}
         """
         try:
             mod = importlib.import_module(f"pynxtools_xps.parsers.{module_path}")

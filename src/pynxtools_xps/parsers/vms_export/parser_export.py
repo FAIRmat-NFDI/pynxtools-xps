@@ -25,7 +25,6 @@ from abc import abstractmethod
 from pathlib import Path
 from typing import Any, ClassVar
 
-import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
 
@@ -36,43 +35,61 @@ from pynxtools_xps.numerics import (
     interpolate_arrays,
 )
 from pynxtools_xps.parsers.base import ParsedSpectrum, _construct_entry_name, _XPSParser
-from pynxtools_xps.parsers.vms_export.metadata import _context, _handle_repetitions
+from pynxtools_xps.parsers.vms_export.metadata import _context
+
+# Column-header → flat-dict key mappings for the two halves of the data section.
+# The KE-side columns produce ``{key}/data`` arrays; the BE-side produce
+# ``{key}/data_cps`` arrays.  Component-name columns are handled separately
+# by :func:`_map_data_headers`.
+_KE_SIDE_HEADERS: dict[str, str] = {
+    "K.E.": "kinetic_energy/data",
+    "Counts": "counts/data",
+    "Background": "background/data",
+    "Envelope": "envelope/data",
+}
+
+_BE_SIDE_HEADERS: dict[str, str] = {
+    "B.E.": "binding_energy/data",
+    "CPS": "counts_per_second/data",
+    "Background CPS": "background/data_cps",
+    "Envelope CPS": "envelope/data_cps",
+}
 
 
-def _select_from_list(input_list: list[str], skip: int, keep_middle: int) -> list[str]:
-    """
-    Select items from a list according to the specified pattern:
-    - Extract the first (2 + count + keep_middle) items,
-    - Skip the next 'count' number of items,
-    - Extract everything after the skipped items.
+def _map_data_headers(
+    headers: list[str],
+    comp_names: list[str],
+    special_map: dict[str, str],
+    comp_suffix: str,
+) -> list[str]:
+    """Map raw column headers from the data section to flat-dict keys.
 
-    Parameters:
-    - input_list (List[str]): The list of strings to process.
-    - skip (int): The number of items to skip after the initial selection.
-    - keep_middle (int): The number of items to keep in the middle.
-
-    Returns:
-    - List[str]: The processed list after extracting and skipping items.
-    """
-    first_part = input_list[: (2 + skip + keep_middle)]
-    skip_part = input_list[(2 + skip + keep_middle) : (2 + skip + keep_middle + skip)]
-    remaining_part = input_list[(2 + skip + keep_middle + skip) :]
-
-    return first_part + remaining_part
-
-
-def _get_dict_keys(header_lines: list[str]) -> list[str]:
-    """
-    Maps a list of header strings to their corresponding keys based on a predefined mapping.
+    Special headers are resolved via *special_map*.  Headers that match a
+    component name are assigned ``component{i}{comp_suffix}`` in order of
+    first appearance.  All other headers are normalized with
+    ``_context.normalize_key`` and *comp_suffix* appended.
 
     Args:
-        header_lines (List[str]): A list of header strings to be mapped.
+        headers:      Ordered raw column header strings (whitespace stripped).
+        comp_names:   Ordered component names from the ``Name`` row.
+        special_map:  Explicit header → final key mapping.
+        comp_suffix:  Appended to component keys (``"/data"`` for the KE
+                      side, ``"/data_cps"`` for the BE side).
 
     Returns:
-        List[str]: A list of keys, where each header is replaced by its mapped value
-                   or left unchanged if no mapping is found.
+        Flat-dict keys in the same order as *headers*.
     """
-    return [_context.normalize_key(header) for header in header_lines if header]
+    comp_idx = 0
+    keys: list[str] = []
+    for h in headers:
+        if h in special_map:
+            keys.append(special_map[h])
+        elif h in comp_names:
+            keys.append(f"component{comp_idx}{comp_suffix}")
+            comp_idx += 1
+        else:
+            keys.append(_context.normalize_key(h) + comp_suffix)
+    return keys
 
 
 class _TextParser(_XPSParser):
@@ -366,173 +383,122 @@ class _TextParserColumns(_TextParser):
 
         return blocks
 
-    def _parse_block_data(self, block_lines):
-        """
-        Parses a block of spectral data into metadata and a DataFrame of measurements.
+    def _parse_block_data(self, block_lines: list[str]) -> dict[str, Any]:
+        """Parse one ``Cycle``-headed block into a flat metadata + data dict.
+
+        The data section header contains both ``K.E.`` and ``B.E.``, separated
+        by an empty tab cell (``\\t\\t``).  The left half (KE side) produces
+        ``{key}/data`` arrays; the right half (BE side) produces
+        ``{key}/data_cps`` arrays.  Component columns are assigned
+        ``component{N}/data`` and ``component{N}/data_cps`` keys in order.
+
+        Header rows (``Name``, ``Position``, ``FWHM``, ``Area``, ``Width``,
+        ``Lineshape``) produce scalar ``component{N}/{field}`` metadata keys.
 
         Args:
-            block (list of str): The raw lines of the spectral data block.
+            block_lines: Raw text lines for one spectral block.
 
         Returns:
-            dict: A dictionary with metadata and a DataFrame of measurements.
+            Flat dict with scalar metadata and 1-D ``np.ndarray`` values.
         """
+        _fit_rows: frozenset[str] = frozenset(
+            {"Position", "FWHM", "Area", "Width", "Lineshape"}
+        )
 
-        metadata = {}
-        data = {}
-        fit_data = {}
+        metadata: dict[str, Any] = {}
+        comp_names: list[str] = []
+        comp_fit: dict[int, dict[str, Any]] = {}
+        ke_keys: list[str] = []
+        be_keys: list[str] = []
+        ke_rows: list[list[float]] = []
+        be_rows: list[list[float]] = []
+        in_data = False
 
-        in_data_section = False
+        for raw_line in block_lines:
+            line = raw_line.rstrip("\n")
+            stripped = line.strip()
+            if not stripped:
+                continue
 
-        for line in block_lines:
-            line = line.strip()
-            if line.startswith("Cycle"):
-                # Extract cycle and scan type
-                metadata["cycle"], metadata["source"], metadata["spectrum_type"] = map(
-                    str.strip, line.split(":")
+            if stripped.startswith("Cycle"):
+                parts = stripped.split(":")
+                metadata["cycle"] = parts[0].strip()
+                if len(parts) > 1:
+                    metadata["group_name"] = parts[1].strip()
+                if len(parts) > 2:
+                    metadata["spectrum_type"] = parts[2].strip()
+
+            elif stripped.startswith("Characteristic Energy"):
+                for key_raw, val_str in re.findall(r"([\w\s]+)\t([\deE+\-.]+)", line):
+                    key_raw = key_raw.strip()
+                    key, _, unit = key_raw.rpartition(" ")
+                    key = convert_pascal_to_snake(key.strip())
+                    metadata[key] = float(val_str)
+                    metadata[f"{key}/@units"] = unit
+
+            elif stripped.startswith("Name"):
+                comp_names = [c for c in line.split("\t")[1:] if c.strip()]
+
+            elif any(stripped.startswith(fr) for fr in _fit_rows):
+                cols = line.split("\t")
+                field = _context.normalize_key(cols[0].strip())
+                values = [v for v in cols[1:] if v.strip()]
+                for i, val_str in enumerate(values):
+                    comp_fit.setdefault(i, {})[field] = _context._format_value(val_str)
+
+            elif "K.E." in stripped and "B.E." in stripped:
+                # Data header — two halves separated by an empty tab cell.
+                halves = line.split("\t\t", 1)
+                left_headers = [h.strip() for h in halves[0].split("\t") if h.strip()]
+                right_headers = (
+                    [h.strip() for h in halves[1].split("\t") if h.strip()]
+                    if len(halves) > 1
+                    else []
                 )
-
-            elif line.startswith("Characteristic Energy"):
-                # Parse characteristic energy and acquisition time
-                metadata_match = re.findall(r"([\w\s]+)\t([\deE\+\-.]+)", line)
-                matches = {key.strip(): float(value) for key, value in metadata_match}
-                for key, value in matches.items():
-                    key, unit = key.rsplit(" ", 1)
-                    key = convert_pascal_to_snake(key)
-                    metadata.update({key: value, f"{key}/@units": unit})
-
-            elif line.startswith("Name"):
-                comp_names = _handle_repetitions(_get_dict_keys(line.split("\t")[1:]))
-                for comp_index, comp_name in enumerate(comp_names):
-                    data[f"component{comp_index}"] = {
-                        "name": comp_name,
-                        "data": [],
-                        "data_cps": [],
-                    }
-                n_components = len(comp_names)
-
-            elif line.startswith(("Area", "Width", "FWHM", "Position", "data")):
-                line_split = line.split("\t")
-                fit_data[line_split[0]] = [
-                    _context._format_value(val) for val in line_split[1:]
-                ]
-
-            elif "K.E." in line and "Counts" in line:
-                # Parse column headers
-                all_names = _get_dict_keys(line.split("\t"))
-
-                keep_middle = 2
-
-                for name in ["background_intensity", "fit_sum"]:
-                    if name in all_names:
-                        keep_middle += 1
-
-                names = _select_from_list(
-                    all_names, skip=n_components, keep_middle=keep_middle
+                ke_keys = _map_data_headers(
+                    left_headers, comp_names, _KE_SIDE_HEADERS, "/data"
                 )
-
-                names = _handle_repetitions(names)
-
-                non_comp_names = []
-
-                for name in names:
-                    if (
-                        not any(
-                            sub_dict.get("name") == name for sub_dict in data.values()
-                        )
-                        and "CPS" not in name
-                    ):
-                        data[name] = {"name": name, "data": [], "data_cps": []}
-
-                        non_comp_names += [name]
-
-                # Circumvents the problem that there are two columns for
-                # each component, but two components can also have the
-                # same name.
-                new_names = (
-                    non_comp_names[:2]
-                    + comp_names
-                    + non_comp_names[2 : 2 + keep_middle]
-                    + comp_names
-                    + non_comp_names[2 + keep_middle :]
+                be_keys = _map_data_headers(
+                    right_headers, comp_names, _BE_SIDE_HEADERS, "/data_cps"
                 )
+                in_data = True
 
-                in_data_section = True
-
-            elif in_data_section:
-                values = [val for val in line.split("\t") if val]
-
-                assert len(values) == len(new_names), f"{new_names}"
-
-                lineshape_in = []
-                for name, value in zip(new_names, values):
-                    matching_key = name
-                    for key, sub_dict in data.items():
-                        if sub_dict.get("name") == name:
-                            matching_key = key
-                            break
-
-                    if name not in lineshape_in:
-                        data[matching_key]["data"].append(_context._format_value(value))
-                        lineshape_in += [name]
-                    else:
-                        data[matching_key]["data_cps"].append(
-                            _context._format_value(value)
-                        )
-        flattened = {}
-        for i, (sup_key, sub_dict) in enumerate(data.items()):
-            for sub_key, value in sub_dict.items():
-                if sup_key == value:
-                    continue
-                if value and any(str(val).strip() for val in value):
-                    if "data" in sub_key:
-                        value = np.array(value)
-                    flattened[f"{sup_key}/{sub_key}"] = value
-
-            for param in ("Area", "Width", "FWHM", "Position", "data"):
-                if param in fit_data and i < len(fit_data[param]):
-                    param_value = fit_data[param][i]
-                    if param_value:
-                        param_key, param_value, unit = _context.format(
-                            param, param_value
-                        )
-                        flattened[f"{sup_key}/{param_key}"] = param_value
-                        if unit:
-                            flattened[f"{sup_key}/{param_key}/@units"] = unit
-
-        if self.uniform_energy_steps:
-            uniform = False
-
-            try:
-                x_arr = flattened["kinetic_energy/data"]
-                uniform = check_uniform_step_width(x_arr)
-            except KeyError:
-                x_arr = flattened["binding_energy/data"]
-                uniform = check_uniform_step_width(x_arr)
-
-            if not uniform:
-                return {**metadata, **flattened}
-            else:
-                uniform_dict = {}
-                all_arrays = {}
-
-                for key, value in flattened.copy().items():
-                    if isinstance(value, np.ndarray):
-                        all_arrays[key] = value
-                    else:
-                        uniform_dict[key] = value
-
-                x_arr, resampled_arrays = interpolate_arrays(
-                    x_arr, list(all_arrays.values())
+            elif in_data:
+                halves = line.split("\t\t", 1)
+                left_vals = [v.strip() for v in halves[0].split("\t") if v.strip()]
+                right_vals = (
+                    [v.strip() for v in halves[1].split("\t") if v.strip()]
+                    if len(halves) > 1
+                    else []
                 )
+                if left_vals:
+                    ke_rows.append([float(v) for v in left_vals[: len(ke_keys)]])
+                if right_vals:
+                    be_rows.append([float(v) for v in right_vals[: len(be_keys)]])
 
-                for i, key in enumerate(all_arrays):
-                    uniform_dict[key] = resampled_arrays[i]
+        flat: dict[str, Any] = {**metadata}
 
-                return {**metadata, **uniform_dict}
+        # Component fit metadata
+        for i, name in enumerate(comp_names):
+            flat[f"component{i}/name"] = name
+            for field, val in comp_fit.get(i, {}).items():
+                flat[f"component{i}/{field}"] = val
 
-        return {**metadata, **flattened}
+        # KE-side data arrays
+        if ke_rows:
+            ke_arr = np.array(ke_rows)
+            for j, key in enumerate(ke_keys):
+                flat[key] = ke_arr[:, j]
 
-    def _build_list_of_dicts(self, blocks):
+        # BE-side data arrays
+        if be_rows:
+            be_arr = np.array(be_rows)
+            for j, key in enumerate(be_keys):
+                flat[key] = be_arr[:, j]
+
+        return flat
+
+    def _build_list_of_dicts(self, blocks: list[list[str]]) -> list[dict[str, Any]]:
         """
         Build list of dictionaries, with each dict containing data
         and metadata of one spectrum (block).
@@ -550,29 +516,47 @@ class _TextParserColumns(_TextParser):
         """
         spectra = []
         for block in blocks:
-            parsed_data = self._parse_block_data(block)
+            parsed = self._parse_block_data(block)
 
-            if "binding_energy/data" not in parsed_data:
-                parsed_data["binding_energy/data"] = (
-                    parsed_data["characteristic_energy"]
-                    - parsed_data["kinetic_energy/data"]
+            # Fallback: derive binding energy axis if the BE column was absent.
+            if "binding_energy/data" not in parsed and "kinetic_energy/data" in parsed:
+                parsed["binding_energy/data"] = (
+                    parsed["characteristic_energy"] - parsed["kinetic_energy/data"]
                 )
 
-            if "counts_per_second/data" not in parsed_data:
-                parsed_data["counts_per_second/data"] = (
-                    parsed_data["counts"] / parsed_data["acquisition_time"]
+            # Fallback: derive CPS if the CPS column was absent.
+            if "counts_per_second/data" not in parsed and "counts/data" in parsed:
+                parsed["counts_per_second/data"] = (
+                    parsed["counts/data"] / parsed["acquisition_time"]
                 )
 
-            if check_uniform_step_width(parsed_data["kinetic_energy/data"]):
-                parsed_data["step_size"] = _get_minimal_step(
-                    parsed_data["kinetic_energy/data"]
+            # Resample all arrays to a uniform energy grid when requested.
+            if self.uniform_energy_steps:
+                x_key = (
+                    "kinetic_energy/data"
+                    if "kinetic_energy/data" in parsed
+                    else "binding_energy/data"
                 )
+                x_arr = parsed.get(x_key)
+                if x_arr is not None and not check_uniform_step_width(x_arr):
+                    y_keys = [
+                        k
+                        for k, v in parsed.items()
+                        if isinstance(v, np.ndarray) and k != x_key
+                    ]
+                    x_uniform, resampled = interpolate_arrays(
+                        x_arr, [parsed[k] for k in y_keys]
+                    )
+                    parsed[x_key] = x_uniform
+                    for k, v in zip(y_keys, resampled):
+                        parsed[k] = v
 
-            parsed_data["energy_label"] = "binding"
+            ke_data = parsed.get("kinetic_energy/data")
+            if ke_data is not None and check_uniform_step_width(ke_data):
+                parsed["step_size"] = _get_minimal_step(ke_data)
 
-            spectra += [parsed_data]
-
-            plt.show()
+            parsed["energy_label"] = "binding"
+            spectra.append(parsed)
 
         return spectra
 

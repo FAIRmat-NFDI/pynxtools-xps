@@ -59,8 +59,6 @@ _KEY_MAP: dict[str, str] = {
     "k.e.": "kinetic_energy",
     "b.e.": "binding_energy",
     "cps": "counts_per_second",
-    "background": "background_intensity",
-    "background_cps": "background_intensity_cps",
     "envelope": "fit_sum",
     "envelope_cps": "fit_sum_cps",
     "%at_conc": "atomic_concentration",

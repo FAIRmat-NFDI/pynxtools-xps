@@ -27,9 +27,10 @@ from pynxtools_xps.parsers.base import (
     ParsedSpectrum,
     _construct_entry_name,
     _XPSMetadataParser,
+    _XPSParser,
 )
-from pynxtools_xps.parsers.vms_export.metadata import _context, _handle_repetitions
-from pynxtools_xps.parsers.vms_export.parser_export import VamasExportParser
+from pynxtools_xps.parsers.vms.parser import VamasParser
+from pynxtools_xps.parsers.vms_export.metadata import _context
 
 
 class VamasResultParser(_XPSMetadataParser):
@@ -53,7 +54,7 @@ class VamasResultParser(_XPSMetadataParser):
     Compatible primary parser: ``VamasExportParser``.
     """
 
-    compatible_primary_parser: ClassVar[type[VamasExportParser]] = VamasExportParser
+    compatible_primary_parser: ClassVar[type[_XPSParser]] = VamasParser
     supported_file_extensions: ClassVar[tuple[str, ...]] = (".csv",)
 
     def matches_file(self, file: Path) -> bool:
@@ -73,9 +74,6 @@ class VamasResultParser(_XPSMetadataParser):
         table1_rows = self._parse_table1(all_rows)
         compact_rows = self._parse_compact_table(all_rows, n_expected=len(table1_rows))
         self._build_entries(table1_rows, compact_rows)
-
-        for spec in self.data.values():
-            print(spec.metadata)
 
     def _parse_table1(self, all_rows: list[list[str]]) -> list[dict[str, Any]]:
         """Extract ordered component data from Table 1.
@@ -201,6 +199,7 @@ class VamasResultParser(_XPSMetadataParser):
         group_order: list[str] = []
 
         for peak_name, s_id, row_data in aligned:
+            peak_name = peak_name.replace(" ", "")
             parts = [s_id, peak_name] if s_id else [peak_name]
             entry_name = _construct_entry_name(parts)
             if entry_name not in groups:
@@ -211,18 +210,15 @@ class VamasResultParser(_XPSMetadataParser):
         # Build ParsedSpectrum per group
         for entry_name in group_order:
             group_rows = groups[entry_name]
-            raw_labels = [r["_peak_name"] for r in group_rows]
-            comp_labels = _handle_repetitions(
-                [_construct_entry_name([lbl]) for lbl in raw_labels]
-            )
+            comp_labels = [r["_peak_name"] for r in group_rows]
 
             metadata: dict[str, Any] = {}
-            for comp_label, row_data in zip(comp_labels, group_rows):
+            for i, (comp_label, row_data) in enumerate(zip(comp_labels, group_rows)):
                 for field, value in row_data.items():
                     if field == "_peak_name":
                         continue
-                    print(comp_label, field, value)
-                    metadata[f"{comp_label}/{field}"] = value
+                    metadata[f"component{i}/name"] = comp_label
+                    metadata[f"component{i}/{field}"] = value
 
             self._data[entry_name] = ParsedSpectrum(
                 data=None, raw=None, metadata=metadata
@@ -246,31 +242,20 @@ class VamasResultParser(_XPSMetadataParser):
         if not self._data:
             return
 
-        pattern = re.compile(r"(component\d+/)name")
-        inject_fields = {
+        pattern = re.compile(r"(component\d+/)")
+        _inject_fields = {
             "area_over_rsf*t*mfp",
-            "atomic_concentration",
+            "atomic_concentration",  # overwrites the 0.0 placeholder
             "goodness_of_fit",
+            "raw_area",
         }
-
-        for entry, meta_spectrum in self._data.items():
-            meta = meta_spectrum.metadata
-            print(meta)
-            filtered_keys = {
-                key: match.group(1) for key in meta if (match := pattern.search(key))
-            }
-
-            for key, comp_prefix in filtered_keys.items():
-                component_name = meta[key]
-
-                print(key)
-                # if component_name in self._data:
-                #     csv_sub = self._data[component_name]
-                #     for field in inject_fields & csv_sub.keys():
-                #         meta[f"{comp_prefix}{field}"] = csv_sub[field]
-
-        # TODO: this is all broken
         for meta_entry, meta_spectrum in self._data.items():
             for main_entry, main_spectrum in main_file_data.items():
                 if self._matches_entry(meta_entry, main_entry):
-                    main_spectrum.metadata.update(meta_spectrum.metadata)
+                    for key, value in meta_spectrum.metadata.items():
+                        field = key.rsplit("/", 1)[
+                            -1
+                        ]  # "component0/raw_area" → "raw_area"
+                        if field in _inject_fields:
+                            main_spectrum.metadata[key] = value
+                    break

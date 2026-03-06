@@ -97,6 +97,54 @@ def _concatenate_values(value1: Any, value2: Any) -> Any:
     return concatenated
 
 
+def _merge_spectra(spectra: list[ParsedSpectrum]) -> ParsedSpectrum:
+    """Merge a list of ParsedSpectrum by overwriting fields in order.
+
+    Starts with the first spectrum; for each successive one:
+
+    - ``data`` / ``raw`` are replaced if the newer spectrum has a non-None value.
+    - ``metadata`` is updated (later keys win).
+
+    Returns a new ``ParsedSpectrum``; does not mutate any input.
+    """
+    merged_data = spectra[0].data
+    merged_raw = spectra[0].raw
+    merged_metadata = dict(spectra[0].metadata)
+    for spec in spectra[1:]:
+        if spec.data is not None:
+            merged_data = spec.data
+        if spec.raw is not None:
+            merged_raw = spec.raw
+        merged_metadata.update(spec.metadata)
+    return ParsedSpectrum(data=merged_data, raw=merged_raw, metadata=merged_metadata)
+
+
+def _concatenate_spectra(spectra: list[ParsedSpectrum]) -> ParsedSpectrum:
+    """Merge a list of ParsedSpectrum without overwriting.
+
+    - ``data`` / ``raw``: concatenated along the ``"scan"`` dimension via
+      ``xr.concat``; ``None`` entries are skipped.
+    - ``metadata``: each key's values are accumulated with
+      ``_concatenate_values`` (scalar → list, list → extended list).
+
+    Returns a new ``ParsedSpectrum``; does not mutate any input.
+    """
+    data_arrays = [s.data for s in spectra if s.data is not None]
+    raw_arrays = [s.raw for s in spectra if s.raw is not None]
+    merged_data = xr.concat(data_arrays, dim="scan") if data_arrays else None
+    merged_raw = xr.concat(raw_arrays, dim="scan") if raw_arrays else None
+
+    merged_metadata: dict[str, Any] = {}
+    for spec in spectra:
+        for key, value in spec.metadata.items():
+            if key not in merged_metadata:
+                merged_metadata[key] = value
+            else:
+                merged_metadata[key] = _concatenate_values(merged_metadata[key], value)
+
+    return ParsedSpectrum(data=merged_data, raw=merged_raw, metadata=merged_metadata)
+
+
 # ---------------------------------------------------------------------------
 # Module-level helpers for get_data dispatch
 # ---------------------------------------------------------------------------
@@ -248,8 +296,8 @@ class XPSReader(MultiFormatReader):
     def __init__(self, config_file: str | None = None, *args, **kwargs):
         super().__init__(config_file, *args, **kwargs)
 
-        self.parsed_data_dicts: list[dict[str, Any]] = []
-        self.parsed_data: dict[str, Any] = {}
+        self._parsed_datasets: list[dict[str, ParsedSpectrum]] = []
+        self.parsed_spectra: dict[str, ParsedSpectrum] = {}
         self._active_parsers: list[_XPSParser] = []
         self._pending_metadata: list[_XPSMetadataParser] = []
         self.eln_data: dict[str, Any] = {}
@@ -396,7 +444,7 @@ class XPSReader(MultiFormatReader):
             )
 
             data = parser.data
-            self.parsed_data_dicts += [data]
+            self._parsed_datasets += [data]
             self._active_parsers.append(parser)
 
             # Apply any metadata parsers that were waiting for a compatible parser
@@ -432,7 +480,7 @@ class XPSReader(MultiFormatReader):
         Returns a list of entry names which should be constructed from the data.
         Defaults to creating a single entry named "entry".
         """
-        entries = list(getattr(self, "parsed_data", {}).keys())
+        entries = list(getattr(self, "parsed_spectra", {}).keys())
         return entries or ["entry"]
 
     def setup_template(self) -> dict[str, Any]:
@@ -458,44 +506,40 @@ class XPSReader(MultiFormatReader):
         # self.process_multiple_entities()
 
     def _combine_datasets(self) -> None:
+        """Merge all per-parser datasets into ``self.parsed_spectra``.
+
+        Finds entry names that appear in more than one parser output
+        (``common_entries``).
+
+        - common entries + ``overwrite_keys``: build one ``ParsedSpectrum``
+          by overwriting ``data``, ``raw``, and ``metadata`` in order.
+        - common entries + not ``overwrite_keys``: concatenate ``data``/``raw``
+          along the ``"scan"`` dimension; accumulate metadata values as lists.
+        - All non-common entries are added to ``self.parsed_spectra`` as-is.
         """
-        This function (which is called after all files have been read)
-        combines the different data sets from the XPS files and ensures
-        that entry names are different and that no data is overwritten.
-        """
-        # Find entry names that appear in more than one parsed data dict
-        entry_to_dicts: dict[str, set[int]] = {}
-        for i, d in enumerate(self.parsed_data_dicts):
-            for entry_name in list(d.keys()):
-                if entry_name not in entry_to_dicts:
-                    entry_to_dicts[entry_name] = set()
-                entry_to_dicts[entry_name].add(i)
+        entry_to_indices: dict[str, list[int]] = {}
+        for i, d in enumerate(self._parsed_datasets):
+            for entry_name in d:
+                entry_to_indices.setdefault(entry_name, []).append(i)
 
         common_entries = {
-            e for e, indices in entry_to_dicts.items() if len(indices) > 1
+            e for e, indices in entry_to_indices.items() if len(indices) > 1
         }
 
-        if common_entries and not self.overwrite_keys:
+        if common_entries:
             for entry in common_entries:
-                dicts_with_entry = [
-                    self.parsed_data_dicts[i] for i in sorted(entry_to_dicts[entry])
+                spectra = [
+                    self._parsed_datasets[i][entry] for i in entry_to_indices[entry]
                 ]
-                for i, data_dict in enumerate(dicts_with_entry):
-                    if entry in data_dict:
-                        data_dict[f"{entry}{i}"] = data_dict.pop(entry)
+                if self.overwrite_keys:
+                    self.parsed_spectra[entry] = _merge_spectra(spectra)
+                else:
+                    self.parsed_spectra[entry] = _concatenate_spectra(spectra)
 
-        for data_dict in self.parsed_data_dicts:
-            # If there are multiple input data files of the same type,
-            # make sure that existing keys are not overwritten.
-            existing = [
-                (key, self.parsed_data[key], data_dict[key])
-                for key in set(self.parsed_data).intersection(data_dict)
-            ]
-            self.parsed_data = {**self.parsed_data, **data_dict}
-
-            if not self.overwrite_keys:
-                for key, value1, value2 in existing:
-                    self.parsed_data[key] = _concatenate_values(value1, value2)
+        for d in self._parsed_datasets:
+            for entry, spectrum in d.items():
+                if entry not in common_entries:
+                    self.parsed_spectra[entry] = spectrum
 
     def _get_analyzer_names(self) -> list[str]:
         """
@@ -522,7 +566,7 @@ class XPSReader(MultiFormatReader):
         detectors: list[str] = []
 
         try:
-            for spectrum in self.parsed_data.values():
+            for spectrum in self.parsed_spectra.values():
                 if isinstance(spectrum, ParsedSpectrum) and spectrum.raw is not None:
                     n_channels = spectrum.raw.sizes.get("channel", 0)
                     for i in range(n_channels):
@@ -622,7 +666,7 @@ class XPSReader(MultiFormatReader):
 
     def get_attr(self, key: str, path: str) -> Any:
         """Return metadata stored in the parsed spectrum for the current entry."""
-        spectrum: ParsedSpectrum | None = self.parsed_data.get(
+        spectrum: ParsedSpectrum | None = self.parsed_spectra.get(
             self.callbacks.entry_name
         )
         if spectrum is None:
@@ -654,7 +698,7 @@ class XPSReader(MultiFormatReader):
         Returns the dimensions of the data from the given path.
         """
         entry = self.callbacks.entry_name
-        spectrum: ParsedSpectrum | None = self.parsed_data.get(entry)
+        spectrum: ParsedSpectrum | None = self.parsed_spectra.get(entry)
 
         if spectrum is None:
             return []
@@ -740,7 +784,7 @@ class XPSReader(MultiFormatReader):
         }
 
         entry = self.callbacks.entry_name
-        spectrum: ParsedSpectrum | None = self.parsed_data.get(entry)
+        spectrum: ParsedSpectrum | None = self.parsed_spectra.get(entry)
         if spectrum is None:
             return None
 

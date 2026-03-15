@@ -135,6 +135,7 @@ microm
 monochromatized
 monochromator
 mpes
+nbins
 ndarray
 neutraliser
 newaxis
@@ -166,6 +167,7 @@ workfunction
 xarr
 xaxes
 xaxis
+xpsapp
 yaxes
 zalar
 zenodo

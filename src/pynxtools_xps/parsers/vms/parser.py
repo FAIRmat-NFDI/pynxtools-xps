@@ -323,7 +323,7 @@ class VamasParser(_XPSParser):
         block.analyzer_take_off_azimuth_angle = float(self.lines.pop(0).strip())
         block.species_label = self.lines.pop(0).strip()
         block.transition_label = self.lines.pop(0).strip()
-        block.particle_charge = int(self.lines.pop(0).strip())
+        block.particle_charge = int(float(self.lines.pop(0).strip()))
 
         if self.header.scan_mode == "REGULAR":
             block.abscissa_label = self.lines.pop(0).strip()

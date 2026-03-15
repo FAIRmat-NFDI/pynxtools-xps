@@ -378,7 +378,14 @@ class SPECSSLEParser(_XPSParser):
         raw_data = self._get_one_scan(raw_id)
         data = self._separate_channels(raw_data, n_channels)
 
-        energy = np.arange(data.shape[0]) * spectrum["step_size"]
+        step_size = spectrum.get("step_size")
+        if step_size is None:
+            raise ValueError(
+                f"step_size could not be determined for spectrum "
+                f"{spectrum.get('spectrum_id')}. "
+                "ARPES/snapshot modes may require a different energy axis source."
+            )
+        energy = np.arange(data.shape[0]) * step_size
 
         if spectrum["energy_scan_mode"] == "fixed_analyzer_transmission":
             energy, data = self._apply_channel_shifts(energy, data, spectrum)
@@ -851,7 +858,10 @@ class SPECSSLEParser(_XPSParser):
             column_names = self._get_column_names("Spectrum")
             combined = {k: v for k, v in dict(zip(column_names, results)).items()}
 
-            if combined.get("step_size") is None:
+            _format_dict(combined, _context)
+            spectrum.update(combined)
+
+            if spectrum.get("step_size") is None:
                 try:
                     # 1. Prefer ScanDelta from AnalyzerSpectrumParameters
                     for spec_xml in self.xml_schedule.findall(
@@ -862,7 +872,7 @@ class SPECSSLEParser(_XPSParser):
                             break
 
                     # 2. Fallback: calculate from Ebin/End/NumValues if available
-                    if "step_size" not in spectrum or spectrum["step_size"] is None:
+                    if spectrum.get("step_size") is None:
                         for spec_xml in self.xml_schedule.findall(
                             ".//FixedAnalyzerTransmissionSettings"
                         ):
@@ -870,17 +880,24 @@ class SPECSSLEParser(_XPSParser):
                             end = float(spec_xml.attrib.get("End", 0))
                             n_points = int(spec_xml.attrib.get("NumValues", 1))
                             if n_points > 1:
-                                spectrum["step_size"] = (end - ebin) / (n_points - 1)
+                                spectrum["step_size"] = abs(end - ebin) / (n_points - 1)
                                 break
+
+                    # 3. Last resort: derive from energy range and n_values
+                    if spectrum.get("step_size") is None:
+                        start = spectrum.get("binding_energy") or spectrum.get(
+                            "kinetic_energy"
+                        )
+                        end = spectrum.get("end_energy")
+                        n = spectrum.get("n_values")
+                        if start is not None and end is not None and n and n > 1:
+                            spectrum["step_size"] = abs(end - start) / (n - 1)
 
                 except Exception as e:
                     raise RuntimeError(
                         f"Failed to assign step_size for "
                         f"spectrum_id={spectrum.get('spectrum_id')}, error={e}"
                     )
-
-            _format_dict(combined, _context)
-            spectrum.update(combined)
 
     def _get_scan_metadata(self, raw_id: int) -> dict[str, Any]:
         """
@@ -1043,7 +1060,12 @@ class SPECSSLEParser(_XPSParser):
                 if first_scan["data"].get("energy") is not None:
                     return np.array(first_scan["energy"])
 
-        step = spectrum["step_size"]
+        step = spectrum.get("step_size")
+        if step is None:
+            raise ValueError(
+                f"step_size could not be determined for spectrum "
+                f"{spectrum.get('spectrum_id')}."
+            )
         points = spectrum["n_values"]
 
         energy_type = spectrum.get("energy/@type")

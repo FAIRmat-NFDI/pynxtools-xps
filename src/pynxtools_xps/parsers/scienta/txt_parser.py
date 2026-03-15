@@ -43,17 +43,27 @@ class ScientaTXTParser(_XPSParser):
     )
 
     def matches_file(self, file: Path) -> bool:
-        """Return True for Scienta TXT files ([Info] INI format with SES metadata)."""
         try:
             with open(file, encoding="utf-8", errors="ignore") as f:
-                lines = [f.readline() for _ in range(3)]
-                remaining = f.read(4096 - sum(len(line) for line in lines))
-            head = "".join(lines) + remaining
-            return (
-                lines[0].strip() == "[Info]"
-                and any("Number of Regions=" in line for line in lines)
-                and any(s in head for s in ("Scienta", "scienta", "SCIENTA"))
-            )
+                first = f.readline().strip()
+                if first != "[Info]":
+                    return False
+
+                found_regions = False
+                found_scienta = False
+
+                for _ in range(200):  # scan first ~200 lines
+                    line = f.readline()
+                    if not line:
+                        break
+                    if "Number of Regions=" in line:
+                        found_regions = True
+                    if "scienta" in line.lower():
+                        found_scienta = True
+                    if found_regions and found_scienta:
+                        return True
+
+                return found_regions
         except Exception:
             return False
 
@@ -185,7 +195,7 @@ class ScientaTXTParser(_XPSParser):
         metadata = {**self.header.dict(), **region.dict(), **units}
 
         entry_name = _construct_entry_name(
-            [metadata.get("region_name", ""), metadata.get("spectrum_type", "")]
+            [metadata.get("spectrum_type", ""), metadata.get("region_name", "")]
         )
         if not entry_name:
             entry_name = f"region_{region_id}"

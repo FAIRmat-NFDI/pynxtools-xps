@@ -164,8 +164,9 @@ class _IgorWaveParser(_XPSParser):
         spectrum = self._spectrum
 
         entry_name = _construct_entry_name(
-            [spectrum.get("region_name", ""), spectrum.get("spectrum_type", "")]
+            [spectrum.get("spectrum_type", ""), spectrum.get("region_name", "")]
         )
+        print(entry_name)
         if not entry_name:
             entry_name = "region_0"
 

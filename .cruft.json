@@ -16,7 +16,7 @@
       "license": "Apache Software License 2.0",
       "zenodo_record": "13951684",
       "vscode_settings": true,
-      "include_nomad_app": false,
+      "include_nomad_app": true,
       "include_nomad_example_upload": true,
       "include_north_tools": false,
       "north_tool_name": "xps",

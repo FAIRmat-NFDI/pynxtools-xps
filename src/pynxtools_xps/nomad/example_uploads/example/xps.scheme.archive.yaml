@@ -5,7 +5,7 @@ definitions:
   sections:
     ELN_for_XPS:
       base_sections:
-      - pynxtools.nomad.dataconverter.ElnYamlConverter
+      - pynxtools.nomad.schema_packages.dataconverter.ElnYamlConverter
       - nomad.datamodel.data.EntryData
       m_annotations:
         template:

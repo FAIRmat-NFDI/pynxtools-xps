@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# pylint: disable=too-many-lines,too-few-public-methods
 """
 A generic reader for loading XPS (X-ray Photoelectron Spectroscopy) data
 file into mpes nxdl (NeXus Definition Language) template.
@@ -22,14 +21,13 @@ file into mpes nxdl (NeXus Definition Language) template.
 
 import copy
 import datetime
-import os
 import re
 from collections.abc import Callable, Iterable
 from pathlib import Path
-from re import Pattern
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
+import xarray as xr
 from pynxtools.dataconverter.helpers import extract_atom_types
 from pynxtools.dataconverter.readers.multi.reader import MultiFormatReader
 from pynxtools.dataconverter.readers.utils import parse_yml
@@ -38,21 +36,27 @@ from pynxtools.dataconverter.template import Template
 from pynxtools_xps.logging import _logger
 from pynxtools_xps.numerics import check_units
 from pynxtools_xps.parsers import (
-    PHIMapper,
-    ScientaMapper,
-    SpecsSLEMapper,
-    SpecsXMLMapper,
-    SpecsXYMapper,
-    VamasExportMapper,
-    VamasMapper,
-    VamasResultMapper,
+    PHIParser,
+    ScientaHDF5Parser,
+    ScientaIgorParser,
+    ScientaTXTParser,
+    SPECSSLEParser,
+    SPECSXMLParser,
+    SPECSXYParser,
+    VamasExportParser,
+    VamasParser,
+    VamasResultParser,
 )
-from pynxtools_xps.parsers.base import (
-    # ParsedSpectrum,
-    _XPSMapper,
-    _XPSMetadataParser,
-    _XPSParser,
-)
+from pynxtools_xps.parsers.base import ParsedSpectrum, _XPSMetadataParser, _XPSParser
+
+_PROCESS_ORDER: list[tuple[str, Any]] = [
+    (
+        "channels_averaging",
+        lambda s: s.raw is not None and s.raw.sizes.get("channel", 1) > 1,
+    ),
+    ("scan_averaging", lambda s: "scan" in s.data.dims and s.data.sizes["scan"] > 1),
+    ("cycle_averaging", lambda s: "cycle" in s.data.dims and s.data.sizes["cycle"] > 1),
+]
 
 _CONVERT_DICT = {
     "unit": "@units",
@@ -64,32 +68,15 @@ _CONVERT_DICT = {
     "electronanalyzer": "ELECTRONANALYZER[electronanalyzer]",
     "collectioncolumn": "COLLECTIONCOLUMN[collectioncolumn]",
     "energydispersion": "ENERGYDISPERSION[energydispersion]",
-    "detector": "DETECTOR[detector]",
+    "detector": "ELECTRON_DETECTOR[detector]",
     "manipulator": "MANIPULATOR[manipulator]",
-    "pid": "PID[pid]",
+    "pid": "PID_CONTROLLER[pid_controller]",
     "process": "PROCESS[process]",
     "sample": "SAMPLE[sample]",
     "substance": "SUBSTANCE[substance]",
 }
 
 _REPLACE_NESTED: dict[str, str] = {}
-
-_CHAN_COUNT = "_chan"
-_SCAN_COUNT = "_scan"
-
-
-def _get_channel_vars(data_vars: list[str]) -> list[str]:
-    """Get all data vars that contain _chan."""
-    return [data_var for data_var in data_vars if _CHAN_COUNT in data_var]
-
-
-def _get_scan_vars(data_vars: list[str]) -> list[str]:
-    """Get all data vars that contain _scan, but not _chan."""
-    return [
-        data_var
-        for data_var in data_vars
-        if _SCAN_COUNT in data_var and _CHAN_COUNT not in data_var
-    ]
 
 
 def _concatenate_values(value1: Any, value2: Any) -> Any:
@@ -110,89 +97,118 @@ def _concatenate_values(value1: Any, value2: Any) -> Any:
     return concatenated
 
 
-# TODO: enable
-# def _assemble_spectra(
-#     spectra: list[ParsedSpectrum],
-#     file_path: str | Path,
-# ) -> dict[str, Any]:
-#     """Build ENTRY-keyed dict + xarray datasets from parsed spectra.
+def _merge_spectra(spectra: list[ParsedSpectrum]) -> ParsedSpectrum:
+    """Merge a list of ParsedSpectrum by overwriting fields in order.
 
-#     This is the single, generic replacement for all per-parser
-#     ``_XPSMapper.construct_data`` / ``_update_xps_dict_with_spectrum``
-#     methods.
-#     """
-#     data_dict: dict[str, Any] = {
-#         "File": file_path,
-#         "file_ext": os.path.splitext(file_path)[1],
-#         "data": {},
-#     }
+    Starts with the first spectrum; for each successive one:
 
-#     for spectrum in spectra:
-#         spectrum.validate()
+    - ``data`` / ``raw`` are replaced if the newer spectrum has a non-None value.
+    - ``metadata`` is updated (later keys win).
 
-#         entry = _construct_entry_name(
-#             [spectrum.group_name, spectrum.spectrum_type]
-#         )
-#         if not entry:
-#             entry = "entry"
+    Returns a new ``ParsedSpectrum``; does not mutate any input.
+    """
+    merged_data = spectra[0].data
+    merged_raw = spectra[0].raw
+    merged_metadata = dict(spectra[0].metadata)
+    for spec in spectra[1:]:
+        if spec.data is not None:
+            merged_data = spec.data
+        if spec.raw is not None:
+            merged_raw = spec.raw
+        merged_metadata.update(spec.metadata)
+    return ParsedSpectrum(data=merged_data, raw=merged_raw, metadata=merged_metadata)
 
-#         entry_parent = f"/ENTRY[{entry}]"
 
-#         # Write metadata as ENTRY-prefixed keys
-#         for key, value in spectrum.metadata.items():
-#             if key.startswith("entry/"):
-#                 mpes_key = f"/ENTRY[entry]/{key.replace('entry/', '', 1)}"
-#             else:
-#                 mpes_key = f"{entry_parent}/{key}"
-#             data_dict[mpes_key] = value
+def _concatenate_spectra(spectra: list[ParsedSpectrum]) -> ParsedSpectrum:
+    """Merge a list of ParsedSpectrum without overwriting.
 
-#         # Create or reuse xarray Dataset for this entry
-#         if entry not in data_dict["data"]:
-#             data_dict["data"][entry] = xr.Dataset()
-#         ds = data_dict["data"][entry]
+    - ``data`` / ``raw``: concatenated along the ``"scan"`` dimension via
+      ``xr.concat``; ``None`` entries are skipped.
+    - ``metadata``: each key's values are accumulated with
+      ``_concatenate_values`` (scalar → list, list → extended list).
 
-#         base_key = _construct_data_key(spectrum)
+    Returns a new ``ParsedSpectrum``; does not mutate any input.
+    """
+    data_arrays = [s.data for s in spectra if s.data is not None]
+    raw_arrays = [s.raw for s in spectra if s.raw is not None]
+    merged_data = xr.concat(data_arrays, dim="scan") if data_arrays else None
+    merged_raw = xr.concat(raw_arrays, dim="scan") if raw_arrays else None
 
-#         # Write individual scans
-#         for scan in spectrum.scans:
-#             if len(spectrum.scans) > 1:
-#                 s_key = f"{base_key}_scan{scan.scan_id}"
-#             else:
-#                 s_key = base_key
+    merged_metadata: dict[str, Any] = {}
+    for spec in spectra:
+        for key, value in spec.metadata.items():
+            if key not in merged_metadata:
+                merged_metadata[key] = value
+            else:
+                merged_metadata[key] = _concatenate_values(merged_metadata[key], value)
 
-#             ds[s_key] = xr.DataArray(
-#                 data=scan.intensity,
-#                 coords={"energy": spectrum.energy},
-#             )
+    return ParsedSpectrum(data=merged_data, raw=merged_raw, metadata=merged_metadata)
 
-#             # Channel-resolved data
-#             if scan.channels is not None:
-#                 for i in range(scan.channels.shape[1]):
-#                     ds[f"{s_key}_chan{i}"] = xr.DataArray(
-#                         data=scan.channels[:, i],
-#                         coords={"energy": spectrum.energy},
-#                     )
 
-#             # Raw counts (stored as chan0 when no channel separation)
-#             if scan.raw_counts is not None and scan.channels is None:
-#                 ds[f"{s_key}_chan0"] = xr.DataArray(
-#                     data=scan.raw_counts,
-#                     coords={"energy": spectrum.energy},
-#                 )
+# ---------------------------------------------------------------------------
+# Module-level helpers for get_data dispatch
+# ---------------------------------------------------------------------------
 
-#         # Write average across scans (if multiple)
-#         if len(spectrum.scans) > 1:
-#             with warnings.catch_warnings():
-#                 warnings.simplefilter("ignore", category=RuntimeWarning)
-#                 averaged = np.mean(
-#                     [s.intensity for s in spectrum.scans], axis=0
-#                 )
-#             ds[base_key] = xr.DataArray(
-#                 data=averaged,
-#                 coords={"energy": spectrum.energy},
-#             )
 
-#     return data_dict
+def _raw_or_data_array(spectrum: "ParsedSpectrum") -> xr.DataArray:
+    """Return raw DataArray, falling back to processed data."""
+    data_array = spectrum.raw if spectrum.raw is not None else spectrum.data
+    if data_array is not None:
+        return data_array
+    else:
+        raise ValueError(f"Could not retrieve raw or data array for {spectrum}.")
+
+
+def _raw_active_dims(spectrum: "ParsedSpectrum") -> list[str]:
+    """Dims with size > 1 or named 'energy' in the raw (or processed) array."""
+    da = _raw_or_data_array(spectrum)
+    return [str(d) for d in da.dims if d == "energy" or da.sizes[d] > 1]
+
+
+def _raw_dim_indices(spectrum: "ParsedSpectrum", dim: str) -> np.ndarray | None:
+    """Index array for *dim* in raw (or processed) DA; None if absent or singular."""
+    da = _raw_or_data_array(spectrum)
+    if dim not in da.dims or da.sizes[dim] <= 1:
+        return None
+    return np.arange(da.sizes[dim])
+
+
+def _get_raw(spectrum: "ParsedSpectrum") -> np.ndarray:
+    """Return raw (or processed) data, squeezing singular non-energy dims."""
+    da = _raw_or_data_array(spectrum)
+    squeeze = [d for d in da.dims if d != "energy" and da.sizes[d] <= 1]
+    return da.squeeze(squeeze).values if squeeze else da.values
+
+
+def _cycle_averaging(spectrum: "ParsedSpectrum") -> np.ndarray | None:
+    """Average over all scan and cycle dims; None if only one cycle present."""
+    if spectrum.data is None:
+        return None
+    if "cycle" not in spectrum.data.dims or spectrum.data.sizes["cycle"] <= 1:
+        return None
+    dims = [d for d in ["scan", "cycle"] if d in spectrum.data.dims]
+    return spectrum.data.mean(dims).values
+
+
+def _get_raw_energy_index(spectrum: "ParsedSpectrum") -> int:
+    """Position of 'energy' in the active raw dims; last dim if not found."""
+    dims = _raw_active_dims(spectrum)
+    return dims.index("energy") if "energy" in dims else len(dims) - 1
+
+
+def _stats_reduced(
+    spectrum: "ParsedSpectrum", stats_fn: Callable[[], xr.DataArray]
+) -> np.ndarray | None:
+    """Apply *stats_fn* and reduce extra (non-energy) dims by summation.
+
+    Returns None when the result is already 1D (i.e. identical to the
+    unreduced variant), signalling the config to drop that field.
+    """
+    result = stats_fn()
+    extra_dims = [d for d in result.dims if d != "energy"]
+    if not extra_dims:
+        return None
+    return result.sum(dim=extra_dims).values
 
 
 def _check_multiple_extensions(
@@ -215,12 +231,36 @@ def _check_multiple_extensions(
     Raises:
         TypeError: If `file_paths` is not a tuple of strings or `Path` objects.
     """
+    if file_paths is None:
+        return False
     extensions = {str(path).split(".")[-1] for path in file_paths if "." in str(path)}
 
     return len(extensions) > 1
 
 
-# pylint: disable=too-few-public-methods
+def _collect_supported_extensions(
+    parser_classes: Iterable[type],
+) -> list[str]:
+    """
+    Collect unique supported_file_extensions from the given parser classes,
+    preserving first occurrence order.
+    """
+    seen: set[str] = set()
+    extensions: list[str] = []
+
+    for parser in parser_classes:
+        for ext in getattr(parser, "supported_file_extensions", []):
+            if ext not in seen:
+                seen.add(ext)
+                extensions.append(ext)
+
+    # ".txt" comes last because of the processing_order
+    if ".txt" in extensions:
+        extensions = [ext for ext in extensions if ext != ".txt"] + [".txt"]
+
+    return extensions
+
+
 class XPSReader(MultiFormatReader):
     """Reader for XPS."""
 
@@ -232,76 +272,34 @@ class XPSReader(MultiFormatReader):
     reader_dir: Path = Path(__file__).parent
     config_file: str | Path | None = reader_dir.joinpath("config", "template.json")
 
-    # TODO: implement
     parsers: list[type[_XPSParser]] = [
-        # KratosParser,
+        PHIParser,
+        ScientaHDF5Parser,
+        ScientaIgorParser,
+        ScientaTXTParser,
+        SPECSSLEParser,
+        SPECSXMLParser,
+        SPECSXYParser,
+        VamasExportParser,
+        VamasParser,
     ]
 
     metadata_parsers: list[type[_XPSMetadataParser]] = [
-        # TODO: implement
-        # VamasExportMapper,
+        VamasResultParser,
     ]
 
-    mappers: list[type[_XPSMapper]] = [
-        PHIMapper,
-        ScientaMapper,
-        SpecsSLEMapper,
-        SpecsXMLMapper,
-        SpecsXYMapper,
-        VamasMapper,
-        VamasResultMapper,
-        VamasExportMapper,
-    ]
-
-    supported_file_extensions: list[str] = [
-        ".h5",
-        ".hdf5",
-        ".ibw",
-        ".npl",
-        ".pro",
-        ".spe",
-        ".sle",
-        ".slh",
-        ".vms",
-        ".xml",
-        ".xy",
-        ".txt",  # This is last because of the processing_order
-    ]
-
-    supported_metadata_file_extensions: dict[str, str] = {".csv": ".txt"}
-    supported_vendors: list[str] = ["kratos", "phi", "scienta", "specs", "unknown"]
-    vendor_map: dict[str, dict[str, Any]] = {
-        ".csv": {"unknown": VamasResultMapper},
-        ".h5": {"scienta": ScientaMapper},
-        ".hdf5": {"scienta": ScientaMapper},
-        ".ibw": {"scienta": ScientaMapper},
-        ".npl": {"unknown": VamasMapper},
-        ".pro": {"phi": PHIMapper},
-        ".spe": {"phi": PHIMapper},
-        ".sle": {"specs": SpecsSLEMapper},
-        ".txt": {
-            "scienta": ScientaMapper,
-            "unknown": VamasExportMapper,
-        },
-        ".vms": {"unknown": VamasMapper},
-        ".xml": {"specs": SpecsXMLMapper},
-        ".xy": {"specs": SpecsXYMapper},
-    }
-
-    file_err_msg: str = (
-        "Need an XPS data file with one of the following extensions: "
-        f"data files: {supported_file_extensions}, metadata files: {supported_metadata_file_extensions}."
-    )
-
-    vendor_err_msg: str = (
-        f"Need an XPS data file from one of the following vendors: {supported_vendors}"
+    supported_file_extensions: list[str] = _collect_supported_extensions(parsers)
+    supported_metadata_file_extensions: list[str] = _collect_supported_extensions(
+        metadata_parsers
     )
 
     def __init__(self, config_file: str | None = None, *args, **kwargs):
         super().__init__(config_file, *args, **kwargs)
 
-        self.parsed_data_dicts: list[dict[str, Any]] = []
-        self.parsed_data: dict[str, Any] = {}
+        self._parsed_datasets: list[dict[str, ParsedSpectrum]] = []
+        self.parsed_data: dict[str, ParsedSpectrum] = {}
+        self._active_parsers: list[_XPSParser] = []
+        self._pending_metadata: list[_XPSMetadataParser] = []
         self.eln_data: dict[str, Any] = {}
 
         self.extensions: dict[str, Callable] = {
@@ -312,12 +310,13 @@ class XPSReader(MultiFormatReader):
 
         self.processing_order: list[str] = (
             XPSReader.supported_file_extensions
-            + list(XPSReader.supported_metadata_file_extensions.keys())
+            + XPSReader.supported_metadata_file_extensions
             + list(self.extensions.keys())
         )
 
-        for ext in XPSReader.supported_file_extensions + list(
-            XPSReader.supported_metadata_file_extensions.keys()
+        for ext in (
+            XPSReader.supported_file_extensions
+            + XPSReader.supported_metadata_file_extensions
         ):
             self.extensions[ext] = self.handle_data_file
 
@@ -400,7 +399,8 @@ class XPSReader(MultiFormatReader):
                                 )
                         else:
                             _logger.info(
-                                f"{key} from ELN was not parsed to atom_types because {modified_key} already exists."
+                                f"{key} from ELN was not parsed to 'atom_types' because "
+                                f"{modified_key} already exists."
                             )
 
             if isinstance(value, datetime.datetime):
@@ -411,220 +411,67 @@ class XPSReader(MultiFormatReader):
         return {}
 
     def handle_data_file(self, file_path: str) -> dict[str, Any]:
-        # # # TODO: this is structurally incorrect, we need this:
-        # # # self.datasets: list[Dataset] = []
-        # # # self.pending_metadata: list[_XPSMetadataParser] = []
-        # # # class Dataset:
-        # # #     def __init__(self, parser: _XPSParser, file: Path):
-        # # #         self.parser = parser
-        # # #         self.file = file
-        # # #         self.data = parser.data
+        """Dispatch *file_path* to the matching primary or metadata parser."""
+        file = Path(file_path)
 
-        # # # # Important Final Detail: Metadata should not be applied multiple times to the same dataset.
-        # # # # # If that is a risk, track application:
-        # # # # dataset.applied_metadata: set[type]
+        primary_matches = [P for P in self.parsers if P.is_mainfile(file)]
+        metadata_matches = [M for M in self.metadata_parsers if M.is_mainfile(file)]
 
-        # # # file = Path(file_path)
+        if primary_matches and metadata_matches:
+            raise ValueError(
+                f"File '{file.name}' matches both primary and metadata parsers."
+            )
 
-        # # # primary_matches = [
-        # # #     P for P in self.parsers
-        # # #     if P.is_mainfile(file)
-        # # # ]
+        if not primary_matches and not metadata_matches:
+            _logger.warning("No parser matches file: %s", file_path)
+            return {}
 
-        # # # metadata_matches = [
-        # # #     M for M in self.metadata_parsers
-        # # #     if M.is_mainfile(file)
-        # # # ]
-
-        # # # # Handle ambiguity strictly
-        # # # if primary_matches and metadata_matches:
-        # # #     raise ValueError("File matches both primary and metadata parsers.")
-
-        # # # if not primary_matches and not metadata_matches:
-        # # #     raise ValueError("No parser supports this file.")
-
-        # # # if primary_matches:
-        # # #     ParserCls = _select_unique(primary_matches)
-        # # #     parser = ParserCls()
-        # # #     parser.parse_file(file, **self.kwargs)
-
-        # # #     dataset = Dataset(parser, file)
-        # # #     self.datasets.append(dataset)
-
-        # # #     # Try to apply any metadata that arrived earlier
-        # # #     self._try_attach_pending_metadata(dataset)
-
-        # # # if metadata_matches:
-        # # #     MetadataCls = _select_unique(metadata_matches)
-        # # #     metadata = MetadataCls()
-        # # #     metadata.parse_file(file)
-
-        # # #     attached = False
-
-        # # #     for dataset in self.datasets:
-        # # #         if MetadataCls.supports_parser(dataset.parser):
-        # # #             metadata.update_main_file_data(dataset.data)
-        # # #             attached = True
-
-        # # #     if not attached:
-        # # #         # No compatible dataset yet → defer
-        # # #         self.pending_metadata.append(metadata)
-
-        # # # def _try_attach_pending_metadata(self, dataset: Dataset):
-        # # #     still_pending = []
-
-        # # #     for metadata in self.pending_metadata:
-        # # #         if metadata.__class__.supports_parser(dataset.parser):
-        # # #             metadata.update_main_file_data(dataset.data)
-        # # #         else:
-        # # #             still_pending.append(metadata)
-
-        # # #  self.pending_metadata = still_pending
-
-        # def _select_parser(file_path: Path) -> type[_XPSParser]:
-        #     matches = [
-        #         ParserCls
-        #         for ParserCls in self.parsers
-        #         if ParserCls.is_mainfile(file)
-        #     ]
-
-        #     if len(matches) == 0:
-        #         raise ValueError("No parser supports this file.")
-        #     if len(matches) > 1:
-        #         raise ValueError("Ambiguous file format: multiple parsers match.")
-
-        #     parser = matches[0]
-
-        #     return parser
-
-        # def _select_metadata_parsers(
-        #     file: Path,
-        #     parser:_XPSParser,
-        # ) -> list[type[_XPSMetadataParser]]:
-
-        #     fitting_metadata_parsers: list[_XPSMetadataParser] = []
-
-        #     matches = [
-        #         ParserCls
-        #         for ParserCls in self.metadata_parsers
-        #         if ParserCls.is_mainfile(file)
-        #     ]
-
-        #     if not matches:
-        #         return []
-
-        #     for metadata_parser in matches:
-        #         if not metadata_parser.supports_parser(parser):
-        #             _logger.warning(
-        #                 f"Metadata parser {metadata_parser.__name__} does not support the main parser {parser.__class__.__name__}."
-        #             )
-        #             continue
-        #         fitting_metadata_parsers.append(metadata_parser)
-
-        #     return fitting_metadata_parsers
-
-        # file = Path(file_path)
-        # main_file_ext = file.suffix
-        # file_ext = file.suffix
-
-        # parser = _select_parser(file)()
-        # parser.parse_file(file_path, **self.kwargs)
-        # main_file_data = parser.data
-
-        # metadata_parsers = _select_metadata_parsers(file, parser)
-
-        # for m_parser in metadata_parsers:
-        #     m_parser().update_main_file_data(main_file_data)
-
-        # config_file = parser.config_file
-        # if isinstance(config_file, dict):
-        #     config_file = config_file.get(file_ext)
-        # self.set_config_file(
-        #     XPSReader.reader_dir.joinpath("config", config_file),
-        #     replace=False,
-        # )
-
-        # self.parsed_data_dicts += [parser.data]
-
-        # return {}
-
-        def _check_for_vendors(file_path: str) -> str:
-            """
-            Check for the vendor name of the XPS data file.
-
-            """
-            _, file_ext = os.path.splitext(file_path)
-
-            vendor_dict = XPSReader.vendor_map[file_ext]
-
-            if len(vendor_dict) == 1:
-                return list(vendor_dict.keys())[0]
-            if file_ext == ".txt":
-                return _check_for_vendors_txt(file_path)
-            raise ValueError(XPSReader.vendor_err_msg)
-
-        def _check_for_vendors_txt(file_path: str) -> str:
-            """
-            Search for a vendor names in a txt file
-
-            Args:
-                file (str): XPS txt file
-            Returns:
-                str: vendor (str): Vendor name if that name is in the txt file or "unknown"
-
-            """
-            vendor_dict = XPSReader.vendor_map[".txt"]
-
-            with open(file_path, encoding="utf-8") as txt_file:
-                contents = txt_file.read()
-
-            for vendor in vendor_dict:
-                vendor_options = [vendor, vendor.upper(), vendor.capitalize()]
-
-                if any(vendor_opt in contents for vendor_opt in vendor_options):
-                    return vendor
-                if contents[:6] == "[Info]":
-                    # This is for picking the Scienta reader if "scienta"
-                    # is not in the file
-                    return vendor
-            return "unknown"
-
-        _, file_ext = os.path.splitext(file_path)
-
-        if file_ext in XPSReader.supported_file_extensions:
-            vendor = _check_for_vendors(file_path)
-
-            parser = XPSReader.vendor_map[file_ext][vendor]()
-            parser.parse_file(file_path, **self.kwargs)
-
-            # New parser path: returns list[ParsedSpectrum]
-            # spectra = handler.parse_file(file_path, **self.kwargs)
-            # data = _assemble_spectra(spectra, file_path)
-            # self.parsed_data_dicts += [data]
+        if primary_matches:
+            if len(primary_matches) > 1:
+                raise ValueError(
+                    f"Ambiguous file format: {len(primary_matches)} parsers match "
+                    f"'{file.name}'."
+                )
+            parser = primary_matches[0]()
+            parser.parse(file_path, **(self.kwargs or {}))
 
             config_file = parser.config_file
             if isinstance(config_file, dict):
-                config_file = config_file.get(file_ext)
+                config_file = config_file.get(file.suffix)
             self.set_config_file(
                 XPSReader.reader_dir.joinpath("config", config_file),
                 replace=False,
             )
 
-            self.parsed_data_dicts += [parser.data]
+            data = parser.data
+            self._parsed_datasets += [data]
+            self._active_parsers.append(parser)
 
-        elif file_ext in XPSReader.supported_metadata_file_extensions:
-            vendor = _check_for_vendors(file_path)
+            # Apply any metadata parsers that were waiting for a compatible parser
+            still_pending: list[_XPSMetadataParser] = []
+            for m_parser in self._pending_metadata:
+                if m_parser.__class__.supports_parser(parser):
+                    m_parser.update_main_file_data(data)
+                else:
+                    still_pending.append(m_parser)
+            self._pending_metadata = still_pending
 
-            metadata_parser = XPSReader.vendor_map[file_ext][vendor]()
-            metadata_parser.parse_file(file_path, **self.kwargs)
+        else:
+            if len(metadata_matches) > 1:
+                raise ValueError(
+                    f"Ambiguous metadata format: multiple parsers match '{file.name}'."
+                )
+            m_parser = metadata_matches[0]()
+            m_parser.parse(file_path, **(self.kwargs or {}))
 
-            main_file_ext = XPSReader.supported_metadata_file_extensions[file_ext]
+            attached = False
+            for parser in self._active_parsers:
+                if m_parser.__class__.supports_parser(parser):
+                    m_parser.update_main_file_data(parser.data)
+                    attached = True
 
-            main_file_dicts = [
-                d for d in self.parsed_data_dicts if d.get("file_ext") == main_file_ext
-            ]
-
-            metadata_parser.update_main_file_dict(main_file_dicts)
+            if not attached:
+                self._pending_metadata.append(m_parser)
 
         return {}
 
@@ -633,19 +480,8 @@ class XPSReader(MultiFormatReader):
         Returns a list of entry names which should be constructed from the data.
         Defaults to creating a single entry named "entry".
         """
-        # Track entries for using for eln data
-        entries: list[str] = []
-
-        try:
-            for entry in self.parsed_data["data"]:
-                entries += [entry]
-        except KeyError:
-            pass
-
-        if not entries:
-            entries += ["entry"]
-
-        return list(dict.fromkeys(entries))
+        entries = list(getattr(self, "parsed_data", {}).keys())
+        return entries or ["entry"]
 
     def setup_template(self) -> dict[str, Any]:
         """
@@ -670,90 +506,40 @@ class XPSReader(MultiFormatReader):
         # self.process_multiple_entities()
 
     def _combine_datasets(self) -> None:
+        """Merge all per-parser datasets into ``self.parsed_spectra``.
+
+        Finds entry names that appear in more than one parser output
+        (``common_entries``).
+
+        - common entries + ``overwrite_keys``: build one ``ParsedSpectrum``
+          by overwriting ``data``, ``raw``, and ``metadata`` in order.
+        - common entries + not ``overwrite_keys``: concatenate ``data``/``raw``
+          along the ``"scan"`` dimension; accumulate metadata values as lists.
+        - All non-common entries are added to ``self.parsed_spectra`` as-is.
         """
-        This function (which as called after all files have been read)
-        combines the different data sets from the XPS files and ensures
-        that entry names are different and that no data is overwritten.
+        entry_to_indices: dict[str, list[int]] = {}
+        for i, d in enumerate(self._parsed_datasets):
+            for entry_name in d:
+                entry_to_indices.setdefault(entry_name, []).append(i)
 
-        """
+        common_entries = {
+            e for e, indices in entry_to_indices.items() if len(indices) > 1
+        }
 
-        def check_for_same_entries(
-            dicts: list[dict[str, Any]],
-        ) -> tuple[set[str], list[set[int]]] | None:
-            """
-            Checks whether the input dictionaries have the same entries and identifies which
-            dictionaries contain each common entry.
+        if common_entries:
+            for entry in common_entries:
+                spectra = [
+                    self._parsed_datasets[i][entry] for i in entry_to_indices[entry]
+                ]
+                if self.overwrite_keys:
+                    self.parsed_data[entry] = _merge_spectra(spectra)
+                else:
+                    self.parsed_data[entry] = _concatenate_spectra(spectra)
 
-            Args:
-                dicts (list[dict[str, any]]): A list of dictionaries with keys potentially containing entries.
-
-            Returns:
-                Optional[tuple[Set[str], list[Set[int]]]]:
-                - A tuple where:
-                  - The first element is a set of common entries found across the dictionaries.
-                  - The second element is a list of sets, where each set contains the indices of dictionaries
-                    that have the corresponding entry.
-                - None if no common entries are found.
-            """
-            entry_pattern = re.compile(r"/ENTRY\[(.*?)\]")
-
-            entry_to_dicts: dict[str, set] = {}
-
-            for i, d in enumerate(dicts):
-                for key in d.keys():
-                    entries = entry_pattern.findall(key)
-                    for entry in entries:
-                        if entry not in entry_to_dicts:
-                            entry_to_dicts[entry] = set()
-                        entry_to_dicts[entry].add(i)
-
-            common_entries = {
-                entry
-                for entry, dict_indices in entry_to_dicts.items()
-                if len(dict_indices) > 1
-            }
-
-            if not common_entries:
-                return None, None
-
-            dict_indices = [entry_to_dicts[entry] for entry in common_entries]
-
-            return common_entries, dict_indices
-
-        common_entries, dict_indices = check_for_same_entries(self.parsed_data_dicts)
-
-        if common_entries and not self.overwrite_keys:
-            for entry, indices in zip(common_entries, dict_indices):
-                dicts_with_common_entries = [self.parsed_data_dicts[i] for i in indices]
-
-                for i, data_dict in enumerate(dicts_with_common_entries):
-                    for key, value in data_dict.copy().items():
-                        new_key = key.replace(f"/ENTRY[{entry}]", f"/ENTRY[{entry}{i}]")
-                        if key == "data":
-                            for entry_name, xarr in value.copy().items():
-                                if entry_name == entry:
-                                    new_entry_name = entry_name.replace(
-                                        f"{entry}", f"{entry}{i}"
-                                    )
-                                    value[new_entry_name] = xarr
-                                    del value[entry_name]
-                        if new_key != key:
-                            data_dict[new_key] = value
-                            del data_dict[key]
-
-        for data_dict in self.parsed_data_dicts:
-            # If there are multiple input data files of the same type,
-            # make sure that existing keys are not overwritten.
-            existing = [
-                (key, self.parsed_data[key], data_dict[key])
-                for key in set(self.parsed_data).intersection(data_dict)
-            ]
-
-            self.parsed_data = {**self.parsed_data, **data_dict}
-
-            if not self.overwrite_keys:
-                for key, value1, value2 in existing:
-                    self.parsed_data[key] = _concatenate_values(value1, value2)
+        for d in self._parsed_datasets:
+            for entry, spectrum in d.items():
+                if entry not in common_entries:
+                    self.parsed_data[entry] = spectrum
 
     def _get_analyzer_names(self) -> list[str]:
         """
@@ -780,13 +566,12 @@ class XPSReader(MultiFormatReader):
         detectors: list[str] = []
 
         try:
-            for entry, entry_values in self.parsed_data["data"].items():
-                for data_var in entry_values:
-                    if _CHAN_COUNT in data_var:
-                        detector_num = data_var.split(_CHAN_COUNT)[-1]
-                        detector_nm = f"detector{detector_num}"
-                        detectors += [detector_nm]
-        except KeyError:
+            for spectrum in self.parsed_data.values():
+                if isinstance(spectrum, ParsedSpectrum) and spectrum.raw is not None:
+                    n_channels = spectrum.raw.sizes.get("channel", 0)
+                    for i in range(n_channels):
+                        detectors.append(f"detector{i}")
+        except (KeyError, AttributeError):
             pass
 
         if not detectors:
@@ -841,61 +626,54 @@ class XPSReader(MultiFormatReader):
                         self.config_dict[modified_key] = modified_value
                         del self.config_dict[config_key]
 
-    def _get_metadata(
-        self,
-        metadata_dict: dict[str, Any],
-        path: str,
-        entry_name: str,
-    ) -> Any:
+    def _search_metadata(self, metadata: dict[str, Any], path: str) -> Any:
+        """Suffix-match ``path`` in a flat metadata dict.
+
+        Tries an exact key match first, then falls back to any key ending with
+        ``"/" + path``.  Returns ``None`` when the value is empty/missing.
         """
-        Get metadata from the ELN or XPS data dictionaries.
-
-        Note that the keys of metadata_dict may contain more than
-        the path, i.e.,
-        /ENTRY[my-entry]/instrument/analyzer/collectioncolumn/voltage.
-        With the regex, the path = "collectioncolumn/voltage" would
-        still yield the correct value.
-
-        Parameters
-        ----------
-        metadata_dict : dict[str, Any]
-            One of ELN or XPS data dictionaries .
-        path : str
-            Path to search in the metadata_dict
-        entry_name : str
-            Entry name to search.
-
-        Yields
-        ------
-        value: Any
-            The value in the metadata_dict.
-
-        """
-        pattern = re.compile(
-            rf"^/ENTRY\[{re.escape(entry_name)}\](?:/.*/|/){re.escape(path)}$"
-        )
-
-        matching_key = next((key for key in metadata_dict if pattern.match(key)), None)
-
-        value = metadata_dict.get(matching_key)
-
+        _sentinel = object()
+        value = metadata.get(path, _sentinel)
+        if value is _sentinel:
+            value = next(
+                (v for k, v in metadata.items() if k.endswith(f"/{path}")), None
+            )
         if (
             value is None
             or str(value) in {"None", ""}
             or (isinstance(value, list) and all(v == "" for v in value))
         ):
-            return
+            return None
+        return value.isoformat() if isinstance(value, datetime.datetime) else value
 
-        if isinstance(value, datetime.datetime):
-            value = value.isoformat()
+    def _get_process_sequence_index(
+        self, key: str, spectrum: "ParsedSpectrum"
+    ) -> int | None:
+        """Return the 1-based sequence index for the PROCESS group in *key*.
 
-        return value
+        Returns ``None`` when that process is not applicable for *spectrum*,
+        which causes the ``!@attrs:sequence_index`` notation to drop the whole
+        PROCESS group.
+        """
+        m = re.search(r"PROCESS\[(\w+)\]", key)
+        if m is None:
+            return None
+        name = m.group(1)
+        active = [p for p, pred in _PROCESS_ORDER if pred(spectrum)]
+        if name not in active:
+            return None
+        return active.index(name) + 1
 
     def get_attr(self, key: str, path: str) -> Any:
-        """
-        Get the metadata that was stored in the main file.
-        """
-        return self._get_metadata(self.parsed_data, path, self.callbacks.entry_name)
+        """Return metadata stored in the parsed spectrum for the current entry."""
+        spectrum: ParsedSpectrum | None = self.parsed_data.get(
+            self.callbacks.entry_name
+        )
+        if spectrum is None:
+            return None
+        if path == "sequence_index":
+            return self._get_process_sequence_index(key, spectrum)
+        return self._search_metadata(spectrum.metadata, path)
 
     def get_eln_data(self, key: str, path: str) -> Any:
         """
@@ -920,172 +698,126 @@ class XPSReader(MultiFormatReader):
         Returns the dimensions of the data from the given path.
         """
         entry = self.callbacks.entry_name
-        escaped_entry = re.escape(entry)
-        xr_data = self.parsed_data["data"].get(entry)
+        spectrum: ParsedSpectrum | None = self.parsed_data.get(entry)
 
-        if xr_data is None:
+        if spectrum is None:
             return []
 
-        def get_signals(key: str) -> list[str]:
-            if key == "scans":
-                data_vars = _get_scan_vars(xr_data.data_vars)
-            elif key == "channels":
-                data_vars = _get_channel_vars(xr_data.data_vars)
-                if not data_vars:
-                    data_vars = _get_scan_vars(xr_data.data_vars)
-            elif key == "axes":
-                data_vars = list(xr_data.coords)
-            else:
-                data_vars = [""]
-
-            return list(map(str, data_vars))
-
         def get_all_keys(template_key: str) -> list[str]:
-            pattern = re.compile(rf"^/ENTRY\[{escaped_entry}]/{template_key}([^/]+)")
-
             keys = {
-                match[1] for key in self.parsed_data if (match := pattern.search(key))
+                k[len(template_key) :].split("/")[0]
+                for k in spectrum.metadata
+                if k.startswith(template_key)
             }
-
             return sorted(keys)
 
+        # Peak and background wildcards (fit-related)
+        if re.search(r"peak", key):
+            return get_all_keys("component")
+        if re.search(r"background", key):
+            return get_all_keys("region")
+
+        # External channel wildcards (e.g., SPECS-XY additional axes)
         if isinstance(path, str) and path.endswith(("*.external", "*.external_unit")):
-            data_func = lambda: get_all_keys("external_")
-        else:
-            if isinstance(path, str) and path.endswith(".unit"):
-                data_func = lambda: list(xr_data.coords)
-            else:
-                data_func = lambda: get_signals(path.rsplit(":*.", maxsplit=1)[-1])
+            return get_all_keys("external_")
 
-        PatternHandler = dict[Pattern[str], Callable[[], Any]]
+        # Axis name wildcard
+        if isinstance(path, str) and path.endswith(".unit"):
+            return [
+                cast(str, d) for d in spectrum.data.dims if d not in ("cycle", "scan")
+            ]
 
-        patterns: dict[re.Pattern, Callable[[], Any]] = {
-            re.compile(r"peak"): lambda: get_all_keys("component"),
-            re.compile(r"background"): lambda: get_all_keys("region"),
-            re.compile(
-                r"DATA\[[^\]]+\]/(?:DATA\[[^\]]+\]|AXISNAME\[[^\]]+\])(?:/@units)?"
-            ): data_func,
-            re.compile(r"ELECTRON_DETECTOR\[[a-zA-Z0-9_]+\]/raw_data"): lambda: (
-                get_signals("channels")
+        # Axis data wildcard (e.g., AXISNAME[*] → @data:*.axes)
+        if isinstance(path, str) and path.endswith(".axes"):
+            return [
+                cast(str, d) for d in spectrum.data.dims if d not in ("cycle", "scan")
+            ]
+
+        return []
+
+    def get_data(self, key: str, path: str) -> Any | None:
+        """Retrieve XPS spectral data for the current entry by path token."""
+        data_handlers: dict[str, Callable[[ParsedSpectrum], Any]] = {
+            # stats
+            "average": lambda s: s.average().values,
+            "average_reduced": lambda s: _stats_reduced(s, s.average),
+            "errors": lambda s: s.errors().values,
+            "errors_reduced": lambda s: _stats_reduced(s, s.errors),
+            # NXprocess averaging
+            "channels_averaging": lambda s: (
+                s.data.values
+                if s.raw is not None and s.raw.sizes.get("channel", 1) > 1
+                else None
+            ),
+            "scan_averaging": lambda s: (
+                s.data.mean("scan").values
+                if "scan" in s.data.dims and s.data.sizes["scan"] > 1
+                else None
+            ),
+            "cycle_averaging": _cycle_averaging,
+            # raw data
+            "raw": _get_raw,
+            # processed axis indices
+            "cycle": lambda s: (
+                np.arange(s.data.sizes["cycle"]) if "cycle" in s.data.dims else None
+            ),
+            "scan": lambda s: (
+                np.arange(s.data.sizes["scan"]) if "scan" in s.data.dims else None
+            ),
+            "channel": lambda s: (
+                np.arange(s.raw.sizes["channel"]) if s.raw is not None else None
+            ),
+            # raw axis indices (fall back to processed DA, require size > 1)
+            "raw_cycle": lambda s: _raw_dim_indices(s, "cycle"),
+            "raw_scan": lambda s: _raw_dim_indices(s, "scan"),
+            "raw_channel": lambda s: (
+                np.arange(s.raw.sizes["channel"])
+                if s.raw is not None and s.raw.sizes.get("channel", 0) > 1
+                else None
+            ),
+            # raw axis metadata
+            "raw_axes": _raw_active_dims,
+            "raw_energy_index": _get_raw_energy_index,
+            "raw_units": lambda s: (
+                "counts" if s.raw is not None else "counts_per_second"
             ),
         }
 
-        # Function to match and return the handler result
-        for pattern, handler in patterns.items():
-            if pattern.search(key):
-                return handler()
-
-        return get_signals(key="scans")
-
-    def _search_first(self, data: dict[str, Any], pattern: re.Pattern) -> Any | None:
-        """
-        Search for the first value in a dictionary whose key matches a regex pattern.
-
-        Parameters:
-            data (dict[str, Any]): The dictionary to search.
-            pattern (re.Pattern): The compiled regex pattern to search for in keys.
-
-        Returns:
-            The first matching value, or None if no match is found.
-        """
-        return next((value for key, value in data.items() if pattern.search(key)), None)
-
-    def get_data(self, key: str, path: str) -> Any | None:
-        """
-        Retrieve XPS data based on a key and a path string. The method supports multiple
-        forms of data access, such as averages, raw data, axis values, units, and external links.
-
-        Parameters:
-            key (str): The key under which the data is stored (unused in current logic).
-            path (str): A string path that determines what type of data to return.
-
-        Returns:
-            Any: The requested data, or None if the path is invalid or not found.
-        """
         entry = self.callbacks.entry_name
-        escaped_entry = re.escape(entry)
-        xr_data = self.parsed_data["data"].get(entry)
-
-        if xr_data is None:
+        spectrum: ParsedSpectrum | None = self.parsed_data.get(entry)
+        if spectrum is None:
             return None
 
-        # Average or errors
-        if path.startswith(("average", "errors")):
-            data = [xr_data[var].data for var in _get_scan_vars(xr_data.data_vars)]
-            if path.endswith("reduced"):
-                try:
-                    data = [np.sum(arr, axis=tuple(range(1, arr.ndim))) for arr in data]
-                except np.exceptions.AxisError:
-                    return None
-            stats_func = np.mean if path.startswith("average") else np.std
-            return stats_func(data, axis=0)
+        if path in data_handlers:
+            return data_handlers[path](spectrum)
 
-        # Raw data
-        if path.endswith("raw_data"):
-            data_vars = _get_channel_vars(xr_data.data_vars) or _get_scan_vars(
-                xr_data.data_vars
-            )
-            return np.array(
-                [xr_data[var].data for var in data_vars if _SCAN_COUNT in var]
-            )
-
-        # Channels or scans by suffix
-        for suffix, extractor in {
-            ".scans": xr_data.get,
-            ".channels": xr_data.get,
-        }.items():
-            if path.endswith(suffix):
-                name = path.split(suffix, maxsplit=1)[0]
-                data = extractor(name)
-                return np.array(data) if data is not None else None
-
-        # Axis or coordinate data
         if path.endswith(".axes"):
-            axis = path.split(".axes", maxsplit=1)[0]
-            coord = xr_data.coords.get(axis)
+            axis = path[: -len(".axes")]
+            coord = spectrum.data.coords.get(axis)
             return np.array(coord.values) if coord is not None else None
 
-        # Units for internal channels
         if path.endswith(".unit"):
-            channel = path.split(".unit", maxsplit=1)[0]
-            pattern = re.compile(
-                rf"^/ENTRY\[{escaped_entry}]/{re.escape(channel)}/@units"
-            )
-            return self._search_first(self.parsed_data, pattern)
+            channel = path[: -len(".unit")]
+            return self._search_metadata(spectrum.metadata, f"{channel}/@units")
 
-        # External channels and units
         if path.endswith((".external", ".external_unit")):
             channel = path.split(".external", maxsplit=1)[0]
             if path.endswith("_unit"):
-                pattern = re.compile(
-                    rf"^/ENTRY\[{escaped_entry}]/external_{re.escape(channel)}/@units"
+                return self._search_metadata(
+                    spectrum.metadata, f"external_{channel}/@units"
                 )
-                return self._search_first(self.parsed_data, pattern)
-            else:
-                pattern = re.compile(
-                    rf"^/ENTRY\[{escaped_entry}]/external_{re.escape(channel)}$"
-                )
-                matches = [
-                    value
-                    for key, value in self.parsed_data.items()
-                    if pattern.search(key)
-                ]
-                return np.array(matches).squeeze() if matches else None
+            value = self._search_metadata(spectrum.metadata, f"external_{channel}")
+            return np.array(value) if value is not None else None
 
-        # Default: try direct data access
-        try:
-            return xr_data[path]
-        except KeyError:
-            try:
-                return np.array(xr_data.coords[path].values)
-            except KeyError:
-                return None
+        # default: coordinate lookup
+        coord = spectrum.data.coords.get(path)
+        return np.array(coord.values) if coord is not None else None
 
     def set_nxdata_defaults(self, template):
         """Set the default for automatic plotting."""
         survey_count, count = 0, 0
 
-        def get_unique_nxfit_names(template) -> set[str]:
+        def _get_unique_nxfit_names(template) -> set[str]:
             """Extract unique 'ENTRY[<some-name>]/FIT[<some-other-name>]' pairs from template keys."""
             pattern = re.compile(r"^/?ENTRY\[(?P<entry>[^]]+)\]/FIT\[(?P<fit>[^]]+)\]/")
 
@@ -1096,8 +828,8 @@ class XPSReader(MultiFormatReader):
                     result.add(f"{m.group('entry')}/{m.group('fit')}")
             return result
 
-        def get_first_matching_fit(
-            entry_name: str, unique_fits: set[str]
+        def _get_first_matching_fit(
+            entry_name: str, unique_fits: list[str]
         ) -> str | None:
             """Return the first '<fit>' name that matches the given entry name, if any."""
             for fit in unique_fits:
@@ -1105,17 +837,15 @@ class XPSReader(MultiFormatReader):
                     return fit.split("/", 1)[1]  # Extract only the fit name
             return None
 
-        unique_fits = sorted(
-            get_unique_nxfit_names(template)
-        )  # Sorting for deterministic ordering
+        # Sorting for deterministic ordering
+        unique_fits = sorted(_get_unique_nxfit_names(template))
 
         for entry in self.get_entry_names():
             if unique_fits:
                 template["/@default"] = unique_fits[0]
-                match = get_first_matching_fit(entry, unique_fits)
+                match = _get_first_matching_fit(entry, unique_fits)
                 if match:
                     template[f"/ENTRY[{entry}]/@default"] = match
-
                 else:
                     template[f"/ENTRY[{entry}]/@default"] = "data"
 
@@ -1133,13 +863,12 @@ class XPSReader(MultiFormatReader):
         self,
         template: dict = None,
         file_paths: tuple[str] = None,
-        objects: tuple[Any] = None,
+        objects: tuple[Any] | None = None,
         **kwargs,
     ) -> dict:
         self.overwrite_keys = _check_multiple_extensions(file_paths)
 
-        if "config_file" in kwargs:
-            self.set_config_file(kwargs.get("config_file"))
+        self.set_config_file(kwargs.get("config_file", self.config_file))
 
         template = super().read(template, file_paths, objects, suppress_warning=True)
         self.set_nxdata_defaults(template)

@@ -123,10 +123,16 @@
           },
           "raw_data":{
             "@signal":"raw",
-            "raw":"@data:raw_data",
-            "raw/@units":"counts",
-            "DATA[*]": "@data:*.channels",
-            "DATA[*]/@units":"counts"
+            "raw":"@data:raw",
+            "raw/@units":"@data:raw_units",
+            "cycle":"@data:raw_cycle",
+            "scan":"@data:raw_scan",
+            "channel":"@data:raw_channel",
+            "energy":"@link:/entry/data/energy",
+            "energy/@units":null,
+            "energy/@type":null,
+            "@axes":"@data:raw_axes",
+            "@energy_indices":"@data:raw_energy_index"
           }
         }
       },
@@ -354,13 +360,62 @@
       "@signal":"data",
       "@axes":["energy"],
       "data":"@data:average",
+      "FIELDNAME_errors[data_errors]":"@data:errors",
       "data/@units":null,
-      "DATA[*]":"@data:*.scans",
-      "DATA[*]/@units":null,
       "energy":null,
       "energy/@type":null,
       "energy/@units":null,
       "energy/@reference":null,
       "@energy_indices":null
+    },
+    "/ENTRY/DATA[data_reduced]":{
+      "@signal":"data",
+      "@axes":["energy"],
+      "data":"!@data:average_reduced",
+      "FIELDNAME_errors[data_errors]":"@data:errors_reduced",
+      "data/@units":null,
+      "energy":"@link:/entry/data/energy",
+      "energy/@type":null,
+      "energy/@units":null,
+      "@energy_indices":0
+    },
+    "/ENTRY/PROCESS[channels_averaging]":{
+      "sequence_index":"!@attrs:sequence_index",
+      "DATA[data]":{
+        "@signal":"data",
+        "data":"@data:channels_averaging",
+        "data/@units":null,
+        "cycle":"@data:cycle",
+        "scan":"@data:scan",
+        "energy":"@link:/entry/data/energy",
+        "energy/@units":null,
+        "@axes":["cycle","scan","energy"],
+        "@energy_indices":2
+      }
+    },
+    "/ENTRY/PROCESS[scan_averaging]":{
+      "sequence_index":"!@attrs:sequence_index",
+      "DATA[data]":{
+        "@signal":"data",
+        "data":"@data:scan_averaging",
+        "data/@units":null,
+        "cycle":"@data:cycle",
+        "energy":"@link:/entry/data/energy",
+        "energy/@units":null,
+        "@axes":["cycle","energy"],
+        "@energy_indices":1
+      }
+    },
+    "/ENTRY/PROCESS[cycle_averaging]":{
+      "sequence_index":"!@attrs:sequence_index",
+      "DATA[data]":{
+        "@signal":"data",
+        "data":"@data:cycle_averaging",
+        "data/@units":null,
+        "energy":"@link:/entry/data/energy",
+        "energy/@units":null,
+        "@axes":["energy"],
+        "@energy_indices":0
+      }
     }
   }

@@ -15,21 +15,17 @@
 # limitations under the License.
 #
 from .data_model import ScientaHeader, ScientaRegion, scienta_igor_peak_schema
-from .parser import (
-    ScientaHDF5Parser,
-    ScientaIgorParserOld,
-    ScientaIgorParserPEAK,
-    ScientaMapper,
-    ScientaTXTParser,
-)
+from .hdf5_parser import ScientaHDF5Parser
+from .igor_parser import ScientaIgorParser, ScientaIgorParserOld, ScientaIgorParserPEAK
+from .txt_parser import ScientaTXTParser
 
 __all__ = [
     "ScientaHeader",
     "ScientaRegion",
     "scienta_igor_peak_schema",
-    "ScientaMapper",
     "ScientaHDF5Parser",
-    "ScientaTXTParser",
+    "ScientaIgorParser",
     "ScientaIgorParserOld",
     "ScientaIgorParserPEAK",
+    "ScientaTXTParser",
 ]

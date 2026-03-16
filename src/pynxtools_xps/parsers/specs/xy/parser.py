@@ -14,16 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# pylint: disable=too-many-lines,too-many-instance-attributes
 """
-Parser for reading XPS (X-ray Photoelectron Spectroscopy) data from
-Specs Lab Prodigy XY exports, to be passed to mpes nxdl
-(NeXus Definition Language) template.
+Parser for reading XPS data from Specs Lab Prodigy XY exports.
 """
 
 import itertools
 import re
-import warnings
 from collections import OrderedDict
 from pathlib import Path
 from typing import Any, ClassVar
@@ -31,171 +27,18 @@ from typing import Any, ClassVar
 import numpy as np
 import xarray as xr
 
-from pynxtools_xps.mapping import _convert_bool, _Value, convert_pascal_to_snake
-from pynxtools_xps.numerics import _get_minimal_step, check_uniform_step_width
-from pynxtools_xps.parsers.base import (
-    _construct_data_key,
-    _construct_entry_name,
-    _XPSMapper,
-    _XPSParser,
+from pynxtools_xps.mapping import (
+    _convert_bool,
+    _get_measurement_method_long,
+    _Value,
+    convert_pascal_to_snake,
 )
+from pynxtools_xps.numerics import _get_minimal_step, check_uniform_step_width
+from pynxtools_xps.parsers.base import ParsedSpectrum, _construct_entry_name, _XPSParser
 from pynxtools_xps.parsers.specs.xy.metadata import _context
 
 
-class SpecsXYMapper(_XPSMapper):
-    """
-    Class for restructuring .xy data file from
-    Specs vendor into python dictionary.
-    """
-
-    config_file = "config_specs_xy.json"
-
-    def __init__(self):
-        super().__init__()
-        self.write_channels_to_data = True
-
-    def _select_parser(self):
-        return XYProdigyParser()
-
-    def parse_file(self, file: str | Path, **kwargs):
-        """
-        Parse the file using the Specs XY parser.
-
-        Parameters
-        ----------
-        file : str
-            Filepath of the XY file.
-        **kwargs : dict
-            write_channels_to_data: bool
-                If True, the spectra of each individual channel is
-                written to the entry/data field in the MPES template.
-
-        Returns
-        -------
-        dict
-            Flattened dictionary to be passed to MPES template.
-
-        """
-        self.write_channels_to_data = kwargs.pop("write_channels_to_data", False)
-        return super().parse_file(file, **kwargs)
-
-    def construct_data(self, parsed_data: list[dict[str, Any]]):
-        """Map XY format to NXmpes-ready dict."""
-        # pylint: disable=duplicate-code
-        for spectrum in parsed_data:
-            self._update_xps_dict_with_spectrum(spectrum)
-
-    def _update_xps_dict_with_spectrum(self, spectrum: dict[str, Any]):
-        """
-        Map one spectrum from raw data to NXmpes-ready dict.
-
-        """
-        # pylint: disable=too-many-locals,duplicate-code
-        entry_parts = []
-        for part in ["group_name", "region_name"]:
-            val = spectrum.get(part, None)
-            if val:
-                entry_parts += [val]
-
-        entry = _construct_entry_name(entry_parts)
-        entry_parent = f"/ENTRY[{entry}]"
-
-        for key, value in spectrum.items():
-            mpes_key = f"{entry_parent}/{key}"
-            if "units" in key:
-                if isinstance(value, dict):
-                    value = {k: _context.map_unit(v) for k, v in value.items()}
-                else:
-                    value = _context.map_unit(value)
-            else:
-                unit = _context.get_default_unit(key)
-                if unit is not None:
-                    self._data[f"{mpes_key}/@units"] = unit
-            self._data[mpes_key] = value
-
-        data = spectrum["data"]
-
-        if self.parser.export_settings.get("transmission_function"):
-            self._data["transmission_function"] = data["transmission"]
-            self._data["transmission_function/units"] = "counts_per_second"
-
-        # Create key for writing to data.
-        scan_key = _construct_data_key(spectrum)
-
-        x_axis_name, x_axis = list(data.items())[0]
-        y_axis_name, intensity = list(data.items())[1]
-        x_axis, intensity = np.array(x_axis), np.array(intensity)
-
-        if entry not in self._data["data"]:
-            self._data["data"][entry] = xr.Dataset()
-
-        if not self.parser.export_settings["separate_channel_data"]:
-            averaged_channels = intensity
-        else:
-            all_channel_data = [
-                value
-                for key, value in self._data["data"][entry].items()
-                if "_chan" in key
-            ]
-            if not all_channel_data:
-                averaged_channels = intensity
-            else:
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore", category=RuntimeWarning)
-                    averaged_channels = np.mean(all_channel_data, axis=0)
-
-        if not self.parser.export_settings["separate_scan_data"]:
-            averaged_scans = intensity
-        else:
-            all_scan_data = [
-                value
-                for key, value in self._data["data"][entry].items()
-                if "_scan" in key and "_chan" not in key
-            ]
-            if not all_scan_data:
-                averaged_scans = intensity
-            else:
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore", category=RuntimeWarning)
-                    averaged_scans = np.mean(all_scan_data, axis=0)
-
-        # Write to data in order: scan, cycle, channel
-
-        # Write averaged cycle data to 'data'.
-        self._data["data"][entry][scan_key.split("_")[0]] = xr.DataArray(
-            data=averaged_scans,
-            coords={x_axis_name: x_axis},
-        )
-
-        # Write average cycle data to '_scan'.
-        self._data["data"][entry][scan_key] = xr.DataArray(
-            data=averaged_channels,
-            coords={x_axis_name: x_axis},
-        )
-
-        if (
-            self.parser.export_settings["separate_channel_data"]
-            and self.write_channels_to_data
-        ):
-            # Write channel data to '_chan'.
-            channel_no = spectrum["channel_no"]
-            self._data["data"][entry][f"{scan_key}_chan{channel_no}"] = xr.DataArray(
-                data=intensity,
-                coords={x_axis_name: x_axis},
-            )
-
-        if self.parser.export_settings["external_channel_data"]:
-            self._data[f"{entry_parent}/aux_signals"] = []
-            for ext_channel, channel_data in list(spectrum["data"].items()):
-                if ext_channel not in [x_axis_name, y_axis_name, "transmission"]:
-                    self._data[f"{entry_parent}/external_{ext_channel}"] = channel_data
-                    self._data[f"{entry_parent}/external_{ext_channel}/@units"] = (
-                        spectrum["channel_units"].get(ext_channel)
-                    )
-                    self._data[f"{entry_parent}/aux_signals"] += [ext_channel]
-
-
-class XYProdigyParser(_XPSParser):  # pylint: disable=too-few-public-methods
+class SPECSXYParser(_XPSParser):
     """
     A parser for reading in ASCII-encoded .xy data from Specs Prodigy.
 
@@ -204,12 +47,31 @@ class XYProdigyParser(_XPSParser):  # pylint: disable=too-few-public-methods
 
     config_file: ClassVar[str] = "config_specs_xy.json"
     supported_file_extensions: ClassVar[tuple[str, ...]] = (".xy",)
+    _metadata_exclude_keys: ClassVar[frozenset[str]] = frozenset(
+        {
+            "loop_no",
+            "scan_no",
+            "channel_no",
+            "data",
+            "channel_units",
+        }
+    )
+
+    def matches_file(self, file: Path) -> bool:
+        """Return True for SpecsLab Prodigy XY export files."""
+        try:
+            with open(file, encoding="utf-8", errors="ignore") as f:
+                first = f.readline()
+            return first.startswith("# Created by:") and "SpecsLab" in first
+        except Exception:
+            return False
 
     def __init__(self):
         """
         Construct the parser.
 
         """
+        super().__init__()
         self.lines = []
         self.prefix = "#"
         self.n_headerlines = 14
@@ -217,28 +79,20 @@ class XYProdigyParser(_XPSParser):  # pylint: disable=too-few-public-methods
 
     def _parse(self, file: Path, **kwargs) -> None:
         """
-        Parse the .xy file into a list of dictionaries.
+        Parse the .xy file and populate ``self._data``.
 
-        Parsed data is stored in the attribute 'self.data'.
-        Each dictionary in the data list is a grouping of related
-        attributes. The dictionaries are later re-structured into a
-        nested dictionary that more closely resembles the domain logic.
+        Each entry in ``self._data`` corresponds to one
+        (group_name, region_name) pair and holds a ``ParsedSpectrum``
+        with dims ``("cycle", "scan", "energy")``.
 
         Parameters
         ----------
-        file : str
+        file : Path
             XPS data filepath.
-
-        **kwargs : dict
-            commentprefix : str
-                Prefix for comments in xy file. The default is "#".
-            n_headerlines: int
-                number of header_lines in each data block.
-
-        Returns
-        -------
-        list
-            Flat list of dictionaries containing one spectrum each.
+        commentprefix : str, optional
+            Prefix for comments in xy file. The default is ``"#"``.
+        n_headerlines : int, optional
+            Number of header lines in each data block.
 
         """
         if "commentprefix" in kwargs:
@@ -250,10 +104,203 @@ class XYProdigyParser(_XPSParser):  # pylint: disable=too-few-public-methods
         header, data = self._separate_header()
         self.export_settings = self._parse_export_settings(header)
 
-        # Recursively read XPS data from flat 'lines' list.
         groups = self._handle_groups(data)
+        self._data = self._build_parsed_spectra(groups)
 
-        self._data = self._flatten_dict(groups)
+    def _build_parsed_spectra(
+        self, groups: dict[str, Any]
+    ) -> dict[str, ParsedSpectrum]:
+        """
+        Walk the nested group/region/cycle/scan structure and assemble
+        ``ParsedSpectrum`` objects.
+
+        The primary channel (channel_no == 0) scans are stacked into a
+        DataArray with dims ``("cycle", "scan", "energy")``.  External
+        channels (all other data columns besides energy and intensity)
+        are stored in ``metadata`` as ``"external_{channel_name}"``.
+
+        Parameters
+        ----------
+        groups : dict
+            Nested dict produced by ``_handle_groups``.
+
+        Returns
+        -------
+        dict[str, ParsedSpectrum]
+            Mapping from NeXus entry name to typed spectrum.
+
+        """
+        # Collect all flat scan records across the file.
+        flat_scans = list(self._iter_flat_scans(groups))
+
+        # Group by entry_name.
+        entries: dict[str, list[dict[str, Any]]] = {}
+        for scan in flat_scans:
+            entry_name = _construct_entry_name(
+                [scan.get("group_name", ""), scan.get("region_name", "")]
+            )
+            entries.setdefault(entry_name, []).append(scan)
+
+        parsed: dict[str, ParsedSpectrum] = {}
+        for entry_name, scans in entries.items():
+            parsed[entry_name] = self._assemble_entry(entry_name, scans)
+
+        return parsed
+
+    def _iter_flat_scans(self, groups: dict[str, Any]):
+        """
+        Yield one flat dict per scan from the nested groups structure.
+
+        Each yielded dict has:
+          - ``group_name``, ``region_name``
+          - ``loop_no``, ``scan_no``, ``channel_no``
+          - ``data``: OrderedDict (x-axis_name → values, y_axis_name → values, ...)
+          - ``channel_units``: dict
+          - all scalar metadata keys from group/region/cycle/scan settings
+
+        """
+        group_settings_global = groups.get("group_settings", {})
+
+        for group_name, group in groups.items():
+            if group_name == "group_settings":
+                continue
+
+            group_settings = group.get("group_settings", {})
+
+            for region_name, region in group.items():
+                if region_name == "group_settings":
+                    continue
+
+                region_settings = region.get("region_settings", {})
+
+                for cycle_name, cycle in region.items():
+                    if cycle_name == "region_settings":
+                        continue
+
+                    cycle_settings = cycle.get("cycle_settings", {})
+
+                    for scan_name, scan in cycle.items():
+                        if scan_name == "cycle_settings":
+                            continue
+
+                        scan_settings = scan.get("scan_settings", {})
+                        scan_data = scan.get("data", {})
+                        channel_units = scan.get("channel_units", {})
+
+                        record: dict[str, Any] = {}
+                        record.update(group_settings_global)
+                        record.update(group_settings)
+                        record.update(region_settings)
+                        record.update(cycle_settings)
+                        record.update(scan_settings)
+
+                        # Extend scan settings (scan_no, channel_no) from
+                        # the scan_name string.
+                        record.update(self._extend_scan_settings(scan_name))
+
+                        record["group_name"] = group_settings.get(
+                            "group_name", group_name
+                        )
+                        record["region_name"] = region_settings.get(
+                            "region_name", region_name
+                        )
+                        record["data"] = scan_data
+                        record["channel_units"] = channel_units
+                        record["x_units"] = self.export_settings.get("x_units", "")
+
+                        yield record
+
+    def _assemble_entry(
+        self, entry_name: str, scans: list[dict[str, Any]]
+    ) -> ParsedSpectrum:
+        """
+        Build a ``ParsedSpectrum`` from all scans belonging to one entry.
+
+        Primary scans (channel_no == 0, or no channel separation) are
+        stacked by (loop_no, scan_no) into a DataArray with dims
+        ``("cycle", "scan", "energy")``.
+
+        External channel columns (neither the energy axis nor the primary
+        intensity column) are stored in ``metadata`` as
+        ``"external_{channel_name}"`` (np.ndarray of concatenated values).
+
+        Parameters
+        ----------
+        entry_name : str
+            NeXus entry name, used only for error reporting.
+        scans : list[dict]
+            All flat scan records belonging to this entry.
+
+        Returns
+        -------
+        ParsedSpectrum
+
+        """
+        # Separate primary-channel scans from external-channel scans.
+        # When separate_channel_data is False, every scan is "primary".
+        if self.export_settings.get("separate_channel_data", False):
+            primary_scans = [s for s in scans if s.get("channel_no", 0) == 0]
+        else:
+            primary_scans = scans
+
+        # Sort by (loop_no, scan_no) for deterministic ordering.
+        primary_scans = sorted(
+            primary_scans, key=lambda s: (s.get("loop_no", 0), s.get("scan_no", 0))
+        )
+
+        # Determine x-axis name from the first data dict.
+        first_data = primary_scans[0]["data"] if primary_scans else {}
+        data_items = list(first_data.items())
+        x_axis_name = data_items[0][0] if data_items else "energy"
+        y_axis_name = data_items[1][0] if len(data_items) > 1 else "intensity"
+
+        energy_axis = np.array(data_items[0][1]) if data_items else np.array([])
+
+        # Stack intensities: shape (1, n_scans, n_energy)
+        intensities = np.stack(
+            [np.array(s["data"][y_axis_name]) for s in primary_scans], axis=0
+        )
+        # Add a cycle dimension of size 1.
+        intensities = intensities[np.newaxis, ...]  # (1, n_scans, n_energy)
+
+        data_array = xr.DataArray(
+            data=intensities,
+            dims=("cycle", "scan", x_axis_name),
+            coords={x_axis_name: energy_axis},
+        )
+
+        # Build metadata from the first primary scan's non-identity fields.
+        metadata: dict[str, Any] = {}
+        if primary_scans:
+            first_scan = primary_scans[0]
+            for key, value in first_scan.items():
+                if key not in self._metadata_exclude_keys:
+                    metadata[key] = value
+                    if key == "analysis_method":
+                        metadata["f{key}_long_name"] = _get_measurement_method_long(
+                            value
+                        )
+
+        # Collect external channel columns from all primary scans and store
+        # them as concatenated arrays under "external_{channel_name}".
+        if self.export_settings.get("external_channel_data", False) and primary_scans:
+            primary_data = primary_scans[0]["data"]
+            ext_keys = [
+                k
+                for k in primary_data
+                if k not in (x_axis_name, y_axis_name, "transmission")
+            ]
+            for ext_key in ext_keys:
+                ext_arrays = [
+                    np.array(s["data"].get(ext_key, [])) for s in primary_scans
+                ]
+                metadata[f"external_{ext_key}"] = np.array(ext_arrays)
+
+                channel_units = primary_scans[0].get("channel_units", {})
+                if ext_key in channel_units:
+                    metadata[f"external_{ext_key}/@units"] = channel_units[ext_key]
+
+        return ParsedSpectrum(data=data_array, raw=None, metadata=metadata)
 
     def _read_lines(self, file: str | Path):
         """
@@ -385,7 +432,7 @@ class XYProdigyParser(_XPSParser):  # pylint: disable=too-few-public-methods
             group_settings = {"group_name": name}
 
             sections, region_data = _parse_group_header(group_data)
-            group: Unknown = self._handle_regions(group_data)
+            group = self._handle_regions(group_data)
             for section_name, lines in sections.items():
                 section_settings = self._handle_settings_block(lines)
                 if section_name == "group_settings":
@@ -786,46 +833,3 @@ class XYProdigyParser(_XPSParser):  # pylint: disable=too-few-public-methods
         if key in line:
             return line.strip().split(self.prefix + " " + key)[-1].strip()
         return line
-
-    def _flatten_dict(self, data_dict: dict[str, Any]):
-        """
-        Flatten a raw data dict into a list, with each element
-        being a dictionary with data and metadata for one spectrum.
-
-        Parameters
-        ----------
-        data_dict : dict
-            Nested dictionary containing group, regions, cycles,
-            and scans.
-
-        Returns
-        -------
-        spectra : list
-            Flattened list of spectra dicts.
-
-        """
-        spectra = []
-
-        for group in data_dict.values():
-            group_settings = group["group_settings"]
-            for region in list(group.values())[:1]:
-                region_settings = region["region_settings"]
-                for cycle in list(region.values())[:1]:
-                    cycle_settings = cycle["cycle_settings"]
-                    for scan in list(cycle.values())[:1]:
-                        scan_settings = scan["scan_settings"]
-                        spectrum: dict[str, Any] = {"data": {}}
-                        for settings in [
-                            group_settings,
-                            region_settings,
-                            cycle_settings,
-                            scan_settings,
-                        ]:
-                            spectrum.update(settings)
-                        for key, val in scan.items():
-                            if key != "scan_settings":
-                                spectrum[key] = val
-                        spectrum["x_units"] = self.export_settings["x_units"]
-                        spectra.append(spectrum)
-
-        return spectra

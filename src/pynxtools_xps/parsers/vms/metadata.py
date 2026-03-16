@@ -19,33 +19,12 @@
 Metadata mapping for the VAMAS parser.
 """
 
-from typing import Any
-
 from pynxtools_xps.mapping import (
     _convert_energy_scan_mode,
     _convert_energy_type,
-    _convert_measurement_method,
     _MetadataContext,
     _ValueMap,
 )
-
-
-def _drop_unused_keys(dictionary: dict[str, Any], keys_to_drop: list[str]) -> None:
-    """
-    Remove unwanted keys from a dictionary.
-
-    Args:
-        dictionary (dict[str, Any]):
-            Dictionary containing data and metadata for a spectrum.
-        keys_to_drop (list[str]):
-            List of keys that should be removed from the dictionary.
-
-    Returns:
-        None
-    """
-    for key in keys_to_drop:
-        dictionary.pop(key, None)
-
 
 EXP_MODES = [
     "MAP",
@@ -105,7 +84,6 @@ def _convert_vamas_unit(unit: str) -> str | None:
 
 
 _VALUE_MAP: _ValueMap = {
-    "analysis_method": _convert_measurement_method,
     "energy_label": _convert_energy_type,
     "energy_scan_mode": _convert_energy_scan_mode,
     "y_units_1": _convert_vamas_unit,

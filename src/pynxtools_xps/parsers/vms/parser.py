@@ -14,15 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# pylint: disable=too-many-lines
 """
-Parser for reading XPS (X-ray Photoelectron Spectroscopy) metadata from
-VAMAS standard, to be passed to MPES nxdl (NeXus Definition Language)
-template.
+Parser for reading XPS data from the VAMAS standard.
 """
 
 import datetime
-import warnings
 from itertools import groupby
 from pathlib import Path
 from typing import Any, ClassVar
@@ -32,16 +28,12 @@ import xarray as xr
 
 from pynxtools_xps.mapping import (
     _format_dict,
+    _get_measurement_method_long,
     convert_pascal_to_snake,
     update_dict_without_overwrite,
 )
 from pynxtools_xps.numerics import _check_for_allowed_in_list, _get_minimal_step
-from pynxtools_xps.parsers.base import (
-    _construct_data_key,
-    _construct_entry_name,
-    _XPSMapper,
-    _XPSParser,
-)
+from pynxtools_xps.parsers.base import ParsedSpectrum, _construct_entry_name, _XPSParser
 from pynxtools_xps.parsers.vms.comment_handler import handle_comments
 from pynxtools_xps.parsers.vms.data_model import (
     ExpVariable,
@@ -50,162 +42,15 @@ from pynxtools_xps.parsers.vms.data_model import (
     VamasBlock,
     VamasHeader,
 )
-from pynxtools_xps.parsers.vms.metadata import (
-    ALLOWED_TECHNIQUES,
-    EXP_MODES,
-    _context,
-    _drop_unused_keys,
-)
-
-
-class VamasMapper(_XPSMapper):
-    """
-    Class for restructuring .txt data file from
-    Vamas format into python dictionary.
-    """
-
-    config_file = "config_vms.json"
-
-    def __init__(self):
-        self.multiple_spectra_groups: bool = True
-        self.duplicate_spectrum_types: set[str] = []
-
-        super().__init__()
-
-    def _select_parser(self):
-        """
-        Select parser based on the structure of the Vamas file,
-        i.e., whether it is regular or irregular.
-
-        Returns
-        -------
-        VamasParserVMS
-            Vamas parser for reading this file structure.
-
-        """
-        return VamasParser()
-
-    def construct_data(self, parsed_data: list[dict[str, Any]]):
-        """Map VMS format to NXmpes-ready dict."""
-
-        def get_duplicate_spectrum_types(data: list[dict]) -> set:
-            """
-            Find all duplicate 'spectrum_type' values in the given list of spectra.
-
-            Returns a set of duplicate spectrum types.
-            """
-            seen = set()
-            duplicates = set()
-
-            for spectrum in data:
-                spectrum_type = spectrum.get("spectrum_type")
-                if spectrum_type:
-                    if spectrum_type in seen:
-                        duplicates.add(spectrum_type)
-                    seen.add(spectrum_type)
-
-            return duplicates
-
-        if len({spectrum.get("group_name") for spectrum in parsed_data}) == 1:
-            self.multiple_spectra_groups = False
-
-        if not self.multiple_spectra_groups:
-            self.duplicate_spectrum_types = get_duplicate_spectrum_types(parsed_data)
-
-        for spectrum in parsed_data:
-            self._update_xps_dict_with_spectrum(spectrum)
-
-    def _update_xps_dict_with_spectrum(self, spectrum: dict[str, Any]):
-        """
-        Map one spectrum from raw data to NXmpes-ready dict.
-        """
-        entry_parts = []
-
-        parts_to_use = ["group_name"] * bool(self.multiple_spectra_groups) + [
-            "spectrum_type"
-        ]
-
-        for part in parts_to_use:
-            val = spectrum.get(part, None)
-            if val:
-                entry_parts += [val]
-
-        if (
-            len(entry_parts) == 1
-            and spectrum["spectrum_type"] in self.duplicate_spectrum_types
-        ):
-            entry_parts += [spectrum["time_stamp"]]
-
-        entry = _construct_entry_name(entry_parts)
-
-        if not entry:
-            if not self.multiple_spectra_groups:
-                entry = f"entry{spectrum['spectrum_id']}"
-            else:
-                entry = "entry"
-
-        entry_parent = f"/ENTRY[{entry}]"
-
-        for key, value in spectrum.items():
-            if key.startswith("entry"):
-                entry_parent = "/ENTRY[entry]"
-                key = key.replace("entry/", "", 1)
-            mpes_key = f"{entry_parent}/{key}"
-            if "units" in key:
-                value = _context.map_unit(value)
-            else:
-                unit = _context.get_default_unit(key)
-                if unit is not None:
-                    self._data[f"{mpes_key}/@units"] = unit
-            self._data[mpes_key] = value
-
-        # Create key for writing to data.
-        scan_key = _construct_data_key(spectrum)
-
-        energy = np.array(spectrum["data"]["x"])
-        intensity_raw = np.array(spectrum["data"]["y"])
-        intensity_cps = np.array(spectrum["data"]["y_cps"])
-
-        if entry not in self._data["data"]:
-            self._data["data"][entry] = xr.Dataset()
-
-        # Write averaged cycle data to 'data'.
-        all_scan_data = [
-            np.array(value)
-            for key, value in self._data["data"][entry].items()
-            if scan_key.split("_")[0] in key
-        ]
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=RuntimeWarning)
-            averaged_scans = np.mean(all_scan_data, axis=0)
-
-        if averaged_scans.size == 1:
-            # on first scan in cycle
-            averaged_scans = intensity_cps
-
-        try:
-            self._data["data"][entry][scan_key.split("_")[0]] = xr.DataArray(
-                data=averaged_scans,
-                coords={"energy": energy},
-            )
-        except ValueError:
-            pass
-
-        self._data["data"][entry][scan_key] = xr.DataArray(
-            data=intensity_cps, coords={"energy": energy}
-        )
-
-        # Write raw intensities to 'cycle0'.
-        self._data["data"][entry][f"{scan_key}_chan0"] = xr.DataArray(
-            data=intensity_raw, coords={"energy": energy}
-        )
+from pynxtools_xps.parsers.vms.metadata import ALLOWED_TECHNIQUES, EXP_MODES, _context
 
 
 class VamasParser(_XPSParser):
     """A parser for reading vamas files."""
 
     config_file: ClassVar[str] = "config_vms.json"
-    supported_file_extensions: ClassVar[tuple[str, ...]] = (".vms",)
+    supported_file_extensions: ClassVar[tuple[str, ...]] = (".vms", ".npl")
+    _metadata_exclude_keys: ClassVar[frozenset[str]] = frozenset({"data", "scan_no"})
 
     def __init__(self):
         """Construct the vamas parser.
@@ -222,18 +67,82 @@ class VamasParser(_XPSParser):
         self.header = VamasHeader()
         self.blocks: list[VamasBlock] = []
 
+    _VAMAS_HEADER_PREFIX: ClassVar[str] = "VAMAS Surface Chemical Analysis"
+
+    def matches_file(self, file: Path) -> bool:
+        """Return True if the first line starts with the VAMAS specification prefix."""
+        try:
+            with open(file, encoding="utf-8", errors="ignore") as f:
+                return f.readline().strip().startswith(self._VAMAS_HEADER_PREFIX)
+        except Exception:
+            return False
+
     def _parse(self, file: Path, **kwargs) -> None:
-        """Parse the vamas file into a list of dictionaries.
+        """Parse the vamas file and populate ``self._data``.
+
+        Each distinct (group_name, spectrum_type) combination becomes one
+        ``ParsedSpectrum`` entry.  Scans belonging to the same group are
+        stacked along the ``"scan"`` axis; a single synthetic ``"cycle"``
+        dimension is prepended so that the output conforms to the
+        ``(cycle, scan, *axes)`` contract required by ``ParsedSpectrum``.
 
         Parameters
         ----------
-        file: str
-           The location and name of the vamas file to be parsed.
+        file:
+            Path to the VAMAS file to be parsed.
         """
         self._read_lines(file)
         self._parse_header()
         self._parse_blocks()
-        self._data = self._build_list()
+
+        self._flat_spectra: list[dict[str, Any]] = self._build_list()
+        self._build_parsed_spectra()
+
+    def _build_parsed_spectra(self) -> None:
+        """Group flat spectra by entry name and build ``self._data``."""
+        groups: dict[str, list[dict[str, Any]]] = {}
+        for d in self._flat_spectra:
+            entry_name = (
+                _construct_entry_name(
+                    [d.get("group_name", ""), d.get("spectrum_type", "")]
+                )
+                or "entry"
+            )
+            groups.setdefault(entry_name, []).append(d)
+
+        for entry_name, scan_dicts in groups.items():
+            self._data[entry_name] = self._assemble_entry(entry_name, scan_dicts)
+
+    def _assemble_entry(
+        self, entry_name: str, scan_dicts: list[dict[str, Any]]
+    ) -> ParsedSpectrum:
+        """Build one ``ParsedSpectrum`` from all scan dicts for *entry_name*."""
+        scan_dicts_sorted = sorted(scan_dicts, key=lambda d: d.get("scan_no", 0))
+
+        x = np.array(scan_dicts_sorted[0]["data"]["x"])
+
+        # channel-averaged data: y_cps → (1, n_scans, n_energy)
+        y_cps_stack = np.stack(
+            [np.array(d["data"]["y_cps"]) for d in scan_dicts_sorted], axis=0
+        )
+        data_da = xr.DataArray(
+            y_cps_stack[np.newaxis, ...],
+            dims=("cycle", "scan", "energy"),
+            coords={"energy": x},
+        )
+
+        # raw counts: y → (1, n_scans, 1, n_energy)
+        y_raw_stack = np.stack(
+            [np.array(d["data"]["y"]) for d in scan_dicts_sorted], axis=0
+        )
+        raw_da = xr.DataArray(
+            y_raw_stack[np.newaxis, :, np.newaxis, :],
+            dims=("cycle", "scan", "channel", "energy"),
+            coords={"energy": x},
+        )
+
+        metadata = self._filter_metadata(scan_dicts_sorted[0])
+        return ParsedSpectrum(data=data_da, raw=raw_da, metadata=metadata)
 
     def _read_lines(self, file: str | Path):
         """Read in vamas text file."""
@@ -331,7 +240,6 @@ class VamasParser(_XPSParser):
             A block represents one spectrum with its metadata.
 
         """
-        # pylint: disable=too-many-statements
         block = VamasBlock()
         block.block_id = self.lines.pop(0).strip()
         block.sample_id = self.lines.pop(0).strip()
@@ -415,7 +323,7 @@ class VamasParser(_XPSParser):
         block.analyzer_take_off_azimuth_angle = float(self.lines.pop(0).strip())
         block.species_label = self.lines.pop(0).strip()
         block.transition_label = self.lines.pop(0).strip()
-        block.particle_charge = int(self.lines.pop(0).strip())
+        block.particle_charge = int(float(self.lines.pop(0).strip()))
 
         if self.header.scan_mode == "REGULAR":
             block.abscissa_label = self.lines.pop(0).strip()
@@ -665,7 +573,12 @@ class VamasParser(_XPSParser):
             settings["n_values"] = int(block.num_ord_values / block.no_variables)
 
             # Remap to the MPES-preferred keys, values, and units
-            settings = _format_dict(settings, _context)
+            _format_dict(settings, _context)
+            analysis_method = settings.get("analysis_method")
+            if analysis_method:
+                settings["analysis_method_long_name"] = _get_measurement_method_long(
+                    analysis_method
+                )
 
             comment_dict = handle_comments(block.comment_lines, comment_type="block")
 
@@ -730,6 +643,7 @@ class VamasParser(_XPSParser):
                 ],
                 dtype=float,
             )
+            settings["extent/@units"] = settings["source_beam_width_x/@units"]
             settings["spatial_acceptance"] = np.array(
                 [
                     settings["analysis_width_x"],
@@ -737,6 +651,7 @@ class VamasParser(_XPSParser):
                 ],
                 dtype=float,
             )
+            settings["spatial_acceptance/@units"] = settings["analysis_width_x/@units"]
 
             data = {"x": block.x}
 
@@ -767,7 +682,7 @@ class VamasParser(_XPSParser):
                 "data": data,
             }
 
-            remove_keys = [
+            keys_to_drop = [
                 "comment_lines",
                 "year",
                 "month",
@@ -781,7 +696,8 @@ class VamasParser(_XPSParser):
                 "x",
             ]
 
-            _drop_unused_keys(settings, remove_keys)
+            for key in keys_to_drop:
+                settings.pop(key, None)
 
             spec_dict.update(settings)
             spectra += [spec_dict]

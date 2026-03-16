@@ -24,7 +24,6 @@ from functools import partial
 from pynxtools_xps.mapping import (
     _convert_energy_scan_mode,
     _convert_energy_type,
-    _convert_measurement_method,
     _MetadataContext,
     _ValueMap,
     parse_datetime,
@@ -40,18 +39,16 @@ _POSSIBLE_DATE_FORMATS: list[str] = ["%Y-%b-%d %H:%M:%S.%f"]
 # TODO: wrong type, does this need to be a dict of dicts?
 _KEY_MAP: dict[str, str | dict[str, str]] = {
     # SQL spectrum metadata
-    "SpectrumID": "spectrum_id",
-    "EnergyChns": "energy_channels",
-    "NonEnergyChns": "non_energy_channels",
-    "Samples": "n_values",
-    "ElectronEnergy": "electron_energy",
-    "EnergyType": "energy/@type",
-    "Step": "step_size",
-    "EpassOrRR": "pass_energy_or_retardation_ratio",
-    "Ubias": "bias_voltage",
-    "Udet": "detector_voltage",
-    "Wf": "work_function",
-    "Timestamp": "time_stamp",
+    "energy_chns": "energy_channels",
+    "non_energy_chns": "non_energy_channels",
+    "samples": "n_values",
+    "energy_type": "energy/@type",
+    "step": "step_size",
+    "epass_or_rr": "pass_energy_or_retardation_ratio",
+    "ubias": "bias_voltage",
+    "udet": "detector_voltage",
+    "wf": "work_function",
+    "timestamp": "time_stamp",
     # Spectrum group settings
     "ScanMode": {"Name": "energy_scan_mode"},
     "SlitInfo": {"Entrance": "entrance_slit", "Exit": "exit_slit"},
@@ -110,7 +107,6 @@ _VALUE_MAP: _ValueMap = {
         possible_date_formats=_POSSIBLE_DATE_FORMATS,
     ),
     "energy_scan_mode": _convert_energy_scan_mode,
-    "measurement_type": _convert_measurement_method,
 }
 
 _UNIT_MAP: dict[str, str | None] = {

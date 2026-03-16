@@ -49,8 +49,8 @@ test_cases: list[tuple[str, list[Any], dict[Any, Any], str]] = [
         "scienta_ibw",
         [],
         {
+            "FIELD (//Ag__001__Ag3d/start_time)": ["DEBUG - value:"],
             "FIELD (//Ag__002__VB/start_time)": ["DEBUG - value:"],
-            "FIELD (//Ag3d__Ag__001/start_time)": ["DEBUG - value:"],
         },
         "scienta-ibw-reader",
     ),
@@ -58,8 +58,8 @@ test_cases: list[tuple[str, list[Any], dict[Any, Any], str]] = [
         "scienta_txt",
         [],
         {
+            "FIELD (//Ag__001__Ag3d/start_time)": ["DEBUG - value:"],
             "FIELD (//Ag__002__VB/start_time)": ["DEBUG - value:"],
-            "FIELD (//Ag3d__Ag__001/start_time)": ["DEBUG - value:"],
         },
         "scienta-txt-reader",
     ),

@@ -31,7 +31,7 @@ NXDLS = ["NXxps"]  # READER_CLASS.supported_nxdls
 
 # Define lines/sections to be ignored in _all_ test cases
 ignore_lines_all_tests: list = []
-ignore_sections_all_tests: dict = {}
+ignore_sections_all_tests: dict = {"ATTRS (//@creator_version)": ["DEBUG - value:"]}
 
 # Test cases should be [("folder", ignore_lines, ignore_sections, "test-id")]
 test_cases: list[tuple[str, list[Any], dict[Any, Any], str]] = [

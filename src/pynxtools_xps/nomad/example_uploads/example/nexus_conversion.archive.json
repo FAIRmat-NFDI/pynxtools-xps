@@ -1,6 +1,6 @@
 {
     "data": {
-        "m_def": "pynxtools.nomad.dataconverter.NexusDataConverter",
+        "m_def": "pynxtools.nomad.schema_packages.dataconverter.NexusDataConverter",
         "input_files": [
             "EX439_S718_Au_in_25_mbar_O2.sle",
             "eln_data.yaml"

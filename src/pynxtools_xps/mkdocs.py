@@ -56,28 +56,30 @@ def define_env(env):
 
             {{ supported_formats_table() }}
         """
-        _VENDOR_META: dict[str, tuple[str, str]] = {
-            "scienta": ("Scienta Omicron", "reference/scienta.md"),
-            "specs": ("SPECS", "reference/specs.md"),
-            "phi": ("PHI Electronics", "reference/phi.md"),
-            "unknown": ("VAMAS (ISO 14976)", "reference/vms.md"),
-        }
-        # Vendor display order
-        _VENDOR_ORDER = ["scienta", "specs", "phi", "unknown"]
-
         try:
             from pynxtools_xps.reader import XPSReader  # noqa: PLC0415
         except ImportError as exc:
             return f"*Could not load `XPSReader`: {exc}*"
 
-        vendor_map: dict = XPSReader.vendor_map
+        _VENDOR_META: dict[str, tuple[str, str]] = {
+            "scienta": ("Scienta Omicron", "reference/scienta.md"),
+            "specs": ("SPECS", "reference/specs.md"),
+            "phi": ("PHI Electronics", "reference/phi.md"),
+            "various": ("VAMAS (ISO 14976)", "reference/vms.md"),
+        }
+
+        # Vendor display order
+        _VENDOR_ORDER = ["scienta", "specs", "phi", "various"]
+
         # Build vendor → sorted list of extensions
         vendor_extensions: dict[str, list[str]] = {}
-        for ext, vendors in vendor_map.items():
-            for vendor in vendors:
-                if vendor not in _VENDOR_META:
-                    continue
-                vendor_extensions.setdefault(vendor, []).append(ext)
+
+        for parser in XPSReader.parsers:
+            supported_vendor = parser.supported_vendor
+            if supported_vendor is None or supported_vendor not in _VENDOR_META:
+                continue
+            for ext in parser.supported_file_extensions:
+                vendor_extensions.setdefault(str(supported_vendor), []).append(ext)
 
         rows = []
         for vendor in _VENDOR_ORDER:

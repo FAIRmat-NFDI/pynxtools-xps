@@ -5,7 +5,7 @@
 ![](https://img.shields.io/pypi/pyversions/pynxtools-xps)
 ![](https://img.shields.io/pypi/l/pynxtools-xps)
 ![](https://img.shields.io/pypi/v/pynxtools-xps)
-![](https://coveralls.io/repos/github/FAIRmat-NFDI/pynxtools-xps/badge.svg?branch=main)
+![Coverage Status](https://coveralls.io/repos/github/FAIRmat-NFDI/pynxtools-xps/badge.svg?branch=main)
 [![DOI](https://zenodo.org/badge/759916501.svg)](https://doi.org/10.5281/zenodo.13951684)
 
 # `pynxtools-xps`: A `pynxtools` reader for XPS data
@@ -16,11 +16,9 @@ This `pynxtools` plugin was generated with [`cookiecutter`](https://github.com/c
 
 ## Installation
 
-It is recommended to use python 3.12 with a dedicated virtual environment for this package.
-Learn how to manage [python versions](https://github.com/pyenv/pyenv) and
-[virtual environments](https://realpython.com/python-virtual-environments-a-primer/).
+It is recommended to use python 3.12 with a dedicated virtual environment for this package. Learn how to manage [python versions](https://github.com/pyenv/pyenv) and [virtual environments](https://realpython.com/python-virtual-environments-a-primer/).
 
-This package is a reader plugin for [`pynxtools`](https://github.com/FAIRmat-NFDI/pynxtools) and can be installed together with `pynxtools`:
+This package is a reader plugin for [`pynxtools`](https://github.com/FAIRmat-NFDI/pynxtools) and should be installed together with `pynxtools`:
 
 ```shell
 uv pip install pynxtools[xps]

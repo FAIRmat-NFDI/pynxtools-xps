@@ -1,0 +1,10 @@
+diff a/src/pynxtools_xps/nomad/example_uploads/__init__.py b/src/pynxtools_xps/nomad/example_uploads/__init__.py	(rejected hunks)
+@@ -24,7 +24,7 @@ except ImportError as exc:
+         "Could not import nomad package. Please install the package 'nomad-lab'."
+     ) from exc
+ 
+-xps_example_upload_entry_point = ExampleUploadEntryPoint(
++xps_example_upload = ExampleUploadEntryPoint(
+     title="",
+     category="NeXus Experiment Examples",
+     description="""""",

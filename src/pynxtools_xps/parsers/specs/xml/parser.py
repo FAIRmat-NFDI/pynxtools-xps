@@ -28,7 +28,12 @@ import numpy as np
 import xarray as xr
 
 from pynxtools_xps.mapping import Any, _convert_energy_scan_mode
-from pynxtools_xps.parsers.base import ParsedSpectrum, _align_name_part, _XPSParser
+from pynxtools_xps.parsers.base import (
+    ParsedSpectrum,
+    VendorType,
+    _align_name_part,
+    _XPSParser,
+)
 from pynxtools_xps.parsers.specs.xml.metadata import _context
 
 _KEY_PARTS = ["RegionGroup_", "RegionData_"]
@@ -52,6 +57,7 @@ class SPECSXMLParser(_XPSParser):
     """Parser for SpecsLab2 XML data"""
 
     config_file: ClassVar[str] = "config_specs_xml.json"
+    supported_vendor: ClassVar[VendorType | None] = "specs"
     supported_file_extensions: ClassVar[tuple[str, ...]] = (".xml",)
 
     def matches_file(self, file: Path) -> bool:

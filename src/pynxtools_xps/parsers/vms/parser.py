@@ -33,7 +33,12 @@ from pynxtools_xps.mapping import (
     update_dict_without_overwrite,
 )
 from pynxtools_xps.numerics import _check_for_allowed_in_list, _get_minimal_step
-from pynxtools_xps.parsers.base import ParsedSpectrum, _construct_entry_name, _XPSParser
+from pynxtools_xps.parsers.base import (
+    ParsedSpectrum,
+    VendorType,
+    _construct_entry_name,
+    _XPSParser,
+)
 from pynxtools_xps.parsers.vms.comment_handler import handle_comments
 from pynxtools_xps.parsers.vms.data_model import (
     ExpVariable,
@@ -49,6 +54,7 @@ class VamasParser(_XPSParser):
     """A parser for reading vamas files."""
 
     config_file: ClassVar[str] = "config_vms.json"
+    supported_vendor: ClassVar[VendorType | None] = "various"
     supported_file_extensions: ClassVar[tuple[str, ...]] = (".vms", ".npl")
     _metadata_exclude_keys: ClassVar[frozenset[str]] = frozenset({"data", "scan_no"})
 

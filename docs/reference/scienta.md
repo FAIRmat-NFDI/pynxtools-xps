@@ -19,7 +19,7 @@ Three dedicated parsers live in
 
 | Format | Extension | Software | Supported versions |
 | ------ | --------- | -------- | ------------------ |
-| Scienta plain text export | `.txt` | SES / Scienta software | any |
+| Scienta plain text export | `.txt` | Scienta software | any |
 | Igor Binary Wave | `.ibw` | WaveMetrics Igor Pro | any |
 | HDF5 | `.h5`, `.hdf5` | Scienta / PEAK software | any |
 

@@ -34,7 +34,12 @@ from pynxtools_xps.numerics import (
     check_uniform_step_width,
     interpolate_arrays,
 )
-from pynxtools_xps.parsers.base import ParsedSpectrum, _construct_entry_name, _XPSParser
+from pynxtools_xps.parsers.base import (
+    ParsedSpectrum,
+    VendorType,
+    _construct_entry_name,
+    _XPSParser,
+)
 from pynxtools_xps.parsers.vms_export.metadata import _context
 
 # Column-header → flat-dict key mappings for the two halves of the data section.
@@ -101,6 +106,7 @@ class _TextParser(_XPSParser):
     """
 
     config_file: ClassVar[str] = "config_vms.json"
+    supported_vendor: ClassVar[VendorType | None] = "various"
     supported_file_extensions: ClassVar[tuple[str, ...]] = (".txt",)
 
     def __init__(self):
@@ -571,6 +577,7 @@ class VamasExportParser(_XPSParser):
     """
 
     config_file: ClassVar[str] = "config_vms.json"
+    supported_vendor: ClassVar[VendorType | None] = "various"
     supported_file_extensions: ClassVar[tuple[str, ...]] = (".txt",)
 
     _SUB_PARSERS: ClassVar[tuple[type[_TextParser], ...]] = (

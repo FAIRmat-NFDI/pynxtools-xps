@@ -26,13 +26,19 @@ import h5py
 import numpy as np
 import xarray as xr
 
-from pynxtools_xps.parsers.base import ParsedSpectrum, _construct_entry_name, _XPSParser
+from pynxtools_xps.parsers.base import (
+    ParsedSpectrum,
+    VendorType,
+    _construct_entry_name,
+    _XPSParser,
+)
 
 
 class ScientaHDF5Parser(_XPSParser):
     """Parser for Scienta Omicron HDF5 exports."""
 
     config_file: ClassVar[str] = "config_scienta_hdf5.json"
+    supported_vendor: ClassVar[VendorType | None] = "scienta"
     supported_file_extensions: ClassVar[tuple[str, ...]] = (".h5", ".hdf5")
     _metadata_exclude_keys: ClassVar[frozenset[str]] = frozenset(
         {"acquisition/spectrum/data/data", "acquisition/spectrum/data/x_axis"}

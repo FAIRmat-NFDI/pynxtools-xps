@@ -25,6 +25,7 @@ from typing import Any, ClassVar
 
 from pynxtools_xps.parsers.base import (
     ParsedSpectrum,
+    VendorType,
     _construct_entry_name,
     _XPSMetadataParser,
     _XPSParser,
@@ -55,6 +56,7 @@ class VamasResultParser(_XPSMetadataParser):
     """
 
     compatible_primary_parser: ClassVar[type[_XPSParser]] = VamasParser
+    supported_vendor: ClassVar[VendorType | None] = "various"
     supported_file_extensions: ClassVar[tuple[str, ...]] = (".csv",)
 
     def matches_file(self, file: Path) -> bool:

@@ -33,7 +33,12 @@ from scipy.interpolate import interp1d
 
 from pynxtools_xps.logging import _logger
 from pynxtools_xps.mapping import _format_dict, update_dict_without_overwrite
-from pynxtools_xps.parsers.base import ParsedSpectrum, _construct_entry_name, _XPSParser
+from pynxtools_xps.parsers.base import (
+    ParsedSpectrum,
+    VendorType,
+    _construct_entry_name,
+    _XPSParser,
+)
 from pynxtools_xps.parsers.specs.sle.flatten_xml import (
     _iterate_xml_at_tag,
     flatten_context,
@@ -61,6 +66,7 @@ class SPECSSLEParser(_XPSParser):
     """
 
     config_file: ClassVar[str] = "config_specs_sle.json"
+    supported_vendor: ClassVar[VendorType | None] = "specs"
     supported_file_extensions: ClassVar[tuple[str, ...]] = (".sle",)
     _metadata_exclude_keys: ClassVar[frozenset[str]] = frozenset({"data"})
     supported_versions: ClassVar[tuple[VersionRange, ...]] = (

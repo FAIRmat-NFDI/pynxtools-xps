@@ -16,16 +16,43 @@
 #
 """
 Parametrized tests for:
+  - version in self.__init__
   - parsers/versioning.py
 """
 
+import re
+
 import pytest
 
+from pynxtools_xps import get_pynxtools_xps_version
 from pynxtools_xps.parsers.versioning import (
     _format_version,
     is_version_supported,
     normalize_version,
 )
+
+# ── pynxtools-xps version ─────────────────────────────────────────────────────────────
+
+
+def test_get_pynxtools_xps_version():
+    version = get_pynxtools_xps_version()
+    assert version != "unknown_version"
+    assert re.compile(
+        r"""
+        ^
+        (?P<major>\d+)\.
+        (?P<minor>\d+)\.
+        (?P<patch>\d+)
+        (?:\.post(?P<post>\d+))?
+        (?:\.dev(?P<dev>\d+))?
+        (?:\+(?P<local>[a-zA-Z0-9\.]+))?
+        $
+        """,
+        re.VERBOSE,
+    ).match(version)
+
+
+# ── parsers/versioning.py ─────────────────────────────────────────────────────────────
 
 
 @pytest.mark.parametrize(

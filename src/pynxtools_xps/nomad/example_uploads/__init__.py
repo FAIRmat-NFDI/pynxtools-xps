@@ -24,7 +24,7 @@ except ImportError as exc:
         "Could not import nomad package. Please install the package 'nomad-lab'."
     ) from exc
 
-xps_example_upload_entry_point = ExampleUploadEntryPoint(
+xps_example_upload = ExampleUploadEntryPoint(
     title="X-ray Photoelectron Spectroscopy (XPS)",
     category="NeXus Experiment Examples",
     description="""

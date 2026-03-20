@@ -28,7 +28,12 @@ import xarray as xr
 from pynxtools_xps.logging import _logger
 from pynxtools_xps.mapping import _get_measurement_method_long
 from pynxtools_xps.numerics import safe_arange_with_edges
-from pynxtools_xps.parsers.base import ParsedSpectrum, _construct_entry_name, _XPSParser
+from pynxtools_xps.parsers.base import (
+    ParsedSpectrum,
+    VendorType,
+    _construct_entry_name,
+    _XPSParser,
+)
 from pynxtools_xps.parsers.phi.data_model import (
     PHIMetadata,
     PHISpatialArea,
@@ -45,6 +50,7 @@ class PHIParser(_XPSParser):
     """
 
     config_file: ClassVar[str] = "config_phi.json"
+    supported_vendor: ClassVar[VendorType | None] = "phi"
     supported_file_extensions: ClassVar[tuple[str, ...]] = (".spe", ".pro")
     _metadata_exclude_keys: ClassVar[frozenset[str]] = frozenset({"energy", "data"})
 

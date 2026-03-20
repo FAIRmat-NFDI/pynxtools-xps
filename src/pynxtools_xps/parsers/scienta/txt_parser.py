@@ -24,7 +24,12 @@ from typing import ClassVar
 import numpy as np
 import xarray as xr
 
-from pynxtools_xps.parsers.base import ParsedSpectrum, _construct_entry_name, _XPSParser
+from pynxtools_xps.parsers.base import (
+    ParsedSpectrum,
+    VendorType,
+    _construct_entry_name,
+    _XPSParser,
+)
 from pynxtools_xps.parsers.scienta.data_model import ScientaHeader, ScientaRegion
 from pynxtools_xps.parsers.scienta.metadata import (
     _check_valid_value,
@@ -37,6 +42,7 @@ class ScientaTXTParser(_XPSParser):
     """Parser for Scienta TXT exports."""
 
     config_file: ClassVar[str] = "config_scienta.json"
+    supported_vendor: ClassVar[VendorType | None] = "scienta"
     supported_file_extensions: ClassVar[tuple[str, ...]] = (".txt",)
     _metadata_exclude_keys: ClassVar[frozenset[str]] = frozenset(
         {"data", "axis_labels", "data_labels", "units"}

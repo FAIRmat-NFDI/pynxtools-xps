@@ -22,7 +22,7 @@ import types
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, ClassVar, Union, get_args, get_origin
+from typing import Any, ClassVar, Literal, Union, get_args, get_origin
 
 import xarray as xr
 
@@ -34,6 +34,8 @@ from pynxtools_xps.parsers.versioning import (
     _version_ranges_overlap,
     is_version_supported,
 )
+
+VendorType = Literal["scienta", "specs", "phi", "various"]
 
 
 @dataclass
@@ -338,9 +340,9 @@ class _Parser(ABC):
     identify and parse a specific XPS file format variant or its metadata.
 
     Class Attributes:
+        supported_vendor: String of supported instrument vendor.
         supported_file_extensions: Tuple of supported file extensions
             (e.g., (".sle", ".txt")).
-        supported_vendors: Tuple of supported instrument vendors.
         supported_versions: Tuple of supported version ranges (half-open
             intervals). If empty, all files are accepted regardless of
             whether they carry a version. If non-empty, only files whose
@@ -356,10 +358,8 @@ class _Parser(ABC):
 
     """
 
+    supported_vendor: ClassVar[VendorType | None] = None
     supported_file_extensions: ClassVar[tuple[str, ...]] = ()
-    supported_vendors: ClassVar[tuple[str, ...]] = ()
-    # TODO: implement in subclasses
-    # "kratos", "phi", "scienta", "specs", "unknown"]
     supported_versions: ClassVar[tuple[VersionRange, ...]] = ()
 
     @classmethod

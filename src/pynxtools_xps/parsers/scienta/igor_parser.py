@@ -39,7 +39,12 @@ import xarray as xr
 from igor2 import binarywave
 
 from pynxtools_xps.mapping import convert_pascal_to_snake
-from pynxtools_xps.parsers.base import ParsedSpectrum, _construct_entry_name, _XPSParser
+from pynxtools_xps.parsers.base import (
+    ParsedSpectrum,
+    VendorType,
+    _construct_entry_name,
+    _XPSParser,
+)
 from pynxtools_xps.parsers.scienta.data_model import (
     ScientaRegion,
     scienta_igor_peak_schema,
@@ -91,6 +96,7 @@ class _IgorWaveParser(_XPSParser):
     """
 
     config_file: ClassVar[str] = "config_scienta.json"
+    supported_vendor: ClassVar[VendorType | None] = "scienta"
     supported_file_extensions: ClassVar[tuple[str, ...]] = (".ibw",)
     _metadata_exclude_keys: ClassVar[frozenset[str]] = frozenset(
         {"data", "axis_labels", "data_labels", "units"}
@@ -430,6 +436,7 @@ class ScientaIgorParser(_XPSParser):
     """
 
     config_file: ClassVar[str] = "config_scienta.json"
+    supported_vendor: ClassVar[VendorType | None] = "scienta"
     supported_file_extensions: ClassVar[tuple[str, ...]] = (".ibw",)
 
     _SUB_PARSERS: ClassVar[tuple[type[_IgorWaveParser], ...]] = (

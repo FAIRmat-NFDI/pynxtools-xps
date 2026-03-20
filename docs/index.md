@@ -50,6 +50,7 @@ The explanation section provides background knowledge on the implementation desi
 - [The XPS coordinate system](explanation/coordinate_system.md)
 - [Mapping of data processing performed in CasaXPS](explanation/data_processing.md)
 - [NOMAD integration](explanation/nomad_integration.md)
+- [Note on versioning](explanation/versioning.md)
 
 </div>
 <div markdown="block">

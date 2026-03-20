@@ -33,6 +33,11 @@ class KratosParser(_XPSParser):
     A parser for reading in data from Kratos spectrometers.
     """
 
+    # TODO: implement for real parser solution
+    # config_file: ClassVar[str] = ""
+    # supported_vendor: ClassVar[VendorType | None] = "kratos"
+    # supported_file_extensions: ClassVar[tuple[str, ...]] = (".",)
+
     def __init__(self):
         """
         Construct the parser.

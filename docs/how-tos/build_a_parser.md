@@ -91,6 +91,7 @@ for a typical example.
 Start by subclassing
 [`_XPSParser`](https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/src/pynxtools_xps/parsers/base.py). Implement the following required class variables and methods:
 
+- `supported_vendor` — a string for which vendor / data provider your parser support
 - `supported_file_extensions` — a tuple of file extensions that your parser supports
 - `matches_file(file_path)` — return `True` only if the file unambiguously conforms to
   your format (check headers, magic bytes, or required keywords).

@@ -57,10 +57,7 @@ _PROCESS_ORDER: list[tuple[str, Any]] = [
     ("scan_averaging", lambda s: "scan" in s.data.dims and s.data.sizes["scan"] > 1),
     (
         "cycle_averaging",
-        lambda s: (
-            ("scan" in s.data.dims and s.data.sizes["scan"] > 1)
-            or ("cycle" in s.data.dims and s.data.sizes["cycle"] > 1)
-        ),
+        lambda s: "cycle" in s.data.dims and s.data.sizes["cycle"] > 1,
     ),
 ]
 
@@ -168,31 +165,33 @@ def _raw_or_data_array(spectrum: "ParsedSpectrum") -> xr.DataArray:
 def _raw_active_dims(spectrum: "ParsedSpectrum") -> list[str]:
     """Dims with size > 1 or named 'energy' in the raw (or processed) array."""
     da = _raw_or_data_array(spectrum)
-    return [str(d) for d in da.dims if d == "energy" or da.sizes[d] >= 1]
+    return [str(d) for d in da.dims if d == "energy" or da.sizes[d] > 1]
 
 
 def _raw_dim_indices(spectrum: "ParsedSpectrum", dim: str) -> np.ndarray | None:
     """Index array for *dim* in raw (or processed) DA; None if absent or singular."""
     da = _raw_or_data_array(spectrum)
-    if dim not in da.dims or da.sizes[dim] < 1:
+    if dim not in da.dims or da.sizes[dim] <= 1:
         return None
     return np.arange(da.sizes[dim])
 
 
-def _get_raw(spectrum: "ParsedSpectrum") -> np.ndarray:
-    """Return raw (or processed) data, squeezing singular non-energy dims."""
-    da = _raw_or_data_array(spectrum)
-    squeeze = [d for d in da.dims if d != "energy" and da.sizes[d] < 1]
+def _squeeze_non_energy(da: "xr.DataArray") -> "np.ndarray":
+    """Return *da* values, squeezing all non-energy dims with size ≤ 1."""
+    squeeze = [d for d in da.dims if d != "energy" and da.sizes[d] <= 1]
     return da.squeeze(squeeze).values if squeeze else da.values
 
 
+def _get_raw(spectrum: "ParsedSpectrum") -> np.ndarray:
+    """Return raw (or processed) data, squeezing singular non-energy dims."""
+    return _squeeze_non_energy(_raw_or_data_array(spectrum))
+
+
 def _cycle_averaging(spectrum: "ParsedSpectrum") -> np.ndarray | None:
-    """Average over all scan and cycle dims; None if both dims are trivial (≤ 1)."""
+    """Mean over all scan and cycle dims; None when n_cycles ≤ 1."""
     if spectrum.data is None:
         return None
-    n_scans = spectrum.data.sizes.get("scan", 1)
-    n_cycles = spectrum.data.sizes.get("cycle", 1)
-    if n_scans <= 1 and n_cycles <= 1:
+    if "cycle" not in spectrum.data.dims or spectrum.data.sizes["cycle"] <= 1:
         return None
     dims = [d for d in ("scan", "cycle") if d in spectrum.data.dims]
     return spectrum.data.mean(dim=dims).values
@@ -201,6 +200,17 @@ def _cycle_averaging(spectrum: "ParsedSpectrum") -> np.ndarray | None:
 def _get_raw_energy_index(spectrum: "ParsedSpectrum") -> int:
     """Position of 'energy' in the active raw dims; last dim if not found."""
     dims = _raw_active_dims(spectrum)
+    return dims.index("energy") if "energy" in dims else len(dims) - 1
+
+
+def _active_dims(da: "xr.DataArray") -> list[str]:
+    """Ordered dim names in *da* after squeezing size-1 non-energy dims."""
+    return [str(d) for d in da.dims if d == "energy" or da.sizes[d] > 1]
+
+
+def _energy_index(da: "xr.DataArray") -> int:
+    """Position of 'energy' in the active dims of *da*."""
+    dims = _active_dims(da)
     return dims.index("energy") if "energy" in dims else len(dims) - 1
 
 
@@ -753,24 +763,48 @@ class XPSReader(MultiFormatReader):
             "errors_reduced": lambda s: _stats_reduced(s, s.errors),
             # NXprocess averaging
             "channels_averaging": lambda s: (
-                s.data.values
+                _squeeze_non_energy(s.data)
+                if s.raw is not None and s.raw.sizes.get("channel", 1) > 1
+                else None
+            ),
+            "channels_averaging_axes": lambda s: (
+                _active_dims(s.data)
+                if s.raw is not None and s.raw.sizes.get("channel", 1) > 1
+                else None
+            ),
+            "channels_averaging_energy_index": lambda s: (
+                _energy_index(s.data)
                 if s.raw is not None and s.raw.sizes.get("channel", 1) > 1
                 else None
             ),
             "scan_averaging": lambda s: (
-                s.data.mean("scan").values
+                _squeeze_non_energy(s.data.mean("scan"))
+                if "scan" in s.data.dims and s.data.sizes["scan"] > 1
+                else None
+            ),
+            "scan_averaging_axes": lambda s: (
+                _active_dims(s.data.mean("scan"))
+                if "scan" in s.data.dims and s.data.sizes["scan"] > 1
+                else None
+            ),
+            "scan_averaging_energy_index": lambda s: (
+                _energy_index(s.data.mean("scan"))
                 if "scan" in s.data.dims and s.data.sizes["scan"] > 1
                 else None
             ),
             "cycle_averaging": _cycle_averaging,
             # raw data
             "raw": _get_raw,
-            # processed axis indices
+            # processed axis indices (None when dim is trivial — axis not written)
             "cycle": lambda s: (
-                np.arange(s.data.sizes["cycle"]) if "cycle" in s.data.dims else None
+                np.arange(s.data.sizes["cycle"])
+                if "cycle" in s.data.dims and s.data.sizes["cycle"] > 1
+                else None
             ),
             "scan": lambda s: (
-                np.arange(s.data.sizes["scan"]) if "scan" in s.data.dims else None
+                np.arange(s.data.sizes["scan"])
+                if "scan" in s.data.dims and s.data.sizes["scan"] > 1
+                else None
             ),
             "channel": lambda s: (
                 np.arange(s.raw.sizes["channel"]) if s.raw is not None else None

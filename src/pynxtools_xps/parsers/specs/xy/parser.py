@@ -249,25 +249,33 @@ class SPECSXYParser(_XPSParser):
         else:
             primary_scans = scans
 
-        # Sort by (loop_no, scan_no) for deterministic ordering.
-        primary_scans = sorted(
-            primary_scans, key=lambda s: (s.get("loop_no", 0), s.get("scan_no", 0))
-        )
+        # Group by loop_no and sort within each cycle by scan_no.
+        cycles_dict: dict[int, list[dict[str, Any]]] = {}
+        for s in primary_scans:
+            cycles_dict.setdefault(s.get("loop_no", 0), []).append(s)
+        cycle_keys = sorted(cycles_dict)
+        for key in cycle_keys:
+            cycles_dict[key].sort(key=lambda s: s.get("scan_no", 0))
 
-        # Determine x-axis name from the first data dict.
-        first_data = primary_scans[0]["data"] if primary_scans else {}
+        # Determine x/y axis names from the first scan.
+        first_data = cycles_dict[cycle_keys[0]][0]["data"] if cycle_keys else {}
         data_items = list(first_data.items())
         x_axis_name = data_items[0][0] if data_items else "energy"
         y_axis_name = data_items[1][0] if len(data_items) > 1 else "intensity"
 
         energy_axis = np.array(data_items[0][1]) if data_items else np.array([])
 
-        # Stack intensities: shape (1, n_scans, n_energy)
-        intensities = np.stack(
-            [np.array(s["data"][y_axis_name]) for s in primary_scans], axis=0
-        )
-        # Add a cycle dimension of size 1.
-        intensities = intensities[np.newaxis, ...]  # (1, n_scans, n_energy)
+        # Stack intensities: shape (n_cycles, n_scans, n_energy)
+        cycle_arrays = [
+            np.stack(
+                [np.array(s["data"][y_axis_name]) for s in cycles_dict[key]], axis=0
+            )
+            for key in cycle_keys
+        ]
+        intensities = np.stack(cycle_arrays, axis=0)  # (n_cycles, n_scans, n_energy)
+
+        # Rebuild primary_scans in deterministic order for metadata/external channels.
+        primary_scans = [s for key in cycle_keys for s in cycles_dict[key]]
 
         data_array = xr.DataArray(
             data=intensities,
@@ -279,30 +287,38 @@ class SPECSXYParser(_XPSParser):
         metadata: dict[str, Any] = {}
         if primary_scans:
             first_scan = primary_scans[0]
-            for key, value in first_scan.items():
-                if key not in self._metadata_exclude_keys:
-                    metadata[key] = value
-                    if key == "analysis_method":
-                        metadata["f{key}_long_name"] = _get_measurement_method_long(
+            for m_key, value in first_scan.items():
+                if m_key not in self._metadata_exclude_keys:
+                    metadata[m_key] = value
+                    if m_key == "analysis_method":
+                        metadata["f{m_key}_long_name"] = _get_measurement_method_long(
                             value
                         )
 
         # Collect external channel columns from all primary scans and store
-        # them as concatenated arrays under "external_{channel_name}".
+        # them as arrays under "external_{channel_name}" with shape
+        # (n_cycles, n_scans, n_energy).
         if self.export_settings.get("external_channel_data", False) and primary_scans:
-            primary_data = primary_scans[0]["data"]
+            primary_data = cycles_dict[cycle_keys[0]][0]["data"]
             ext_keys = [
                 k
                 for k in primary_data
                 if k not in (x_axis_name, y_axis_name, "transmission")
             ]
             for ext_key in ext_keys:
-                ext_arrays = [
-                    np.array(s["data"].get(ext_key, [])) for s in primary_scans
+                ext_cycle_arrays = [
+                    np.stack(
+                        [
+                            np.array(s["data"].get(ext_key, []))
+                            for s in cycles_dict[key]
+                        ],
+                        axis=0,
+                    )
+                    for key in cycle_keys
                 ]
-                metadata[f"external_{ext_key}"] = np.array(ext_arrays)
+                metadata[f"external_{ext_key}"] = np.stack(ext_cycle_arrays, axis=0)
 
-                channel_units = primary_scans[0].get("channel_units", {})
+                channel_units = cycles_dict[cycle_keys[0]][0].get("channel_units", {})
                 if ext_key in channel_units:
                     metadata[f"external_{ext_key}/@units"] = channel_units[ext_key]
 

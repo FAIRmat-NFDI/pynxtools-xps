@@ -596,8 +596,8 @@
       "AXISNAME[scan]":"@data:scan",
       "AXISNAME[energy]":"@link:/entry/data/energy",
       "AXISNAME[energy]/@units":"@attrs:energy/@units",
-      "@axes":["cycle","scan","energy"],
-      "@energy_indices":2
+      "@axes":"@data:channels_averaging_axes",
+      "@energy_indices":"@data:channels_averaging_energy_index"
     }
   },
   "/ENTRY/PROCESS[scan_averaging]":{
@@ -609,8 +609,8 @@
       "AXISNAME[cycle]":"@data:cycle",
       "AXISNAME[energy]":"@link:/entry/data/energy",
       "AXISNAME[energy]/@units":"@attrs:energy/@units",
-      "@axes":["cycle","energy"],
-      "@energy_indices":1
+      "@axes":"@data:scan_averaging_axes",
+      "@energy_indices":"@data:scan_averaging_energy_index"
     }
   },
   "/ENTRY/PROCESS[cycle_averaging]":{

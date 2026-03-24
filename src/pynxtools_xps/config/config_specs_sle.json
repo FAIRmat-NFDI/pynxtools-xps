@@ -325,7 +325,8 @@
       "AXISNAME[scan]":"@data:scan",
       "AXISNAME[energy]":"@link:/entry/energy_axis_calibration/calibrated_axis",
       "AXISNAME[energy]/@units":"@attrs:energy/@units",
-      "@axes":["cycle","scan","energy"]
+      "@axes":"@data:channels_averaging_axes",
+      "@energy_indices":"@data:channels_averaging_energy_index"
     }
   },
   "/ENTRY/PROCESS[scan_averaging]":{
@@ -337,7 +338,8 @@
       "AXISNAME[cycle]":"@data:cycle",
       "AXISNAME[energy]":"@link:/entry/energy_axis_calibration/calibrated_axis",
       "AXISNAME[energy]/@units":"@attrs:energy/@units",
-      "@axes":["cycle","energy"]
+      "@axes":"@data:scan_averaging_axes",
+      "@energy_indices":"@data:scan_averaging_energy_index"
     }
   },
   "/ENTRY/PROCESS[cycle_averaging]":{

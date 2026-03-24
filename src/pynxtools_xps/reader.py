@@ -55,7 +55,13 @@ _PROCESS_ORDER: list[tuple[str, Any]] = [
         lambda s: s.raw is not None and s.raw.sizes.get("channel", 1) > 1,
     ),
     ("scan_averaging", lambda s: "scan" in s.data.dims and s.data.sizes["scan"] > 1),
-    ("cycle_averaging", lambda s: "cycle" in s.data.dims and s.data.sizes["cycle"] > 1),
+    (
+        "cycle_averaging",
+        lambda s: (
+            ("scan" in s.data.dims and s.data.sizes["scan"] > 1)
+            or ("cycle" in s.data.dims and s.data.sizes["cycle"] > 1)
+        ),
+    ),
 ]
 
 _CONVERT_DICT = {
@@ -162,13 +168,13 @@ def _raw_or_data_array(spectrum: "ParsedSpectrum") -> xr.DataArray:
 def _raw_active_dims(spectrum: "ParsedSpectrum") -> list[str]:
     """Dims with size > 1 or named 'energy' in the raw (or processed) array."""
     da = _raw_or_data_array(spectrum)
-    return [str(d) for d in da.dims if d == "energy" or da.sizes[d] > 1]
+    return [str(d) for d in da.dims if d == "energy" or da.sizes[d] >= 1]
 
 
 def _raw_dim_indices(spectrum: "ParsedSpectrum", dim: str) -> np.ndarray | None:
     """Index array for *dim* in raw (or processed) DA; None if absent or singular."""
     da = _raw_or_data_array(spectrum)
-    if dim not in da.dims or da.sizes[dim] <= 1:
+    if dim not in da.dims or da.sizes[dim] < 1:
         return None
     return np.arange(da.sizes[dim])
 
@@ -176,18 +182,20 @@ def _raw_dim_indices(spectrum: "ParsedSpectrum", dim: str) -> np.ndarray | None:
 def _get_raw(spectrum: "ParsedSpectrum") -> np.ndarray:
     """Return raw (or processed) data, squeezing singular non-energy dims."""
     da = _raw_or_data_array(spectrum)
-    squeeze = [d for d in da.dims if d != "energy" and da.sizes[d] <= 1]
+    squeeze = [d for d in da.dims if d != "energy" and da.sizes[d] < 1]
     return da.squeeze(squeeze).values if squeeze else da.values
 
 
 def _cycle_averaging(spectrum: "ParsedSpectrum") -> np.ndarray | None:
-    """Average over all scan and cycle dims; None if only one cycle present."""
+    """Average over all scan and cycle dims; None if both dims are trivial (≤ 1)."""
     if spectrum.data is None:
         return None
-    if "cycle" not in spectrum.data.dims or spectrum.data.sizes["cycle"] <= 1:
+    n_scans = spectrum.data.sizes.get("scan", 1)
+    n_cycles = spectrum.data.sizes.get("cycle", 1)
+    if n_scans <= 1 and n_cycles <= 1:
         return None
-    dims = [d for d in ["scan", "cycle"] if d in spectrum.data.dims]
-    return spectrum.data.mean(dims).values
+    dims = [d for d in ("scan", "cycle") if d in spectrum.data.dims]
+    return spectrum.data.mean(dim=dims).values
 
 
 def _get_raw_energy_index(spectrum: "ParsedSpectrum") -> int:

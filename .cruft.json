@@ -1,6 +1,6 @@
 {
   "template": "https://github.com/FAIRmat-NFDI/pynxtools-plugin-template.git",
-  "commit": "39ae64305e0f3c696003eab5cca56b49ecaf883f",
+  "commit": "b3269e98da0738d74ce586f373ea1fd7ddf2a59e",
   "checkout": null,
   "context": {
     "cookiecutter": {
@@ -13,7 +13,7 @@
       "author_email": "fairmat@physik.hu-berlin.de",
       "github_username": "FAIRmat-NFDI",
       "organization_name": "fairmat-nfdi",
-      "license": "MIT",
+      "license": "Apache-2.0",
       "zenodo_record": "13951684",
       "vscode_settings": true,
       "include_nomad_app": false,
@@ -29,7 +29,7 @@
         "*.html"
       ],
       "_template": "https://github.com/FAIRmat-NFDI/pynxtools-plugin-template.git",
-      "_commit": "39ae64305e0f3c696003eab5cca56b49ecaf883f"
+      "_commit": "b3269e98da0738d74ce586f373ea1fd7ddf2a59e"
     }
   },
   "directory": null

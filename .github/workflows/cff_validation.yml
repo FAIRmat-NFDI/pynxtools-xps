@@ -1,0 +1,37 @@
+name: Validate CITATION.cff
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "CITATION.cff"
+      - ".github/workflows/cff-validation.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "CITATION.cff"
+      - ".github/workflows/cff-validation.yml"
+
+env:
+  PYTHON_VERSION: 3.12
+
+jobs:
+  validate-cff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+            python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Test Zenodo conversion
+        run: |
+          # Remove the funding section to avoid validation issues with Zenodo
+          sed -i '/^funding:/,$d' CITATION.cff
+
+          uv run --with cffconvert cffconvert --validate --format zenodo || exit 1

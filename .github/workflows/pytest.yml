@@ -25,7 +25,7 @@ jobs:
       - name: Install nomad
         run: |
           uv pip install nomad-lab[infrastructure]@git+https://gitlab.mpcdf.mpg.de/nomad-lab/nomad-FAIR.git
-      - name: Install package and pynxtools master branch
+      - name: Install package
         run: |
           # Editable install is necessary for coveralls to work
           uv pip install -e ".[dev]"

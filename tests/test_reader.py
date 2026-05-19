@@ -31,7 +31,7 @@ NXDLS = ["NXxps"]  # READER_CLASS.supported_nxdls
 
 # Define lines/sections to be ignored in _all_ test cases
 ignore_lines_all_tests: list = []
-ignore_sections_all_tests: dict = {"ATTRS (//@creator_version)": ["DEBUG - value:"]}
+ignore_sections_all_tests: dict = {}
 
 # Test cases should be [("folder", ignore_lines, ignore_sections, "test-id")]
 test_cases: list[tuple[str, list[Any], dict[Any, Any], str]] = [
@@ -49,8 +49,8 @@ test_cases: list[tuple[str, list[Any], dict[Any, Any], str]] = [
         "scienta_ibw",
         [],
         {
-            "FIELD (//Ag__001__Ag3d/start_time)": ["DEBUG - value:"],
-            "FIELD (//Ag__002__VB/start_time)": ["DEBUG - value:"],
+            "FIELD /Ag__001__Ag3d/start_time ": ["Value"],
+            "FIELD /Ag__002__VB/start_time ": ["Value"],
         },
         "scienta-ibw-reader",
     ),
@@ -58,8 +58,8 @@ test_cases: list[tuple[str, list[Any], dict[Any, Any], str]] = [
         "scienta_txt",
         [],
         {
-            "FIELD (//Ag__001__Ag3d/start_time)": ["DEBUG - value:"],
-            "FIELD (//Ag__002__VB/start_time)": ["DEBUG - value:"],
+            "FIELD /Ag__001__Ag3d/start_time ": ["Value"],
+            "FIELD /Ag__002__VB/start_time ": ["Value"],
         },
         "scienta-txt-reader",
     ),

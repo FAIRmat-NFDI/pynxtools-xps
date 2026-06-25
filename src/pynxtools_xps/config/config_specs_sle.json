@@ -129,13 +129,13 @@
         },
         "ELECTROMAGNETIC_LENS[pre_defl_x]":{
           "name":"Pre-Deflector X",
-          "current":"!@attrs:pre_deflector_x_current",
-          "current/@units":"@attrs:pre_deflector_x_current/@units"
+          "current":"!@attrs:pre_defl_x_current",
+          "current/@units":"@attrs:pre_defl_x_current/@units"
         },
         "ELECTROMAGNETIC_LENS[pre_defl_y]":{
           "name":"Pre-Deflector Y",
-          "current":"!@attrs:pre_deflector_y_current",
-          "current/@units":"@attrs:pre_deflector_y_current/@units"
+          "current":"!@attrs:pre_defl_y_current",
+          "current/@units":"@attrs:pre_defl_y_current/@units"
         },
         "ELECTROMAGNETIC_LENS[focus_displacement]":{
           "name":"Focus Displacement",

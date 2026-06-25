@@ -519,9 +519,11 @@ class _Parser(ABC):
         version = self.detect_version(file)
 
         if not self.is_version_supported(version):
+            _logger.warning(self.file_version_err_msg(file, version))
             raise ValueError(self.file_version_err_msg(file, version))
 
         if not self.matches_file(file):
+            _logger.warning(self.matches_file_warning(file))
             raise ValueError(self.matches_file_warning(file))
 
     def detect_version(self, file: Path) -> VersionTuple | None:

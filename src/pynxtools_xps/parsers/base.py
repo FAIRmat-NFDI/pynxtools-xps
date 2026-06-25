@@ -402,8 +402,28 @@ class _Parser(ABC):
             )
 
         return (
-            f"Unsupported file version '{version_str}' for file '{file_name}'. "
+            f"File '{file_name}' has version {version_str}, which is not supported by {cls.__name__}."
             f"Supported versions: {supported_str}."
+        )
+
+    @classmethod
+    def supported_vendor_err_msg(cls, file: str | Path, vendor: str | None) -> str:
+        path = Path(file)
+        file_name = path.name
+        vendor_str = vendor if vendor is not None else "<unknown>"
+
+        return (
+            f"File '{file_name}' has vendor '{vendor_str}', which is not supported by {cls.__name__}."
+            f"Supported vendor: {cls.supported_vendor}."
+        )
+
+    @classmethod
+    def matches_file_warning(cls, file: str | Path) -> str:
+        path = Path(file)
+        file_name = path.name
+
+        return (
+            f"File '{file_name}' does not match the expected format for {cls.__name__}."
         )
 
     @classmethod
@@ -481,13 +501,12 @@ class _Parser(ABC):
         version = self.detect_version(file)
 
         if not self.is_version_supported(version):
+            _logger.warning(self.file_version_err_msg(file, version))
             raise ValueError(self.file_version_err_msg(file, version))
 
         if not self.matches_file(file):
-            raise ValueError(
-                f"File '{file.name}' does not match the expected "
-                f"format for {self.__class__.__name__}."
-            )
+            _logger.warning(self.matches_file_warning(file))
+            raise ValueError(self.matches_file_warning(file))
 
     def detect_version(self, file: Path) -> VersionTuple | None:
         """

@@ -252,7 +252,7 @@ def test_kratos_context_format(key, value, exp_key, exp_value, exp_unit):
 @pytest.mark.parametrize(
     "key, value, exp_key, exp_value, exp_unit",
     [
-        ("block_id", "C 1s", "region", "C 1s", None),
+        ("block_id", "C 1s", "analysis_region", "C 1s", None),
         (
             "technique",
             "XPS",

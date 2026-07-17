@@ -56,7 +56,7 @@ ALLOWED_TECHNIQUES = [
 ]
 
 _KEY_MAP: dict[str, str] = {
-    "block_id": "region",
+    "block_id": "analysis_region",
     "sample_id": "sample_name",
     "technique": "analysis_method",
     "source_energy": "excitation_energy",

@@ -33,6 +33,7 @@ from pynxtools_xps.parsers.specs.xy.parser import SPECSXYParser
 from pynxtools_xps.parsers.vms.parser import VamasParser
 from pynxtools_xps.parsers.vms_export.parser_export import VamasExportParser
 from pynxtools_xps.parsers.vms_export.parser_results import VamasResultParser
+from pynxtools_xps.reader import XPSReader
 
 DATA_DIR = Path(__file__).parent / "data"
 
@@ -120,3 +121,82 @@ def test_matches_file_negative(parser_cls, rel_path):
     if not path.exists():
         pytest.skip(f"test file not found: {path}")
     assert not parser_cls().matches_file(path)
+
+
+@pytest.mark.parametrize("parser_cls, rel_path", _NEGATIVE_CASES)
+def test_is_mainfile_rejection_is_silent(parser_cls, rel_path, caplog):
+    """is_mainfile() is probed speculatively against every registered parser,
+    so a rejection must not itself log a warning (see match_failure_reason
+    for on-demand diagnostics instead)."""
+    path = DATA_DIR / rel_path
+    if not path.exists():
+        pytest.skip(f"test file not found: {path}")
+    with caplog.at_level("WARNING"):
+        assert not parser_cls.is_mainfile(path)
+    assert caplog.records == []
+
+
+def _expected_match_failure_reason(parser_cls, path: Path) -> str:
+    """The exact diagnostic match_failure_reason() must produce for *path*,
+    derived independently from the same public classification the parser
+    uses (extension support), not by re-deriving matches_file()'s verdict."""
+    if not parser_cls.is_extension_supported(path):
+        return parser_cls.file_ext_err_msg(path)
+    return parser_cls.matches_file_warning(path)
+
+
+@pytest.mark.parametrize("parser_cls, rel_path", _NEGATIVE_CASES)
+def test_match_failure_reason_explains_rejection_without_logging(
+    parser_cls, rel_path, caplog
+):
+    """match_failure_reason() gives the same diagnosis as the ValueError raised
+    internally, but as a plain return value, and without logging on its own."""
+    path = DATA_DIR / rel_path
+    if not path.exists():
+        pytest.skip(f"test file not found: {path}")
+    with caplog.at_level("WARNING"):
+        reason = parser_cls.match_failure_reason(path)
+    assert reason == _expected_match_failure_reason(parser_cls, path)
+    assert caplog.records == []
+
+
+@pytest.mark.parametrize("parser_cls, rel_path", _POSITIVE_CASES)
+def test_match_failure_reason_none_on_match(parser_cls, rel_path):
+    """match_failure_reason() returns None whenever matches_file() succeeds."""
+    path = DATA_DIR / rel_path
+    if not path.exists():
+        pytest.skip(f"test file not found: {path}")
+    assert parser_cls.match_failure_reason(path) is None
+
+
+def test_reader_does_not_warn_on_extension_overlap(caplog):
+    """Scienta TXT and CasaXPS/Vamas-export TXT files share the .txt extension,
+    so both parsers are probed for either file. Dispatching a file that one of
+    them matches must not surface the other's rejection as a warning."""
+    scienta_txt = DATA_DIR / "scienta_txt/Ag_0001.txt"
+    vamas_export_txt = DATA_DIR / "vms_txt_export/vms_txt_export.txt"
+    for path in (scienta_txt, vamas_export_txt):
+        if not path.exists():
+            pytest.skip(f"test file not found: {path}")
+
+    with caplog.at_level("WARNING"):
+        XPSReader().handle_data_file(str(scienta_txt))
+        XPSReader().handle_data_file(str(vamas_export_txt))
+
+    assert caplog.records == []
+
+
+def test_reader_reports_all_reasons_when_no_parser_matches(tmp_path, caplog):
+    """When no registered parser matches a file, the reader logs one warning
+    that aggregates every parser's individual rejection reason."""
+    unmatched_file = tmp_path / "unmatched.foo"
+    unmatched_file.write_bytes(b"not a real XPS file")
+
+    with caplog.at_level("WARNING"):
+        XPSReader().handle_data_file(str(unmatched_file))
+
+    assert len(caplog.records) == 1
+    message = caplog.records[0].getMessage()
+    assert "No parser matches file" in message
+    for parser_cls in (*XPSReader.parsers, *XPSReader.metadata_parsers):
+        assert parser_cls.__name__ in message

@@ -452,12 +452,30 @@ class _Parser(ABC):
         Returns:
             True if the file can be parsed by this class, otherwise False.
         """
+        return cls.match_failure_reason(file) is None
+
+    @classmethod
+    def match_failure_reason(cls, file: str | Path) -> str | None:
+        """
+        Explain why this parser rejects *file*, without raising.
+
+        Used for on-demand diagnostics once every registered parser has
+        rejected a file — `is_mainfile` itself must stay silent, since it
+        is probed speculatively against each candidate parser and a
+        negative result there is the expected outcome for all but one.
+
+        Args:
+            file: Path to the candidate file.
+
+        Returns:
+            The rejection reason, or None if this parser matches the file.
+        """
         try:
             parser = cls()
             parser._is_mainfile(Path(file))
-            return True
-        except ValueError:
-            return False
+            return None
+        except ValueError as error:
+            return str(error)
 
     def __init__(self) -> None:
         self.file: Path
@@ -501,11 +519,9 @@ class _Parser(ABC):
         version = self.detect_version(file)
 
         if not self.is_version_supported(version):
-            _logger.warning(self.file_version_err_msg(file, version))
             raise ValueError(self.file_version_err_msg(file, version))
 
         if not self.matches_file(file):
-            _logger.warning(self.matches_file_warning(file))
             raise ValueError(self.matches_file_warning(file))
 
     def detect_version(self, file: Path) -> VersionTuple | None:

@@ -1,6 +1,7 @@
 # Custom Dictionary Words
 ACQUSITION
 ARPES
+ARUPS
 ARXPS
 AXISNAME
 Analysed

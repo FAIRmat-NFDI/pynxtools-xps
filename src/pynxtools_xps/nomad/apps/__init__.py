@@ -36,7 +36,7 @@ except ImportError as exc:
     ) from exc
 
 
-schema = "pynxtools.nomad.schema.Root"
+schema = "pynxtools.nomad.metainfo.applications.xps.Xps"
 
 xps_app = AppEntryPoint(
     name="XPS App",
@@ -45,10 +45,10 @@ xps_app = AppEntryPoint(
         label="XPS",
         path="xpsapp",
         category="Experiment",
-        description="A search app for NXxps and NXmpes NeXus-based XPS experiment entries.",
+        description="A search app for NXxps NeXus-based XPS experiment entries.",
         readme=(
             "This app supports search and exploration of X-ray photoelectron spectroscopy (XPS) "
-            "data stored in the NeXus format according to the NXxps and NXmpes application definitions."
+            "data stored in the NeXus format according to the NXxps application definition."
         ),
         search_quantities=SearchQuantities(
             include=[f"*#{schema}"],
@@ -62,38 +62,41 @@ xps_app = AppEntryPoint(
             ),
             Column(
                 title="Start Time",
-                search_quantity=f"data.ENTRY[*].start_time__field#{schema}",
+                search_quantity=f"data.start_time#{schema}",
                 selected=True,
             ),
             Column(
                 title="Method",
-                search_quantity=f"data.ENTRY[*].method__field#{schema}",
+                search_quantity=f"data.method#{schema}",
                 selected=True,
             ),
             Column(
                 title="Transitions",
-                search_quantity=f"data.ENTRY[*].transitions__field#{schema}",
+                search_quantity=f"data.transitions#{schema}",
                 selected=True,
             ),
             Column(
                 title="Author",
-                search_quantity=f"data.ENTRY[*].USER[*].name__field#{schema}",
+                search_quantity=f"data.user[*].name#{schema}",
                 selected=True,
             ),
             Column(
                 title="Sample",
-                search_quantity=f"data.ENTRY[*].SAMPLE[*].name__field#{schema}",
+                search_quantity=f"data.sample[*].name#{schema}",
                 selected=True,
             ),
             Column(
+                title="Sample ID",
+                search_quantity=f"data.sample[*].identifier#{schema}",
+                selected=False,
+            ),
+            Column(
                 title="Definition",
-                search_quantity=f"data.ENTRY[*].definition__field#{schema}",
+                search_quantity=f"data.definition#{schema}",
                 selected=True,
             ),
         ],
-        filters_locked={
-            f"data.ENTRY.definition__field#{schema}": ["NXxps", "NXmpes"],
-        },
+        filters_locked={"section_defs.definition_qualified_name": [schema]},
         menu=Menu(
             size=MenuSizeEnum.MD,
             title="Menu",
@@ -113,7 +116,7 @@ xps_app = AppEntryPoint(
                         ),
                         MenuItemTerms(
                             title="Sample Name",
-                            quantity=f"data.ENTRY.SAMPLE.name__field#{schema}",
+                            quantity=f"data.sample.name#{schema}",
                             width=6,
                             options=10,
                         ),
@@ -128,21 +131,15 @@ xps_app = AppEntryPoint(
                     items=[
                         MenuItemTerms(
                             title="Method",
-                            quantity=f"data.ENTRY.method__field#{schema}",
+                            quantity=f"data.method#{schema}",
                             width=12,
                             options=10,
                         ),
                         MenuItemTerms(
                             title="Probed Core Levels / Transitions",
-                            quantity=f"data.ENTRY.transitions__field#{schema}",
+                            quantity=f"data.transitions#{schema}",
                             width=12,
                             options=15,
-                        ),
-                        MenuItemTerms(
-                            title="Definition",
-                            quantity=f"data.ENTRY.definition__field#{schema}",
-                            width=12,
-                            options=5,
                         ),
                     ],
                 ),
@@ -152,7 +149,7 @@ xps_app = AppEntryPoint(
                     items=[
                         MenuItemTerms(
                             title="Entry Author",
-                            search_quantity=f"data.ENTRY.USER.name__field#{schema}",
+                            search_quantity=f"data.user.name#{schema}",
                             width=12,
                             options=5,
                         ),
@@ -164,7 +161,7 @@ xps_app = AppEntryPoint(
                         ),
                         MenuItemTerms(
                             title="Affiliation",
-                            search_quantity=f"data.ENTRY.USER.affiliation__field#{schema}",
+                            search_quantity=f"data.user.affiliation#{schema}",
                             width=12,
                             options=5,
                         ),
@@ -176,39 +173,44 @@ xps_app = AppEntryPoint(
                     items=[
                         MenuItemTerms(
                             title="Instrument Name",
-                            quantity=f"data.ENTRY.INSTRUMENT.name__field#{schema}",
+                            quantity=f"data.instrument.name#{schema}",
                             width=12,
                             options=10,
                         ),
                         MenuItemTerms(
                             title="X-ray Source Type",
-                            quantity=f"data.ENTRY.INSTRUMENT.source_probe.probe__field#{schema}",
+                            quantity=f"data.instrument.source_probe.probe#{schema}",
                             width=6,
                             options=5,
                         ),
                         MenuItemTerms(
                             title="X-ray Source Name",
-                            quantity=f"data.ENTRY.INSTRUMENT.source_probe.name__field#{schema}",
+                            quantity=f"data.instrument.source_probe.name#{schema}",
                             width=6,
                             options=10,
                         ),
-                        MenuItemHistogram(
-                            title="Photon Energy",
-                            x=Axis(
-                                title="Photon Energy (eV)",
-                                search_quantity=f"data.ENTRY.INSTRUMENT.beam_probe.incident_energy__field#{schema}#float",
-                            ),
-                        ),
+                        # "beam_probe.incident_energy" is shape=["*"] (real
+                        # array). NOMAD's dynamic search-quantity registration
+                        # unconditionally skips array-shaped quantities, so it
+                        # cannot be used here (same constraint noted in
+                        # mpes_app).
+                        # MenuItemHistogram(
+                        #     title="Photon Energy",
+                        #     x=Axis(
+                        #         title="Photon Energy (eV)",
+                        #         search_quantity=f"data.ENTRY.INSTRUMENT.beam_probe.incident_energy__field#{schema}#float",
+                        #     ),
+                        # ),
                         MenuItemHistogram(
                             title="Energy Resolution",
                             x=Axis(
                                 title="Energy Resolution (eV)",
-                                search_quantity=f"data.ENTRY.INSTRUMENT.energy_resolution.resolution__field#{schema}#float",
+                                search_quantity=f"data.instrument.energy_resolution.resolution#{schema}#float",
                             ),
                         ),
                         MenuItemTerms(
                             title="Energy Scan Mode",
-                            quantity=f"data.ENTRY.INSTRUMENT.ELECTRONANALYZER.ENERGYDISPERSION.energy_scan_mode__field#{schema}",
+                            quantity=f"data.instrument.electronanalyzer.energydispersion.energy_scan_mode#{schema}",
                             width=12,
                             options=5,
                         ),
@@ -216,14 +218,14 @@ xps_app = AppEntryPoint(
                             title="Pass Energy",
                             x=Axis(
                                 title="Pass Energy (eV)",
-                                search_quantity=f"data.ENTRY.INSTRUMENT.ELECTRONANALYZER.ENERGYDISPERSION.pass_energy__field#{schema}#float",
+                                search_quantity=f"data.instrument.electronanalyzer.energydispersion.pass_energy#{schema}#float",
                             ),
                         ),
                         MenuItemHistogram(
                             title="Work Function",
                             x=Axis(
                                 title="Work Function (eV)",
-                                search_quantity=f"data.ENTRY.INSTRUMENT.ELECTRONANALYZER.work_function__field#{schema}#float",
+                                search_quantity=f"data.instrument.electronanalyzer.work_function#{schema}#float",
                             ),
                         ),
                     ],
@@ -234,7 +236,7 @@ xps_app = AppEntryPoint(
                     items=[
                         MenuItemTerms(
                             title="Situation",
-                            quantity=f"data.ENTRY.SAMPLE.situation__field#{schema}",
+                            quantity=f"data.sample.situation#{schema}",
                             width=12,
                             options=5,
                         ),
@@ -242,7 +244,7 @@ xps_app = AppEntryPoint(
                             title="Sample Temperature",
                             x=Axis(
                                 title="Sample Temperature",
-                                search_quantity=f"data.ENTRY.SAMPLE.temperature_env.temperature_sensor.value__field#{schema}#float",
+                                search_quantity=f"data.sample.temperature_env.value#{schema}#float",
                             ),
                         ),
                     ],
@@ -255,7 +257,7 @@ xps_app = AppEntryPoint(
                             title="Min. Binding Energy",
                             x=Axis(
                                 title="Min. Binding Energy (eV)",
-                                search_quantity=f"data.ENTRY.DATA.energy__min#{schema}#float",
+                                search_quantity=f"data.data.energy__min#{schema}#float",
                             ),
                             width=6,
                         ),
@@ -263,7 +265,7 @@ xps_app = AppEntryPoint(
                             title="Max. Binding Energy",
                             x=Axis(
                                 title="Max. Binding Energy (eV)",
-                                search_quantity=f"data.ENTRY.DATA.energy__max#{schema}#float",
+                                search_quantity=f"data.data.energy__max#{schema}#float",
                             ),
                             width=6,
                         ),
@@ -275,19 +277,19 @@ xps_app = AppEntryPoint(
                     items=[
                         MenuItemTerms(
                             title="Fit Region Label",
-                            quantity=f"data.ENTRY.FIT.label__field#{schema}",
+                            quantity=f"data.fit.label#{schema}",
                             width=12,
                             options=10,
                         ),
                         MenuItemTerms(
                             title="Peak Label",
-                            quantity=f"data.ENTRY.FIT.PEAK.label__field#{schema}",
+                            quantity=f"data.fit.peakPEAK.label#{schema}",
                             width=12,
                             options=15,
                         ),
                         MenuItemTerms(
                             title="Peak Function Type",
-                            quantity=f"data.ENTRY.FIT.PEAK.function.function_type__field#{schema}",
+                            quantity=f"data.fit.peakPEAK.function.function_type#{schema}",
                             width=12,
                             options=10,
                         ),
@@ -295,14 +297,14 @@ xps_app = AppEntryPoint(
                             title="Peak Position (Binding Energy)",
                             x=Axis(
                                 title="Peak Position (eV)",
-                                search_quantity=f"data.ENTRY.FIT.PEAK.data.position__field#{schema}#float",
+                                search_quantity=f"data.fit.peakPEAK.data.position#{schema}#float",
                             ),
                         ),
                     ],
                 ),
                 MenuItemHistogram(
                     title="Start Time",
-                    x=f"data.ENTRY.start_time__field#{schema}",
+                    x=f"data.start_time#{schema}",
                     autorange=True,
                 ),
                 MenuItemHistogram(
@@ -331,7 +333,7 @@ xps_app = AppEntryPoint(
                     "type": "terms",
                     "show_input": False,
                     "scale": "linear",
-                    "quantity": f"data.ENTRY.method__field#{schema}",
+                    "quantity": f"data.method#{schema}",
                     "title": "Method",
                     "layout": {
                         "sm": {"minH": 3, "minW": 3, "h": 5, "w": 4, "y": 0, "x": 8},
@@ -345,7 +347,7 @@ xps_app = AppEntryPoint(
                     "type": "terms",
                     "show_input": False,
                     "scale": "linear",
-                    "quantity": f"data.ENTRY.transitions__field#{schema}",
+                    "quantity": f"data.transitions#{schema}",
                     "title": "Core Levels / Transitions",
                     "layout": {
                         "sm": {"minH": 3, "minW": 3, "h": 5, "w": 4, "y": 0, "x": 8},
@@ -363,7 +365,7 @@ xps_app = AppEntryPoint(
                     "scale": "linear",
                     "x": Axis(
                         title="Photon Energy (eV)",
-                        search_quantity=f"data.ENTRY.INSTRUMENT.beam_probe.incident_energy__field#{schema}#float",
+                        search_quantity=f"data.data.photon_energy#{schema}#float",
                     ),
                     "title": "Photon Energy",
                     "layout": {
@@ -382,7 +384,7 @@ xps_app = AppEntryPoint(
                     "scale": "linear",
                     "x": Axis(
                         title="Pass Energy (eV)",
-                        search_quantity=f"data.ENTRY.INSTRUMENT.ELECTRONANALYZER.ENERGYDISPERSION.pass_energy__field#{schema}#float",
+                        search_quantity=f"data.instrument.electronanalyzer.energydispersion.pass_energy#{schema}#float",
                     ),
                     "title": "Pass Energy",
                     "layout": {
@@ -397,7 +399,7 @@ xps_app = AppEntryPoint(
                     "type": "terms",
                     "show_input": False,
                     "scale": "linear",
-                    "quantity": f"data.ENTRY.FIT.PEAK.function.function_type__field#{schema}",
+                    "quantity": f"data.fit.peakPEAK.function.function_type#{schema}",
                     "title": "Peak Function Type",
                     "layout": {
                         "sm": {"minH": 3, "minW": 3, "h": 4, "w": 6, "y": 9, "x": 0},
@@ -411,7 +413,7 @@ xps_app = AppEntryPoint(
                     "type": "terms",
                     "show_input": False,
                     "scale": "linear",
-                    "quantity": f"data.ENTRY.FIT.PEAK.label__field#{schema}",
+                    "quantity": f"data.fit.peakPEAK.label#{schema}",
                     "title": "Peak Labels",
                     "layout": {
                         "sm": {"minH": 3, "minW": 3, "h": 4, "w": 6, "y": 9, "x": 6},

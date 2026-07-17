@@ -402,8 +402,28 @@ class _Parser(ABC):
             )
 
         return (
-            f"Unsupported file version '{version_str}' for file '{file_name}'. "
+            f"File '{file_name}' has version {version_str}, which is not supported by {cls.__name__}."
             f"Supported versions: {supported_str}."
+        )
+
+    @classmethod
+    def supported_vendor_err_msg(cls, file: str | Path, vendor: str | None) -> str:
+        path = Path(file)
+        file_name = path.name
+        vendor_str = vendor if vendor is not None else "<unknown>"
+
+        return (
+            f"File '{file_name}' has vendor '{vendor_str}', which is not supported by {cls.__name__}."
+            f"Supported vendor: {cls.supported_vendor}."
+        )
+
+    @classmethod
+    def matches_file_warning(cls, file: str | Path) -> str:
+        path = Path(file)
+        file_name = path.name
+
+        return (
+            f"File '{file_name}' does not match the expected format for {cls.__name__}."
         )
 
     @classmethod
@@ -432,12 +452,30 @@ class _Parser(ABC):
         Returns:
             True if the file can be parsed by this class, otherwise False.
         """
+        return cls.match_failure_reason(file) is None
+
+    @classmethod
+    def match_failure_reason(cls, file: str | Path) -> str | None:
+        """
+        Explain why this parser rejects *file*, without raising.
+
+        Used for on-demand diagnostics once every registered parser has
+        rejected a file — `is_mainfile` itself must stay silent, since it
+        is probed speculatively against each candidate parser and a
+        negative result there is the expected outcome for all but one.
+
+        Args:
+            file: Path to the candidate file.
+
+        Returns:
+            The rejection reason, or None if this parser matches the file.
+        """
         try:
             parser = cls()
             parser._is_mainfile(Path(file))
-            return True
-        except ValueError:
-            return False
+            return None
+        except ValueError as error:
+            return str(error)
 
     def __init__(self) -> None:
         self.file: Path
@@ -484,10 +522,7 @@ class _Parser(ABC):
             raise ValueError(self.file_version_err_msg(file, version))
 
         if not self.matches_file(file):
-            raise ValueError(
-                f"File '{file.name}' does not match the expected "
-                f"format for {self.__class__.__name__}."
-            )
+            raise ValueError(self.matches_file_warning(file))
 
     def detect_version(self, file: Path) -> VersionTuple | None:
         """

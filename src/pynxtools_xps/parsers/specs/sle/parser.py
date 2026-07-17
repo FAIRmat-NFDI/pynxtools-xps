@@ -71,7 +71,7 @@ class SPECSSLEParser(_XPSParser):
     _metadata_exclude_keys: ClassVar[frozenset[str]] = frozenset({"data"})
     supported_versions: ClassVar[tuple[VersionRange, ...]] = (
         ((1, 1), (4, 0)),  # 1.*, 2.*, 3.*
-        ((4, 1), (4, 101)),  # 4.1 – 4.100
+        ((4, 1), (4, 130)),  # 4.1 – 4.130
     )
     _SQLITE_MAGIC: ClassVar[bytes] = b"SQLite format 3\x00"
 

@@ -41,6 +41,7 @@ MEASUREMENT_METHOD_MAP: dict[str, str] = {
     "ESCA": "electron spectroscopy for chemical analysis",
     "NAPXPS": "near ambient pressure X-ray photoelectron spectroscopy",
     "ARXPS": "angle-resolved X-ray photoelectron spectroscopy",
+    "ARUPS": "angle-resolved ultraviolet photoelectron spectroscopy",
 }
 
 ENERGY_TYPE_MAP: dict[str, str] = {

@@ -441,7 +441,13 @@ class XPSReader(MultiFormatReader):
             )
 
         if not primary_matches and not metadata_matches:
-            _logger.warning("No parser matches file: %s", file_path)
+            reasons = [
+                f"  - {P.__name__}: {P.match_failure_reason(file)}"
+                for P in (*self.parsers, *self.metadata_parsers)
+            ]
+            _logger.warning(
+                "No parser matches file: %s\n%s", file_path, "\n".join(reasons)
+            )
             return {}
 
         if primary_matches:

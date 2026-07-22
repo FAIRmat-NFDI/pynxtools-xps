@@ -5,7 +5,7 @@
   "context": {
     "cookiecutter": {
       "reader_name": "xps",
-      "supported_nxdl": "NXmpes",
+      "supported_nxdl": "NXxps",
       "short_description": "pynxtools-xps is a pynxtools reader plugin for X-ray photoelectron spectroscopy (XPS) data.",
       "technique": "XPS",
       "reader_class": "XPSReader",

@@ -36,7 +36,7 @@ except ImportError as exc:
     ) from exc
 
 
-schema = "pynxtools.nomad.metainfo.applications.xps.Xps"
+schema = "pynxtools.nomad.metainfo.applications.Xps"
 
 xps_app = AppEntryPoint(
     name="XPS App",

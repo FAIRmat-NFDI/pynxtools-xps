@@ -207,7 +207,7 @@ def test_metadata_context_format_value(simple_context, value, expected):
         ("rate [s-1]", "3", "rate", 3, "1/s"),
     ],
 )
-def test_metadata_context_format(
+def test_metadata_context_format(  # noqa: PLR0917
     simple_context, key, value, exp_key, exp_value, exp_unit
 ):
     key, value, unit = simple_context.format(key, value)

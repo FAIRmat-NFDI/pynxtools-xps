@@ -175,7 +175,7 @@ class LorentzianAsymmetric:
 class LorentzianFinite(LorentzianAsymmetric):
     """Finite Lorentzian peak with specified position, width, area, asymmetry parameters, and damping."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0917
         self,
         position: float,
         width: float,

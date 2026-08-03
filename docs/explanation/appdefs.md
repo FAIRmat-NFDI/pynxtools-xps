@@ -143,8 +143,8 @@ In practice:
 The choice is made at conversion time via the `--nxdl` flag:
 
 ```shell
-dataconverter example.vms eln_data.yaml --reader xps --nxdl NXxps  --output example.nxs
-dataconverter example.vms eln_data.yaml --reader xps --nxdl NXmpes --output example.nxs
+pynx convert example.vms eln_data.yaml --reader xps --nxdl NXxps  --output example.nxs
+pynx convert example.vms eln_data.yaml --reader xps --nxdl NXmpes --output example.nxs
 ```
 
 `NXxps` is recommended for most XPS workflows; `NXmpes` is the appropriate choice when the richer XPS-specific structure is not needed or not supported by the source data.

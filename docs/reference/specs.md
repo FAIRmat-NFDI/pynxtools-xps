@@ -26,7 +26,7 @@ Example data is available in the
 [`examples/specs/sle/` directory](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/specs/sle).
 
 ```console
-user@box:~$ dataconverter --params-file params.yaml
+pynx convert --params-file params.yaml
 ```
 
 The `params.yaml` file supports a `remove_align` keyword specific to the SLE parser.
@@ -39,7 +39,7 @@ Example data is available in the
 [`examples/specs/xml/` directory](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/specs/xml).
 
 ```console
-user@box:~$ dataconverter In-situ_PBTTT_XPS_SPECS.xml eln_data_xml.yaml --reader xps --nxdl NXxps --output In-situ_PBTTT.nxs
+pynx convert In-situ_PBTTT_XPS_SPECS.xml eln_data_xml.yaml --reader xps --nxdl NXxps --output In-situ_PBTTT.nxs
 ```
 
 ## .xy data
@@ -48,7 +48,7 @@ Example data is available in the
 [`examples/specs/xy/` directory](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/specs/xy).
 
 ```console
-user@box:~$ dataconverter MgFe2O4.xy eln_data_xy.yaml --reader xps --nxdl NXxps --output MgFe2O4.nxs
+pynx convert MgFe2O4.xy eln_data_xy.yaml --reader xps --nxdl NXxps --output MgFe2O4.nxs
 ```
 
 ## Further reading

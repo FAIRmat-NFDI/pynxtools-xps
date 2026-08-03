@@ -148,6 +148,7 @@ parseable
 pnts
 presputter
 prmt
+pynx
 pynxtools
 recal
 scienta

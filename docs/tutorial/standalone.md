@@ -14,7 +14,7 @@ produce a standardized NeXus output without using NOMAD.
 
 You will understand:
 
-- What inputs the dataconverter needs and why
+- What inputs the `dataconverter` needs and why
 - How to run the conversion for each supported file format
 - How to inspect the resulting NeXus file
 
@@ -26,7 +26,7 @@ Every conversion takes three inputs and produces one output:
 
 ```text
 Raw measurement file  ─┐
-ELN yaml              ─┼─►  dataconverter (reader: xps, nxdl: NXxps)  ─►  output.nxs
+ELN yaml              ─┼─►  `dataconverter` (reader: xps, nxdl: NXxps)  ─►  output.nxs
 Optional params/config ─┘
 ```
 
@@ -64,7 +64,7 @@ Fill in the relevant fields (instrument details, sample description, user inform
 The general command is:
 
 ```console
-user@box:~$ dataconverter <measurement-file> <eln_data.yaml> \
+pynx convert <measurement-file> <eln_data.yaml> \
     --reader xps \
     --nxdl NXxps \
     --output output.nxs
@@ -79,7 +79,7 @@ The format-specific examples below use the files from the `examples/` directory.
 #### VAMAS (`.vms`, `.npl`)
 
 ```console
-user@box:~$ dataconverter regular.vms eln_data_vms.yaml \
+pynx convert regular.vms eln_data_vms.yaml \
     --reader xps \
     --nxdl NXxps \
     --output regular.nxs
@@ -92,7 +92,7 @@ Both regular (equally spaced energy axis) and irregular VAMAS files are supporte
 The SLE example uses a `params.yaml` file that bundles all arguments:
 
 ```console
-user@box:~$ dataconverter --params-file params.yaml
+pynx convert --params-file params.yaml
 ```
 
 The `params.yaml` in [`examples/specs/sle/`](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/specs/sle){:target="_blank" rel="noopener"}
@@ -107,7 +107,7 @@ remove_align: true
 #### SPECS XML (`.xml`)
 
 ```console
-user@box:~$ dataconverter In-situ_PBTTT_XPS_SPECS.xml eln_data_xml.yaml \
+pynx convert In-situ_PBTTT_XPS_SPECS.xml eln_data_xml.yaml \
     --reader xps \
     --nxdl NXxps \
     --output output.nxs
@@ -116,7 +116,7 @@ user@box:~$ dataconverter In-situ_PBTTT_XPS_SPECS.xml eln_data_xml.yaml \
 #### SPECS XY (`.xy`)
 
 ```console
-user@box:~$ dataconverter MgFe2O4.xy eln_data_xy.yaml \
+pynx convert MgFe2O4.xy eln_data_xy.yaml \
     --reader xps \
     --nxdl NXxps \
     --output MgFe2O4.nxs
@@ -128,7 +128,7 @@ Scienta instruments export one file per scan region. Pass all scan files as posi
 arguments before the ELN yaml:
 
 ```console
-user@box:~$ dataconverter \
+pynx convert \
     Cu-HHTP_0001.txt Cu-HHTP_0002.txt Cu-HHTP_0003.txt \
     eln_data_scienta_txt.yaml \
     --reader xps \
@@ -139,7 +139,7 @@ user@box:~$ dataconverter \
 The same multi-file pattern applies to IBW files:
 
 ```console
-user@box:~$ dataconverter \
+pynx convert \
     Cu-HHTP_0001Cu-HHTP__001.ibw Cu-HHTP_0002Cu-HHTP__002.ibw \
     eln_data_scienta_ibw.yaml \
     --reader xps \
@@ -150,7 +150,7 @@ user@box:~$ dataconverter \
 #### PHI (`.spe`, `.pro`)
 
 ```console
-user@box:~$ dataconverter SnO2_10nm.spe eln_data_phi.yaml \
+pynx convert SnO2_10nm.spe eln_data_phi.yaml \
     --reader xps \
     --nxdl NXxps \
     --output SnO2_10nm.nxs

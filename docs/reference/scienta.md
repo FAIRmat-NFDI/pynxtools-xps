@@ -29,7 +29,7 @@ Example data is available in the
 [`examples/scienta/txt/` directory](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/scienta/txt).
 
 ```console
-user@box:~$ dataconverter Cu-HHTP_*.txt eln_data_scienta_txt.yaml --reader xps --nxdl NXxps --output Cu-HHTP.txt.nxs
+pynx convert Cu-HHTP_*.txt eln_data_scienta_txt.yaml --reader xps --nxdl NXxps --output Cu-HHTP.txt.nxs
 ```
 
 ## .ibw data
@@ -38,7 +38,7 @@ Example data is available in the
 [`examples/scienta/ibw/` directory](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/scienta/ibw).
 
 ```console
-user@box:~$ dataconverter Cu-HHTP_*.ibw eln_data_scienta_ibw.yaml --reader xps --nxdl NXxps --output Cu-HHTP.ibw.nxs
+pynx convert Cu-HHTP_*.ibw eln_data_scienta_ibw.yaml --reader xps --nxdl NXxps --output Cu-HHTP.ibw.nxs
 ```
 
 ## .h5 / .hdf5 data
@@ -46,7 +46,7 @@ user@box:~$ dataconverter Cu-HHTP_*.ibw eln_data_scienta_ibw.yaml --reader xps -
 HDF5 files written by Scienta or PEAK software are supported via extensions `.h5` and `.hdf5`.
 
 ```console
-user@box:~$ dataconverter measurement.h5 eln_data_scienta_hdf5.yaml --reader xps --nxdl NXxps --output measurement.h5.nxs
+pynx convert measurement.h5 eln_data_scienta_hdf5.yaml --reader xps --nxdl NXxps --output measurement.h5.nxs
 ```
 
 ## Acknowledgements

@@ -67,7 +67,7 @@ The same conversion can also be triggered from the command line (see
 [Tutorial > Standalone data conversion](../tutorial/standalone.md)):
 
 ```console
-user@box:~$ dataconverter measurement.sle eln_data.yaml --reader xps --nxdl NXxps --output measurement.nxs
+pynx convert measurement.sle eln_data.yaml --reader xps --nxdl NXxps --output measurement.nxs
 ```
 
 ### Parsing, search, and visualization

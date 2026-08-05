@@ -26,7 +26,7 @@ extracts the following instrument-specific fields from the VAMAS comment blocks 
 Kratos `.vms` files are converted using the same command as any other VAMAS file:
 
 ```console
-user@box:~$ dataconverter my_kratos_data.vms eln_data.yaml --reader xps --nxdl NXxps --output my_kratos_data.nxs
+pynx convert my_kratos_data.vms eln_data.yaml --reader xps --nxdl NXxps --output my_kratos_data.nxs
 ```
 
 An ELN YAML file is required to supply any required NeXus fields not present in the

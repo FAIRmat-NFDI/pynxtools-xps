@@ -38,7 +38,7 @@ In the ISO format, there are two types of scan modes: regular and irregular. In 
 the energy axis is uniformly spaced. The axis itself is not saved, but only its start (“abscissa start”) and step energy (“abscissa increment”). The “abscissa label" determines whether the scan is in binding or kinetic energy.
 
 ```console
-user@box:~$ dataconverter regular.vms eln_data_vms.yaml --reader xps --nxdl NXxps --output regular.vms.nxs
+pynx convert regular.vms eln_data_vms.yaml --reader xps --nxdl NXxps --output regular.vms.nxs
 ```
 
 ### IRREGULAR file format
@@ -46,7 +46,7 @@ user@box:~$ dataconverter regular.vms eln_data_vms.yaml --reader xps --nxdl NXxp
 In irregular mode, the energy axis is stored explicitly as a list of energy values. These values are not required to be uniformly spaced and may vary arbitrarily.
 
 ```console
-user@box:~$ dataconverter irregular.vms eln_data_vms.yaml --reader xps --nxdl NXxps --output irregular.vms.nxs
+pynx convert irregular.vms eln_data_vms.yaml --reader xps --nxdl NXxps --output irregular.vms.nxs
 ```
 
 ## Data analysis and peak fitting
@@ -63,7 +63,7 @@ Example data is available in the
 [`examples/vms/data_analysis/` directory](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/vms/data_analysis).
 
 ```console
-user@box:~$ dataconverter FeO* eln.yaml --reader xps --nxdl NXxps --output vms_analysis_ref.nxs
+pynx convert FeO* eln.yaml --reader xps --nxdl NXxps --output vms_analysis_ref.nxs
 ```
 
 For details on how to prepare CasaXPS data for NeXus conversion, see
@@ -78,7 +78,7 @@ Example data is available in the
 [`examples/vms/txt_export/` directory](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/vms/txt_export).
 
 ```console
-user@box:~$ dataconverter vms_txt_export.txt eln_data_vms_txt_export.yaml --reader xps --nxdl NXxps --output vms_txt_export.nxs
+pynx convert vms_txt_export.txt eln_data_vms_txt_export.yaml --reader xps --nxdl NXxps --output vms_txt_export.nxs
 ```
 
 ## Further reading

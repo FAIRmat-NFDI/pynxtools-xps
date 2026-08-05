@@ -21,7 +21,7 @@ Example data is available in the
 [`examples/phi/` directory](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/phi).
 
 ```console
-user@box:~$ dataconverter SnO2_10nm.spe eln_data_phi.yaml --reader xps --nxdl NXxps --output SnO2_10nm.spe.nxs
+pynx convert SnO2_10nm.spe eln_data_phi.yaml --reader xps --nxdl NXxps --output SnO2_10nm.spe.nxs
 ```
 
 ## .pro data (profiling)
@@ -30,7 +30,7 @@ Example data is available in the
 [`examples/phi/` directory](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/examples/phi).
 
 ```console
-user@box:~$ dataconverter SnO2_10nm_1.pro eln_data_phi.yaml --reader xps --nxdl NXxps --output SnO2_10nm_1.pro.nxs
+pynx convert SnO2_10nm_1.pro eln_data_phi.yaml --reader xps --nxdl NXxps --output SnO2_10nm_1.pro.nxs
 ```
 
 ## Acknowledgements

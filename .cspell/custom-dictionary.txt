@@ -6,6 +6,7 @@ ARXPS
 AXISNAME
 Analysed
 Analyser
+Atmion
 Brockhauser
 COLLECTIONCOLUMN
 CORBA
@@ -151,6 +152,7 @@ prmt
 pynx
 pynxtools
 recal
+reparsed
 scienta
 smoothings
 snakecase

@@ -291,7 +291,7 @@ class SPECSXYParser(_XPSParser):
                 if m_key not in self._metadata_exclude_keys:
                     metadata[m_key] = value
                     if m_key == "analysis_method":
-                        metadata["f{m_key}_long_name"] = _get_measurement_method_long(
+                        metadata[f"{m_key}_long_name"] = _get_measurement_method_long(
                             value
                         )
 

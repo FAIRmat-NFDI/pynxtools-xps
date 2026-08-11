@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 from .sle import SPECSSLEParser
+from .slh import SPECSMetadataCSVParser, SPECSMetadataSLHParser
 from .xml import SPECSXMLParser
 from .xy import SPECSXYParser
 
@@ -22,4 +23,6 @@ __all__ = [
     "SPECSSLEParser",
     "SPECSXMLParser",
     "SPECSXYParser",
+    "SPECSMetadataCSVParser",
+    "SPECSMetadataSLHParser",
 ]

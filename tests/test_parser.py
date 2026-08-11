@@ -28,6 +28,7 @@ from pynxtools_xps.parsers.scienta.igor_parser import (
 )
 from pynxtools_xps.parsers.scienta.txt_parser import ScientaTXTParser
 from pynxtools_xps.parsers.specs.sle.parser import SPECSSLEParser
+from pynxtools_xps.parsers.specs.slh.parser import SPECSMetadataSLHParser
 from pynxtools_xps.parsers.specs.xml.parser import SPECSXMLParser
 from pynxtools_xps.parsers.specs.xy.parser import SPECSXYParser
 from pynxtools_xps.parsers.vms.parser import VamasParser
@@ -53,6 +54,17 @@ _POSITIVE_CASES = [
     ),
     pytest.param(SPECSXYParser, "specs_xy/MgFe2O4_small.xy", id="specs-xy"),
     pytest.param(SPECSSLEParser, "specs_sle/EX439_S718_Au.sle", id="specs-sle"),
+    pytest.param(SPECSMetadataSLHParser, "specs_slh/xray.slh", id="specs-slh-xray"),
+    pytest.param(
+        SPECSMetadataSLHParser,
+        "specs_slh/nap_parameters.slh",
+        id="specs-slh-nap-parameters",
+    ),
+    pytest.param(
+        SPECSMetadataSLHParser,
+        "specs_slh/phoibos_voltages.slh",
+        id="specs-slh-phoibos-voltages",
+    ),
     pytest.param(PHIParser, "phi_spe/SnO2_10nm.spe", id="phi-spe"),
     pytest.param(PHIParser, "phi_pro/SnO2_10nm_1.pro", id="phi-pro"),
     pytest.param(ScientaTXTParser, "scienta_txt/Ag_0001.txt", id="scienta-txt"),
@@ -101,6 +113,28 @@ _NEGATIVE_CASES = [
         ScientaIgorParserPEAK,
         "scienta_ibw/Ag_0001Ag__001.ibw",
         id="scienta-igor-peak-rejects-old-ibw",
+    ),
+    pytest.param(
+        SPECSMetadataSLHParser, "vms_regular/regular.vms", id="specs-slh-rejects-vms"
+    ),
+    pytest.param(
+        SPECSMetadataSLHParser,
+        "specs_sle/EX439_S718_Au.sle",
+        id="specs-slh-rejects-sle",
+    ),
+    # Both formats are SQLite -- confirm the reverse direction too, or the
+    # reader's "file matches both a primary and a metadata parser" guard
+    # (reader.py:handle_data_file) would trip on a real .slh file.
+    pytest.param(SPECSSLEParser, "specs_slh/xray.slh", id="specs-sle-rejects-slh-xray"),
+    pytest.param(
+        SPECSSLEParser,
+        "specs_slh/nap_parameters.slh",
+        id="specs-sle-rejects-slh-nap-parameters",
+    ),
+    pytest.param(
+        SPECSSLEParser,
+        "specs_slh/phoibos_voltages.slh",
+        id="specs-sle-rejects-slh-phoibos-voltages",
     ),
 ]
 

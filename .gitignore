@@ -207,3 +207,4 @@ build/
 !tests/data/vms_txt_export/vms_txt_export.txt
 !tests/data/vms_analysis/FeO_analyzed_lineshapes_cols.txt
 .worktrees/
+uv.lock

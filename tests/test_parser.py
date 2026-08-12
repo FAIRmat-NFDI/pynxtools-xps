@@ -28,7 +28,10 @@ from pynxtools_xps.parsers.scienta.igor_parser import (
 )
 from pynxtools_xps.parsers.scienta.txt_parser import ScientaTXTParser
 from pynxtools_xps.parsers.specs.sle.parser import SPECSSLEParser
-from pynxtools_xps.parsers.specs.slh.parser import SPECSMetadataSLHParser
+from pynxtools_xps.parsers.specs.slh.parser import (
+    SPECSMetadataCSVParser,
+    SPECSMetadataSLHParser,
+)
 from pynxtools_xps.parsers.specs.xml.parser import SPECSXMLParser
 from pynxtools_xps.parsers.specs.xy.parser import SPECSXYParser
 from pynxtools_xps.parsers.vms.parser import VamasParser
@@ -64,6 +67,11 @@ _POSITIVE_CASES = [
         SPECSMetadataSLHParser,
         "specs_slh/phoibos_voltages.slh",
         id="specs-slh-phoibos-voltages",
+    ),
+    pytest.param(
+        SPECSMetadataCSVParser,
+        "specs_csv/universal_time.csv",
+        id="specs-csv-universal-time",
     ),
     pytest.param(PHIParser, "phi_spe/SnO2_10nm.spe", id="phi-spe"),
     pytest.param(PHIParser, "phi_pro/SnO2_10nm_1.pro", id="phi-pro"),
@@ -135,6 +143,24 @@ _NEGATIVE_CASES = [
         SPECSSLEParser,
         "specs_slh/phoibos_voltages.slh",
         id="specs-sle-rejects-slh-phoibos-voltages",
+    ),
+    # Delimiter is ';' despite the '.csv' extension (European export
+    # convention, confirmed by the repo owner) -- a genuine comma-delimited
+    # CSV must still be rejected.
+    pytest.param(
+        SPECSMetadataCSVParser,
+        "specs_csv/comma_delimited.csv",
+        id="specs-csv-rejects-comma-delimited",
+    ),
+    pytest.param(
+        SPECSMetadataCSVParser,
+        "specs_slh/xray.slh",
+        id="specs-csv-rejects-slh",
+    ),
+    pytest.param(
+        SPECSMetadataCSVParser,
+        "specs_sle/EX439_S718_Au.sle",
+        id="specs-csv-rejects-sle",
     ),
 ]
 

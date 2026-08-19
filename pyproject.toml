@@ -58,6 +58,7 @@ xps = "pynxtools_xps.reader:XPSReader"
 
 [project.entry-points.'nomad.plugin']
 xps_example_upload = "pynxtools_xps.nomad.example_uploads:xps_example_upload"
+xps_app = "pynxtools_xps.nomad.apps:xps_app"
 
 [tool.uv]
 extra-index-url = [

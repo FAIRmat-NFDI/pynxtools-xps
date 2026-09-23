@@ -89,6 +89,7 @@ analyser
 arange
 argwhere
 arithmatex
+asstr
 binarywave
 bnote
 browsable
@@ -139,7 +140,9 @@ ndarray
 neutraliser
 newaxis
 nxdata
+nxdl
 nxdls
+nxentry
 nxfit
 orcid
 panode

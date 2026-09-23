@@ -6,10 +6,12 @@ ARXPS
 AXISNAME
 Analysed
 Analyser
+Atmion
 Brockhauser
 COLLECTIONCOLUMN
 CORBA
 Calib
+Ceravac
 Chns
 DEPTHPRO
 Defl
@@ -151,6 +153,7 @@ prmt
 pynx
 pynxtools
 recal
+reparsed
 scienta
 smoothings
 snakecase

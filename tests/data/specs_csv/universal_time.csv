@@ -1,0 +1,4 @@
+"Universal Time";"Local Date";"Local Time of Day";"Relative Time [s]";"CoilCurrent Current [µA] (Phoibos)";"Pressure [mbar] (Ceravac_AC)"
+2025-Apr-03 06:57:15.625973;2025-04-03;08:57:15.625973;0.000135;0;1.2e-06
+2025-Apr-03 06:57:16.625973;2025-04-03;08:57:16.625973;1.000135;;1.1e-06
+2025-Apr-03 06:57:17.625973;2025-04-03;08:57:17.625973;2.000135;5;

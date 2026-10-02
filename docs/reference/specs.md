@@ -11,6 +11,8 @@ The parsers are in
 | SpecsLabProdigy binary | `.sle` | SpecsLabProdigy | see below |
 | SpecsLab 2 XML | `.xml` | SpecsLab 2 | ≥ 4.63 (other versions likely work) |
 | SpecsLabProdigy XY export | `.xy` | SpecsLabProdigy | any |
+| SpecsLabProdigy parameter-history log | `.slh` | SpecsLabProdigy | see below |
+| SpecsLabProdigy parameter-history CSV export | `.csv` | SpecsLabProdigy | any |
 
 Supported `.sle` version ranges (derived from
 [`SPECSSLEParser.supported_versions`](https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/src/pynxtools_xps/parsers/specs/sle/parser.py)):
@@ -19,6 +21,11 @@ Supported `.sle` version ranges (derived from
 
 If your file is rejected with a version error, check the SpecsLabProdigy version listed
 in your SLE file against the ranges above.
+
+Supported `.slh` version ranges (derived from
+[`SPECSMetadataSLHParser.supported_versions`](https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/src/pynxtools_xps/parsers/specs/slh/parser.py)):
+
+{{ parser_version_table("specs.slh.parser", "SPECSMetadataSLHParser") }}
 
 ## .sle data
 
@@ -51,6 +58,24 @@ Example data is available in the
 pynx convert MgFe2O4.xy eln_data_xy.yaml --reader xps --nxdl NXxps --output MgFe2O4.nxs
 ```
 
+## .slh / .csv parameter-history logs
+
+`.slh` and `.csv` files are metadata-only: they add device parameter readings (pressure,
+temperature, voltages, currents, ...) to entries produced by an `.sle` file, rather than
+producing entries of their own. See
+[Explanation > SPECS parameter-history logs](../explanation/slh-log-mapping-and-nxxps-metadata.md)
+for the file formats, the entry-merging algorithm, and full usage examples. Test fixtures
+are available under
+[`tests/data/specs_slh/`](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/tests/data/specs_slh)
+and
+[`tests/data/specs_csv/`](https://github.com/FAIRmat-NFDI/pynxtools-xps/tree/main/tests/data/specs_csv).
+
+```console
+pynx convert EX1559_S1710.sle xray.slh nap_parameters.slh phoibos_voltages.slh \
+    eln_data.yaml --reader xps --nxdl NXxps --output EX1559_S1710.nxs
+```
+
 ## Further reading
 
 - [Explanation > Parser architecture](../explanation/parser_architecture.md)
+- [Explanation > SPECS parameter-history logs](../explanation/slh-log-mapping-and-nxxps-metadata.md)

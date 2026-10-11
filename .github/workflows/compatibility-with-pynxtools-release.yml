@@ -2,9 +2,9 @@ name: Compatibility with pynxtools
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop, 'release/**']
   pull_request:
-    branches: [main]
+    branches: [main, develop, 'release/**']
 
 env:
   python-version: 3.12

@@ -19,6 +19,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: develop
 
       - name: Install uv and set the python version to ${{ env.python-version }}
         uses: astral-sh/setup-uv@v5
@@ -65,9 +67,10 @@ jobs:
 
       - name: Create pull request
         if: steps.check.outputs.has_changes == '1'
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          base: develop
           add-paths: .
           commit-message: "chore: accept new Cruft update"
           branch: cruft/update

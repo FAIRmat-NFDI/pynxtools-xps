@@ -17,9 +17,10 @@ nav:
   - Explanation:
     - explanation/motivation.md
     - explanation/appdefs.md
-    - explanation/parser_architecture.md    
+    - explanation/parser_architecture.md
     - explanation/coordinate_system.md
     - explanation/data_processing.md
+    - explanation/slh-log-mapping-and-nxxps-metadata.md
     - explanation/nomad_integration.md
     - explanation/versioning.md
   - Reference:

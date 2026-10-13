@@ -23,6 +23,8 @@ import copy
 import re
 import sqlite3
 import zlib
+import os
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any, ClassVar
 
@@ -190,7 +192,7 @@ class SPECSSLEParser(_XPSParser):
         """Convert ``self._flat_spectra`` into ``self._data``.
 
         Each spectrum dict in ``self._flat_spectra`` becomes one ``ParsedSpectrum`` in ``self._data``
-        entry.  Scans are stacked along the ``"scan"`` axis; a single
+        entry. Scans are stacked along the ``"scan"`` axis; a single
         synthetic ``"cycle"`` dimension is prepended so that the output
         conforms to the ``(cycle, scan, *axes)`` contract.
 
@@ -210,12 +212,21 @@ class SPECSSLEParser(_XPSParser):
             if not scans:
                 continue
 
-            energy = self._get_energy_data(spectrum)
+            # Use the reconstructed scan energy axis and
+            # validate that all scans have consistent energy and intensity lengths.
+            energy = np.asarray(scans[0]["energy"])
+            expected_length = len(energy)
+
+            for scan in scans:
+                if len(scan["energy"]) != expected_length or len(scan["merged"]) != expected_length:
+                    raise ValueError(
+                        f"Inconsistent reconstructed scan length for {entry_name}: "
+                        f"energy={len(scan['energy'])}, merged={len(scan['merged'])}, "
+                        f"expected={expected_length}."
+                    )
 
             # Channel-averaged signal: (n_scans, n_energy) → (1, n_scans, n_energy)
-            merged_stack = np.stack(
-                [np.array(scan["merged"]) for scan in scans], axis=0
-            )
+            merged_stack = np.stack([np.array(scan["merged"]) for scan in scans], axis=0)
             data_da = xr.DataArray(
                 data=merged_stack[np.newaxis, ...],
                 dims=("cycle", "scan", "energy"),
@@ -232,7 +243,7 @@ class SPECSSLEParser(_XPSParser):
             ):
                 channels_stack = np.stack(
                     [np.array(scan["channels"]) for scan in scans], axis=0
-                )  # (n_scans, n_energy, n_channels)
+                )
                 channels_arr = channels_stack.transpose(0, 2, 1)
                 raw_da = xr.DataArray(
                     data=channels_arr[np.newaxis, ...],
@@ -297,49 +308,38 @@ class SPECSSLEParser(_XPSParser):
         """
         Fetch scan signal data and metadata from the SQLite database and
         attach them to each spectrum in ``_flat_spectra``.
-
-        For each spectrum the method:
-
-        1. Loads detector calibration and computes per-channel energy shifts.
-        2. Loads transmission-function data.
-        3. Iterates over raw scan IDs and builds one scan dict per scan via
-           :math:`_build_scan`.
-        4. Falls back to unit-transmission when no TF data are available.
-        5. Normalizes vendor XML key names via :func:`_format_dict`.
-        6. Computes the TF kinetic-energy axis via
-           :math:`_compute_tf_energy_axis`.
         """
         transmission_key = "transmission_function/relative_intensity"
 
         for spectrum in self._flat_spectra:
             spectrum["energy/@units"] = "eV"
             spectrum["intensity/@units"] = "counts_per_second"
-
             spectrum["data"]: dict[str, Any] = {"scans": [], "energy": None}
 
             group_node_id = self._get_sql_node_id(spectrum["group_id"])
             if not group_node_id:
                 continue
+
             spectrum["detector_calib"] = self._get_detector_calibration(group_node_id)
-            try:
-                pass_energy = spectrum["pass_energy_or_retardation_ratio"]
+
+            n_channels = spectrum["energy_channels"]
+            node_id = self._get_sql_node_id(spectrum["spectrum_id"]) or spectrum["spectrum_id"]
+
+            # Obtain the pass energy from the spectrum-specific
+            # NodeData and use it to calculate the detector-channel energy shifts.
+            pass_energy = self._get_pass_energy(node_id)
+            if pass_energy is not None:
                 detector_shifts = [
                     item["shift"]
                     for key, item in spectrum["detector_calib"].items()
                     if key.startswith("detector")
                 ]
                 spectrum["detector_calib"]["shifts"] = (
-                    np.array(detector_shifts) * pass_energy
+                    np.array(detector_shifts, dtype=float) * pass_energy
                 )
-            except KeyError:
-                pass
 
-            n_channels = spectrum["energy_channels"]
-            node_id = (
-                self._get_sql_node_id(spectrum["spectrum_id"])
-                or spectrum["spectrum_id"]
-            )
             raw_ids = self._get_raw_ids(node_id)
+
             if not raw_ids:
                 _logger.warning(f"No raw_ids found for node {node_id}")
 
@@ -347,13 +347,11 @@ class SPECSSLEParser(_XPSParser):
             spectrum["abscissa_info"] = self._get_sql_abscissa_info(node_id)
 
             for scan_id, raw_id in enumerate(raw_ids):
-                scan = self._build_scan(raw_id, scan_id, spectrum, n_channels)
+                scan = self._build_scan(raw_id, scan_id, spectrum, n_channels, node_id)
                 spectrum["data"]["scans"].append(scan)
+
                 if spectrum["data"]["energy"] is None:
                     spectrum["data"]["energy"] = scan["energy"]
-                self._check_scan_length(
-                    node_id, scan["energy"], spectrum["abscissa_info"]
-                )
 
             if spectrum["data"]["energy"] is None:
                 _logger.error(
@@ -368,12 +366,65 @@ class SPECSSLEParser(_XPSParser):
             _format_dict(spectrum, _context)
             self._compute_tf_energy_axis(spectrum)
 
+    def _get_head_tail(self, raw_id: int, node_id: int) -> tuple[int, int]:
+        """Get FAT Head/Tail limits across supported SPECSLab SLE schemas."""
+        raw_columns = self._get_column_names("RawData")
+
+        if "Head" in raw_columns and "Tail" in raw_columns:
+            result = self._execute_sql_query(
+                f'SELECT Head, Tail FROM RawData WHERE RawId="{raw_id}"'
+            )
+            if result:
+                head, tail = result[0]
+                return int(head or 0), int(tail or 0)
+
+        spectrum_columns = self._get_column_names("Spectrum")
+
+        if "Head" in spectrum_columns and "Tail" in spectrum_columns:
+            result = self._execute_sql_query(
+                f'SELECT Head, Tail FROM Spectrum WHERE Node="{node_id}"'
+            )
+            if result:
+                head, tail = result[0]
+                return int(head or 0), int(tail or 0)
+
+        return 0, 0
+
+    def _get_pass_energy(self, node_id: int) -> float | None:
+        """Get PassEnergy directly from AnalyzerSpectrumParameters in NodeData."""
+        query = f'SELECT Data FROM NodeData WHERE Node="{node_id}"'
+        result = self._execute_sql_query(query)
+
+        if not result:
+            return None
+
+        xml = result[0][0]
+        if isinstance(xml, bytes):
+            xml = xml.decode(errors="replace")
+
+        try:
+            root = ET.fromstring(xml)
+        except ET.ParseError:
+            return None
+
+        params = root.find("AnalyzerSpectrumParameters")
+        if params is None:
+            params = root.find(".//AnalyzerSpectrumParameters")
+
+        if params is None:
+            return None
+
+        pass_energy = params.attrib.get("PassEnergy")
+        return float(pass_energy) if pass_energy is not None else None
+
+
     def _build_scan(
         self,
         raw_id: int,
         scan_id: int,
         spectrum: dict[str, Any],
         n_channels: int,
+        node_id: int,
     ) -> dict[str, Any]:
         """
         Build and return a single scan dict from raw SQLite data.
@@ -384,25 +435,66 @@ class SPECSSLEParser(_XPSParser):
         raw_data = self._get_one_scan(raw_id)
         data = self._separate_channels(raw_data, n_channels)
 
+        # Reconstruct FAT scans from the native detector data,
+        # including counts-per-second conversion, Head/Tail selection, and the
+        # physical kinetic-energy axis.
+        dwell_time = spectrum.get("dwell_time")
+        if dwell_time is None:
+            raise ValueError(
+                f"dwell_time could not be determined for spectrum "
+                f"{spectrum.get('spectrum_id')}."
+            )
+
         step_size = spectrum.get("step_size")
         if step_size is None:
             raise ValueError(
                 f"step_size could not be determined for spectrum "
-                f"{spectrum.get('spectrum_id')}. "
-                "ARPES/snapshot modes may require a different energy axis source."
+                f"{spectrum.get('spectrum_id')}."
             )
-        energy = np.arange(data.shape[0]) * step_size
+
+        raw_energy = np.arange(data.shape[0]) * step_size
 
         if spectrum["energy_scan_mode"] == "fixed_analyzer_transmission":
-            energy, data = self._apply_channel_shifts(energy, data, spectrum)
+            raw_energy, data = self._apply_channel_shifts(raw_energy, data, spectrum)
+
+            merged = np.sum(data, axis=1) / dwell_time
+
+            head, tail = self._get_head_tail(raw_id, node_id)
+            stop = data.shape[0] - tail if tail else data.shape[0]
+            data = data[head:stop]
+            merged = merged[head:stop]
+
+            kinetic_start = spectrum.get("kinetic_energy")
+            if kinetic_start is None:
+                raise ValueError(
+                    f"KineticEnergy could not be determined for FAT spectrum "
+                    f"{spectrum.get('spectrum_id')}."
+                )
+
+            energy = float(kinetic_start) + np.arange(len(merged)) * step_size
+
+            if len(energy) != len(merged):
+                raise ValueError(
+                    f"Energy/intensity length mismatch for spectrum "
+                    f"{spectrum.get('spectrum_id')}: "
+                    f"energy={len(energy)}, intensity={len(merged)}."
+                )
+
+            spectrum["energy/@type"] = "kinetic"
+            channels = data / dwell_time
+
+        else:
+            channels = data / dwell_time
+            merged = np.sum(data, axis=1) / dwell_time
+            energy = raw_energy
 
         scan_metadata = self._get_scan_metadata(raw_id)
 
         return {
             "scan_id": scan_id,
             "energy": energy,
-            "channels": data,
-            "merged": np.sum(data, axis=1),
+            "channels": channels,
+            "merged": merged,
             **scan_metadata,
         }
 
@@ -413,40 +505,43 @@ class SPECSSLEParser(_XPSParser):
         spectrum: dict[str, Any],
     ) -> tuple[np.ndarray, np.ndarray]:
         """
-        Apply per-channel energy shifts and interpolate onto a common grid.
-
-        Used for fixed-analyser-transmission (FAT) mode, where each detector
-        channel is offset by a calibrated shift.  If no shift data are
-        available the inputs are returned unchanged.
-
-        Returns
-        -------
-        energy_calib : np.ndarray
-            Common energy axis after shift and interpolation.
-        data_interpolated : np.ndarray
-            Channel data interpolated onto ``new_x``.
+        Apply the calibrated detector-channel energy shifts and interpolate each
+        channel onto the common FAT acquisition grid.
         """
-        shifts = spectrum["detector_calib"].get("shifts")
+        detector_calib = spectrum["detector_calib"]
+
+        # Use the pass-energy-scaled detector-channel shifts
+        # calculated from the SPECS detector calibration and preserve the complete
+        # native FAT acquisition grid during channel alignment.
+        shifts = detector_calib.get("shifts")
         if shifts is None:
-            return raw_energy, data
+            raise ValueError(
+                f"Pass-energy-scaled detector shifts could not be determined for "
+                f"spectrum {spectrum.get('spectrum_id')}."
+            )
 
-        n_channels = data.shape[1]
-        shifted = [
-            np.vstack((raw_energy + shifts[i], data[:, i])).T for i in range(n_channels)
-        ]
+        shifts = np.asarray(shifts, dtype=float)
 
-        xmin = max(s[:, 0].min() for s in shifted)
-        xmax = min(s[:, 0].max() for s in shifted)
-        energy_calib = np.linspace(xmin, xmax, spectrum["num_values"])
+        if len(shifts) != data.shape[1]:
+            raise ValueError(
+                f"Detector calibration contains {len(shifts)} shifts but "
+                f"the scan contains {data.shape[1]} channels."
+            )
 
-        data_interpolated = np.array(
-            [interp1d(s[:, 0], s[:, 1], kind="linear")(energy_calib) for s in shifted]
-        ).T
+        data_interpolated = np.zeros_like(data, dtype=float)
 
-        if spectrum.get("energy/@type") == "binding":
-            energy_calib = np.flip(energy_calib)
+        for i in range(data.shape[1]):
+            channel_energy = raw_energy + shifts[i]
+            f = interp1d(
+                channel_energy,
+                data[:, i],
+                kind="linear",
+                bounds_error=False,
+                fill_value=0.0,
+            )
+            data_interpolated[:, i] = f(raw_energy)
 
-        return energy_calib, data_interpolated
+        return raw_energy, data_interpolated
 
     def _check_scan_length(
         self,
@@ -669,32 +764,32 @@ class SPECSSLEParser(_XPSParser):
         return n_channels
 
     def _get_raw_ids(self, node_id: int | str) -> list[int]:
-        """
-        Ensure proper RawData lookup using Node, not SpectrumID.
-        Falls back to inferred Node if needed.
-        """
-        # Try direct lookup by Node (correct in this SLE schema)
+        """Get raw scan IDs for a spectrum in SPECS scan order."""
         query = f'SELECT RawId FROM RawData WHERE Node="{node_id}"'
         rows = self._execute_sql_query(query)
-        if rows:
-            return [r[0] for r in rows]
 
-        # Fallback: maybe node_id was actually a SpectrumID (string)
-        try:
-            node_row = self._execute_sql_query(
-                f'SELECT Node FROM Spectrum WHERE SpectrumID="{node_id}"'
-            )
-            if node_row:
-                node = node_row[0][0]
-                rows = self._execute_sql_query(
-                    f'SELECT RawId FROM RawData WHERE Node="{node}"'
+        # Support RawData lookup across SPECSLab schemas by
+        # resolving SpectrumID to Node when necessary, and return the resulting
+        # RawIDs in the acquisition scan order stored in the scan metadata.
+        if not rows:
+            try:
+                node_row = self._execute_sql_query(
+                    f'SELECT Node FROM Spectrum WHERE SpectrumID="{node_id}"'
                 )
-                if rows:
-                    return [r[0] for r in rows]
-        except Exception as e:
-            _logger.warning(f"could not resolve raw_ids for {node_id}: {e}")
+                if node_row:
+                    node = node_row[0][0]
+                    rows = self._execute_sql_query(
+                        f'SELECT RawId FROM RawData WHERE Node="{node}"'
+                    )
+            except Exception as e:
+                _logger.warning(f"could not resolve raw_ids for {node_id}: {e}")
 
-        return []
+        if not rows:
+            return []
+
+        raw_ids = [r[0] for r in rows]
+        raw_ids.sort(key=lambda raw_id: int(self._get_scan_metadata(raw_id).get("scan_no", 0)))
+        return raw_ids
 
     def _check_number_of_scans(self, node_id: int) -> int:
         """
@@ -805,9 +900,9 @@ class SPECSSLEParser(_XPSParser):
         """
         Get the detector data for a single scan and convert it to float.
 
-        The detector data is stored in the SQLite database as a blob.
-        This function decodes the blob into python float. The blob can be
-        encoded as float or double in the SQLite table.
+        The detector data may be stored across multiple rows in the SQLite
+        CountRateData table. All chunks are decoded in Offset order and
+        concatenated to reconstruct the complete scan.
 
         Parameters
         ----------
@@ -816,16 +911,26 @@ class SPECSSLEParser(_XPSParser):
 
         Returns
         -------
-        list[float]
-            List with measured data.
-
+        np.ndarray
+            Array with measured detector data.
         """
-        query = f'SELECT Data FROM CountRateData WHERE RawId="{raw_id}"'
-        data = self._execute_sql_query(query)[0][0]
+        # Reconstruct scans stored across multiple CountRateData
+        # rows by decoding all chunks in Offset order and concatenating them.
+        query = (
+            f'SELECT Data FROM CountRateData '
+            f'WHERE RawId="{raw_id}" ORDER BY Offset'
+        )
+        results = self._execute_sql_query(query)
 
-        data = self._decompress_data(data)
+        if not results:
+            raise ValueError(f"No CountRateData found for RawID {raw_id}.")
 
-        return np.frombuffer(data, dtype=self.encoding)
+        chunks = []
+        for result in results:
+            data = self._decompress_data(result[0])
+            chunks.append(np.frombuffer(data, dtype=self.encoding))
+
+        return np.concatenate(chunks)
 
     def _parse_external_channels(self, channel: int):
         """
@@ -847,11 +952,7 @@ class SPECSSLEParser(_XPSParser):
     def _get_spectrum_metadata_from_sql(self):
         """
         Get the metadata stored in the SQLite Spectrum table.
-        Also patch in step_size from Schedule XML if missing.
-
-        Returns
-        -------
-        None.
+        Also patch in metadata from spectrum-specific NodeData XML if missing.
         """
         for spectrum in self._flat_spectra:
             node_id = self._get_sql_node_id(spectrum["spectrum_id"])
@@ -867,33 +968,58 @@ class SPECSSLEParser(_XPSParser):
             _format_dict(combined, _context)
             spectrum.update(combined)
 
+            # Support SPECSLab schema variations by interpreting
+            # ElectronEnergy according to EnergyType and recovering missing kinetic
+            # energy and scan-step metadata from spectrum-specific NodeData XML.
+            electron_energy = spectrum.get("electron_energy")
+            energy_type = spectrum.get("energy/@type")
+
+            if electron_energy is not None:
+                if energy_type == "binding" and spectrum.get("binding_energy") is None:
+                    spectrum["binding_energy"] = float(electron_energy)
+                elif energy_type == "kinetic" and spectrum.get("kinetic_energy") is None:
+                    spectrum["kinetic_energy"] = float(electron_energy)
+
+            try:
+                node_result = self._execute_sql_query(
+                    f'SELECT Data FROM NodeData WHERE Node="{node_id}"'
+                )
+
+                if node_result:
+                    node_xml = node_result[0][0]
+                    if isinstance(node_xml, bytes):
+                        node_xml = node_xml.decode(errors="replace")
+
+                    node_root = ET.fromstring(node_xml)
+                    params = node_root.find(".//AnalyzerSpectrumParameters")
+
+                    if params is not None:
+                        if spectrum.get("kinetic_energy") is None and "KineticEnergy" in params.attrib:
+                            spectrum["kinetic_energy"] = float(params.attrib["KineticEnergy"])
+
+                        if spectrum.get("step_size") is None and "ScanDelta" in params.attrib:
+                            spectrum["step_size"] = float(params.attrib["ScanDelta"])
+
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed to read spectrum metadata from NodeData for "
+                    f"spectrum_id={spectrum.get('spectrum_id')}, error={e}"
+                )
+
             if spectrum.get("step_size") is None:
                 try:
-                    # 1. Prefer ScanDelta from AnalyzerSpectrumParameters
-                    for spec_xml in self.xml_schedule.findall(
-                        ".//AnalyzerSpectrumParameters"
-                    ):
-                        if "ScanDelta" in spec_xml.attrib:
-                            spectrum["step_size"] = float(spec_xml.attrib["ScanDelta"])
+                    # Fallback: calculate from Ebin/End/NumValues if available
+                    for spec_xml in self.xml_schedule.findall(".//FixedAnalyzerTransmissionSettings"):
+                        ebin = float(spec_xml.attrib.get("Ebin", 0))
+                        end = float(spec_xml.attrib.get("End", 0))
+                        n_points = int(spec_xml.attrib.get("NumValues", 1))
+                        if n_points > 1:
+                            spectrum["step_size"] = abs(end - ebin) / (n_points - 1)
                             break
 
-                    # 2. Fallback: calculate from Ebin/End/NumValues if available
+                    # Last resort: derive from energy range and n_values
                     if spectrum.get("step_size") is None:
-                        for spec_xml in self.xml_schedule.findall(
-                            ".//FixedAnalyzerTransmissionSettings"
-                        ):
-                            ebin = float(spec_xml.attrib.get("Ebin", 0))
-                            end = float(spec_xml.attrib.get("End", 0))
-                            n_points = int(spec_xml.attrib.get("NumValues", 1))
-                            if n_points > 1:
-                                spectrum["step_size"] = abs(end - ebin) / (n_points - 1)
-                                break
-
-                    # 3. Last resort: derive from energy range and n_values
-                    if spectrum.get("step_size") is None:
-                        start = spectrum.get("binding_energy") or spectrum.get(
-                            "kinetic_energy"
-                        )
+                        start = spectrum.get("binding_energy") or spectrum.get("kinetic_energy")
                         end = spectrum.get("end_energy")
                         n = spectrum.get("n_values")
                         if start is not None and end is not None and n and n > 1:

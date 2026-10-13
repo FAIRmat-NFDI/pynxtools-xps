@@ -1,11 +1,12 @@
 {
   "/ENTRY":{
     "@default":"data",
+    "definition":"@eln",
+    "definition/@version":"@eln",
     "title":"@eln",
     "start_time":"@eln",
     "end_time":"@eln",
     "method":"@attrs:analysis_method",
-    "method/@long_name":"@attrs:analysis_method_long_name",
     "transitions":"@attrs:transitions",
     "experiment_institution":"@eln",
     "experiment_facility":"@eln",
@@ -20,8 +21,7 @@
     "affiliation":"@eln",
     "address":"@eln",
     "email":"@eln",
-    "identifierNAME[identifier_orcid]":"@eln",
-    "identifierNAME[identifier_orcid]/@type": "ORCID"
+    "ORCID":"@eln"
   },
   "/ENTRY/INSTRUMENT[instrument]":{
     "@default":"electronanalyzer",
@@ -325,8 +325,7 @@
       "AXISNAME[scan]":"@data:scan",
       "AXISNAME[energy]":"@link:/entry/energy_axis_calibration/calibrated_axis",
       "AXISNAME[energy]/@units":"@attrs:energy/@units",
-      "@axes":"@data:channels_averaging_axes",
-      "@energy_indices":"@data:channels_averaging_energy_index"
+      "@axes":"@data:channels_averaging_axes"
     }
   },
   "/ENTRY/PROCESS[scan_averaging]":{
@@ -338,8 +337,7 @@
       "AXISNAME[cycle]":"@data:cycle",
       "AXISNAME[energy]":"@link:/entry/energy_axis_calibration/calibrated_axis",
       "AXISNAME[energy]/@units":"@attrs:energy/@units",
-      "@axes":"@data:scan_averaging_axes",
-      "@energy_indices":"@data:scan_averaging_energy_index"
+      "@axes":"@data:scan_averaging_axes"
     }
   },
   "/ENTRY/PROCESS[cycle_averaging]":{

@@ -669,7 +669,7 @@ class VamasParser(_XPSParser):
                     del settings["y"]
 
                     if block.variable_label_1 in ["Intensity", "counts", "count rate"]:
-                        y_cps = [np.round(y / block.dwell_time, 2) for y in block.y]
+                        y_cps = [y / block.dwell_time for y in block.y]
                         data["y_cps"] = np.array(y_cps)
 
                 else:

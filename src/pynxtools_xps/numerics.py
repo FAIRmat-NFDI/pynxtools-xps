@@ -102,7 +102,7 @@ def _get_minimal_step(lst: list[float] | np.ndarray) -> float:
     """
     lst1 = np.roll(lst, -1)
     diff = np.abs(np.subtract(lst, lst1))
-    step = round(np.min(diff[diff != 0]), 2)
+    step = round(np.min(diff[diff != 0]), 4)
 
     return step
 

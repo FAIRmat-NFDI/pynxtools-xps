@@ -42,6 +42,7 @@ _KEY_MAP: dict[str, str | dict[str, str]] = {
     "energy_chns": "energy_channels",
     "non_energy_chns": "non_energy_channels",
     "samples": "n_values",
+    "electron_energy": "electron_energy",
     "energy_type": "energy/@type",
     "step": "step_size",
     "epass_or_rr": "pass_energy_or_retardation_ratio",

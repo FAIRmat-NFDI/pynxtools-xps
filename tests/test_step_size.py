@@ -76,3 +76,23 @@ def test_vamas_regular_axis_keeps_small_steps(tmp_path):
     spectrum = next(iter(parser._data.values()))
     energy = spectrum.data.coords["energy"].values
     assert list(np.diff(energy)) == pytest.approx([0.005] * (len(energy) - 1))
+
+
+def test_vamas_regular_axis_is_not_rounded(tmp_path):
+    """The regular VAMAS energy axis must be exactly start + i * step."""
+    # The axis is fully defined by the start and step in the file, so rounding
+    # each point can only lose precision. The test gives regular.vms a start
+    # energy with 5 decimals, which used to be cut to 4.
+    lines = (DATA_DIR / "vms_regular" / "regular.vms").read_text().splitlines()
+    start = lines.index("kinetic energy")
+    assert lines[start + 2] == "136.61"  # abscissa start in eV
+    lines[start + 2] = "136.61234"
+    vms_file = tmp_path / "precise_start.vms"
+    vms_file.write_text("\n".join(lines) + "\n")
+
+    parser = VamasParser()
+    parser.parse(vms_file)
+    spectrum = next(iter(parser._data.values()))
+    energy = spectrum.data.coords["energy"].values
+    expected = 136.61234 + 1.0 * np.arange(len(energy))
+    assert list(energy) == pytest.approx(list(expected), rel=1e-12)

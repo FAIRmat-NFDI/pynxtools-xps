@@ -431,7 +431,7 @@ class VamasParser(_XPSParser):
         start = float(block.abscissa_start)
         step = float(block.abscissa_step)
         num = int(block.num_ord_values / block.no_variables)
-        energy = np.array([round(start + i * step, 4) for i in range(num)])
+        energy = start + step * np.arange(num)
 
         if block.abscissa_label == "binding energy":
             energy = np.flip(energy)

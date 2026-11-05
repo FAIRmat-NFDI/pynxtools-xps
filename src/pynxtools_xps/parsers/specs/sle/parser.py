@@ -643,7 +643,7 @@ class SPECSSLEParser(_XPSParser):
             Separate data across n_channels.
 
         """
-        return data.reshape(data.size // n_channels, n_channels)
+        return data.reshape(n_channels, data.size // n_channels)
 
     def _check_energy_channels(self, node_id: int) -> int:
         """

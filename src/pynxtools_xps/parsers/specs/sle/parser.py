@@ -335,19 +335,22 @@ class SPECSSLEParser(_XPSParser):
                 pass
 
             n_channels = spectrum["energy_channels"]
-            node_id = (
-                self._get_sql_node_id(spectrum["spectrum_id"])
-                or spectrum["spectrum_id"]
-            )
+            node_id = self._get_sql_node_id(spectrum["spectrum_id"])
+            if node_id is None:
+                node_id = spectrum["spectrum_id"]
             raw_ids = self._get_raw_ids(node_id)
+            # Container nodes may appear in XML but carry no scan data.
             if not raw_ids:
-                _logger.warning(f"No raw_ids found for node {node_id}")
+                _logger.info(f"No RawData found for node {node_id}; skipping spectrum.")
+                continue
 
             spectrum[transmission_key] = self._get_transmission(node_id)
             spectrum["abscissa_info"] = self._get_sql_abscissa_info(node_id)
 
             for scan_id, raw_id in enumerate(raw_ids):
                 scan = self._build_scan(raw_id, scan_id, spectrum, n_channels)
+                if scan is None:
+                    continue
                 spectrum["data"]["scans"].append(scan)
                 if spectrum["data"]["energy"] is None:
                     spectrum["data"]["energy"] = scan["energy"]
@@ -356,11 +359,9 @@ class SPECSSLEParser(_XPSParser):
                 )
 
             if spectrum["data"]["energy"] is None:
-                _logger.error(
-                    f"No valid x-axis information available for node {node_id}: "
-                    "missing abscissa_info and scan data"
-                )
-                raise ValueError("Missing x-axis / abscissa information")
+                _logger.info(f"No valid x-axis for node {node_id}; skipping spectrum.")
+                spectrum["data"]["scans"] = []
+                continue
 
             if spectrum.get(transmission_key) is None:
                 spectrum[transmission_key] = np.ones(len(spectrum["data"]["energy"]))
@@ -374,9 +375,12 @@ class SPECSSLEParser(_XPSParser):
         scan_id: int,
         spectrum: dict[str, Any],
         n_channels: int,
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any] | None:
         """
         Build and return a single scan dict from raw SQLite data.
+
+        Returns None when required axis metadata is missing (e.g. step_size for
+        ARPES/snapshot modes), so callers can skip gracefully.
 
         Applies per-channel energy shifts and interpolation for FAT mode via
         :meth:`_apply_channel_shifts`.
@@ -386,11 +390,11 @@ class SPECSSLEParser(_XPSParser):
 
         step_size = spectrum.get("step_size")
         if step_size is None:
-            raise ValueError(
-                f"step_size could not be determined for spectrum "
-                f"{spectrum.get('spectrum_id')}. "
-                "ARPES/snapshot modes may require a different energy axis source."
+            _logger.info(
+                f"step_size missing for spectrum {spectrum.get('spectrum_id')} "
+                f"(raw_id={raw_id}); skipping scan."
             )
+            return None
         energy = np.arange(data.shape[0]) * step_size
 
         if spectrum["energy_scan_mode"] == "fixed_analyzer_transmission":
@@ -443,7 +447,7 @@ class SPECSSLEParser(_XPSParser):
             [interp1d(s[:, 0], s[:, 1], kind="linear")(energy_calib) for s in shifted]
         ).T
 
-        if spectrum.get("energy/@type") == "binding":
+        if str(spectrum.get("energy/@type", "")).lower() == "binding":
             energy_calib = np.flip(energy_calib)
 
         return energy_calib, data_interpolated
@@ -458,7 +462,7 @@ class SPECSSLEParser(_XPSParser):
         if abscissa_info is None:
             return
 
-        expected = abscissa_info.get("num_values")
+        expected = abscissa_info.get("NumValues")
         if expected is not None and expected != len(x):
             _logger.warning(
                 f"Node {node_id} axis length mismatch -> expected {expected}, got {len(x)}"
@@ -476,7 +480,7 @@ class SPECSSLEParser(_XPSParser):
             return
 
         energy = spectrum.get("data", {}).get("energy")
-        energy_type = spectrum.get("energy/@type")
+        energy_type = str(spectrum.get("energy/@type", "")).lower()
         excitation_energy = spectrum.get("excitation_energy")
 
         if energy_type == "binding" and excitation_energy:
@@ -556,16 +560,17 @@ class SPECSSLEParser(_XPSParser):
             return abscissa_info
 
         except (IndexError, sqlite3.OperationalError):
+            # Use PascalCase keys to match the AbscissaInfo SQL column naming convention.
             abscissa_info = {}
             asp = self.xml_schedule.find(".//AnalyzerSpectrumParameters")
             if asp is not None:
                 if "KineticEnergy" in asp.attrib:
-                    abscissa_info["start"] = float(asp.attrib["KineticEnergy"])
+                    abscissa_info["Start"] = float(asp.attrib["KineticEnergy"])
                 elif "Ebin" in asp.attrib:
-                    abscissa_info["start"] = float(asp.attrib["Ebin"])
+                    abscissa_info["Start"] = float(asp.attrib["Ebin"])
 
                 if "ScanDelta" in asp.attrib:
-                    abscissa_info["step_size"] = float(asp.attrib["ScanDelta"])
+                    abscissa_info["StepSize"] = float(asp.attrib["ScanDelta"])
                 elif all(k in asp.attrib for k in ("Ebin", "End", "ValuesPerCurve")):
                     ebin = float(asp.attrib.get("Ebin", 0))
                     end = float(asp.attrib.get("End", 0))
@@ -574,7 +579,7 @@ class SPECSSLEParser(_XPSParser):
                         abscissa_info["StepSize"] = (end - ebin) / (n_points - 1)
 
                 if "ValuesPerCurve" in asp.attrib:
-                    abscissa_info["num_values"] = int(asp.attrib["ValuesPerCurve"])
+                    abscissa_info["NumValues"] = int(asp.attrib["ValuesPerCurve"])
 
             return abscissa_info if abscissa_info else None
 
@@ -864,6 +869,11 @@ class SPECSSLEParser(_XPSParser):
             column_names = self._get_column_names("Spectrum")
             combined = {k: v for k, v in dict(zip(column_names, results)).items()}
 
+            # Some SLE files omit the EnergyType column; default to "Binding" so
+            # downstream code has a valid energy/@type to work with.
+            if "EnergyType" not in combined or combined["EnergyType"] is None:
+                combined["EnergyType"] = "Binding"
+
             _format_dict(combined, _context)
             spectrum.update(combined)
 
@@ -1024,6 +1034,19 @@ class SPECSSLEParser(_XPSParser):
         for spectrum in self._flat_spectra:
             xml_id = spectrum["spectrum_id"]
             node_id = self._get_sql_node_id(xml_id)
+
+            # NodeMapping may point to container nodes that have no Spectrum row.
+            # Fall back to the raw xml_id so subsequent lookups can still attempt
+            # a direct match (some SLE versions store spectrum rows under the xml_id).
+            if node_id is not None:
+                query = f'SELECT Node FROM Spectrum WHERE Node="{node_id}"'
+                if not self._execute_sql_query(query):
+                    _logger.info(
+                        f"NodeMapping returned non-spectrum node {node_id} "
+                        f"for xml_id={xml_id}; falling back to xml_id."
+                    )
+                    node_id = xml_id
+
             spectrum["node_id"] = node_id
 
     def _remove_empty_nodes(self):
@@ -1063,7 +1086,7 @@ class SPECSSLEParser(_XPSParser):
                 return np.array(spectrum["data"]["energy"])
             if "scans" in spectrum["data"] and len(spectrum["data"]["scans"]) > 0:
                 first_scan = spectrum["data"]["scans"][0]
-                if first_scan["data"].get("energy") is not None:
+                if first_scan.get("energy") is not None:
                     return np.array(first_scan["energy"])
 
         step = spectrum.get("step_size")
@@ -1074,7 +1097,8 @@ class SPECSSLEParser(_XPSParser):
             )
         points = spectrum["n_values"]
 
-        energy_type = spectrum.get("energy/@type")
+        # Normalize case: some SLE versions write "Binding" instead of "binding".
+        energy_type = str(spectrum.get("energy/@type", "")).lower()
         if energy_type == "binding":
             start = spectrum["binding_energy"]
             energy = [start - i * step for i in range(points)]
@@ -1084,7 +1108,7 @@ class SPECSSLEParser(_XPSParser):
         else:
             _logger.error(
                 "Energy axis could not be constructed in _get_energy_data: "
-                f"unknown energy type '{energy_type}' or missing metadata"
+                f"unknown energy type '{spectrum.get('energy/@type')}' or missing metadata"
             )
             raise ValueError("Missing or invalid energy axis information")
         return np.array(energy)

@@ -36,11 +36,18 @@ def _with_scan_mode(tmp_path, scan_mode):
     return file
 
 
-@pytest.mark.parametrize("scan_mode", ["MAPPING", "SOMETHING_ELSE"])
-def test_unsupported_scan_mode_raises(tmp_path, scan_mode):
-    file = _with_scan_mode(tmp_path, scan_mode)
+def test_mapping_scan_mode_is_not_supported_yet(tmp_path):
+    # TODO: replace with a real MAPPING test once it is supported (see Issue #206).
+    file = _with_scan_mode(tmp_path, "MAPPING")
 
-    with pytest.raises(ValueError, match=f"scan mode '{scan_mode}' is not supported"):
+    with pytest.raises(NotImplementedError, match="'MAPPING' is not supported yet"):
+        VamasParser().parse(file)
+
+
+def test_invalid_scan_mode_raises(tmp_path):
+    file = _with_scan_mode(tmp_path, "SOMETHING_ELSE")
+
+    with pytest.raises(ValueError, match="'SOMETHING_ELSE' is not a valid VAMAS scan"):
         VamasParser().parse(file)
 
 

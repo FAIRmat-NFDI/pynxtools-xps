@@ -427,8 +427,6 @@ class VamasParser(_XPSParser):
             self._add_regular_data(block)
         elif self.header.scan_mode == "IRREGULAR":
             self._add_irregular_data(block)
-        elif self.header.scan_mode == "MAPPING":
-            self._add_mapping_data(block)
 
     def _add_regular_data(self, block: VamasBlock):
         """Parse data with regularly spaced energy axis."""

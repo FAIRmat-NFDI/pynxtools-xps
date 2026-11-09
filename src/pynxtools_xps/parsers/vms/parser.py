@@ -195,6 +195,12 @@ class VamasParser(_XPSParser):
         )
         self.header.scan_mode = self.lines.pop(0).strip()
 
+        if self.header.scan_mode not in ("REGULAR", "IRREGULAR"):
+            raise ValueError(
+                f"VAMAS scan mode '{self.header.scan_mode}' is not supported. "
+                "Only REGULAR and IRREGULAR files can be read."
+            )
+
         if self.header.exp_mode in ["MAP", "MAPDP", "NORM", "SDP"]:
             setattr(self.header, "num_spectral_regions", self.lines.pop(0).strip())
 
@@ -488,14 +494,6 @@ class VamasParser(_XPSParser):
             setattr(block, name, data_dict[name])
 
         self.lines = self.lines[block.num_ord_values :]
-
-    def _add_mapping_data(self, block: VamasBlock):
-        """
-        Parse data in mapping format.
-
-        TBD!
-        """
-        pass
 
     def _get_scan_numbers_for_spectra(self, spectra: list[dict]):
         """

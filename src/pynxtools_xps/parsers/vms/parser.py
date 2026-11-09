@@ -196,7 +196,7 @@ class VamasParser(_XPSParser):
         self.header.scan_mode = self.lines.pop(0).strip()
 
         if self.header.scan_mode == "MAPPING":
-            # TODO: support MAPPING files, then remove this check (see Issue #206).
+            # TODO: support MAPPING files, then remove this check (see Issues #206 and #208).
             raise NotImplementedError(
                 "VAMAS scan mode 'MAPPING' is not supported yet. "
                 "Only REGULAR and IRREGULAR files can be read."

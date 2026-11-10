@@ -53,6 +53,12 @@ from pynxtools_xps.parsers.versioning import (
 )
 
 
+def _parse_xml(text: str | bytes) -> ET._Element:
+    """Parse XML stored in an SLE file without expanding entities or network access."""
+    parser = ET.XMLParser(resolve_entities=False, no_network=True)
+    return ET.fromstring(text, parser=parser)
+
+
 def _execute_sql_query_with_cur(cur: sqlite3.Cursor, query: str):
     """Execute a query with a sqlite3 Cursor object."""
     cur.execute(query)
@@ -277,7 +283,7 @@ class SPECSSLEParser(_XPSParser):
     def _get_xml_from_key(self, key: str):
         query = f"SELECT Value FROM Configuration WHERE Key='{key}'"
         try:
-            return ET.fromstring(self._execute_sql_query(query)[0][0])
+            return _parse_xml(self._execute_sql_query(query)[0][0])
         except IndexError:
             return None
 
@@ -495,7 +501,7 @@ class SPECSSLEParser(_XPSParser):
     def _get_detector_calibration(self, node_id: int):
         """Extract detector calibration for given node_id."""
         query = f'SELECT Data FROM NodeData WHERE Node="{node_id}"'
-        elem = ET.fromstring(self._execute_sql_query(query)[0][0])
+        elem = _parse_xml(self._execute_sql_query(query)[0][0])
 
         detectors: dict[str, Any] = {}
 
@@ -768,7 +774,7 @@ class SPECSSLEParser(_XPSParser):
 
             result = rows[0]
 
-            protocol = ET.fromstring(result[0])
+            protocol = _parse_xml(result[0])
             protocol_params = self._get_one_device_protocol(protocol)
             spectrum.update(protocol_params)
 

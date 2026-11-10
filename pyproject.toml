@@ -89,6 +89,7 @@ select = [
     "PL", # pylint
     "UP", # pyupgrade
     "F401", # remove unused import
+    "F601", # repeated dict key
     "I001", # sort imports
     "NPY201", # upgrade numpy v2
 ]

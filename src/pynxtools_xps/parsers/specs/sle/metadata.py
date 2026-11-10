@@ -91,7 +91,6 @@ _KEY_MAP: dict[str, str | dict[str, str]] = {
     "Node": "node_id",
     "ScanDate": "timestamp",
     "Eexc": "excitation_energy",
-    "DeviceExcitationEnergy": "excitation_energy",
     "Trace": "trace",
     "RawID": "raw_id",
     "Channel": "channel",

@@ -195,6 +195,17 @@ class VamasParser(_XPSParser):
         )
         self.header.scan_mode = self.lines.pop(0).strip()
 
+        if self.header.scan_mode == "MAPPING":
+            # TODO: support MAPPING files, then remove this check (see Issues #206 and #208).
+            raise NotImplementedError(
+                "VAMAS scan mode 'MAPPING' is not supported yet. "
+                "Only REGULAR and IRREGULAR files can be read."
+            )
+        if self.header.scan_mode not in ("REGULAR", "IRREGULAR"):
+            raise ValueError(
+                f"'{self.header.scan_mode}' is not a valid VAMAS scan mode. "
+                "Valid scan modes are REGULAR, IRREGULAR and MAPPING."
+            )
         if self.header.exp_mode in ["MAP", "MAPDP", "NORM", "SDP"]:
             setattr(self.header, "num_spectral_regions", self.lines.pop(0).strip())
 
@@ -421,8 +432,9 @@ class VamasParser(_XPSParser):
             self._add_regular_data(block)
         elif self.header.scan_mode == "IRREGULAR":
             self._add_irregular_data(block)
-        elif self.header.scan_mode == "MAPPING":
-            self._add_mapping_data(block)
+        # TODO: enable once _add_mapping_data is implemented (see Issue #206).
+        # elif self.header.scan_mode == "MAPPING":
+        #     self._add_mapping_data(block)
 
     def _add_regular_data(self, block: VamasBlock):
         """Parse data with regularly spaced energy axis."""
@@ -489,14 +501,6 @@ class VamasParser(_XPSParser):
 
         self.lines = self.lines[block.num_ord_values :]
 
-    def _add_mapping_data(self, block: VamasBlock):
-        """
-        Parse data in mapping format.
-
-        TBD!
-        """
-        pass
-
     def _get_scan_numbers_for_spectra(self, spectra: list[dict]):
         """
         For a flat list of spectra dictionaries, group the spectra
@@ -532,6 +536,15 @@ class VamasParser(_XPSParser):
         ]
 
         return flattened_spectra
+
+    def _add_mapping_data(self, block: VamasBlock):
+        """
+        Parse data in mapping format.
+
+        TODO: implement MAPPING support (see Issue  #206). Until then, MAPPING
+        files are rejected in _parse_header.
+        """
+        raise NotImplementedError("VAMAS scan mode 'MAPPING' is not supported yet.")
 
     def _build_list(self):
         """

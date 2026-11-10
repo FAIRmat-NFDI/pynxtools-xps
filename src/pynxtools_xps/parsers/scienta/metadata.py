@@ -191,7 +191,6 @@ _VALUE_MAP: _ValueMap = {
     "energy_scale": _convert_energy_type,
     "energy_scale_2": _convert_energy_type,
     "acquisition_mode": _convert_energy_scan_mode,
-    "time_per_spectrum_channel": float,
     "manipulator_r1": float,
     "manipulator_r2": float,
     "start_time": partial(

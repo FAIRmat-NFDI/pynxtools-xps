@@ -40,7 +40,7 @@
         "probe":null,
         "associated_beam":null,
         "power":null,
-        "power/@units":null,        
+        "power/@units":null,
         "device_information":{
           "vendor":null,
           "model":null,
@@ -286,7 +286,7 @@
         },
         "total_area":null,
         "relative_sensitivity_factor":null,
-        "relative_atomic_concentration":null,
+        "relative_atomic_concentration":null
       },
       "backgroundBACKGROUND[background*]":{
         "@default":"data",

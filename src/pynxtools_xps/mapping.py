@@ -97,8 +97,18 @@ def _make_converter(value_map: dict[str, Any]) -> Callable[[Any], Any]:
 _convert_bool = _make_converter(BOOL_MAP)
 _convert_detector_acquisition_mode = _make_converter(ACQUSITION_MODE_MAP)
 _convert_energy_scan_mode = _make_converter(ENERGY_SCAN_MODE_MAP)
-_convert_energy_type = _make_converter(ENERGY_TYPE_MAP)
 _convert_slit_type = _make_converter(SLIT_TYPE_MAP)
+
+_ENERGY_TYPE_MAP_LOWER_CASE = {
+    key.lower(): value for key, value in ENERGY_TYPE_MAP.items()
+}
+
+
+def _convert_energy_type(value: Any) -> Any:
+    """Convert an energy type label (e.g. "Binding Energy") ignoring its case."""
+    if isinstance(value, str):
+        return _ENERGY_TYPE_MAP_LOWER_CASE.get(value.strip().lower(), value)
+    return value
 
 
 def _get_measurement_method_long(measurement_method: str) -> str:

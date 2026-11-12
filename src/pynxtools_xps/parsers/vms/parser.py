@@ -443,10 +443,9 @@ class VamasParser(_XPSParser):
         start = float(block.abscissa_start)
         step = float(block.abscissa_step)
         num = int(block.num_ord_values / block.no_variables)
+        # The VAMAS energy values are given in the same order as the
+        # intensities, also for a binding energy axis, so they are not flipped.
         energy = start + step * np.arange(num)
-
-        if block.abscissa_label == "binding energy":
-            energy = np.flip(energy)
 
         setattr(block, "x", energy)
 
@@ -477,8 +476,6 @@ class VamasParser(_XPSParser):
         block_data = np.array(self.lines[: block.num_ord_values], dtype=float)
 
         energy = block_data[:: block.no_variables + 1]
-        if block.abscissa_label == "binding energy":
-            energy = np.flip(energy)
 
         setattr(block, "x", energy)
         block.abscissa_start = float(min(energy))

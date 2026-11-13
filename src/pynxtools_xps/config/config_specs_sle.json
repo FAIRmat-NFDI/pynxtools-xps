@@ -92,7 +92,7 @@
         "@axes":["kinetic_energy"],
         "kinetic_energy":"@attrs:transmission_function/kinetic_energy",
         "kinetic_energy/@units":"@attrs:transmission_function/kinetic_energy/@units",
-        "relative_intensity":"@attrs:transmission_function/relative_intensity"
+        "relative_intensity":"!@attrs:transmission_function/relative_intensity"
       },
       "COLLECTIONCOLUMN[collectioncolumn]":{
         "scheme":"@eln",
@@ -308,7 +308,7 @@
       "@axes":["kinetic_energy"],
       "kinetic_energy":"@attrs:transmission_function/kinetic_energy",
       "kinetic_energy/@units":"@attrs:transmission_function/kinetic_energy/@units",
-      "relative_intensity":"@attrs:transmission_function/relative_intensity"
+      "relative_intensity":"!@attrs:transmission_function/relative_intensity"
     },
     "calibration_object":{
       "type":"file",

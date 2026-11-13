@@ -111,7 +111,7 @@ def _get_measurement_method_long(measurement_method: str) -> str:
 def parse_datetime(
     datetime_string: str,
     possible_date_formats: list[str],
-    tzinfo: datetime.tzinfo = datetime.timezone.utc,
+    tzinfo: datetime.tzinfo | None = datetime.timezone.utc,
 ) -> str:
     """
     Convert a date string to ISO 8601 format with optional timezone handling.
@@ -128,10 +128,9 @@ def parse_datetime(
         String representation of the date
     possible_date_formats : List[str]
         List of possible date time formats to attempt for parsing.
-    tzinfo: datetime.tzinfo
+    tzinfo: datetime.tzinfo | None
         A tzinfo object specifying the desired timezone to apply to the datetime object.
-        Defaults to UTC (datetime.timezone.utc).
-
+        Defaults to UTC (datetime.timezone.utc). None leaves the datetime without a zone.
     Raises
     ------
     ValueError

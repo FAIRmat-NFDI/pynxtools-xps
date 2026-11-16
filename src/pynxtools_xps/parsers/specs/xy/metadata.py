@@ -21,7 +21,6 @@ Metadata mapping for the SPECS XY parser.
 
 import datetime
 
-from pynxtools_xps.logging import _logger
 from pynxtools_xps.mapping import (
     _convert_energy_scan_mode,
     _convert_energy_type,
@@ -64,11 +63,8 @@ def _parse_datetime(date: str) -> str:
     except ValueError:
         pass
 
-    # No zone in the file: keep the time without one instead of
-    # attaching the zone of the machine that runs the conversion.
-    _logger.warning(
-        f"Timestamp {date!r} has no time zone, so it is written without one."
-    )
+    # No zone in the file: keep the time without one here. The reader adds
+    # the zone from the ELN (`timezone`) or, failing that, the machine's zone.
     return parse_datetime(date, _POSSIBLE_DATE_FORMATS, None)
 
 

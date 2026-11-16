@@ -23,8 +23,11 @@ import re
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, TypeAlias
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import numpy as np
+
+from pynxtools_xps.logging import _logger
 
 BOOL_MAP: dict[str, bool] = {
     "yes": True,
@@ -106,6 +109,47 @@ def _get_measurement_method_long(measurement_method: str) -> str:
     return MEASUREMENT_METHOD_MAP.get(
         measurement_method, "X-ray photoelectron spectroscopy"
     )
+
+
+def attach_time_zone(timestamp: str, timezone: str | None = None) -> str:
+    """
+    Give an ISO 8601 timestamp without a time zone a zone.
+
+    Parameters
+    ----------
+    timestamp : str
+        ISO 8601 timestamp. Timestamps that already have a zone, and strings
+        that are not ISO 8601, are returned unchanged.
+    timezone : str | None
+        Time zone given by the user (e.g. "Europe/Berlin"), usually from the
+        `timezone` key of the ELN file. If None or unknown, the time zone of
+        the machine running the conversion is assumed, with a warning.
+
+    Returns
+    -------
+    str
+        The timestamp with a time zone.
+    """
+    try:
+        date_time = datetime.datetime.fromisoformat(timestamp)
+    except ValueError:
+        return timestamp
+    if date_time.tzinfo is not None:
+        return timestamp
+
+    if timezone:
+        try:
+            return date_time.replace(tzinfo=ZoneInfo(timezone)).isoformat()
+        except (ZoneInfoNotFoundError, ValueError):
+            _logger.warning(f"Unknown time zone {timezone!r}.")
+
+    local_date_time = date_time.astimezone()
+    _logger.warning(
+        f"Timestamp {timestamp!r} has no time zone, so the time zone of the "
+        f"converting machine ({local_date_time.tzname()}) was assumed. Set "
+        "`timezone` in the ELN file (e.g. 'Europe/Berlin') to give the right one."
+    )
+    return local_date_time.isoformat()
 
 
 def parse_datetime(

@@ -123,7 +123,7 @@ def attach_time_zone(timestamp: str, timezone: str | None = None) -> str:
     timezone : str | None
         Time zone given by the user (e.g. "Europe/Berlin"), usually from the
         `timezone` key of the ELN file. If None or unknown, the time zone of
-        the machine running the conversion is assumed, with a warning.
+        the machine running the conversion is assumed, with a log.
 
     Returns
     -------
@@ -144,7 +144,7 @@ def attach_time_zone(timestamp: str, timezone: str | None = None) -> str:
             _logger.warning(f"Unknown time zone {timezone!r}.")
 
     local_date_time = date_time.astimezone()
-    _logger.warning(
+    _logger.info(
         f"Timestamp {timestamp!r} has no time zone, so the time zone of the "
         f"converting machine ({local_date_time.tzname()}) was assumed. Set "
         "`timezone` in the ELN file (e.g. 'Europe/Berlin') to give the right one."

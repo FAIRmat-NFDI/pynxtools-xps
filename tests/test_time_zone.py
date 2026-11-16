@@ -74,17 +74,17 @@ def test_given_zone_is_attached(machine_in_tokyo, caplog):
     assert caplog.records == []
 
 
-def test_without_zone_the_machine_zone_is_assumed_with_a_warning(
+def test_without_zone_the_machine_zone_is_assumed_with_an_info(
     machine_in_tokyo, caplog
 ):
     """No zone in the file and none given: use the machine's zone, but say so."""
-    with caplog.at_level(logging.WARNING):
+    with caplog.at_level(logging.INFO):
         assert attach_time_zone("2023-08-24T14:19:47") == "2023-08-24T14:19:47+09:00"
     assert "time zone of the converting machine" in caplog.text
 
 
 def test_unknown_zone_falls_back_to_the_machine_zone(machine_in_tokyo, caplog):
-    with caplog.at_level(logging.WARNING):
+    with caplog.at_level(logging.INFO):
         assert (
             attach_time_zone("2023-08-24T14:19:47", "Mars/Olympus")
             == "2023-08-24T14:19:47+09:00"

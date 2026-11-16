@@ -52,17 +52,20 @@ def _parse_datetime(date: str) -> str:
     """
     if "UTC" in date:
         date = date[: date.find("UTC")].strip()
-        tzinfo = datetime.timezone.utc
-    else:
-        date = date.strip()
-        # Date already carries its own timezone offset — return directly.
-        try:
-            return datetime.datetime.fromisoformat(date).isoformat()
-        except ValueError:
-            pass
-        tzinfo = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo  # type: ignore[assignment]
+        return parse_datetime(date, _POSSIBLE_DATE_FORMATS, datetime.timezone.utc)
 
-    return parse_datetime(date, _POSSIBLE_DATE_FORMATS, tzinfo)
+    date = date.strip()
+    # Date already carries its own timezone offset — return directly.
+    try:
+        parsed = datetime.datetime.fromisoformat(date)
+        if parsed.tzinfo is not None:
+            return parsed.isoformat()
+    except ValueError:
+        pass
+
+    # No zone in the file: keep the time without one here. The reader adds
+    # the zone from the ELN (`timezone`) or, failing that, the machine's zone.
+    return parse_datetime(date, _POSSIBLE_DATE_FORMATS, None)
 
 
 _KEY_MAP: dict[str, str] = {

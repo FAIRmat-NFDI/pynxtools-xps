@@ -23,8 +23,11 @@ import re
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, TypeAlias
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import numpy as np
+
+from pynxtools_xps.logging import _logger
 
 BOOL_MAP: dict[str, bool] = {
     "yes": True,
@@ -108,10 +111,51 @@ def _get_measurement_method_long(measurement_method: str) -> str:
     )
 
 
+def attach_time_zone(timestamp: str, timezone: str | None = None) -> str:
+    """
+    Give an ISO 8601 timestamp without a time zone a zone.
+
+    Parameters
+    ----------
+    timestamp : str
+        ISO 8601 timestamp. Timestamps that already have a zone, and strings
+        that are not ISO 8601, are returned unchanged.
+    timezone : str | None
+        Time zone given by the user (e.g. "Europe/Berlin"), usually from the
+        `timezone` key of the ELN file. If None or unknown, the time zone of
+        the machine running the conversion is assumed, with a log.
+
+    Returns
+    -------
+    str
+        The timestamp with a time zone.
+    """
+    try:
+        date_time = datetime.datetime.fromisoformat(timestamp)
+    except ValueError:
+        return timestamp
+    if date_time.tzinfo is not None:
+        return timestamp
+
+    if timezone:
+        try:
+            return date_time.replace(tzinfo=ZoneInfo(timezone)).isoformat()
+        except (ZoneInfoNotFoundError, ValueError):
+            _logger.warning(f"Unknown time zone {timezone!r}.")
+
+    local_date_time = date_time.astimezone()
+    _logger.info(
+        f"Timestamp {timestamp!r} has no time zone, so the time zone of the "
+        f"converting machine ({local_date_time.tzname()}) was assumed. Set "
+        "`timezone` in the ELN file (e.g. 'Europe/Berlin') to give the right one."
+    )
+    return local_date_time.isoformat()
+
+
 def parse_datetime(
     datetime_string: str,
     possible_date_formats: list[str],
-    tzinfo: datetime.tzinfo = datetime.timezone.utc,
+    tzinfo: datetime.tzinfo | None = datetime.timezone.utc,
 ) -> str:
     """
     Convert a date string to ISO 8601 format with optional timezone handling.
@@ -128,10 +172,9 @@ def parse_datetime(
         String representation of the date
     possible_date_formats : List[str]
         List of possible date time formats to attempt for parsing.
-    tzinfo: datetime.tzinfo
+    tzinfo: datetime.tzinfo | None
         A tzinfo object specifying the desired timezone to apply to the datetime object.
-        Defaults to UTC (datetime.timezone.utc).
-
+        Defaults to UTC (datetime.timezone.utc). None leaves the datetime without a zone.
     Raises
     ------
     ValueError

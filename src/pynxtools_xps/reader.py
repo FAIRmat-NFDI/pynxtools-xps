@@ -34,6 +34,7 @@ from pynxtools.dataconverter.readers.utils import parse_yml
 from pynxtools.dataconverter.template import Template
 
 from pynxtools_xps.logging import _logger
+from pynxtools_xps.mapping import attach_time_zone
 from pynxtools_xps.numerics import check_units
 from pynxtools_xps.parsers import (
     PHIParser,
@@ -525,9 +526,23 @@ class XPSReader(MultiFormatReader):
         Do postprocessing after all files and the config file are read .
         """
         self._combine_datasets()
+        self._attach_time_zones()
 
         # TODO: make processing of multiple entities robust
         # self.process_multiple_entities()
+
+    def _attach_time_zones(self) -> None:
+        """Give timestamps that came without a time zone the ELN's `timezone`.
+
+        `timezone` is a setting for the reader, not data for the template, so
+        it is removed from the ELN data. Without it, the time zone of the
+        converting machine is assumed, with a warning.
+        """
+        timezone = self.eln_data.pop("/ENTRY/timezone", None)
+        for spectrum in self.parsed_data.values():
+            for key, value in spectrum.metadata.items():
+                if key.endswith("time_stamp") and isinstance(value, str):
+                    spectrum.metadata[key] = attach_time_zone(value, timezone)
 
     def _combine_datasets(self) -> None:
         """Merge all per-parser datasets into ``self.parsed_spectra``.

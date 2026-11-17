@@ -26,6 +26,7 @@ from typing import Any, ClassVar
 import numpy as np
 import xarray as xr
 
+from pynxtools_xps.logging import _logger
 from pynxtools_xps.mapping import (
     _format_dict,
     _get_measurement_method_long,
@@ -649,8 +650,21 @@ class VamasParser(_XPSParser):
                     tzinfo=tzinfo,
                 )
             except ValueError:
-                date_time = datetime.datetime(1, 1, 1, 0, 0, 0, tzinfo=tzinfo)
-
+                # Not a real date: write no time stamp instead of inventing one.
+                if block.year == block.month == block.day == 0:
+                    # 0-0-0 is how VAMAS files say that no date was recorded
+                    _logger.info(
+                        f"Block {block.block_id!r} has no date, "
+                        "so no time stamp is written."
+                    )
+                else:
+                    _logger.warning(
+                        f"Block {block.block_id!r} has a date that is not a valid "
+                        f"date ({block.year}-{block.month}-{block.day} "
+                        f"{block.hour}:{block.minute}:{block.second}), "
+                        "so no time stamp is written."
+                    )
+                date_time = None
             if isinstance(date_time, datetime.datetime):
                 date_time = date_time.isoformat()
 

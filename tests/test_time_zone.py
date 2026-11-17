@@ -23,13 +23,26 @@ import time
 from pathlib import Path
 
 import pytest
+from pynxtools import logger as pynx_logger
 from pynxtools.dataconverter.convert import get_reader
 from pynxtools.dataconverter.template import Template
 
 from pynxtools_xps.mapping import attach_time_zone
 from pynxtools_xps.parsers.specs.xy.metadata import _parse_datetime
+from pynxtools_xps.parsers.vms.parser import VamasParser
 
-XY_DIR = Path(__file__).parent / "data" / "specs_xy"
+DATA_DIR = Path(__file__).parent / "data"
+XY_DIR = DATA_DIR / "specs_xy"
+
+
+@pytest.fixture
+def pynx_caplog(caplog):
+    """caplog that also sees the pynxtools logger, which does not propagate."""
+    pynx_logger.addHandler(caplog.handler)
+    try:
+        yield caplog
+    finally:
+        pynx_logger.removeHandler(caplog.handler)
 
 
 @pytest.fixture
@@ -56,41 +69,41 @@ def test_xy_parser_leaves_a_timestamp_without_zone_to_the_reader(machine_in_toky
     assert _parse_datetime("2023-08-24 14:19:47") == "2023-08-24T14:19:47"
 
 
-def test_timestamp_with_zone_is_not_changed(machine_in_tokyo, caplog):
-    with caplog.at_level(logging.WARNING):
+def test_timestamp_with_zone_is_not_changed(machine_in_tokyo, pynx_caplog):
+    with pynx_caplog.at_level(logging.WARNING):
         assert (
             attach_time_zone("2023-08-24T14:19:47+02:00", "America/New_York")
             == "2023-08-24T14:19:47+02:00"
         )
-    assert caplog.records == []
+    assert pynx_caplog.records == []
 
 
-def test_given_zone_is_attached(machine_in_tokyo, caplog):
-    with caplog.at_level(logging.WARNING):
+def test_given_zone_is_attached(machine_in_tokyo, pynx_caplog):
+    with pynx_caplog.at_level(logging.WARNING):
         assert (
             attach_time_zone("2023-08-24T14:19:47", "Europe/Berlin")
             == "2023-08-24T14:19:47+02:00"
         )
-    assert caplog.records == []
+    assert pynx_caplog.records == []
 
 
 def test_without_zone_the_machine_zone_is_assumed_with_an_info(
-    machine_in_tokyo, caplog
+    machine_in_tokyo, pynx_caplog
 ):
     """No zone in the file and none given: use the machine's zone, but say so."""
-    with caplog.at_level(logging.INFO):
+    with pynx_caplog.at_level(logging.INFO):
         assert attach_time_zone("2023-08-24T14:19:47") == "2023-08-24T14:19:47+09:00"
-    assert "time zone of the converting machine" in caplog.text
+    assert "time zone of the converting machine" in pynx_caplog.text
 
 
-def test_unknown_zone_falls_back_to_the_machine_zone(machine_in_tokyo, caplog):
-    with caplog.at_level(logging.INFO):
+def test_unknown_zone_falls_back_to_the_machine_zone(machine_in_tokyo, pynx_caplog):
+    with pynx_caplog.at_level(logging.INFO):
         assert (
             attach_time_zone("2023-08-24T14:19:47", "Mars/Olympus")
             == "2023-08-24T14:19:47+09:00"
         )
-    assert "Mars/Olympus" in caplog.text
-    assert "time zone of the converting machine" in caplog.text
+    assert "Mars/Olympus" in pynx_caplog.text
+    assert "time zone of the converting machine" in pynx_caplog.text
 
 
 def test_timezone_from_the_eln_is_used(machine_in_tokyo, tmp_path):
@@ -112,3 +125,46 @@ def test_timezone_from_the_eln_is_used(machine_in_tokyo, tmp_path):
         == "2023-08-24T14:19:47-04:00"
     )
     assert not any("timezone" in key for key in template.keys())
+
+
+def _parse_regular_vms(tmp_path, month: str):
+    """Parse a copy of regular.vms with the month of the first block replaced."""
+    lines = (DATA_DIR / "vms_regular" / "regular.vms").read_text().splitlines()
+    year = lines.index("2023")
+    assert lines[year + 1] == "8"  # month of the first block
+    lines[year + 1] = month
+    vms_file = tmp_path / "dated.vms"
+    vms_file.write_text("\n".join(lines) + "\n")
+
+    parser = VamasParser()
+    parser.parse(vms_file)
+    return next(iter(parser._data.values())).metadata
+
+
+def test_valid_vamas_date_keeps_its_zone(tmp_path):
+    metadata = _parse_regular_vms(tmp_path, month="8")
+    assert metadata["time_stamp"] == "2023-08-24T14:19:47+00:00"
+
+
+def test_invalid_vamas_date_is_left_out(tmp_path, pynx_caplog):
+    """Month 13 is not a date: write no time stamp instead of 0001-01-01."""
+    with pynx_caplog.at_level(logging.WARNING):
+        metadata = _parse_regular_vms(tmp_path, month="13")
+    assert metadata.get("time_stamp") is None
+    assert "not a valid date" in pynx_caplog.text
+
+
+def test_vamas_date_of_zeros_is_left_out_quietly(tmp_path, pynx_caplog):
+    """0-0-0 means no date was recorded: no time stamp and no warning."""
+    lines = (DATA_DIR / "vms_regular" / "regular.vms").read_text().splitlines()
+    year = lines.index("2023")
+    lines[year : year + 3] = ["0", "0", "0"]
+    vms_file = tmp_path / "undated.vms"
+    vms_file.write_text("\n".join(lines) + "\n")
+
+    parser = VamasParser()
+    with pynx_caplog.at_level(logging.WARNING):
+        parser.parse(vms_file)
+    metadata = next(iter(parser._data.values())).metadata
+    assert metadata.get("time_stamp") is None
+    assert pynx_caplog.text == ""

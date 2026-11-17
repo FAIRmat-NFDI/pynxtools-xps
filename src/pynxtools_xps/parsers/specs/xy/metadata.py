@@ -65,7 +65,7 @@ def _parse_datetime(date: str) -> str:
 
     # No zone in the file: keep the time without one here. The reader adds
     # the zone from the ELN (`timezone`) or, failing that, the machine's zone.
-    
+
     return parse_datetime(date, _POSSIBLE_DATE_FORMATS, None)
 
 

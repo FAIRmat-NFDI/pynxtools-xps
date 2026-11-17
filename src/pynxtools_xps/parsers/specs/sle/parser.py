@@ -310,7 +310,7 @@ class SPECSSLEParser(_XPSParser):
         2. Loads transmission-function data.
         3. Iterates over raw scan IDs and builds one scan dict per scan via
            :math:`_build_scan`.
-        4. Falls back to unit-transmission when no TF data are available.
+        4. Leaves the transmission function out when the file has none.
         5. Normalizes vendor XML key names via :func:`_format_dict`.
         6. Computes the TF kinetic-energy axis via
            :math:`_compute_tf_energy_axis`.
@@ -367,9 +367,6 @@ class SPECSSLEParser(_XPSParser):
                     "missing abscissa_info and scan data"
                 )
                 raise ValueError("Missing x-axis / abscissa information")
-
-            if spectrum.get(transmission_key) is None:
-                spectrum[transmission_key] = np.ones(len(spectrum["data"]["energy"]))
 
             _format_dict(spectrum, _context)
             self._compute_tf_energy_axis(spectrum)
@@ -491,8 +488,20 @@ class SPECSSLEParser(_XPSParser):
             tf_energy = energy
 
         rel_intensity = spectrum.get("transmission_function/relative_intensity")
-        if rel_intensity is not None and tf_energy is not None:
+        if rel_intensity is None or tf_energy is None:
+            # no transmission function in the file: write none
+            return
+
+        if len(rel_intensity) != len(tf_energy):
+            # This happens in real files, e.g. when the transmission function
+            # covers a wider range than the spectrum. Keep the part that
+            # matches the energy axis, but say so.
             n = min(len(tf_energy), len(rel_intensity))
+            _logger.warning(
+                f"Transmission function of spectrum {spectrum.get('spectrum_id')} "
+                f"has {len(rel_intensity)} values, but the energy axis has "
+                f"{len(tf_energy)}. Only the first {n} values are written."
+            )
             tf_energy = tf_energy[:n]
             spectrum["transmission_function/relative_intensity"] = rel_intensity[:n]
 

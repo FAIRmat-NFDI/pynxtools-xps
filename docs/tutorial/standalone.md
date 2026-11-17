@@ -59,6 +59,30 @@ Copy the ELN template closest to your format from the table below:
 
 Fill in the relevant fields (instrument details, sample description, user information) before running the conversion.
 
+#### Time zone of timestamps
+
+Some file formats (for example SPECS `.xy`) store timestamps without a time zone.
+NeXus needs the zone, so the reader decides it in this order:
+
+1. If the timestamp in the file has a time zone, it is kept as it is.
+2. Otherwise, the zone given by `timezone` in the ELN file is used.
+3. Otherwise, the time zone of the computer running the conversion is used, and this
+   is logged as info.
+
+To set the zone, add an [IANA time zone name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones){:target="_blank" rel="noopener"}
+at the top level of your ELN file:
+
+```yaml
+timezone: Europe/Berlin
+```
+
+The `timezone` key is only used to read the timestamps and is not written to the NeXus file.
+If the name is not a known time zone, a warning is logged and step 3 is used.
+
+!!! tip
+    Set `timezone` when you convert on a NOMAD Oasis or another server. The server
+    often runs in UTC, which may not be the time zone where the data was measured.
+
 ### 3. Run the conversion
 
 The general command is:

@@ -29,6 +29,11 @@ from typing import Any, ClassVar
 import numpy as np
 import xarray as xr
 from lxml import etree as ET
+from pynxtools.dataconverter.readers.parsers.versioning import (
+    VersionRange,
+    VersionTuple,
+    normalize_version,
+)
 from scipy.interpolate import interp1d
 
 from pynxtools_xps.logging import _logger
@@ -46,11 +51,6 @@ from pynxtools_xps.parsers.specs.sle.flatten_xml import (
     flatten_schedule,
 )
 from pynxtools_xps.parsers.specs.sle.metadata import _context
-from pynxtools_xps.parsers.versioning import (
-    VersionRange,
-    VersionTuple,
-    normalize_version,
-)
 
 
 def _parse_xml(text: str | bytes) -> ET._Element:

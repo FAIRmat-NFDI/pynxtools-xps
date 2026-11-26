@@ -25,15 +25,15 @@ from pathlib import Path
 from typing import Any, ClassVar, Literal, Union, get_args, get_origin
 
 import xarray as xr
-
-from pynxtools_xps.logging import _logger
-from pynxtools_xps.parsers.versioning import (
+from pynxtools.dataconverter.readers.parsers.versioning import (
     VersionRange,
     VersionTuple,
     format_version,
     is_version_supported,
     version_ranges_overlap,
 )
+
+from pynxtools_xps.logging import _logger
 
 VendorType = Literal["scienta", "specs", "phi", "various"]
 

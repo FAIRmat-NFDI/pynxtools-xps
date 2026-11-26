@@ -20,18 +20,18 @@ Parametrized tests for:
   - parsers/versioning.py
 """
 
+import importlib
 import re
 
 import pytest
 from pynxtools.dataconverter.readers.parsers import versioning as core_versioning
-
-from pynxtools_xps import get_pynxtools_xps_version
-from pynxtools_xps.parsers import versioning
-from pynxtools_xps.parsers.versioning import (
+from pynxtools.dataconverter.readers.parsers.versioning import (
     format_version,
     is_version_supported,
     normalize_version,
 )
+
+from pynxtools_xps import get_pynxtools_xps_version
 
 # ── pynxtools-xps version ─────────────────────────────────────────────────────────────
 
@@ -138,7 +138,11 @@ HELPERS = [
 ]
 
 
-@pytest.mark.parametrize("name", HELPERS)
-def test_version_helpers_are_the_ones_from_core(name):
-    """Each helper is the core object, not a copy."""
-    assert getattr(versioning, name) is getattr(core_versioning, name)
+def test_old_versioning_module_warns_and_gives_the_core_helpers():
+    """The old module still works, but tells users to import from core."""
+    with pytest.warns(DeprecationWarning, match="is deprecated"):
+        old_module = importlib.reload(
+            importlib.import_module("pynxtools_xps.parsers.versioning")
+        )
+    for name in HELPERS:
+        assert getattr(old_module, name) is getattr(core_versioning, name)

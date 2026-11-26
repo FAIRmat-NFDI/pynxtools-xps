@@ -14,11 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Version helpers, re-exported from pynxtools core.
-
-They live in ``pynxtools.dataconverter.readers.parsers.versioning``. This
-module stays so that existing imports keep working.
 """
+Deprecated: use ``pynxtools.dataconverter.readers.parsers.versioning``.
+
+This module only re-exports the version helpers from pynxtools core so that
+old imports keep working. It will be removed in a future release.
+"""
+
+import warnings
 
 from pynxtools.dataconverter.readers.parsers.versioning import (
     VersionRange,
@@ -28,6 +31,14 @@ from pynxtools.dataconverter.readers.parsers.versioning import (
     is_version_supported,
     normalize_version,
     version_ranges_overlap,
+)
+
+warnings.warn(
+    "pynxtools_xps.parsers.versioning is deprecated and will be removed in a "
+    "future release. Import from pynxtools.dataconverter.readers.parsers.versioning "
+    "instead.",
+    DeprecationWarning,
+    stacklevel=2,
 )
 
 __all__ = [

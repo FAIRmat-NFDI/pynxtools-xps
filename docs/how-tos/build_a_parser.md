@@ -108,7 +108,7 @@ Start by subclassing
 
 If your format embeds a version string, override `detect_version(file_path)` to return
 a `VersionTuple` (produced by
-[`normalize_version`](https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/src/pynxtools_xps/parsers/versioning.py))
+[`normalize_version`](https://github.com/FAIRmat-NFDI/pynxtools/blob/develop/src/pynxtools/dataconverter/readers/parsers/versioning.py){:target="_blank" rel="noopener"}
 and declare `supported_versions` as a class variable (non-empty ranges also implicitly
 require the file to carry a version).
 

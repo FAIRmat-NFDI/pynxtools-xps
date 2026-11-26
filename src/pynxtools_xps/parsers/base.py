@@ -25,15 +25,15 @@ from pathlib import Path
 from typing import Any, ClassVar, Literal, Union, get_args, get_origin
 
 import xarray as xr
-
-from pynxtools_xps.logging import _logger
-from pynxtools_xps.parsers.versioning import (
+from pynxtools.dataconverter.readers.parsers.versioning import (
     VersionRange,
     VersionTuple,
-    _format_version,
-    _version_ranges_overlap,
+    format_version,
     is_version_supported,
+    version_ranges_overlap,
 )
+
+from pynxtools_xps.logging import _logger
 
 VendorType = Literal["scienta", "specs", "phi", "various"]
 
@@ -381,15 +381,15 @@ class _Parser(ABC):
 
         path = Path(file)
         file_name = path.name
-        version_str = _format_version(version) if version is not None else "<unknown>"
+        version_str = format_version(version) if version is not None else "<unknown>"
 
         ranges: list[str] = []
         for lower, upper in cls.supported_versions:
-            lower_str = _format_version(lower)
+            lower_str = format_version(lower)
             if upper is None:
                 ranges.append(f">= {lower_str}")
             else:
-                upper_str = _format_version(upper)
+                upper_str = format_version(upper)
                 ranges.append(f"{lower_str} – {upper_str}")
 
         supported_str = ", ".join(ranges) if ranges else "<none>"
@@ -684,7 +684,7 @@ class _XPSMetadataParser(_Parser):
             )
 
         if cls.supported_primary_parser_versions and parser_cls.supported_versions:
-            if not _version_ranges_overlap(
+            if not version_ranges_overlap(
                 parser_cls.supported_versions,
                 cls.supported_primary_parser_versions,
             ):

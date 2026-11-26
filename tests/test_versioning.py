@@ -20,16 +20,18 @@ Parametrized tests for:
   - parsers/versioning.py
 """
 
+import importlib
 import re
 
 import pytest
-
-from pynxtools_xps import get_pynxtools_xps_version
-from pynxtools_xps.parsers.versioning import (
-    _format_version,
+from pynxtools.dataconverter.readers.parsers import versioning as core_versioning
+from pynxtools.dataconverter.readers.parsers.versioning import (
+    format_version,
     is_version_supported,
     normalize_version,
 )
+
+from pynxtools_xps import get_pynxtools_xps_version
 
 # ── pynxtools-xps version ─────────────────────────────────────────────────────────────
 
@@ -95,7 +97,7 @@ def test_normalize_version_invalid(raw, exc):
     ],
 )
 def test_format_version(version, expected):
-    assert _format_version(version) == expected
+    assert format_version(version) == expected
 
 
 @pytest.mark.parametrize(
@@ -123,3 +125,24 @@ def test_format_version(version, expected):
 )
 def test_is_version_supported(version, supported, expected):
     assert is_version_supported(version, supported) == expected
+
+
+HELPERS = [
+    "VersionRange",
+    "VersionTuple",
+    "format_version",
+    "format_version_ranges",
+    "is_version_supported",
+    "normalize_version",
+    "version_ranges_overlap",
+]
+
+
+def test_old_versioning_module_warns_and_gives_the_core_helpers():
+    """The old module still works, but tells users to import from core."""
+    with pytest.warns(DeprecationWarning, match="is deprecated"):
+        old_module = importlib.reload(
+            importlib.import_module("pynxtools_xps.parsers.versioning")
+        )
+    for name in HELPERS:
+        assert getattr(old_module, name) is getattr(core_versioning, name)

@@ -96,7 +96,7 @@ implicitly rejected — a declared range implies a version is required.
 
 Version strings extracted from file headers are tokenized into comparable `VersionTuple`
 objects by
-[`normalize_version`](https://github.com/FAIRmat-NFDI/pynxtools-xps/blob/main/src/pynxtools_xps/parsers/versioning.py)
+[`normalize_version`](https://github.com/FAIRmat-NFDI/pynxtools/blob/develop/src/pynxtools/dataconverter/readers/parsers/versioning.py){:target="_blank" rel="noopener"}
 before the range check.
 
 ---

@@ -23,10 +23,12 @@ Parametrized tests for:
 import re
 
 import pytest
+from pynxtools.dataconverter.readers.parsers import versioning as core_versioning
 
 from pynxtools_xps import get_pynxtools_xps_version
+from pynxtools_xps.parsers import versioning
 from pynxtools_xps.parsers.versioning import (
-    _format_version,
+    format_version,
     is_version_supported,
     normalize_version,
 )
@@ -95,7 +97,7 @@ def test_normalize_version_invalid(raw, exc):
     ],
 )
 def test_format_version(version, expected):
-    assert _format_version(version) == expected
+    assert format_version(version) == expected
 
 
 @pytest.mark.parametrize(
@@ -123,3 +125,20 @@ def test_format_version(version, expected):
 )
 def test_is_version_supported(version, supported, expected):
     assert is_version_supported(version, supported) == expected
+
+
+HELPERS = [
+    "VersionRange",
+    "VersionTuple",
+    "format_version",
+    "format_version_ranges",
+    "is_version_supported",
+    "normalize_version",
+    "version_ranges_overlap",
+]
+
+
+@pytest.mark.parametrize("name", HELPERS)
+def test_version_helpers_are_the_ones_from_core(name):
+    """Each helper is the core object, not a copy."""
+    assert getattr(versioning, name) is getattr(core_versioning, name)

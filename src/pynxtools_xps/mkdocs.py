@@ -21,14 +21,7 @@ MKdocs macros for the documentation
 
 import importlib
 
-
-def _format_version_range(lower, upper) -> str:
-    """Format a half-open version interval as a human-readable string."""
-    lower_str = ".".join(str(x) for x in lower)
-    if upper is None:
-        return f">= {lower_str}"
-    upper_str = ".".join(str(x) for x in upper)
-    return f"{lower_str} – {upper_str} (exclusive)"
+from pynxtools.dataconverter.readers.parsers.versioning import format_version_ranges
 
 
 def define_env(env):
@@ -120,6 +113,6 @@ def define_env(env):
             return "All file versions are accepted, including files without a version."
 
         rows = "\n".join(
-            f"| {_format_version_range(lower, upper)} |" for lower, upper in ranges
+            f"| {format_version_ranges((version_range,))} |" for version_range in ranges
         )
         return f"| Supported versions |\n| ------------------ |\n{rows}"

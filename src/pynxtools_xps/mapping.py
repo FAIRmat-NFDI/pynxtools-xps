@@ -155,7 +155,7 @@ def attach_time_zone(timestamp: str, timezone: str | None = None) -> str:
 def parse_datetime(
     datetime_string: str,
     possible_date_formats: list[str],
-    tzinfo: datetime.tzinfo | None = datetime.timezone.utc,
+    tzinfo: datetime.tzinfo | None = datetime.UTC,
 ) -> str:
     """
     Convert a date string to ISO 8601 format with optional timezone handling.

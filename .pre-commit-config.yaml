@@ -16,7 +16,7 @@ repos:
     rev: v3.21.2
     hooks:
       - id: pyupgrade
-        args: [--py310-plus] # modernizes syntax for Python 3.6+
+        args: [--py311-plus] # modernizes syntax for Python 3.11+
 
   - repo: https://github.com/kynan/nbstripout
     rev: 0.9.0

@@ -63,26 +63,26 @@ def test_convert_pascal_to_snake(raw, expected):
         (
             "23/10/2023 14:30:00",
             ["%d/%m/%Y %H:%M:%S"],
-            datetime.timezone.utc,
+            datetime.UTC,
             "2023-10-23T14:30:00+00:00",
         ),
         (
             "23/10/2023 14:30",
             ["%d/%m/%Y %H:%M"],
-            datetime.timezone.utc,
+            datetime.UTC,
             "2023-10-23T14:30:00+00:00",
         ),
         (
             "October 23, 2023 14:30",
             ["%B %d, %Y %H:%M"],
-            datetime.timezone.utc,
+            datetime.UTC,
             "2023-10-23T14:30:00+00:00",
         ),
         # Already-ISO strings: fromisoformat short-circuits; tzinfo is NOT applied
         (
             "2023-10-23T14:30:00Z",
             ["%Y-%m-%dT%H:%M:%SZ"],
-            datetime.timezone.utc,
+            datetime.UTC,
             "2023-10-23T14:30:00+00:00",
         ),
         (

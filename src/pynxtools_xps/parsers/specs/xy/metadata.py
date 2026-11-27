@@ -52,7 +52,7 @@ def _parse_datetime(date: str) -> str:
     """
     if "UTC" in date:
         date = date[: date.find("UTC")].strip()
-        return parse_datetime(date, _POSSIBLE_DATE_FORMATS, datetime.timezone.utc)
+        return parse_datetime(date, _POSSIBLE_DATE_FORMATS, datetime.UTC)
 
     date = date.strip()
     # Date already carries its own timezone offset — return directly.
